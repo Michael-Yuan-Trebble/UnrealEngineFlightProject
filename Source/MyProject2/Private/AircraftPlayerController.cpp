@@ -30,9 +30,14 @@ void AAircraftPlayerController::BeginPlay()
 	{
 		UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 
-		if (GetPawn()) {
+		if (GetPawn()) 
+		{
 			ABaseAircraft* Base = Cast<ABaseAircraft>(GetPawn());
-			if (Base) {
+			if (Base) 
+			{
+
+				//Get Some Variables from controlled Aircraft
+
 				SpringArm = Base->GetSpringArm();
 				CameraComp = Base->GetCamera();
 				springArmLengthOriginal = Base->ReturnSpringArmLength();
@@ -44,7 +49,11 @@ void AAircraftPlayerController::BeginPlay()
 				SpringArm = Base->GetSpringArm();
 				Airframe = Base->GetMesh();
 				PS = Cast<ACurrentPlayerState>(this->PlayerState);
-				if (PS) {
+
+				//Find weapon selection and put it in (Currently set values)
+				
+				if (PS) 
+				{
 					Base->EquipWeapons(PS->SelectedWeapons);
 				}
 			}
@@ -56,9 +65,11 @@ void AAircraftPlayerController::BeginPlay()
 		}
 	}
 	power = (log10(20 / (0.07 * 1.225))) / (log10(maxSpeed));
+
 	Super::BeginPlay();
 }
 
+//Large amount of input binding
 void AAircraftPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -125,6 +136,7 @@ void AAircraftPlayerController::SetupInputComponent()
 	}
 }
 
+//Neutral = 50% Throttle, increase/decrease accordingly
 void AAircraftPlayerController::Thrust(const FInputActionValue& Value)
 {
 	inputThrust = Value.Get<float>();
@@ -137,6 +149,8 @@ void AAircraftPlayerController::Thrust(const FInputActionValue& Value)
 		isThrust = false;
 	}
 } 
+
+//Movement Functions
 
 void AAircraftPlayerController::Roll(const FInputActionValue& Value) 
 {
@@ -168,6 +182,21 @@ void AAircraftPlayerController::Pitch(const FInputActionValue& Value)
 	}
 }
 
+void AAircraftPlayerController::Rudder(const FInputActionValue& Value) 
+{
+	inputYaw = Value.Get<float>();
+	isYaw = true;
+
+	currentRudder = FMath::FInterpTo(currentRudder, inputYaw, GetWorld()->GetDeltaSeconds(), 2.f);
+	currentRudder = FMath::Clamp(currentRudder, -rudderRate, rudderRate);
+	if (inputYaw == 0)
+	{
+		isYaw = false;
+	}
+}
+
+//Specials
+
 void AAircraftPlayerController::Weapons()
 {
 	if (GetPawn()) {
@@ -182,31 +211,12 @@ void AAircraftPlayerController::Special()
 {
 }
 
-void AAircraftPlayerController::Focus() 
-{
-
-}
-
-void AAircraftPlayerController::FocusStop() 
-{
-
-}
-
-void AAircraftPlayerController::Rudder(const FInputActionValue& Value) {
-	inputYaw = Value.Get<float>();
-	isYaw = true;
-
-	currentRudder = FMath::FInterpTo(currentRudder, inputYaw, GetWorld()->GetDeltaSeconds(), 2.f);
-	currentRudder = FMath::Clamp(currentRudder, -rudderRate, rudderRate);
-	if (inputYaw == 0) 
-	{
-		isYaw = false;
-	}
-}
+//Gun
 
 void AAircraftPlayerController::ShootStart() 
 {
-	if (!fire) {
+	if (!fire) 
+	{
 		fire = true;
 		Bullets();
 		GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AAircraftPlayerController::Bullets, 0.1f, true);
@@ -224,17 +234,19 @@ void AAircraftPlayerController::Bullets()
 	print(text);
 }
 
+//Camera Movement
+
 void AAircraftPlayerController::Switch() 
 {
 
 }
 
-void AAircraftPlayerController::MapZoom() 
+void AAircraftPlayerController::Focus()
 {
 
 }
 
-void AAircraftPlayerController::StopMapZoom() 
+void AAircraftPlayerController::FocusStop()
 {
 
 }
@@ -290,6 +302,20 @@ void AAircraftPlayerController::LookVer(const FInputActionValue& ValueY)
 	SpringArm->AddRelativeRotation(FRotator(lookY, 0.f, 0.f));
 }
 
+//Map
+
+void AAircraftPlayerController::MapZoom()
+{
+
+}
+
+void AAircraftPlayerController::StopMapZoom()
+{
+
+}
+
+//Velocity
+
 void AAircraftPlayerController::SpeedAdd(float ThrustPercentage,float prevSpeed) 
 {
 	/*
@@ -322,6 +348,9 @@ void AAircraftPlayerController::SpeedAdd(float ThrustPercentage,float prevSpeed)
 //Might Make two states so Tick doesn't have to do as much, one grounded and one not
 void AAircraftPlayerController::Tick(float DeltaSeconds) 
 {
+
+	//Make transitioning to 0 smoother
+
 	if (!isFlying && currentSpeed > 10.f) isFlying = true;
 	if (!isThrust) thrustPercentage = FMath::FInterpTo(thrustPercentage, 0.5, DeltaSeconds, 2.f);
 	if (!isRoll) currentRoll = FMath::FInterpTo(currentRoll, 0, DeltaSeconds, 3.5f);
@@ -334,5 +363,6 @@ void AAircraftPlayerController::Tick(float DeltaSeconds)
 	}
 
 	SpeedAdd(thrustPercentage, currentSpeed);
+
 	Super::Tick(DeltaSeconds);
 }

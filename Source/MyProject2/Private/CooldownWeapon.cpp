@@ -7,9 +7,11 @@ FCooldownWeapon::FCooldownWeapon() {
 
 }
 
-void FCooldownWeapon::UpdateCooldown(float DeltaTime) {
+void FCooldownWeapon::UpdateCooldown(float DeltaTime) 
+{
 	time -= DeltaTime;
-	if (time <= 0) {
+	if (time <= 0) 
+	{
 		bCanFire = true;
 		time = 0;
 	}

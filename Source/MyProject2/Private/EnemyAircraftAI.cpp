@@ -15,6 +15,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 
+//Initialize AI
 AEnemyAircraftAI::AEnemyAircraftAI() 
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -29,6 +30,7 @@ void AEnemyAircraftAI::BeginPlay()
 	targetRoll = 0.f;
 }
 
+//Possession Function
 void AEnemyAircraftAI::OnPossess(APawn* PawnPossess) 
 {
 	Super::OnPossess(PawnPossess);
@@ -40,6 +42,9 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 		//RunBehaviorTree(BehaviorTree);
 	}
 
+	//Doesn't have Base AI Aircraft Class yet, will change the Cast and others based on different AI Airplane
+
+	//Get Variables from AI
 	Controlled = Cast<AF16AI>(GetPawn());
 	maxSpeed = Controlled->ListedMaximumSpeed;
 	planeAcceleration = Controlled->ListedAcceleration;
@@ -63,6 +68,8 @@ void AEnemyAircraftAI::Tick(float DeltaTime)
 	{
 		Thrust(0.5);
 	}
+
+	//Need to Implement Radar Stuff first in order to confirm that tracking works
 
 	//currentSpeed = FMath::FInterpTo(prevSpeed, currentSpeed, DeltaTime, 2.f);
 	//vectorLocation = (currentSpeed)*Controlled->GetActorForwardVector();

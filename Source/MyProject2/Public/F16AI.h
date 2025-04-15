@@ -16,6 +16,8 @@ public:
 
 	AF16AI();
 
+	//UObjects and Animation Variables
+
 	UPROPERTY(EditAnywhere)
 	class USphereComponent* DetectionZone;
 
@@ -101,20 +103,4 @@ private:
 	void RudderYawCalculation(float DeltaSeconds);
 
 	void FlapPitchCalculation(float DeltaSeconds);
-
-	float SlatsElevationRoll;
-
-	float SlatsElevationPitch;
-
-	float SlatsElevationYaw;
-
-	float RudderRoll;
-
-	float RudderPitch;
-
-	float RudderYaw;
-
-	float FlapRoll;
-
-	float FlapPitch;
 };

@@ -26,9 +26,7 @@ protected:
 
 public:
 
-	FTimerHandle RepeatTimerHandle;
-
-	//OBJECTS
+	//UInputs
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	class UInputMappingContext* Mapping;
@@ -69,12 +67,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	class UInputAction* IA_Zoom;
 
-	//UPROPERTY READ AND WRITE
+	//UVariables
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isFlying = false;
-
-	//UPROPERTY READ ONLY
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float currentPitch;
@@ -106,47 +102,83 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class UCameraComponent* CameraComp;
 
+	FTimerHandle RepeatTimerHandle;
+
 private:
 
+	//Movment
 	void SpeedAdd(float ThrustPercentage, float prevSpeed);
 	void Thrust(const FInputActionValue& Value);
 	void Roll(const FInputActionValue& Value);
 	void Pitch(const FInputActionValue& Value);
+	void Rudder(const FInputActionValue& Value);
+
+	//Weapons
 	void Weapons();
 	void Special();
-	void Rudder(const FInputActionValue& Value);
 	void ShootStart();
 	void ShootEnd();
+	void Bullets();
+
+	//Camera
 	void LookHor(const FInputActionValue& ValueX);
 	void LookVer(const FInputActionValue& ValueY);
-	void Bullets();
 	void Focus();
 	void FocusStop();
 	void Switch();
+
+	//Map
 	void MapZoom();
 	void StopMapZoom();
+
+	//Maybe
 	void TurnSpeedLoss();
 
+	//U Stuff
+
 	USkeletalMeshComponent* Airframe;
+
 	class USpringArmComponent* SpringArm;
+
 	ACurrentPlayerState* PS;
-	float planeAcceleration;
-	float turnRate;
-	float roll;
-	float rudderRate;
-	float maxSpeed;
-	float drag = 0.f;
-	float power;
-	bool fire = false;
-	float LastActionTime = -2.f;
-	float LastSpecialTime = -2.f;
-	float thrustPercentage = 0.5f;
-	float springArmLengthOriginal;
-	float seePitch;
-	float currentYaw;
-	float lookX;
-	float lookY;
-	float CameraLagSpeed = 10.f;
-	int CurrentWeaponIndex = 0;
+
 	TArray<ABaseIRMissile*> WeaponList;
+
+	//Variables
+
+	float planeAcceleration;
+
+	float turnRate;
+
+	float roll;
+
+	float rudderRate;
+
+	float maxSpeed;
+
+	float drag = 0.f;
+
+	float power;
+
+	bool fire = false;
+
+	float LastActionTime = -2.f;
+
+	float LastSpecialTime = -2.f;
+
+	float thrustPercentage = 0.5f;
+
+	float springArmLengthOriginal;
+
+	float seePitch;
+
+	float currentYaw;
+
+	float lookX;
+
+	float lookY;
+
+	float CameraLagSpeed = 10.f;
+
+	int CurrentWeaponIndex = 0;
 };

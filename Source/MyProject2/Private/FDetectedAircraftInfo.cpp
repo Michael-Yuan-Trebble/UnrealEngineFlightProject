@@ -6,7 +6,3 @@
 FDetectedAircraftInfo::FDetectedAircraftInfo()
 {
 }
-
-FDetectedAircraftInfo::~FDetectedAircraftInfo()
-{
-}

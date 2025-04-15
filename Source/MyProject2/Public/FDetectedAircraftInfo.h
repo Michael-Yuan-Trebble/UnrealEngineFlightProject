@@ -29,7 +29,6 @@ public:
 	float threatLevel;
 
 	FDetectedAircraftInfo();
-	~FDetectedAircraftInfo();
 
 	/*
 		Threat 1.f is Max

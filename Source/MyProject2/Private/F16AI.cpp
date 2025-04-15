@@ -9,6 +9,7 @@
 #include "BaseAircraft.h"
 #include "Components/SphereComponent.h"
 
+//Initialize F16AI
 AF16AI::AF16AI()
 {
 	DetectionZone = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionZone"));
@@ -23,6 +24,8 @@ AF16AI::AF16AI()
 void AF16AI::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	//Radar only triggers 0.5 seconds at a time
 	GetWorldTimerManager().SetTimer(RadarScanTimer, this, &AF16AI::ScanForTargets, 0.5f, true);
 }
 
@@ -31,17 +34,20 @@ void AF16AI::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AF16AI::ScanForTargets() {
+void AF16AI::ScanForTargets() 
+{
 	DetectedTargets.Empty();
 	TArray<AActor*> AllAircraft;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseAircraft::StaticClass(), AllAircraft);
+
 	//This only detects the Player aircraft rn
-	for (AActor* Target : AllAircraft) {
+	for (AActor* Target : AllAircraft) 
+	{
 		
 	}
 }
 
-// Called to bind functionality to input
+//Animation (Not yet)
 
 /*
 

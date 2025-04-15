@@ -16,20 +16,36 @@ class MYPROJECT2_API ABaseAircraft : public APawn
 
 public:
 	ABaseAircraft();
+	
+	//Variables
 
 	float springArmLength;
+
 	float ListedAcceleration;
+
 	float TakeoffSpeed;
+
 	float RollRate;
+
 	float ListedTurnRate;
+
 	int ListedMaximumSpeed;
+
 	float ListedThrust;
+
 	float ListedRudder;
+
 	int NumPylons;
+
 	float InputPitchValue;
+
 	float InputRollValue;
+
 	float InputYawValue;
+
 	float InputThrust;
+
+	//UObjects
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> PylonSockets;
@@ -45,31 +61,57 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCameraComponent* Camera;
 
-	virtual void Tick(float DeltaTime) override;
-	void EquipWeapons(const TArray<TSubclassOf<ABaseIRMissile>>& WeaponClasses);
-	void FireWeapon(int WeaponIndex);
-	void SelectWeapon(int WeaponIndex);
+	//Arrays
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FCooldownWeapon> AvailableWeapons;
-	TArray<ABaseIRMissile*> CooldownWeapons;
-	TMap<FName, TArray<ABaseIRMissile*>> AttachedWeaponsToHardpoints;
+
 	TArray<FName> Pylons;
+
 	ABaseIRMissile* CurrentWeapon;
-	virtual float ReturnAcceleration() const;
-	virtual float ReturnTakeoffSpeed() const;
-	virtual float ReturnRollRate() const;
-	virtual float ReturnTurnRate() const;
-	virtual float ReturnMaxSpeed() const;
-	virtual float ReturnThrust() const;
-	virtual float ReturnRudder() const;
-	virtual void AddPylons();
-	virtual float ReturnSpringArmLength() const;
-	virtual void ReEquip(FCooldownWeapon* Replace);
+
+	//Return Functions for UObjects
+
 	virtual USpringArmComponent* GetSpringArm() const;
+
 	virtual UCameraComponent* GetCamera() const;
+
 	virtual USkeletalMeshComponent* GetMesh() const;
 
+	//Return Functions for Vars
+
+	virtual float ReturnAcceleration() const;
+
+	virtual float ReturnTakeoffSpeed() const;
+
+	virtual float ReturnRollRate() const;
+
+	virtual float ReturnTurnRate() const;
+
+	virtual float ReturnMaxSpeed() const;
+
+	virtual float ReturnThrust() const;
+
+	virtual float ReturnRudder() const;
+
+	void AddPylons();
+
+	void EquipWeapons(const TArray<TSubclassOf<ABaseIRMissile>>& WeaponClasses);
+
+	void FireWeapon(int WeaponIndex);
+
+	void SelectWeapon(int WeaponIndex);
+
+	virtual float ReturnSpringArmLength() const;
+
 protected:
+
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 	virtual void PossessedBy(AController* Controller) override;
+
+private:
+
+	virtual void ReEquip(FCooldownWeapon* Replace);
+
 };

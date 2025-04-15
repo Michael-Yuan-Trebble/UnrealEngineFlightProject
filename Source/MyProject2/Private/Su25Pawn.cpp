@@ -12,8 +12,9 @@
 bool isGearUp;
 float Speed;
 
-ASu25Pawn::ASu25Pawn() {
-	//Set Variables here
+//Initialize Su25 Player Pawn
+ASu25Pawn::ASu25Pawn() 
+{
 	ListedAcceleration = 2.f;
 	TakeoffSpeed = 10.f;
 	RollRate = 10.f;
@@ -25,10 +26,16 @@ ASu25Pawn::ASu25Pawn() {
 	NumPylons = 2;
 	isGearUp = false;
 }
-void ASu25Pawn::PossessedBy(AController* NewController) {
+void ASu25Pawn::PossessedBy(AController* NewController) 
+{
 	Super::PossessedBy(NewController);
+
 	Controlled = Cast<AAircraftPlayerController>(NewController);
+	
+	//Put Weapons on Pylons
 	AddPylons();
+
+	//Put Gears down if Grounded
 	if (isGearUp == false)
 	{
 		FrontWheelCoverTop = 90;
@@ -46,10 +53,14 @@ void ASu25Pawn::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ASu25Pawn::Tick(float DeltaSeconds) {
+void ASu25Pawn::Tick(float DeltaSeconds) 
+{
 	Super::Tick(DeltaSeconds);
 	if (Controlled) 
 	{
+		
+		//Calculate Animation Values
+
 		Speed = Controlled->currentSpeed;
 		InputPitchValue = Controlled->inputPitch;
 		InputThrust = Controlled->inputThrust;
@@ -82,6 +93,8 @@ void ASu25Pawn::Tick(float DeltaSeconds) {
 		}
 	}
 }
+
+//Animation Functions
 
 void ASu25Pawn::PitchElevatorCalculation(float DeltaSeconds) 
 {

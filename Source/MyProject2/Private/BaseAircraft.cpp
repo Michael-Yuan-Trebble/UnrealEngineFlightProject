@@ -10,15 +10,20 @@
 #include "CooldownWeapon.h"
 #include "AircraftPlayerController.h"
 
+//Initialize BaseAircraft
 ABaseAircraft::ABaseAircraft()
 {
+	//Mesh Components
 	Airframe = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Airframe"));
 	RootComponent = Airframe;
+
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->bDoCollisionTest = false;
 	SpringArm->SetupAttachment(Airframe);
+
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
+
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -27,14 +32,18 @@ void ABaseAircraft::BeginPlay()
 	Super::BeginPlay();
 }
 
+//On Possession Function
 void ABaseAircraft::PossessedBy(AController* NewController) 
 {
 	Super::PossessedBy(NewController);
+
+	//Controller Cast
 	Controlled = Cast<AAircraftPlayerController>(NewController);
 }
 
 void ABaseAircraft::Tick(float DeltaTime)
 {
+	//Loop Update Cooldown on Missiles
 	for (int i = 0; i < AvailableWeapons.Num(); i++) 
 	{
 		if (AvailableWeapons[i].Current && !AvailableWeapons[i].CanFire()) 
@@ -50,6 +59,7 @@ void ABaseAircraft::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+//Create and Replace Missile in Array
 void ABaseAircraft::ReEquip(FCooldownWeapon* Replace) 
 {
 	FActorSpawnParameters SpawnParams;
@@ -63,6 +73,8 @@ void ABaseAircraft::EquipWeapons(const TArray<TSubclassOf<ABaseIRMissile>>& Weap
 	{
 		if (WeaponClasses[i] != nullptr) 
 		{
+			//Find Socket, attach Weapon to that Socket
+
 			FName SocketName = FName(*FString::Printf(TEXT("Pylon%d"), i + 1));
 			if (GetMesh()->SkeletalMesh->GetSkeleton()->FindSocket(SocketName))
 			{
@@ -70,15 +82,18 @@ void ABaseAircraft::EquipWeapons(const TArray<TSubclassOf<ABaseIRMissile>>& Weap
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.Owner = this;
 				AR60* Weapon = GetWorld()->SpawnActor<AR60>(WeaponClasses[i], SocketTransform, SpawnParams);
+
 				if (Weapon)
 				{
 					Weapon->AttachToComponent(Airframe, FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
+
 					FCooldownWeapon tempCool;
 					tempCool.Current = Weapon;
 					tempCool.bCanFire = true;
 					tempCool.cooldownTime = Weapon->ReturnCooldownTime();
 					tempCool.time = 0;
 					tempCool.SocketName = SocketName;
+
 					AvailableWeapons.Add(tempCool);
 				}
 			}
@@ -113,6 +128,10 @@ void ABaseAircraft::AddPylons()
 		PylonSockets.Add(FName(*FString::Printf(TEXT("Pylon%d"), i + 1)));
 	}
 }
+
+
+//Return Functions
+
 
 float ABaseAircraft::ReturnAcceleration() const 
 {

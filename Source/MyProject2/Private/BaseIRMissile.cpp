@@ -3,6 +3,7 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Missile!"));
 #include "BaseIRMissile.h"
 
+//Initialize Base Missile
 ABaseIRMissile::ABaseIRMissile()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -18,6 +19,7 @@ void ABaseIRMissile::BeginPlay()
 	
 }
 
+//If Missile is shot, delete after timeDet time
 void ABaseIRMissile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -29,7 +31,8 @@ void ABaseIRMissile::Tick(float DeltaTime)
 	}
 }
 
-void ABaseIRMissile::Fire() {
+void ABaseIRMissile::Fire() 
+{
 
 }
 
