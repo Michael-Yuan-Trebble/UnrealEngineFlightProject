@@ -15,6 +15,9 @@ float Speed;
 //Initialize Su25 Player Pawn
 ASu25Pawn::ASu25Pawn() 
 {
+
+	PrimaryActorTick.bCanEverTick = true;
+
 	ListedAcceleration = 2.f;
 	TakeoffSpeed = 10.f;
 	RollRate = 10.f;

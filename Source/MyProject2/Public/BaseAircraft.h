@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "AircraftPlayerController.h"
 #include "BaseIRMissile.h"
 #include "CooldownWeapon.h"
 #include "BaseAircraft.generated.h"
+
+class AAircraftPlayerController;
 
 UCLASS()
 class MYPROJECT2_API ABaseAircraft : public APawn
@@ -52,7 +53,7 @@ public:
 
 	AAircraftPlayerController* Controlled;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* Airframe;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -93,6 +94,13 @@ public:
 	virtual float ReturnThrust() const;
 
 	virtual float ReturnRudder() const;
+
+	void ApplySpeed(float ThrottlePercent);
+	
+	void ApplyRot(float NextPitch, float NextYaw, float NextRoll);
+	
+	//Stuff like drag, aoa, other physics based calculations
+	void UpdatePhys(float DeltaSeconds);
 
 	void AddPylons();
 

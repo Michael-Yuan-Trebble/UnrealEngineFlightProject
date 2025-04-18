@@ -5,14 +5,19 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "BaseIRMissile.h"
 #include "CurrentPlayerState.h"
 #include "AircraftPlayerController.generated.h"
 
-/**
- * 
- */
+class ABaseAircraft;
+class ASu25Pawn;
+class UInputMappingContext;
+class UEnhancedInputComponent;
+
 UCLASS()
 class MYPROJECT2_API AAircraftPlayerController : public APlayerController
 {
@@ -23,15 +28,18 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+	virtual void OnPossess(APawn* InPawn) override;
+
+	AAircraftPlayerController();
 
 public:
 
 	//UInputs
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	class UInputMappingContext* Mapping;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	class UInputAction* Throttle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
@@ -103,6 +111,8 @@ public:
 	class UCameraComponent* CameraComp;
 
 	FTimerHandle RepeatTimerHandle;
+
+	ABaseAircraft* Controlled;
 
 private:
 
@@ -181,4 +191,13 @@ private:
 	float CameraLagSpeed = 10.f;
 
 	int CurrentWeaponIndex = 0;
+
+	bool isRoll = false;
+	bool isPitch = false;
+	bool isYaw = false;
+	bool isThrust = false;
+	float targetSpringArm;
+	float prevPitch;
+	float prevYaw;
+	float thrustNeeded;
 };

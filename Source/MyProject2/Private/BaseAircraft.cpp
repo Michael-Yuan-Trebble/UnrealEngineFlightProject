@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Fuck!"));
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Base!"));
 #include "BaseAircraft.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -13,9 +13,12 @@
 //Initialize BaseAircraft
 ABaseAircraft::ABaseAircraft()
 {
+
 	//Mesh Components
 	Airframe = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Airframe"));
 	RootComponent = Airframe;
+	//Airframe->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	//Airframe->SetSimulatePhysics(false);
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->bDoCollisionTest = false;
@@ -76,7 +79,7 @@ void ABaseAircraft::EquipWeapons(const TArray<TSubclassOf<ABaseIRMissile>>& Weap
 			//Find Socket, attach Weapon to that Socket
 
 			FName SocketName = FName(*FString::Printf(TEXT("Pylon%d"), i + 1));
-			if (GetMesh()->SkeletalMesh->GetSkeleton()->FindSocket(SocketName))
+			if (GetMesh()->GetSkeletalMeshAsset()->GetSkeleton()->FindSocket(SocketName))
 			{
 				FTransform SocketTransform = Airframe->GetSocketTransform(SocketName);
 				FActorSpawnParameters SpawnParams;

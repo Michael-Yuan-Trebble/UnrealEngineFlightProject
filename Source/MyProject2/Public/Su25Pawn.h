@@ -78,11 +78,12 @@ class MYPROJECT2_API ASu25Pawn : public ABaseAircraft
 		UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float BackWheel;
 
+		virtual void PossessedBy(AController* NewController);
+
 	protected:
 
 		virtual void Tick(float DeltaTime) override;
 		virtual void BeginPlay() override;
-		virtual void PossessedBy(AController* NewController);
 
 	private:
 		

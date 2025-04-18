@@ -3,7 +3,14 @@
 
 #include "CooldownWeapon.h"
 
-FCooldownWeapon::FCooldownWeapon() {
+FCooldownWeapon::FCooldownWeapon() 
+	: Current(nullptr)
+	, bCanFire(true)
+	, time(0.f)
+	, cooldownTime(5.0f)
+	, SocketName(NAME_None)
+
+{
 
 }
 

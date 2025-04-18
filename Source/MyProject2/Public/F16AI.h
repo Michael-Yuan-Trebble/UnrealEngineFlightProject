@@ -18,14 +18,8 @@ public:
 
 	//UObjects and Animation Variables
 
-	UPROPERTY(EditAnywhere)
-	class USphereComponent* DetectionZone;
-
-	UPROPERTY(EditAnywhere)
-	class USkeletalMeshComponent* Airframe;
-
-	UPROPERTY(EditAnywhere)
-	class UFloatingPawnMovement* Movement;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMeshComponent* AIMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float ListedAcceleration = 10.f;
@@ -78,7 +72,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FVector RFlap;
 
+	FDetectedAircraftInfo ReturnTargeting();
+
+	void RollToTarget(float RollInput, float DeltaSeconds);
+
 protected:
+
+	float currentRollAI;
 
 	virtual void BeginPlay() override;
 
@@ -86,7 +86,11 @@ protected:
 
 	void ScanForTargets();
 
+	void PickTarget();
+
 	TArray<FDetectedAircraftInfo> DetectedTargets;
+	
+	FDetectedAircraftInfo Targeting;
 
 	float RadarRange = 1000;
 

@@ -3,10 +3,6 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Fuck!"));
 #include "EnemyAircraftAI.h"
 #include "F16AI.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "AircraftPlayerController.h"
 #include "GameFramework/PlayerController.h"
@@ -46,6 +42,7 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 
 	//Get Variables from AI
 	Controlled = Cast<AF16AI>(GetPawn());
+	GetWorldTimerManager().SetTimer(RadarScanTimer, this, &AEnemyAircraftAI::Retrieve, 0.5f, true);
 	maxSpeed = Controlled->ListedMaximumSpeed;
 	planeAcceleration = Controlled->ListedAcceleration;
 	thrust = Controlled->ListedThrust;
@@ -69,61 +66,25 @@ void AEnemyAircraftAI::Tick(float DeltaTime)
 		Thrust(0.5);
 	}
 
+	if (Tracking.CurrentPawn) 
+	{
+		TrackingPawn = Tracking.CurrentPawn;
+		TrackingLocation = TrackingPawn->GetActorLocation();
+		TrackingRotation = Tracking.Rotation;
+		TrackingDistance = Tracking.Distance;
+
+		RotationTarget(DeltaTime);
+	}
+
 	//Need to Implement Radar Stuff first in order to confirm that tracking works
 
 	//currentSpeed = FMath::FInterpTo(prevSpeed, currentSpeed, DeltaTime, 2.f);
 	//vectorLocation = (currentSpeed)*Controlled->GetActorForwardVector();
-
-	for (FDetectedAircraftInfo* Detected : DetectedAircraft) 
-	{
-		Detected->Location = Detected->CurrentPawn->GetActorLocation();
-
-		//Potentially don't need Rotation if its not gonna need it until its tracking
-		//Detected->Rotation = Detected->CurrentActor->GetActorRotation();
-		Detected->Distance = FVector::Dist(Controlled->GetActorLocation(), Detected->Location);
-	}
-	if (!Tracking.CurrentPawn && DetectedAircraft.Num() != 0) 
-	{
-		PickTarget();
-	}
-
-	if (DetectedAircraft.Num() == 0) 
-	{
-		Tracking.CurrentPawn = nullptr;
-	}
-
-	if (Tracking.CurrentPawn != nullptr)
-	{
-		if (Controlled) {
-			Tracking.Location = Tracking.CurrentPawn->GetActorLocation();
-			Tracking.Rotation = Tracking.CurrentPawn->GetActorRotation();
-			Tracking.Distance = FVector::Dist(Controlled->GetActorLocation(), Tracking.Location);
-			RotationTarget(DeltaTime);
-		}
-	}
 }
 
-void AEnemyAircraftAI::TriggerEvent() 
+void AEnemyAircraftAI::Retrieve() 
 {
-
-}
-
-//Not Random
-void AEnemyAircraftAI::PickTarget() 
-{
-	FDetectedAircraftInfo* Max = nullptr;
-	for (FDetectedAircraftInfo* Detected : DetectedAircraft) 
-	{
-		if (Max == nullptr || Max->threatLevel < Detected->threatLevel)
-		{
-			Max = Detected;
-		}
-	}
-	Tracking = *Max;
-}
-
-void AEnemyAircraftAI::UpdateAircraftControls(float DeltaTime) {
-	
+	Tracking = Controlled->ReturnTargeting();
 }
 
 //Make the throttle like thrust percentage, currently not!!!
@@ -150,14 +111,28 @@ void AEnemyAircraftAI::Thrust(float Throttle) {
 	}
 }
 
+//Only Roll to Target
 void AEnemyAircraftAI::RotationTarget(float DeltaTime) 
 {
-	
-}
+	//Find the current up Vector of AI, then find out how much roll needed to match that up vector toward the plane (User)	
+	FVector CurrentUp = Controlled->GetActorUpVector();
+	FVector Forward = Controlled->GetActorForwardVector();
+	FVector TargetUp = (TrackingLocation - Controlled->GetActorLocation()).GetSafeNormal();
 
-void AEnemyAircraftAI::Roll(float RollValue) 
-{
+	FVector NeedVector = TargetUp - (FVector::DotProduct(TargetUp, Forward) * Forward);
+	NeedVector.Normalize();
 
+	float RollAmount = FVector::DotProduct(FVector::CrossProduct(CurrentUp, NeedVector), Forward);
+	RollAmount = FMath::Clamp(RollAmount, -1.f, 1.f);
+
+	if (GEngine)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Vector: %s"), *NeedVector.ToString()));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Vector: %f"), RollAmount));
+	}
+
+	//Add Roll to AI Plane Function
+	Controlled->RollToTarget(RollAmount, DeltaTime);
 }
 
 void AEnemyAircraftAI::Pitch() 

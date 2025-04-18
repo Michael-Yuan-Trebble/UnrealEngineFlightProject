@@ -35,8 +35,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float planeAcceleration;
 
-	TArray<FDetectedAircraftInfo*> DetectedAircraft;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBehaviorTree* BehaviorTree;
 
@@ -46,22 +44,30 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FVector vectorLocation;
 
-	void UpdateAircraftControls(float DeltaTime);
+	FVector TrackingLocation;
+	FRotator TrackingRotation;
+	APawn* TrackingPawn;
+	float TrackingDistance;
 
 protected:
 
-	class APawn* ControlledPawn;
-
 	float targetPitch;
+
 	float targetYaw;
+
 	float targetRoll;
 
 	float currentPitch;
+
 	float currentYaw;
+
 	float currentRoll;
+
+	FTimerHandle RadarScanTimer;
+
 private:
 
-	void TriggerEvent();
+	void Retrieve();
 
 	float maxSpeed;
 
@@ -78,8 +84,6 @@ private:
 	float power;
 
 	void Thrust(float Throttle);
-
-	void Roll(float RollValue);
 
 	void Pitch();
 
@@ -100,8 +104,6 @@ private:
 	void Bullets();
 
 	void TurnSpeedLoss();
-	
-	void PickTarget();
 
 	void RotationTarget(float DeltaTime);
 };
