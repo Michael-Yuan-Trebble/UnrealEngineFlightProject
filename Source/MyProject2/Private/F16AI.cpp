@@ -12,7 +12,6 @@
 //Initialize F16AI
 AF16AI::AF16AI()
 {
-
 	AIMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("AIMesh"));
 	RootComponent = AIMesh;
 
@@ -47,7 +46,6 @@ void AF16AI::ScanForTargets()
 		{
 			FDetectedAircraftInfo TempInfo;
 			TempInfo.Location = RegisteredPawn->GetActorLocation();
-			TempInfo.Distance = FVector::Dist(this->GetActorLocation(), RegisteredPawn->GetActorLocation());
 			TempInfo.Rotation = RegisteredPawn->GetActorRotation();
 			TempInfo.threatLevel = TempInfo.CalculateThreat();
 
@@ -77,7 +75,8 @@ void AF16AI::PickTarget()
 				Targeting = DetectedTargets[i];
 			}
 		}
-		else {
+		else 
+		{
 			Targeting = DetectedTargets[i];
 		}
 	}
@@ -85,19 +84,30 @@ void AF16AI::PickTarget()
 
 void AF16AI::RollToTarget(float RollInput, float DeltaSeconds) 
 {
-	if (GetWorld()) 
-	{
-		//Application of Roll
-		currentRollAI = FMath::FInterpTo(currentRollAI, RollInput, DeltaSeconds, 8.f);
+	//Application of Roll
+	currentRollAI = FMath::FInterpTo(currentRollAI, RollInput, DeltaSeconds, 8.f);
 
-		//Roll in DeltaSeconds Terms
-		float DeltaRoll = -(currentRollAI * RollRate)* DeltaSeconds;
-		DeltaRoll = FMath::Clamp(DeltaRoll, -RollRate * DeltaSeconds, RollRate * DeltaSeconds);
+	//Roll in DeltaSeconds Terms
+	float DeltaRoll = -(currentRollAI * RollRate)* DeltaSeconds;
+	DeltaRoll = FMath::Clamp(DeltaRoll, -RollRate * DeltaSeconds, RollRate * DeltaSeconds);
 
-		FQuat DeltaRot = FQuat(FRotator(0, 0, DeltaRoll));
+	FQuat DeltaRot = FQuat(FRotator(0, 0, DeltaRoll));
 
-		this->AddActorLocalRotation(DeltaRot);
-	}
+	this->AddActorLocalRotation(DeltaRot);
+}
+
+void AF16AI::PitchToTarget(float PitchInput, float DeltaSeconds) 
+{
+	float MaxDeltaThisFrame = ListedTurnRate * DeltaSeconds;
+	float TargetPitch = GetActorRotation().Pitch + PitchInput;
+
+	float SmoothPitch = FMath::FInterpTo(GetActorRotation().Pitch, TargetPitch, DeltaSeconds, 8.f);
+
+	float PitchStep = FMath::Clamp(SmoothPitch, GetActorRotation().Pitch - MaxDeltaThisFrame, GetActorRotation().Pitch + MaxDeltaThisFrame);
+
+	FRotator CurrentRot = GetActorRotation();
+	CurrentRot.Pitch = PitchStep;
+	SetActorRotation(CurrentRot);
 }
 
 FDetectedAircraftInfo AF16AI::ReturnTargeting() 

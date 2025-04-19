@@ -12,8 +12,8 @@
 #include "EnemyAircraftAI.h"
 #include "Su25Pawn.h"
 
-AFlightGamemode::AFlightGamemode() {
-
+AFlightGamemode::AFlightGamemode() 
+{
 	DefaultPawnClass = nullptr;
 	PlayerControllerClass = AAircraftPlayerController::StaticClass();
 

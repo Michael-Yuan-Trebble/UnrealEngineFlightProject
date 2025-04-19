@@ -85,8 +85,6 @@ private:
 
 	void Thrust(float Throttle);
 
-	void Pitch();
-
 	void Weapons();
 
 	void WeaponsCooldown();
@@ -106,4 +104,6 @@ private:
 	void TurnSpeedLoss();
 
 	void RotationTarget(float DeltaTime);
+
+	void PitchTarget(float DeltaTime);
 };

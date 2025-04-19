@@ -31,7 +31,7 @@ public:
 	float RollRate = 25.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float ListedTurnRate = 0.45f;
+	float ListedTurnRate = 45.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int ListedMaximumSpeed = 50;
@@ -75,6 +75,8 @@ public:
 	FDetectedAircraftInfo ReturnTargeting();
 
 	void RollToTarget(float RollInput, float DeltaSeconds);
+
+	void PitchToTarget(float PitchInput, float DeltaSeconds);
 
 protected:
 

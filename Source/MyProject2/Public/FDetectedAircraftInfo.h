@@ -17,9 +17,6 @@ public:
 	FVector Location;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Distance;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator Rotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

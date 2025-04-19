@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Fuck!"));
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("AI CONTROL!"));
 #include "EnemyAircraftAI.h"
 #include "F16AI.h"
 #include "Engine/World.h"
@@ -8,6 +8,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Actor.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 
@@ -70,10 +71,10 @@ void AEnemyAircraftAI::Tick(float DeltaTime)
 	{
 		TrackingPawn = Tracking.CurrentPawn;
 		TrackingLocation = TrackingPawn->GetActorLocation();
-		TrackingRotation = Tracking.Rotation;
-		TrackingDistance = Tracking.Distance;
+		TrackingRotation = TrackingPawn->GetActorRotation();
 
 		RotationTarget(DeltaTime);
+		PitchTarget(DeltaTime);
 	}
 
 	//Need to Implement Radar Stuff first in order to confirm that tracking works
@@ -127,17 +128,26 @@ void AEnemyAircraftAI::RotationTarget(float DeltaTime)
 
 	if (GEngine)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Vector: %s"), *NeedVector.ToString()));
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Vector: %f"), RollAmount));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Roll: %f"), RollAmount));
 	}
 
 	//Add Roll to AI Plane Function
 	Controlled->RollToTarget(RollAmount, DeltaTime);
 }
 
-void AEnemyAircraftAI::Pitch() 
+void AEnemyAircraftAI::PitchTarget(float DeltaTime)
 {
+	FVector DistanceBetween = (TrackingLocation - Controlled->GetActorLocation()).GetSafeNormal();
+	FVector Forward = Controlled->GetActorForwardVector();
+	FRotator CurrentRot = Controlled->GetActorRotation();
+	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(TrackingRotation, CurrentRot);
+	float pitchDif = DeltaRot.Pitch;
 
+	Controlled->PitchToTarget(pitchDif, DeltaTime);
+	if (GEngine)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %f"), pitchDif));
+	}
 }
 
 void AEnemyAircraftAI::Rudder() 
