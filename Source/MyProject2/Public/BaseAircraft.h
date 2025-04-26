@@ -5,13 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "BaseIRMissile.h"
+#include "LockableTarget.h"
 #include "CooldownWeapon.h"
 #include "BaseAircraft.generated.h"
 
 class AAircraftPlayerController;
 
 UCLASS()
-class MYPROJECT2_API ABaseAircraft : public APawn
+class MYPROJECT2_API ABaseAircraft : public APawn, public ILockableTarget
 {
 	GENERATED_BODY()
 
@@ -46,6 +47,12 @@ public:
 
 	float InputThrust;
 
+	bool isAlive;
+
+	float currentSpeed;
+
+	AActor* Tracking;
+
 	//UObjects
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -79,6 +86,10 @@ public:
 
 	virtual USkeletalMeshComponent* GetMesh() const;
 
+	virtual FVector GetTargetLocation() const override;
+
+	virtual bool IsLockable() const override;
+
 	//Return Functions for Vars
 
 	virtual float ReturnAcceleration() const;
@@ -106,7 +117,9 @@ public:
 
 	void EquipWeapons(const TArray<TSubclassOf<ABaseIRMissile>>& WeaponClasses);
 
-	void FireWeapon(int WeaponIndex);
+	void FireWeaponNotSelected(int WeaponIndex);
+
+	void FireWeaponSelected(int WeaponIndex, AActor* Target);
 
 	void SelectWeapon(int WeaponIndex);
 

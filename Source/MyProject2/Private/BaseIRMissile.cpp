@@ -8,7 +8,7 @@ ABaseIRMissile::ABaseIRMissile()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	timeDet = 1;
+	timeDet = 5;
 	timeTilDet = 0;
 	isAir = false;
 }
@@ -31,8 +31,12 @@ void ABaseIRMissile::Tick(float DeltaTime)
 	}
 }
 
-void ABaseIRMissile::Fire() 
+void ABaseIRMissile::FireStatic(float launchSpeed)
 {
+
+}
+
+void ABaseIRMissile::FireTracking(float launchSpeed, AActor* Target) {
 
 }
 

@@ -58,7 +58,6 @@ void ABaseAircraft::Tick(float DeltaTime)
 			}
 		}
 	}
-	
 	Super::Tick(DeltaTime);
 }
 
@@ -104,13 +103,26 @@ void ABaseAircraft::EquipWeapons(const TArray<TSubclassOf<ABaseIRMissile>>& Weap
 	}
 }
 
-void ABaseAircraft::FireWeapon(int WeaponIndex) 
+void ABaseAircraft::FireWeaponNotSelected(int WeaponIndex) 
 {
 	if (AvailableWeapons.IsValidIndex(WeaponIndex-1))
 	{
 		if (AvailableWeapons[WeaponIndex - 1].Current && AvailableWeapons[WeaponIndex - 1].CanFire()) 
 		{
-			AvailableWeapons[WeaponIndex - 1].Current->Fire();
+			AvailableWeapons[WeaponIndex - 1].Current->FireStatic(currentSpeed);
+			AvailableWeapons[WeaponIndex - 1].StartCooldown();
+		}
+	}
+}
+
+void ABaseAircraft::FireWeaponSelected(int WeaponIndex, AActor* Target) 
+{
+	if (AvailableWeapons.IsValidIndex(WeaponIndex - 1))
+	{
+		if (AvailableWeapons[WeaponIndex - 1].Current && AvailableWeapons[WeaponIndex - 1].CanFire())
+		{
+			
+			AvailableWeapons[WeaponIndex - 1].Current->FireTracking(currentSpeed, Target);
 			AvailableWeapons[WeaponIndex - 1].StartCooldown();
 		}
 	}
@@ -135,6 +147,13 @@ void ABaseAircraft::AddPylons()
 
 //Return Functions
 
+FVector ABaseAircraft::GetTargetLocation() const {
+	return this->GetActorLocation();
+}
+
+bool ABaseAircraft::IsLockable() const {
+	return isAlive;
+}
 
 float ABaseAircraft::ReturnAcceleration() const 
 {

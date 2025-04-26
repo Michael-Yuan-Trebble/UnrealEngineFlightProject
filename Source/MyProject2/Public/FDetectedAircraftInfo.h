@@ -25,6 +25,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float threatLevel;
 
+	bool operator==(const FDetectedAircraftInfo& Other) const {
+		return CurrentPawn == Other.CurrentPawn;
+	}
+
 	FDetectedAircraftInfo();
 
 	/*

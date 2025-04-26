@@ -9,9 +9,12 @@
 #include "Engine/World.h"
 #include "Math/UnrealMathUtility.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
+#include "GameFramework/SpectatorPawn.h"
 #include "cmath"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "F16AI.h"
 #include "TimerManager.h"
 #include "BaseAircraft.h"
 
@@ -19,6 +22,12 @@ AAircraftPlayerController::AAircraftPlayerController()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	static ConstructorHelpers::FClassFinder<ULockBoxWidget> WidgetClassFinder(TEXT("/Game/UI/MyLockBoxWidget"));
+	if (WidgetClassFinder.Succeeded()) 
+	{
+		LockBoxWidgetClasses = WidgetClassFinder.Class;
+	}
 }
 
 void AAircraftPlayerController::BeginPlay() 
@@ -179,6 +188,156 @@ void AAircraftPlayerController::SetupInputComponent()
 	}
 }
 
+void AAircraftPlayerController::ScanTargets() 
+{
+	Detected.Empty();
+	TArray<AActor*> AllAircraft;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APawn::StaticClass(), AllAircraft);
+
+	for (AActor* Target : AllAircraft)
+	{
+		APawn* RegisteredPawn = Cast<APawn>(Target);
+		if (RegisteredPawn && RegisteredPawn != Controlled && !RegisteredPawn->IsA(ASpectatorPawn::StaticClass()))
+		{
+			FDetectedAircraftInfo TempInfo;
+			TempInfo.Location = RegisteredPawn->GetActorLocation();
+			TempInfo.Rotation = RegisteredPawn->GetActorRotation();
+			TempInfo.threatLevel = TempInfo.CalculateThreat();
+
+			if (TempInfo.threatLevel > 0)
+			{
+				TempInfo.CurrentPawn = RegisteredPawn;
+				Detected.Add(TempInfo);
+				
+				ULockBoxWidget* LockOnWidget = nullptr;
+				if (!ActiveLockOnWidgets.Contains(RegisteredPawn)) 
+				{
+					//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %s"), *RegisteredPawn->GetName()));
+					LockOnWidget = CreateWidget<ULockBoxWidget>(this, LockBoxWidgetClasses);
+					if (LockOnWidget)
+					{
+						LockOnWidget->AddToViewport();
+						ActiveLockOnWidgets.Add(RegisteredPawn, LockOnWidget);
+						LockOnWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+					}
+				}
+				else 
+				{
+					LockOnWidget = ActiveLockOnWidgets[RegisteredPawn];
+				}
+
+				if (LockOnWidget) 
+				{
+					FVector2D ScreenPosition;
+					FVector WorldPosition = RegisteredPawn->GetActorLocation() + FVector(0.f,0.f,0.f);
+					if (this->ProjectWorldLocationToScreen(WorldPosition, ScreenPosition,true)) 
+					{
+						//FVector2D WidgetSize(64.f, 64.f);
+						//ScreenPosition -= WidgetSize * 0.5f;
+						LockOnWidget->SetPositionInViewport(ScreenPosition, false);
+						float Distance = FVector::Dist(RegisteredPawn->GetActorLocation(), CameraComp->GetComponentLocation());
+						float FOV = this->PlayerCameraManager->GetFOVAngle();
+						float FOVFactor = FMath::Tan(FMath::DegreesToRadians(FOV * 0.5f));
+
+						float ScaleFactor = (1000.f / Distance) * FOVFactor;
+						ScaleFactor = FMath::Clamp(ScaleFactor, 0.1f, 0.3f);
+
+						LockOnWidget->SetRenderScale(FVector2D(ScaleFactor, ScaleFactor));
+					}
+				}
+			}
+		}
+	}
+
+	for (auto It = ActiveLockOnWidgets.CreateIterator(); It; ++It) 
+	{
+		if (!Detected.ContainsByPredicate([&](const FDetectedAircraftInfo& Info) {return Info.CurrentPawn == It.Key(); })) 
+		{
+			if (It.Value()) 
+			{
+				It.Value()->RemoveFromParent();
+			}
+			It.RemoveCurrent();
+		}
+	}
+}
+
+bool AAircraftPlayerController::GetTargetScreenPosition(AActor* Target, FVector2D& OutScreenPos) const 
+{
+	if (!IsValid(Target)) return false;
+	return ProjectWorldLocationToScreen(Target->GetActorLocation(), OutScreenPos);
+}
+
+void AAircraftPlayerController::CycleTarget() 
+{
+	FVector CameraLoc;
+	FRotator CameraRot;
+	GetPlayerViewPoint(CameraLoc, CameraRot);
+	FVector Forward = CameraRot.Vector();
+
+	float BestDot = -1.0f;
+	AActor* ClosestTarget = nullptr;
+
+	for (FDetectedAircraftInfo Target : Detected)
+	{	
+		AActor* temp = Cast<AActor>(Target.CurrentPawn);
+		if (!IsValid(temp)) continue;
+
+		FVector ToTarget = (temp->GetActorLocation() - CameraLoc).GetSafeNormal();
+		float Dot = FVector::DotProduct(Forward, ToTarget);
+
+		if (Dot > BestDot)
+		{
+			BestDot = Dot;
+			ClosestTarget = temp;
+		}
+	}
+
+	if (ClosestTarget != Selected && ClosestTarget != nullptr)
+	{
+		Selected = ClosestTarget;
+	}
+	else 
+	{
+		CycleToNextTarget();
+	}
+}
+
+void AAircraftPlayerController::CycleToNextTarget() 
+{
+	if (Detected.Num() == 0) return;
+
+	FVector CameraLoc;
+	FRotator CameraRot;
+	GetPlayerViewPoint(CameraLoc, CameraRot);
+	FVector Forward = CameraRot.Vector();
+
+	float BestAngleDiff = FLT_MAX;
+	AActor* BestTarget = nullptr;
+
+	for (FDetectedAircraftInfo Target : Detected)
+	{
+		AActor* temp = Cast<AActor>(Target.CurrentPawn);
+
+		if (!IsValid(temp) || temp == Selected) continue;
+
+		FVector ToTarget = (temp->GetActorLocation() - CameraLoc).GetSafeNormal();
+		float AngleDiff = FMath::Acos(FVector::DotProduct(Forward, ToTarget));
+
+		if (AngleDiff < BestAngleDiff)
+		{
+			BestAngleDiff = AngleDiff;
+			BestTarget = temp;
+		}
+	}
+
+	if (BestTarget)
+	{
+		Selected = BestTarget;
+		//VFX here
+	}
+}
+
 //Neutral = 50% Throttle, increase/decrease accordingly
 void AAircraftPlayerController::Thrust(const FInputActionValue& Value)
 {
@@ -241,9 +400,15 @@ void AAircraftPlayerController::Rudder(const FInputActionValue& Value)
 
 void AAircraftPlayerController::Weapons()
 {
-	if (Controlled) {
-			//When can switch change to CurrentWeaponIndex
-		Controlled->FireWeapon(1);
+	//Different states on selected or not
+	if (Controlled && !Selected) 
+	{
+		//When can switch change to CurrentWeaponIndex
+		Controlled->FireWeaponNotSelected(1);
+	}
+	else if (Controlled && Selected) 
+	{
+		Controlled->FireWeaponSelected(1, Selected);
 	}
 }
 
@@ -278,7 +443,12 @@ void AAircraftPlayerController::Bullets()
 
 void AAircraftPlayerController::Switch() 
 {
-
+	print(text)
+	CycleTarget();
+	if (Selected)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %s"), *Selected->GetName()));
+	}
 }
 
 void AAircraftPlayerController::Focus()
@@ -426,6 +596,7 @@ void AAircraftPlayerController::SpeedAdd(float ThrustPercentage,float prevSpeed)
 	if (Controlled && IsValid(Controlled)) {
 		vectorLocation = (currentSpeed)*Controlled->GetActorForwardVector();
 		Controlled->AddActorWorldOffset(vectorLocation);
+		Controlled->currentSpeed = currentSpeed;
 	}
 }
 
@@ -445,6 +616,10 @@ void AAircraftPlayerController::Tick(float DeltaSeconds)
 		SpringArm->TargetArmLength = FMath::FInterpTo(SpringArm->TargetArmLength, targetSpringArm, DeltaSeconds, 2.f);
 	}
 
+	if (CameraComp) {
+		//TrackTarget();
+	}
+
 	SpeedAdd(thrustPercentage, currentSpeed);
 
 	//Apply rotations as Quat and different movement if Flying vs not
@@ -460,6 +635,7 @@ void AAircraftPlayerController::Tick(float DeltaSeconds)
 			FQuat DeltaRotation = FQuat(FRotator(0, currentRudder, 0));
 			Controlled->AddActorLocalRotation(DeltaRotation);
 		}
+		ScanTargets();
 	}
 	Super::Tick(DeltaSeconds);
 }

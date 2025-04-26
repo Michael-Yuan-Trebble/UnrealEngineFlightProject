@@ -25,6 +25,7 @@ void AEnemyAircraftAI::BeginPlay()
 	targetPitch = 0.f;
 	targetYaw = 0.f;
 	targetRoll = 0.f;
+
 }
 
 //Possession Function
@@ -43,6 +44,18 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 
 	//Get Variables from AI
 	Controlled = Cast<AF16AI>(GetPawn());
+	DrawDebugCone(
+		GetWorld(),
+		Controlled->GetActorLocation(),
+		Controlled->GetActorForwardVector(),
+		10000.f,
+		FMath::DegreesToRadians(40.f),
+		FMath::DegreesToRadians(10.0f),
+		12,
+		FColor::Green,
+		false,
+		50.0f
+	);
 	GetWorldTimerManager().SetTimer(RadarScanTimer, this, &AEnemyAircraftAI::Retrieve, 0.5f, true);
 	maxSpeed = Controlled->ListedMaximumSpeed;
 	planeAcceleration = Controlled->ListedAcceleration;
@@ -64,7 +77,7 @@ void AEnemyAircraftAI::Tick(float DeltaTime)
 
 	if (Controlled) 
 	{
-		Thrust(0.5);
+		Controlled->ApplySpeed(0.5);
 	}
 
 	if (Tracking.CurrentPawn) 
@@ -73,43 +86,48 @@ void AEnemyAircraftAI::Tick(float DeltaTime)
 		TrackingLocation = TrackingPawn->GetActorLocation();
 		TrackingRotation = TrackingPawn->GetActorRotation();
 
-		RotationTarget(DeltaTime);
+		FVector DistanceWorld = TrackingLocation - Controlled->GetActorLocation();
+		FVector LocalDistance = Controlled->GetActorTransform().InverseTransformVectorNoScale(DistanceWorld);
+
+		//bUseYaw =  FMath::Abs(LocalDistance.Y) <= Controlled->YawBoxWidth * 0.5f && FMath::Abs(LocalDistance.Z) <= Controlled->YawBoxHeight;
+		//LocalDistance.X <= Controlled->YawBoxDepth &&
+
+		ShouldYaw();
+		if (bUseYaw) 
+		{
+			print(text)
+		}
+		else 
+		{
+			RotationTarget(DeltaTime);
+		}
 		PitchTarget(DeltaTime);
 	}
+}
 
-	//Need to Implement Radar Stuff first in order to confirm that tracking works
+void AEnemyAircraftAI::ShouldYaw() 
+{
+	FVector TargetDistance = TrackingLocation - Controlled->GetActorLocation();
+	float LengthDistance = TargetDistance.Length();
+	TargetDistance.Normalize();
 
-	//currentSpeed = FMath::FInterpTo(prevSpeed, currentSpeed, DeltaTime, 2.f);
-	//vectorLocation = (currentSpeed)*Controlled->GetActorForwardVector();
+	float DotProduct = FVector::DotProduct(Controlled->GetActorForwardVector(), TargetDistance);
+
+	float ConeAngleCosine = FMath::Acos(DotProduct) * (180.f/PI);
+
+	//30 Degrees for now, will change with every aircraft probably
+	if ((ConeAngleCosine <= 30.f) && (LengthDistance <= 100.f)) 
+	{
+		bUseYaw = true;
+	}
+	else {
+		bUseYaw = false;
+	}
 }
 
 void AEnemyAircraftAI::Retrieve() 
 {
 	Tracking = Controlled->ReturnTargeting();
-}
-
-//Make the throttle like thrust percentage, currently not!!!
-void AEnemyAircraftAI::Thrust(float Throttle) {
-
-
-	prevSpeed = currentSpeed;
-	if (Throttle < 0.f)
-	{
-		currentSpeed = currentSpeed - planeAcceleration;
-		if (currentSpeed <= 0)
-		{
-			currentSpeed = 0;
-		}
-	}
-	else
-	{
-		float currentThrust = planeAcceleration * Throttle;
-		currentSpeed = currentSpeed + (currentThrust - ((0.5 * 0.07 * 1.225) * pow(prevSpeed, power)));
-		if (currentSpeed >= maxSpeed)
-		{
-			currentSpeed = maxSpeed;
-		}
-	}
 }
 
 //Only Roll to Target

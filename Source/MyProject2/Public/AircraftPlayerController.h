@@ -10,7 +10,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "BaseIRMissile.h"
+#include "FDetectedAircraftInfo.h"
 #include "CurrentPlayerState.h"
+#include "LockBoxWidget.h"
 #include "AircraftPlayerController.generated.h"
 
 class ABaseAircraft;
@@ -114,14 +116,32 @@ public:
 
 	ABaseAircraft* Controlled;
 
+	TArray<FDetectedAircraftInfo> Detected;
+
+	AActor* Selected;
+
+	bool GetTargetScreenPosition(AActor* Target, FVector2D& OutScreenPos) const;
+
+	int SelectedIndex = -1;
+	
+	UPROPERTY()
+	TMap<AActor*, ULockBoxWidget*> ActiveLockOnWidgets;
+
+	TSubclassOf<ULockBoxWidget> LockBoxWidgetClasses;
+
 private:
 
-	//Movment
+	//Movment, will move most calculations to the pawn
 	void SpeedAdd(float ThrustPercentage, float prevSpeed);
 	void Thrust(const FInputActionValue& Value);
 	void Roll(const FInputActionValue& Value);
 	void Pitch(const FInputActionValue& Value);
 	void Rudder(const FInputActionValue& Value);
+
+	void CycleTarget();
+	void CycleToNextTarget();
+
+	void ScanTargets();
 
 	//Weapons
 	void Weapons();
@@ -140,9 +160,6 @@ private:
 	//Map
 	void MapZoom();
 	void StopMapZoom();
-
-	//Maybe
-	void TurnSpeedLoss();
 
 	//U Stuff
 

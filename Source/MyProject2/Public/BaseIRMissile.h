@@ -26,7 +26,9 @@ public:
 
 	bool isAir;
 
-	virtual void Fire();
+	virtual void FireStatic(float launchSpeed);
+
+	virtual void FireTracking(float launchSpeed, AActor* Target);
 
 protected:
 

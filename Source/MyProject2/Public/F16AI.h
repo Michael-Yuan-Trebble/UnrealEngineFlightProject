@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "FDetectedAircraftInfo.h"
+#include "LockBoxWidget.h"
+#include "Components/WidgetComponent.h"
 #include "F16AI.generated.h"
 
 UCLASS()
@@ -17,6 +19,9 @@ public:
 	AF16AI();
 
 	//UObjects and Animation Variables
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	class UCapsuleComponent* CollisionComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* AIMesh;
@@ -42,15 +47,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float ListedRudder = 0.25f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float InputPitchValue;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float InputRollValue;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float InputYawValue;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float ReturnElevation;
 
@@ -74,9 +70,17 @@ public:
 
 	FDetectedAircraftInfo ReturnTargeting();
 
+	void ApplySpeed(float ThrottlePercentage);
+
 	void RollToTarget(float RollInput, float DeltaSeconds);
 
 	void PitchToTarget(float PitchInput, float DeltaSeconds);
+
+	float YawBoxWidth = 100.f;
+
+	float YawBoxHeight = 100.f;
+
+	float YawBoxDepth = 100.f;
 
 protected:
 

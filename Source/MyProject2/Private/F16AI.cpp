@@ -7,14 +7,23 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "BaseAircraft.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 
 //Initialize F16AI
 AF16AI::AF16AI()
 {
-	AIMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("AIMesh"));
-	RootComponent = AIMesh;
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 
+	CollisionComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CollisionComp"));
+	CollisionComponent->SetupAttachment(RootComponent);
+	CollisionComponent->SetRelativeLocation(FVector::ZeroVector);
+	CollisionComponent->SetCapsuleSize(42.0f, 96.0f);
+	CollisionComponent->SetCapsuleRadius(150.f);
+	CollisionComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+
+	AIMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("AIMesh"));
+	AIMesh->SetupAttachment(RootComponent);
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -24,12 +33,30 @@ void AF16AI::BeginPlay()
 	
 	//Radar only triggers 0.5 seconds at a time
 	GetWorldTimerManager().SetTimer(RadarScanTimer, this, &AF16AI::ScanForTargets, 0.5f, true);
+	if (CollisionComponent)
+	{
+		FVector CapsuleLocation = CollisionComponent->GetComponentLocation();
+		FRotator CapsuleRotation = CollisionComponent->GetComponentRotation();
+		float CapsuleRadius = CollisionComponent->GetScaledCapsuleRadius();
+		float CapsuleHalfHeight = CollisionComponent->GetScaledCapsuleHalfHeight();
+
+		// Draw a debug capsule (you can adjust the duration, color, and other settings)
+		DrawDebugCapsule(
+			GetWorld(),
+			CapsuleLocation,
+			CapsuleHalfHeight,
+			CapsuleRadius,
+			CapsuleRotation.Quaternion(),
+			FColor::Green,
+			false,
+			500.0f
+		);
+	}
 }
 
 void AF16AI::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AF16AI::ScanForTargets() 
@@ -82,6 +109,10 @@ void AF16AI::PickTarget()
 	}
 }
 
+void AF16AI::ApplySpeed(float ThrottlePercentage) {
+
+}
+
 void AF16AI::RollToTarget(float RollInput, float DeltaSeconds) 
 {
 	//Application of Roll
@@ -105,9 +136,10 @@ void AF16AI::PitchToTarget(float PitchInput, float DeltaSeconds)
 
 	float PitchStep = FMath::Clamp(SmoothPitch, GetActorRotation().Pitch - MaxDeltaThisFrame, GetActorRotation().Pitch + MaxDeltaThisFrame);
 
-	FRotator CurrentRot = GetActorRotation();
-	CurrentRot.Pitch = PitchStep;
-	SetActorRotation(CurrentRot);
+	float PitchDelta = PitchStep - GetActorRotation().Pitch;
+
+	FRotator DeltaRot(0, 0, PitchDelta);
+	this->SetActorRotation(DeltaRot);
 }
 
 FDetectedAircraftInfo AF16AI::ReturnTargeting() 

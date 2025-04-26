@@ -18,9 +18,29 @@ public:
 
 	AR60();
 
-	virtual void Fire() override;
+	float missileAcceleration = 1000.f;
+
+	float missileVelocity = 0.f;
+
+	float currentSpeed;
+
+	float missileMaxSpeed = 1000.f;
+
+	AActor* Tracking;
+
+	float turnRate = 50.f;
+
+	FRotator missileRotation = FRotator::ZeroRotator;
+
+	virtual void FireStatic(float launchSpeed) override;
+
+	virtual void FireTracking(float launchSpeed, AActor* Target) override;
+
+	void LaunchSequence();
 
 protected:
 
 	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
 };

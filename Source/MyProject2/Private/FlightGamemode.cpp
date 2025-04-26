@@ -25,7 +25,7 @@ AFlightGamemode::AFlightGamemode()
 	}
 
 	//Static currently, Spawn in a specific Blueprint for AI
-	static ConstructorHelpers::FClassFinder<AF16AI> F16AIBPClass(TEXT("/Game/AI/F16Enemy"));
+	static ConstructorHelpers::FClassFinder<AF16AI> F16AIBPClass(TEXT("/Game/AI/F16DefaultAI"));
 	if (F16AIBPClass.Succeeded()) 
 	{
 		AIAircraftClass = F16AIBPClass.Class;
@@ -68,7 +68,7 @@ void AFlightGamemode::SpawnAIAircraft()
 	FVector SpawnLocation = FVector(0, 0, 0);
 	FRotator SpawnRotation = FRotator(0, 0, 0);
 	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	AF16AI* AIAir = GetWorld()->SpawnActor<AF16AI>(AIAircraftClass, SpawnLocation, SpawnRotation, SpawnParameters);
 	if (AIAir) 
 	{

@@ -83,8 +83,6 @@ private:
 
 	float power;
 
-	void Thrust(float Throttle);
-
 	void Weapons();
 
 	void WeaponsCooldown();
@@ -106,4 +104,8 @@ private:
 	void RotationTarget(float DeltaTime);
 
 	void PitchTarget(float DeltaTime);
+
+	void ShouldYaw();
+
+	bool bUseYaw;
 };
