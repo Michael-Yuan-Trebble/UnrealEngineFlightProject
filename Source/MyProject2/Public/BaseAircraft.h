@@ -50,8 +50,26 @@ public:
 	bool isAlive;
 
 	float currentSpeed;
+	
+	float power;
+
+	float NextRoll;
+
+	float NextPitch;
+
+	float NextYaw;
+
+	float UserRoll;
+
+	float UserPitch;
+
+	float UserYaw;
+
+	bool isFlying;
 
 	AActor* Tracking;
+
+	FVector Velocity;
 
 	//UObjects
 
@@ -68,6 +86,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCameraComponent* Camera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UBoxComponent* Collision;
 
 	//Arrays
 
@@ -106,12 +127,33 @@ public:
 
 	virtual float ReturnRudder() const;
 
-	void ApplySpeed(float ThrottlePercent);
+	void ApplySpeed(float ThrottlePercent, float DeltaSeconds);
 	
-	void ApplyRot(float NextPitch, float NextYaw, float NextRoll);
+	void ApplyRot(float DeltaSeconds);
+
+	void SetPitch(float PitchValue);
+
+	void SetYaw(float YawValue);
+
+	void SetRoll(float RollValue);
+
+	void ApplyPitch(float DeltaSeconds);
+
+	void ApplyYaw(float DeltaSeconds);
+
+	void ApplyRoll(float DeltaSeconds);
+
+	void SlowSpeed(float ThrottlePercentage);
+
+	void NormalSpeed(float ThrottlePercentage);
+
+	void AfterburnerSpeed(float ThrottlePercentage);
 	
 	//Stuff like drag, aoa, other physics based calculations
-	void UpdatePhys(float DeltaSeconds);
+
+	float DragAOA(float AOA);
+
+	void ReturnAOA(float DeltaSeconds);
 
 	void AddPylons();
 

@@ -23,7 +23,7 @@ ASu25Pawn::ASu25Pawn()
 	RollRate = 10.f;
 	ListedTurnRate = 0.3f;
 	ListedMaximumSpeed = 1000.f;
-	ListedThrust = 100.f;
+	ListedThrust = 10.f;
 	ListedRudder = 0.1f;
 	springArmLength = 400.f;
 	NumPylons = 2;
@@ -49,6 +49,7 @@ void ASu25Pawn::PossessedBy(AController* NewController)
 		BackWheelCoverBody = 90;
 		BackWheel = 90;
 	}
+	power  = (log10(20 / (0.07 * 1.225))) / (log10(ListedMaximumSpeed));
 }
 
 void ASu25Pawn::BeginPlay()
@@ -63,14 +64,12 @@ void ASu25Pawn::Tick(float DeltaSeconds)
 	{
 		
 		//Calculate Animation Values
-
-		Speed = Controlled->currentSpeed;
 		InputPitchValue = Controlled->inputPitch;
 		InputThrust = Controlled->inputThrust;
 		InputYawValue = Controlled->inputYaw;
 		InputRollValue = Controlled->inputRoll;
 
-		if ((Speed > TakeoffSpeed + 5) && !isGearUp) 
+		if ((currentSpeed > TakeoffSpeed + 5) && !isGearUp)
 		{
 			WheelCalculation(DeltaSeconds);
 			if (FrontWheelCoverTop == 0) 
@@ -82,7 +81,7 @@ void ASu25Pawn::Tick(float DeltaSeconds)
 		AirbrakeCalculation(DeltaSeconds);
 		RudderYawCalculation(DeltaSeconds);
 		RollElevatorCalculation(DeltaSeconds);
-		if (Speed < TakeoffSpeed) 
+		if (currentSpeed < TakeoffSpeed)
 		{
 			MiddleFlap.Roll = FMath::FInterpTo(MiddleFlap.Roll, 0.1, DeltaSeconds, 2.f);
 			MiddleFlap.Pitch = FMath::FInterpTo(MiddleFlap.Pitch, 20, DeltaSeconds, 2.f);

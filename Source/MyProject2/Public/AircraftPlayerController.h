@@ -82,21 +82,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isFlying = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float currentPitch;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float currentRoll;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float currentRudder;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float currentSpeed;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FVector vectorLocation;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float inputThrust;
 
@@ -108,6 +93,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float inputYaw;
+
+	float thrustNeeded;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class UCameraComponent* CameraComp;
@@ -132,7 +119,6 @@ public:
 private:
 
 	//Movment, will move most calculations to the pawn
-	void SpeedAdd(float ThrustPercentage, float prevSpeed);
 	void Thrust(const FInputActionValue& Value);
 	void Roll(const FInputActionValue& Value);
 	void Pitch(const FInputActionValue& Value);
@@ -173,19 +159,7 @@ private:
 
 	//Variables
 
-	float planeAcceleration;
-
-	float turnRate;
-
-	float roll;
-
-	float rudderRate;
-
 	float maxSpeed;
-
-	float drag = 0.f;
-
-	float power;
 
 	bool fire = false;
 
@@ -209,12 +183,8 @@ private:
 
 	int CurrentWeaponIndex = 0;
 
-	bool isRoll = false;
-	bool isPitch = false;
-	bool isYaw = false;
 	bool isThrust = false;
 	float targetSpringArm;
 	float prevPitch;
 	float prevYaw;
-	float thrustNeeded;
 };

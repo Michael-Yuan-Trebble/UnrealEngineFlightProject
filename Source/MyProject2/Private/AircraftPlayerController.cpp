@@ -34,8 +34,6 @@ void AAircraftPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	power = (log10(20 / (0.07 * 1.225))) / (log10(maxSpeed));
-
 	if (GetLocalPlayer()) 
 	{
 		UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
@@ -58,11 +56,7 @@ void AAircraftPlayerController::OnPossess(APawn* InPawn)
 			SpringArm = Controlled->GetSpringArm();
 			CameraComp = Controlled->GetCamera();
 			springArmLengthOriginal = Controlled->ReturnSpringArmLength();
-			planeAcceleration = Controlled->ReturnAcceleration();
 			maxSpeed = Controlled->ReturnMaxSpeed();
-			turnRate = Controlled->ReturnTurnRate();
-			roll = Controlled->ReturnRollRate();
-			rudderRate = Controlled->ReturnRudder();
 			SpringArm = Controlled->GetSpringArm();
 			Airframe = Controlled->GetMesh();
 
@@ -356,44 +350,19 @@ void AAircraftPlayerController::Thrust(const FInputActionValue& Value)
 void AAircraftPlayerController::Roll(const FInputActionValue& Value) 
 {
 	inputRoll = Value.Get<float>();
-	currentRoll = FMath::FInterpTo(currentRoll, inputRoll, GetWorld()->GetDeltaSeconds(), 8.f);
-	currentRoll = FMath::Clamp(currentRoll, -roll, roll);
-	isRoll = true;
-
-	if (inputRoll == 0) 
-	{
-		isRoll = false;
-	}
+	Controlled->SetRoll(inputRoll);
 }
 
 void AAircraftPlayerController::Pitch(const FInputActionValue& Value)
 {
 	inputPitch = Value.Get<float>();
-	//Cast<ABaseAircraft>(GetPawn())->InputPitchValue = inputPitch;
-	currentPitch = FMath::FInterpTo(currentPitch, inputPitch, GetWorld()->GetDeltaSeconds(), 8.f);
-	currentPitch = FMath::Clamp(currentPitch, -turnRate, turnRate);
-
-	if (inputPitch < 0.01f) {
-		currentPitch = currentPitch * 0.7f;
-	}
-
-	isPitch = true;
-	if (inputPitch == 0) {
-		isPitch = false;
-	}
+	Controlled->SetPitch(inputPitch);
 }
 
 void AAircraftPlayerController::Rudder(const FInputActionValue& Value) 
 {
 	inputYaw = Value.Get<float>();
-	isYaw = true;
-
-	currentRudder = FMath::FInterpTo(currentRudder, inputYaw, GetWorld()->GetDeltaSeconds(), 2.f);
-	currentRudder = FMath::Clamp(currentRudder, -rudderRate, rudderRate);
-	if (inputYaw == 0)
-	{
-		isYaw = false;
-	}
+	Controlled->SetYaw(inputYaw);
 }
 
 //Specials
@@ -526,8 +495,6 @@ void AAircraftPlayerController::StopMapZoom()
 
 //Velocity
 
-void AAircraftPlayerController::SpeedAdd(float ThrustPercentage,float prevSpeed) 
-{
 	/*
 	Drag Formula
 	power = (log10(20 / (0.07 * 1.225)))/(log10(maxSpeed));
@@ -582,34 +549,11 @@ void AAircraftPlayerController::SpeedAdd(float ThrustPercentage,float prevSpeed)
 
 	*/
 
-	//Needs to decrease by plane acceleration when input thrust from before is higher than what it currently is
-	if (ThrustPercentage <= 0.f) {
-		currentSpeed = currentSpeed - planeAcceleration;
-	}
-	else {
-		currentSpeed = currentSpeed + ((planeAcceleration * thrustPercentage) - ((0.5 * 0.07 * 1.225) * pow(prevSpeed, power)));
-	}
-	
-	currentSpeed = FMath::Clamp(currentSpeed, 0, maxSpeed);
-	currentSpeed = FMath::FInterpTo(prevSpeed, currentSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
-
-	if (Controlled && IsValid(Controlled)) {
-		vectorLocation = (currentSpeed)*Controlled->GetActorForwardVector();
-		Controlled->AddActorWorldOffset(vectorLocation);
-		Controlled->currentSpeed = currentSpeed;
-	}
-}
-
 //Might Make two states so Tick doesn't have to do as much, one grounded and one not
 void AAircraftPlayerController::Tick(float DeltaSeconds) 
 {
 	//Make transitioning to 0 smoother
-
-	if (!isFlying && currentSpeed > 10.f) isFlying = true;
 	if (!isThrust) thrustPercentage = FMath::FInterpTo(thrustPercentage, 0.5, DeltaSeconds, 2.f);
-	if (!isRoll) currentRoll = FMath::FInterpTo(currentRoll, 0, DeltaSeconds, 3.5f);
-	if (!isPitch) currentPitch = FMath::FInterpTo(currentPitch, 0, DeltaSeconds, 10.f);
-	if (!isYaw) currentRudder = FMath::FInterpTo(currentRudder, 0, DeltaSeconds, 7.f);
 	if (SpringArm) 
 	{
 		targetSpringArm = springArmLengthOriginal + (50 * (0.5 - thrustPercentage));
@@ -620,21 +564,10 @@ void AAircraftPlayerController::Tick(float DeltaSeconds)
 		//TrackTarget();
 	}
 
-	SpeedAdd(thrustPercentage, currentSpeed);
-
-	//Apply rotations as Quat and different movement if Flying vs not
 	if(Controlled)
 	{
-		if (isFlying) 
-		{
-			FQuat DeltaRotation = FQuat(FRotator(currentPitch, currentRudder, currentRoll));
-			Controlled->AddActorLocalRotation(DeltaRotation);
-		}
-		else 
-		{
-			FQuat DeltaRotation = FQuat(FRotator(0, currentRudder, 0));
-			Controlled->AddActorLocalRotation(DeltaRotation);
-		}
+		Controlled->ApplySpeed(thrustPercentage,DeltaSeconds);
+		Controlled->ApplyRot(DeltaSeconds);
 		ScanTargets();
 	}
 	Super::Tick(DeltaSeconds);
