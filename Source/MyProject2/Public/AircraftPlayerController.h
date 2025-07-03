@@ -6,13 +6,13 @@
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
 #include "EnhancedInputComponent.h"
-#include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
-#include "BaseIRMissile.h"
-#include "FDetectedAircraftInfo.h"
-#include "CurrentPlayerState.h"
-#include "LockBoxWidget.h"
+#include "Weapons/Missiles/BaseIRMissile.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Structs and Data/FDetectedAircraftInfo.h"
+#include "Gamemodes/CurrentPlayerState.h"
+#include "Structs and Data/ControlModeTypes.h"
 #include "AircraftPlayerController.generated.h"
 
 class ABaseAircraft;
@@ -39,43 +39,57 @@ public:
 	//UInputs
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	class UInputMappingContext* Mapping;
+	UInputMappingContext* Mapping;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Input")
+	UInputMappingContext* MenuInputMapping;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Input")
+	UInputAction* Up;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Input")
+	UInputAction* Down;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	class UInputAction* Throttle;
+	UInputAction* Throttle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	class UInputAction* IA_Roll;
+	UInputAction* IA_Roll;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	class UInputAction* IA_Pitch;
+	UInputAction* IA_Pitch;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	class UInputAction* IA_Rudder;
+	UInputAction* IA_Rudder;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	class UInputAction* IA_Special;
+	UInputAction* IA_Special;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	class UInputAction* IA_Shoot;
+	UInputAction* IA_Shoot;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	class UInputAction* IA_Weapons;
+	UInputAction* IA_Weapons;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	class UInputAction* IA_LookX;
+	UInputAction* IA_LookX;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	class UInputAction* IA_LookY;
+	UInputAction* IA_LookY;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	class UInputAction* IA_Focus;
+	UInputAction* IA_Focus;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	class UInputAction* IA_Switch;
+	UInputAction* IA_Switch;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	class UInputAction* IA_Zoom;
+	UInputAction* IA_Zoom;
+
+	int32 AircraftMappingPriority = 0;
+	int32 MenuMappingPriority = 1;
+
+	EControlMode CurrentMode = EControlMode::Null;
 
 	//UVariables
 
@@ -97,7 +111,7 @@ public:
 	float thrustNeeded;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	class UCameraComponent* CameraComp;
+	UCameraComponent* CameraComp;
 
 	FTimerHandle RepeatTimerHandle;
 
@@ -107,16 +121,16 @@ public:
 
 	AActor* Selected;
 
-	bool GetTargetScreenPosition(AActor* Target, FVector2D& OutScreenPos) const;
-
 	int SelectedIndex = -1;
-	
-	UPROPERTY()
-	TMap<AActor*, ULockBoxWidget*> ActiveLockOnWidgets;
 
-	TSubclassOf<ULockBoxWidget> LockBoxWidgetClasses;
+	const TArray<FDetectedAircraftInfo>& GetDetectedTargets() const;
+
+	void SetControlMode(EControlMode NewMode);
 
 private:
+
+	void BindAircraftInputs(UEnhancedInputComponent* EnhancedInputComp);
+	void BindMenuInputs(UEnhancedInputComponent* EnhancedInputComp);
 
 	//Movment, will move most calculations to the pawn
 	void Thrust(const FInputActionValue& Value);
@@ -151,15 +165,11 @@ private:
 
 	USkeletalMeshComponent* Airframe;
 
-	class USpringArmComponent* SpringArm;
-
-	ACurrentPlayerState* PS;
+	USpringArmComponent* SpringArm;
 
 	TArray<ABaseIRMissile*> WeaponList;
 
 	//Variables
-
-	float maxSpeed;
 
 	bool fire = false;
 
@@ -169,8 +179,6 @@ private:
 
 	float thrustPercentage = 0.5f;
 
-	float springArmLengthOriginal;
-
 	float seePitch;
 
 	float currentYaw;
@@ -179,12 +187,9 @@ private:
 
 	float lookY;
 
-	float CameraLagSpeed = 10.f;
-
 	int CurrentWeaponIndex = 0;
 
 	bool isThrust = false;
-	float targetSpringArm;
 	float prevPitch;
 	float prevYaw;
 };

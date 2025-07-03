@@ -2,47 +2,37 @@
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("AH!"));
 #include "AircraftPlayerController.h"
-#include "InputAction.h"
 #include "InputMappingContext.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "Engine/World.h"
 #include "Math/UnrealMathUtility.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "cmath"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
-#include "F16AI.h"
+#include "Aircraft/AI/F16AI.h"
+#include "UI/PlayerHUD.h"
 #include "TimerManager.h"
-#include "BaseAircraft.h"
+#include "Aircraft/BaseAircraft.h"
 
 AAircraftPlayerController::AAircraftPlayerController() 
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
-	static ConstructorHelpers::FClassFinder<ULockBoxWidget> WidgetClassFinder(TEXT("/Game/UI/MyLockBoxWidget"));
-	if (WidgetClassFinder.Succeeded()) 
-	{
-		LockBoxWidgetClasses = WidgetClassFinder.Class;
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> AircraftMapFinder(TEXT("/Game/Controls/Mapping.Mapping"));
+	if (AircraftMapFinder.Succeeded()) {
+		Mapping = AircraftMapFinder.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> MenuMapFinder(TEXT("/Game/Controls/MenuInputMapping.MenuInputMapping"));
+	if (MenuMapFinder.Succeeded()) {
+		MenuInputMapping = MenuMapFinder.Object;
 	}
 }
 
 void AAircraftPlayerController::BeginPlay() 
 {
 	Super::BeginPlay();
-
-	if (GetLocalPlayer()) 
-	{
-		UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-		Mapping = LoadObject<UInputMappingContext>(nullptr, TEXT("/Game/Controls/Mapping"));
-		if (InputSubsystem) 
-		{
-			InputSubsystem->AddMappingContext(Mapping, 0);
-		}
-	}
 }
 
 void AAircraftPlayerController::OnPossess(APawn* InPawn) 
@@ -55,8 +45,6 @@ void AAircraftPlayerController::OnPossess(APawn* InPawn)
 			//Get Some Variables from controlled Aircraft
 			SpringArm = Controlled->GetSpringArm();
 			CameraComp = Controlled->GetCamera();
-			springArmLengthOriginal = Controlled->ReturnSpringArmLength();
-			maxSpeed = Controlled->ReturnMaxSpeed();
 			SpringArm = Controlled->GetSpringArm();
 			Airframe = Controlled->GetMesh();
 
@@ -65,19 +53,20 @@ void AAircraftPlayerController::OnPossess(APawn* InPawn)
 				SetViewTarget(InPawn);
 			}
 		}
+		APlayerHUD* HUD = Cast<APlayerHUD>(GetHUD());
+		if (HUD) 
+		{
+			HUD->PC = this;
+		}
 	}
 }
 
-//Large amount of input binding
-void AAircraftPlayerController::SetupInputComponent()
-{
-	Super::SetupInputComponent();
-	if (UEnhancedInputComponent* EnhancedInputComp = Cast<UEnhancedInputComponent>(InputComponent)) 
-	{
+void AAircraftPlayerController::BindAircraftInputs(UEnhancedInputComponent* EnhancedInputComp) {
+	if (!EnhancedInputComp) return;
 		FSoftObjectPath ThrottlePath(TEXT("/Game/Controls/Inputs/Throttle.Throttle"));
 		TSoftObjectPtr<UInputAction> SoftThrottle(ThrottlePath);
 		Throttle = SoftThrottle.LoadSynchronous();
-		if (Throttle) 
+		if (Throttle)
 		{
 			EnhancedInputComp->BindAction(Throttle, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Thrust);
 			EnhancedInputComp->BindAction(Throttle, ETriggerEvent::Completed, this, &AAircraftPlayerController::Thrust);
@@ -95,7 +84,7 @@ void AAircraftPlayerController::SetupInputComponent()
 		FSoftObjectPath PitchPath(TEXT("/Game/Controls/Inputs/IA_Pitch.IA_Pitch"));
 		TSoftObjectPtr<UInputAction> SoftPitch(PitchPath);
 		IA_Pitch = SoftPitch.LoadSynchronous();
-		if (IA_Pitch) 
+		if (IA_Pitch)
 		{
 			EnhancedInputComp->BindAction(IA_Pitch, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Pitch);
 			EnhancedInputComp->BindAction(IA_Pitch, ETriggerEvent::Completed, this, &AAircraftPlayerController::Pitch);
@@ -112,7 +101,7 @@ void AAircraftPlayerController::SetupInputComponent()
 		FSoftObjectPath SpecialPath(TEXT("/Game/Controls/Inputs/IA_Special.IA_Special"));
 		TSoftObjectPtr<UInputAction> SoftSpecial(SpecialPath);
 		IA_Special = SoftSpecial.LoadSynchronous();
-		if (IA_Special) 
+		if (IA_Special)
 		{
 			EnhancedInputComp->BindAction(IA_Special, ETriggerEvent::Started, this, &AAircraftPlayerController::Special);
 		}
@@ -120,7 +109,7 @@ void AAircraftPlayerController::SetupInputComponent()
 		FSoftObjectPath ShootPath(TEXT("/Game/Controls/Inputs/IA_Shoot.IA_Shoot"));
 		TSoftObjectPtr<UInputAction> SoftShoot(ShootPath);
 		IA_Shoot = SoftShoot.LoadSynchronous();
-		if (IA_Shoot) 
+		if (IA_Shoot)
 		{
 			EnhancedInputComp->BindAction(IA_Shoot, ETriggerEvent::Started, this, &AAircraftPlayerController::ShootStart);
 			EnhancedInputComp->BindAction(IA_Shoot, ETriggerEvent::Completed, this, &AAircraftPlayerController::ShootEnd);
@@ -137,7 +126,7 @@ void AAircraftPlayerController::SetupInputComponent()
 		FSoftObjectPath LookXPath(TEXT("/Game/Controls/Inputs/IA_LookX.IA_LookX"));
 		TSoftObjectPtr<UInputAction> SoftLookX(LookXPath);
 		IA_LookX = SoftLookX.LoadSynchronous();
-		if (IA_LookX) 
+		if (IA_LookX)
 		{
 			EnhancedInputComp->BindAction(IA_LookX, ETriggerEvent::Triggered, this, &AAircraftPlayerController::LookHor);
 			EnhancedInputComp->BindAction(IA_LookX, ETriggerEvent::Completed, this, &AAircraftPlayerController::LookHor);
@@ -146,7 +135,7 @@ void AAircraftPlayerController::SetupInputComponent()
 		FSoftObjectPath LookYPath(TEXT("/Game/Controls/Inputs/IA_LookY.IA_LookY"));
 		TSoftObjectPtr<UInputAction> SoftLookY(LookYPath);
 		IA_LookY = SoftLookY.LoadSynchronous();
-		if (IA_LookY) 
+		if (IA_LookY)
 		{
 			EnhancedInputComp->BindAction(IA_LookY, ETriggerEvent::Triggered, this, &AAircraftPlayerController::LookVer);
 			EnhancedInputComp->BindAction(IA_LookY, ETriggerEvent::Completed, this, &AAircraftPlayerController::LookVer);
@@ -155,7 +144,7 @@ void AAircraftPlayerController::SetupInputComponent()
 		FSoftObjectPath FocusPath(TEXT("/Game/Controls/Inputs/IA_Focus.IA_Focus"));
 		TSoftObjectPtr<UInputAction> SoftFocus(FocusPath);
 		IA_Focus = SoftFocus.LoadSynchronous();
-		if (IA_Focus) 
+		if (IA_Focus)
 		{
 			EnhancedInputComp->BindAction(IA_Focus, ETriggerEvent::Started, this, &AAircraftPlayerController::Focus);
 			EnhancedInputComp->BindAction(IA_Focus, ETriggerEvent::Ongoing, this, &AAircraftPlayerController::Focus);
@@ -165,7 +154,7 @@ void AAircraftPlayerController::SetupInputComponent()
 		FSoftObjectPath SwitchPath(TEXT("/Game/Controls/Inputs/IA_Switch.IA_Switch"));
 		TSoftObjectPtr<UInputAction> SoftSwitch(SwitchPath);
 		IA_Switch = SoftSwitch.LoadSynchronous();
-		if (IA_Switch) 
+		if (IA_Switch)
 		{
 			EnhancedInputComp->BindAction(IA_Switch, ETriggerEvent::Started, this, &AAircraftPlayerController::Switch);
 		}
@@ -173,12 +162,68 @@ void AAircraftPlayerController::SetupInputComponent()
 		FSoftObjectPath ZoomPath(TEXT("/Game/Controls/Inputs/IA_Zoom.IA_Zoom"));
 		TSoftObjectPtr<UInputAction> SoftZoom(ZoomPath);
 		IA_Zoom = SoftZoom.LoadSynchronous();
-		if (IA_Zoom) 
+		if (IA_Zoom)
 		{
 			EnhancedInputComp->BindAction(IA_Zoom, ETriggerEvent::Started, this, &AAircraftPlayerController::MapZoom);
 			EnhancedInputComp->BindAction(IA_Zoom, ETriggerEvent::Ongoing, this, &AAircraftPlayerController::MapZoom);
 			EnhancedInputComp->BindAction(IA_Zoom, ETriggerEvent::Completed, this, &AAircraftPlayerController::StopMapZoom);
 		}
+}
+
+void AAircraftPlayerController::BindMenuInputs(UEnhancedInputComponent* EnhancedInputComp) {
+	if (!EnhancedInputComp) return;
+	FSoftObjectPath UpPath(TEXT("/Game/Controls/MenuInputs/Up.Up"));
+	TSoftObjectPtr<UInputAction> SoftUp(UpPath);
+	Up = SoftUp.LoadSynchronous();
+	if (Up)
+	{
+		print(text)
+		//EnhancedInputComp->BindAction(Up, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Thrust);
+		//EnhancedInputComp->BindAction(Up, ETriggerEvent::Completed, this, &AAircraftPlayerController::Thrust);
+	}
+	FSoftObjectPath DownPath(TEXT("/Game/Controls/MenuInputs/Down.Down"));
+	TSoftObjectPtr<UInputAction> SoftDown(DownPath);
+	Down = SoftDown.LoadSynchronous();
+	if (Down)
+	{
+		print(text)
+		//EnhancedInputComp->BindAction(Up, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Thrust);
+		//EnhancedInputComp->BindAction(Up, ETriggerEvent::Completed, this, &AAircraftPlayerController::Thrust);
+	}
+}
+
+void AAircraftPlayerController::SetupInputComponent() {
+	Super::SetupInputComponent();
+	if (UEnhancedInputComponent* EnhancedInputComp = Cast<UEnhancedInputComponent>(InputComponent)) 
+	{
+		BindAircraftInputs(EnhancedInputComp);
+		BindMenuInputs(EnhancedInputComp);
+	}
+}
+
+void AAircraftPlayerController::SetControlMode(EControlMode NewMode) 
+{
+	if (CurrentMode == NewMode || !GetLocalPlayer()) return;
+	CurrentMode = NewMode;
+
+	auto* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+
+	if (!Subsystem) return;
+
+	auto* EnhancedInputComp = Cast<UEnhancedInputComponent>(InputComponent);
+
+	Subsystem->ClearAllMappings();
+	if (NewMode == EControlMode::Menu) 
+	{
+		Subsystem->AddMappingContext(MenuInputMapping, MenuMappingPriority);
+		SetInputMode(FInputModeUIOnly());
+		bShowMouseCursor = true;
+	}
+	else if (NewMode == EControlMode::Aircraft) 
+	{
+		Subsystem->AddMappingContext(Mapping, AircraftMappingPriority);
+		SetInputMode(FInputModeGameOnly());
+		bShowMouseCursor = false;
 	}
 }
 
@@ -202,64 +247,14 @@ void AAircraftPlayerController::ScanTargets()
 			{
 				TempInfo.CurrentPawn = RegisteredPawn;
 				Detected.Add(TempInfo);
-				
-				ULockBoxWidget* LockOnWidget = nullptr;
-				if (!ActiveLockOnWidgets.Contains(RegisteredPawn)) 
-				{
-					//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %s"), *RegisteredPawn->GetName()));
-					LockOnWidget = CreateWidget<ULockBoxWidget>(this, LockBoxWidgetClasses);
-					if (LockOnWidget)
-					{
-						LockOnWidget->AddToViewport();
-						ActiveLockOnWidgets.Add(RegisteredPawn, LockOnWidget);
-						LockOnWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
-					}
-				}
-				else 
-				{
-					LockOnWidget = ActiveLockOnWidgets[RegisteredPawn];
-				}
-
-				if (LockOnWidget) 
-				{
-					FVector2D ScreenPosition;
-					FVector WorldPosition = RegisteredPawn->GetActorLocation() + FVector(0.f,0.f,0.f);
-					if (this->ProjectWorldLocationToScreen(WorldPosition, ScreenPosition,true)) 
-					{
-						//FVector2D WidgetSize(64.f, 64.f);
-						//ScreenPosition -= WidgetSize * 0.5f;
-						LockOnWidget->SetPositionInViewport(ScreenPosition, false);
-						float Distance = FVector::Dist(RegisteredPawn->GetActorLocation(), CameraComp->GetComponentLocation());
-						float FOV = this->PlayerCameraManager->GetFOVAngle();
-						float FOVFactor = FMath::Tan(FMath::DegreesToRadians(FOV * 0.5f));
-
-						float ScaleFactor = (1000.f / Distance) * FOVFactor;
-						ScaleFactor = FMath::Clamp(ScaleFactor, 0.1f, 0.3f);
-
-						LockOnWidget->SetRenderScale(FVector2D(ScaleFactor, ScaleFactor));
-					}
-				}
 			}
-		}
-	}
-
-	for (auto It = ActiveLockOnWidgets.CreateIterator(); It; ++It) 
-	{
-		if (!Detected.ContainsByPredicate([&](const FDetectedAircraftInfo& Info) {return Info.CurrentPawn == It.Key(); })) 
-		{
-			if (It.Value()) 
-			{
-				It.Value()->RemoveFromParent();
-			}
-			It.RemoveCurrent();
 		}
 	}
 }
 
-bool AAircraftPlayerController::GetTargetScreenPosition(AActor* Target, FVector2D& OutScreenPos) const 
+const TArray<FDetectedAircraftInfo>& AAircraftPlayerController::GetDetectedTargets() const
 {
-	if (!IsValid(Target)) return false;
-	return ProjectWorldLocationToScreen(Target->GetActorLocation(), OutScreenPos);
+	return Detected;
 }
 
 void AAircraftPlayerController::CycleTarget() 
@@ -290,6 +285,7 @@ void AAircraftPlayerController::CycleTarget()
 	if (ClosestTarget != Selected && ClosestTarget != nullptr)
 	{
 		Selected = ClosestTarget;
+		Controlled->Tracking = ClosestTarget;
 	}
 	else 
 	{
@@ -328,6 +324,7 @@ void AAircraftPlayerController::CycleToNextTarget()
 	if (BestTarget)
 	{
 		Selected = BestTarget;
+		Controlled->Tracking = BestTarget;
 		//VFX here
 	}
 }
@@ -405,7 +402,9 @@ void AAircraftPlayerController::ShootEnd()
 
 void AAircraftPlayerController::Bullets() 
 {
-	print(text);
+	if (Controlled) {
+		Controlled->FireBullets();
+	}
 }
 
 //Camera Movement
@@ -493,80 +492,17 @@ void AAircraftPlayerController::StopMapZoom()
 
 }
 
-//Velocity
-
-	/*
-	Drag Formula
-	power = (log10(20 / (0.07 * 1.225)))/(log10(maxSpeed));
-	float prevSpeed = currentSpeed;
-	drag = pow(prevSpeed, power);
-	currentSpeed = currentSpeed + (currentThrust - ((0.5 * 0.07 * 1.225) * pow(prevSpeed, power)));
-
-
-	Air Density and Drag
-
-	Have A Logistic Formula in order to calculate Air Density, some altitude like 15000 will be the "cap"
-
-	Logistics Formula
-	drag = 15/(1+pow(2,-0.1(prevSpeed-650)));
-	currentSpeed = currentSpeed + currentThrust - drag;
-	
-	Some More Drag Stuff
-
-	Drag = 0.5 * AirDensity * Speed² * DragCoefficient * Area
-	DragForce = -Velocity * DragCoefficient
-	
-	AOA Information
-
-	For each aircraft, have a different maximum AOA angle, AOA drag mult, Stall Threshold AOA (This will only come into play due to low airspeed if at all)
-
-	Some AOA code
-	FVector Forward = GetActorForwardVector();
-	FVector VelocityDir = CurrentVelocity.GetSafeNormal();
-
-	float AoA = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Forward, VelocityDir)));
-
-	float AoAAbs = FMath::Abs(AoA);
-	float DragMultiplier = 1.0f;
-
-	if (AoAAbs > MaxOptimalAoA)
-	{
-		float OverAoA = FMath::Clamp((AoAAbs - MaxOptimalAoA) / (MaxAoABeforeHardPenalty - MaxOptimalAoA), 0.0f, 1.0f);
-		DragMultiplier += OverAoA * AoADragMultiplier;
-	}
-
-	Stall (if wanted)
-
-	if (AoAAbs >= StallThresholdAoA)
-	{
-		bIsStalling = true;
-		// Maybe reduce lift or cap velocity
-	}
-	else
-	{
-		bIsStalling = false;
-	}
-
-	*/
-
 //Might Make two states so Tick doesn't have to do as much, one grounded and one not
 void AAircraftPlayerController::Tick(float DeltaSeconds) 
 {
+	if (CurrentMode == EControlMode::Menu) return;
 	//Make transitioning to 0 smoother
 	if (!isThrust) thrustPercentage = FMath::FInterpTo(thrustPercentage, 0.5, DeltaSeconds, 2.f);
-	if (SpringArm) 
-	{
-		targetSpringArm = springArmLengthOriginal + (50 * (0.5 - thrustPercentage));
-		SpringArm->TargetArmLength = FMath::FInterpTo(SpringArm->TargetArmLength, targetSpringArm, DeltaSeconds, 2.f);
-	}
-
-	if (CameraComp) {
-		//TrackTarget();
-	}
 
 	if(Controlled)
 	{
 		Controlled->ApplySpeed(thrustPercentage,DeltaSeconds);
+		Controlled->AdjustSpringArm(DeltaSeconds, thrustPercentage);
 		Controlled->ApplyRot(DeltaSeconds);
 		ScanTargets();
 	}
