@@ -23,14 +23,11 @@ void ABaseIRMissile::BeginPlay()
 void ABaseIRMissile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (isAir) 
-	{
-		timeTilDelt += DeltaTime;
-		if (timeTilDelt >= timeDet)
-		{
-			Destroy();
-		}
-	}
+	if (!isAir) return;
+	timeTilDelt += DeltaTime;
+
+	if (!(timeTilDelt >= timeDet)) return;
+	Destroy();
 }
 
 void ABaseIRMissile::FireStatic(float launchSpeed)

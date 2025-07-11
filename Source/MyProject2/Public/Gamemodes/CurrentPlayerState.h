@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
-#include "Weapons/Missiles/BaseIRMissile.h"
+#include "Weapons/BaseWeapon.h"
+#include "Structs and Data/AircraftData.h"
+#include "Aircraft/BaseAircraft.h"
 #include "CurrentPlayerState.generated.h"
 
 /**
@@ -18,5 +20,11 @@ class MYPROJECT2_API ACurrentPlayerState : public APlayerState
 public:
 	ACurrentPlayerState();
 
-	TArray<TSubclassOf<ABaseIRMissile>> SelectedWeapons;
+	UAircraftData* SelectedAircraft;
+
+	TMap<FName, TSubclassOf<ABaseIRMissile>> SelectedWeapons;
+
+	void SetCurrentAircraft(UAircraftData* Aircraft);
+
+	void AddWeapon(FName Pylon, TSubclassOf<ABaseWeapon> Weapon);
 };

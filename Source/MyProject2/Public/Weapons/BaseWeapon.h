@@ -18,6 +18,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* WeaponMesh;
 
+	FName WeaponName;
+
 	float cooldownTime;
 
 	float timeTilDelt;

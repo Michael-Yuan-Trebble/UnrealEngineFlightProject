@@ -18,8 +18,14 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FName PylonName;
 
-	UPROPERTY(EditAnywhere,BlueprintReadOnly)
-	TArray<TSubclassOf<ABaseWeapon>> AllowedWeapons;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<TSubclassOf<ABaseWeapon>> AllowedMissiles;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<TSubclassOf<ABaseWeapon>> AllowedBombs;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<TSubclassOf<ABaseWeapon>> AllowedMisc;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	int32 MaxWeapons;

@@ -13,6 +13,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAircraftSelected, TSubclassOf<APawn>, SelectedAircraft);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAircraftPicked, UAircraftData*, PickedAircraft);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAircraftBuyPicked, FName, Name, int, Cost);
 
 UCLASS()
 class MYPROJECT2_API UAircraftButtonWidget : public UUserWidget
@@ -27,10 +28,17 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAircraftPicked OnAircraftPicked;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnAircraftBuyPicked OnBuyCreate;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAircraftData* ContainedData;
 
-	void Setup(UAircraftData* AircraftData);
+	int CurrentMoney;
+
+	TArray<FName> Owned;
+
+	void Setup(UAircraftData* AircraftData, int price, TArray<FName> Owned);
 
 protected:
 
@@ -40,7 +48,8 @@ protected:
 	UFUNCTION()
 	void HandleButtonClick();
 
-	virtual void NativeConstruct() override;
+	UFUNCTION()
+	void HandleBuyCreate();
 
 	UPROPERTY(meta = (BindWidget))
 	UButton* AircraftSelectButton;

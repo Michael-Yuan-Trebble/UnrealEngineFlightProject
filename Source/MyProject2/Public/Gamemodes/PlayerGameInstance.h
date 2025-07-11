@@ -15,9 +15,10 @@ class MYPROJECT2_API UPlayerGameInstance : public UGameInstance
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(BlueprintReadWrite)
-	TSubclassOf<APawn> SelectedAircraft;
 
-	UPROPERTY(BlueprintReadWrite)
-	FName SelectedMapName;
+	UPROPERTY()
+	class USaveGameManager* SaveManager;
+
+protected:
+	void Init() override;
 };

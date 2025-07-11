@@ -5,66 +5,82 @@
 #include "GameFramework/SpectatorPawn.h"
 #include "UI/AircraftSelectionWidget.h"
 #include "AircraftPlayerController.h"
+#include "Gamemodes/CurrentPlayerState.h"
+#include "MenuManagerComponent.h"
 #include "Structs and Data/ControlModeTypes.h"
+#include "Kismet/GameplayStatics.h"
+#include "Structs and Data/MenuState.h"
 #include "Kismet/GameplayStatics.h"
 
 AAircraftSelectionGamemode::AAircraftSelectionGamemode() 
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> WidgetBPClass(TEXT("/Game/UI/BPAircraftSelectionWidget"));
-	if (WidgetBPClass.Succeeded())
-	{
-		WidgetClass = WidgetBPClass.Class;
-	}
 }
 
-void AAircraftSelectionGamemode::BeginPlay() {
-
+void AAircraftSelectionGamemode::BeginPlay() 
+{
 	Super::BeginPlay();
 
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-	if (PC) {
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		ASpectatorPawn* Spectator = GetWorld()->SpawnActor<ASpectatorPawn>(ASpectatorPawn::StaticClass(), FVector::ZeroVector,FRotator::ZeroRotator,SpawnParams);
-		if (Spectator) {
-			PC->Possess(Spectator);
-			if (AAircraftPlayerController* APC = Cast<AAircraftPlayerController>(PC)) {
-				APC->SetControlMode(EControlMode::Menu);
-			}
-		}
-	}
+	if (!PC)  return;
 
-	AircraftSelectUI = CreateWidget<UAircraftSelectionWidget>(GetWorld(), WidgetClass);
-	AircraftDatabase = NewObject<UAircraftDatabase>(GetGameInstance());
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ASpectatorPawn* Spectator = GetWorld()->SpawnActor<ASpectatorPawn>(ASpectatorPawn::StaticClass(), FVector::ZeroVector,FRotator::ZeroRotator,SpawnParams);
 
-	if (AircraftDatabase) 
+	if (!Spectator)  return;
+
+	PC->Possess(Spectator);
+	APC = Cast<AAircraftPlayerController>(PC);
+	PS = Cast<ACurrentPlayerState>(PC->PlayerState);
+
+	if (!APC || !PS) return; 
+	APC->SetControlMode(EControlMode::Menu);
+	GetWorld()->GetTimerManager().SetTimerForNextTick([this]() 
 	{
-		FString Path = "/Game/Aircraft/AircraftData";
-		AircraftDatabase->LoadAllAircraftFromFolder(Path);
-	}
-
-	if (AircraftSelectUI && AircraftDatabase) 
-	{
-		AircraftSelectUI->AircraftDatabase = AircraftDatabase;
-		AircraftSelectUI->GetAllAircraft();
-		AircraftSelectUI->AddToViewport();
-		PC = GetWorld()->GetFirstPlayerController();
-		if (PC) 
-		{
-			FInputModeGameAndUI InputMode;
-			InputMode.SetWidgetToFocus(AircraftSelectUI->TakeWidget()); 
-			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-			InputMode.SetHideCursorDuringCapture(true);
-			PC->SetInputMode(InputMode);
-			PC->bShowMouseCursor = true;
-		}
-	}
+		APC->MenuManager->AddDatabase();
+		APC->MenuManager->ChooseAircraftUI();
+	});
 }
 
-void AAircraftSelectionGamemode::PickedAircraft(UAircraftData* Aircraft) {
-	if (AircraftSelectUI && Aircraft) 
+void AAircraftSelectionGamemode::SpawnInAircraft(TSubclassOf<APawn> SpawnIn) 
+{
+	if (AircraftDisplayed && AircraftDisplayed->GetClass() == SpawnIn) return;
+
+	if (AircraftDisplayed) 
 	{
-		AircraftSelectUI->RemoveFromViewport();
-		ChosenAircraft = Aircraft;
+		AircraftDisplayed->Destroy();
+		AircraftDisplayed = nullptr;
 	}
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	FVector PreviewLocation = FVector::ZeroVector;
+	FRotator PreviewRotation = FRotator::ZeroRotator;
+	AircraftDisplayed = GetWorld()->SpawnActor<APawn>(SpawnIn, PreviewLocation, PreviewRotation, SpawnParams);
+}
+
+void AAircraftSelectionGamemode::SpawnInWeapon(TSubclassOf<ABaseWeapon> Weapon, FName Pylon) {
+	if (!AircraftDisplayed || (WeaponDisplayed && WeaponDisplayed->GetClass() == Weapon)) return;
+
+	if (WeaponDisplayed) 
+	{
+		WeaponDisplayed->Destroy();
+		WeaponDisplayed = nullptr;
+	}
+
+	ABaseAircraft* BaseAircraft = Cast<ABaseAircraft>(AircraftDisplayed);
+	if (!BaseAircraft) return;
+
+	USkeletalMeshComponent* Mesh = BaseAircraft->Airframe;
+
+	FTransform SocketTransform = Mesh->GetSocketTransform(Pylon);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	WeaponDisplayed = GetWorld()->SpawnActor<AActor>(Weapon, SocketTransform, SpawnParams);
+	if (!WeaponDisplayed) return;
+
+	WeaponDisplayed->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, Pylon);
 }

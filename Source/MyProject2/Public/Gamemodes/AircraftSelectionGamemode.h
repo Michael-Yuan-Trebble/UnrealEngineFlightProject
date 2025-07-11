@@ -9,6 +9,9 @@
 #include "AircraftSelectionGamemode.generated.h"
 
 class UAircraftSelectionWidget;
+class ACurrentPlayerState;
+class AAircraftPlayerController;
+class AMenuManagerComponent;
 
 UCLASS()
 class MYPROJECT2_API AAircraftSelectionGamemode : public AGameModeBase
@@ -19,20 +22,24 @@ public:
 
 	AAircraftSelectionGamemode();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAircraftSelectionWidget* AircraftSelectUI;
-
-	UPROPERTY()
-	UAircraftDatabase* AircraftDatabase;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UUserWidget> WidgetClass;
-
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	UAircraftData* ChosenAircraft;
 
-	UFUNCTION()
-	void PickedAircraft(UAircraftData* Aircraft);
+	AAircraftPlayerController* APC;
+
+	ACurrentPlayerState* PS;
+
+	AMenuManagerComponent* MenuManager;
 
 	virtual void BeginPlay() override;
+
+	void SpawnInAircraft(TSubclassOf<APawn> SpawnIn);
+
+	AActor* WeaponDisplayed;
+
+	APawn* AircraftDisplayed;
+
+	void SpawnInWeapon(TSubclassOf<ABaseWeapon> Weapon, FName Pylon);
+
+	TMap<FName, TSubclassOf<AActor>> EquippedWeapons;
 };

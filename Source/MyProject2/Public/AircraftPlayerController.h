@@ -10,6 +10,7 @@
 #include "Camera/CameraComponent.h"
 #include "Weapons/Missiles/BaseIRMissile.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Structs and Data/MenuState.h"
 #include "Structs and Data/FDetectedAircraftInfo.h"
 #include "Gamemodes/CurrentPlayerState.h"
 #include "Structs and Data/ControlModeTypes.h"
@@ -19,6 +20,7 @@ class ABaseAircraft;
 class ASu25Pawn;
 class UInputMappingContext;
 class UEnhancedInputComponent;
+class UMenuManagerComponent;
 
 UCLASS()
 class MYPROJECT2_API AAircraftPlayerController : public APlayerController
@@ -49,6 +51,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Input")
 	UInputAction* Down;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Input")
+	UInputAction* IA_Back;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* Throttle;
@@ -91,6 +96,17 @@ public:
 
 	EControlMode CurrentMode = EControlMode::Null;
 
+	UPROPERTY()
+	EMenuState CurrentMenuState;
+
+	TArray<EMenuState> MenuHistory;
+
+	UMenuManagerComponent* MenuManager;
+
+	void ManageMenuSetting(EMenuState NewState);
+
+	UUserWidget* CurrentWidget;
+
 	//UVariables
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -127,6 +143,8 @@ public:
 
 	void SetControlMode(EControlMode NewMode);
 
+	void SetWidget(UUserWidget* Widget);
+
 private:
 
 	void BindAircraftInputs(UEnhancedInputComponent* EnhancedInputComp);
@@ -160,6 +178,8 @@ private:
 	//Map
 	void MapZoom();
 	void StopMapZoom();
+
+	void MenuBack();
 
 	//U Stuff
 

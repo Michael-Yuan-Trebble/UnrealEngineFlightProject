@@ -19,8 +19,20 @@ public:
 	TSubclassOf<APawn> AircraftClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText AircraftName;
+	FName AircraftName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText Class;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TArray<FPylonLoadout> PylonLoadouts;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int NumOfPylons;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int price;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText Description;
 };

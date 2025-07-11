@@ -8,6 +8,8 @@
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "cmath"
+#include "MenuManagerComponent.h"
+#include "Gamemodes/CurrentPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Aircraft/AI/F16AI.h"
 #include "UI/PlayerHUD.h"
@@ -20,45 +22,45 @@ AAircraftPlayerController::AAircraftPlayerController()
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> AircraftMapFinder(TEXT("/Game/Controls/Mapping.Mapping"));
-	if (AircraftMapFinder.Succeeded()) {
+	if (AircraftMapFinder.Succeeded()) 
+	{
 		Mapping = AircraftMapFinder.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> MenuMapFinder(TEXT("/Game/Controls/MenuInputMapping.MenuInputMapping"));
-	if (MenuMapFinder.Succeeded()) {
+	if (MenuMapFinder.Succeeded()) 
+	{
 		MenuInputMapping = MenuMapFinder.Object;
 	}
+
+	MenuManager = CreateDefaultSubobject<UMenuManagerComponent>(TEXT("MenuManager"));
 }
 
 void AAircraftPlayerController::BeginPlay() 
 {
 	Super::BeginPlay();
+	ACurrentPlayerState* PS = Cast<ACurrentPlayerState>(this->PlayerState);
+	MenuManager->InitializePC(this, PS);
 }
 
 void AAircraftPlayerController::OnPossess(APawn* InPawn) 
 {
-	if (InPawn)
-	{
-		Controlled = Cast<ABaseAircraft>(InPawn);
-		if (Controlled)
-		{
-			//Get Some Variables from controlled Aircraft
-			SpringArm = Controlled->GetSpringArm();
-			CameraComp = Controlled->GetCamera();
-			SpringArm = Controlled->GetSpringArm();
-			Airframe = Controlled->GetMesh();
+	if (!InPawn) return;
+	Controlled = Cast<ABaseAircraft>(InPawn);
 
-			if (CameraComp) 
-			{
-				SetViewTarget(InPawn);
-			}
-		}
-		APlayerHUD* HUD = Cast<APlayerHUD>(GetHUD());
-		if (HUD) 
-		{
-			HUD->PC = this;
-		}
-	}
+	if (!Controlled) return;
+	//Get Some Variables from controlled Aircraft
+	SpringArm = Controlled->GetSpringArm();
+	CameraComp = Controlled->GetCamera();
+	SpringArm = Controlled->GetSpringArm();
+	Airframe = Controlled->GetMesh();
+
+	if (!CameraComp) return;
+	SetViewTarget(InPawn);
+
+	APlayerHUD* HUD = Cast<APlayerHUD>(GetHUD());
+	if (!HUD) return;
+	HUD->PC = this;
 }
 
 void AAircraftPlayerController::BindAircraftInputs(UEnhancedInputComponent* EnhancedInputComp) {
@@ -190,9 +192,19 @@ void AAircraftPlayerController::BindMenuInputs(UEnhancedInputComponent* Enhanced
 		//EnhancedInputComp->BindAction(Up, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Thrust);
 		//EnhancedInputComp->BindAction(Up, ETriggerEvent::Completed, this, &AAircraftPlayerController::Thrust);
 	}
+	FSoftObjectPath BackPath(TEXT("/Game/Controls/MenuInputs/Back.Back"));
+	TSoftObjectPtr<UInputAction> SoftBack(BackPath);
+	IA_Back = SoftBack.LoadSynchronous();
+	if (IA_Back)
+	{
+		print(text)
+			//EnhancedInputComp->BindAction(Up, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Thrust);
+			//EnhancedInputComp->BindAction(Up, ETriggerEvent::Completed, this, &AAircraftPlayerController::Thrust);
+	}
 }
 
-void AAircraftPlayerController::SetupInputComponent() {
+void AAircraftPlayerController::SetupInputComponent() 
+{
 	Super::SetupInputComponent();
 	if (UEnhancedInputComponent* EnhancedInputComp = Cast<UEnhancedInputComponent>(InputComponent)) 
 	{
@@ -225,6 +237,29 @@ void AAircraftPlayerController::SetControlMode(EControlMode NewMode)
 		SetInputMode(FInputModeGameOnly());
 		bShowMouseCursor = false;
 	}
+}
+
+void AAircraftPlayerController::MenuBack() 
+{
+	if (!MenuManager) return;
+	MenuManager->GoBack();
+}
+
+void AAircraftPlayerController::ManageMenuSetting(EMenuState NewMenu) 
+{
+	MenuHistory.Push(CurrentMenuState);
+	CurrentMenuState = NewMenu;
+	if (CurrentWidget) 
+	{
+		CurrentWidget->RemoveFromParent();
+		CurrentWidget = nullptr;
+	}
+	MenuManager->GetWidgetClassForState(NewMenu);
+}
+
+void AAircraftPlayerController::SetWidget(UUserWidget* Widget) 
+{
+	CurrentWidget = Widget;
 }
 
 void AAircraftPlayerController::ScanTargets() 

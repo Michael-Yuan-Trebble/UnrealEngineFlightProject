@@ -66,9 +66,8 @@ ABaseAircraft::ABaseAircraft()
 	bLocked = false;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> PylonMeshObj(TEXT("/Game/Weapons/Pylons/NATO_Pylon.NATO_Pylon"));
-	if (PylonMeshObj.Succeeded()) {
-		Pylon = PylonMeshObj.Object;
-	}
+	if (!PylonMeshObj.Succeeded()) return; 
+	Pylon = PylonMeshObj.Object;
 }
 
 void ABaseAircraft::BeginPlay()
@@ -98,9 +97,9 @@ void ABaseAircraft::Tick(float DeltaTime)
 	UpdateLockedOn(DeltaTime);
 
 	float ConeLength = 0;
-	if (CurrentWeapon) {
-		ConeLength = CurrentWeapon->range;
-	}
+
+	if (!CurrentWeapon) return; 
+	ConeLength = CurrentWeapon->range;
 
 	DrawDebugCone(
 		GetWorld(),
@@ -122,19 +121,17 @@ void ABaseAircraft::Tick(float DeltaTime)
 }
 
 void ABaseAircraft::FireBullets() {
-	if (Bullet) {
-		if (Airframe->DoesSocketExist("Gun")) {
-			FVector MuzzleLocation = Airframe->GetSocketLocation("Gun");
-			FRotator MuzzleRotation = Airframe->GetSocketRotation("Gun");
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	if (!Bullet || !(Airframe->DoesSocketExist("Gun"))) return;
 
-			AAircraftBullet* SpawnBullet = GetWorld()->SpawnActor<AAircraftBullet>(Bullet, MuzzleLocation, MuzzleRotation, SpawnParams);
-			if (SpawnBullet) {
-				SpawnBullet->FireInDirection(MuzzleRotation.Vector());
-			}
-		}
-	}
+	FVector MuzzleLocation = Airframe->GetSocketLocation("Gun");
+	FRotator MuzzleRotation = Airframe->GetSocketRotation("Gun");
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	AAircraftBullet* SpawnBullet = GetWorld()->SpawnActor<AAircraftBullet>(Bullet, MuzzleLocation, MuzzleRotation, SpawnParams);
+	if (!SpawnBullet) return; 
+	
+	SpawnBullet->FireInDirection(MuzzleRotation.Vector());
 }
 
 void ABaseAircraft::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
@@ -200,7 +197,8 @@ void ABaseAircraft::AfterburnerSpeed(float ThrottlePercentage)
 	}
 }
 
-void ABaseAircraft::AdjustSpringArm(float DeltaSeconds, float ThrottlePercentage) {
+void ABaseAircraft::AdjustSpringArm(float DeltaSeconds, float ThrottlePercentage) 
+{
 	SpringArm->TargetArmLength = FMath::FInterpTo(SpringArm->TargetArmLength, springArmLength + (50 * (0.5 - ThrottlePercentage)), DeltaSeconds, 2.f);
 }
 
@@ -307,35 +305,31 @@ void ABaseAircraft::EquipWeapons(const TArray<TSubclassOf<ABaseIRMissile>>& Weap
 {
 	for (int i = 0; i < WeaponClasses.Num(); i++) 
 	{
-		if (WeaponClasses[i] != nullptr) 
-		{
+		if (WeaponClasses[i] == nullptr) continue;
 			//Find Socket, attach Weapon to that Socket
 
-			FName SocketName = FName(*FString::Printf(TEXT("Pylon%d"), i + 1));
-			if (GetMesh()->GetSkeletalMeshAsset()->GetSkeleton()->FindSocket(SocketName))
-			{
-				FTransform SocketTransform = Airframe->GetSocketTransform(SocketName);
-				FActorSpawnParameters SpawnParams;
-				SpawnParams.Owner = this;
-				AR60* Weapon = GetWorld()->SpawnActor<AR60>(WeaponClasses[i], SocketTransform, SpawnParams);
+		FName SocketName = FName(*FString::Printf(TEXT("Pylon%d"), i + 1));
+		if (GetMesh()->GetSkeletalMeshAsset()->GetSkeleton()->FindSocket(SocketName))
+		{
+			FTransform SocketTransform = Airframe->GetSocketTransform(SocketName);
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			AR60* Weapon = GetWorld()->SpawnActor<AR60>(WeaponClasses[i], SocketTransform, SpawnParams);
 
-				if (Weapon)
-				{
-					Weapon->SetActorEnableCollision(false);
-					Weapon->AttachToComponent(Airframe, FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
+			if (!Weapon) continue;
+				Weapon->SetActorEnableCollision(false);
+				Weapon->AttachToComponent(Airframe, FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
 
-					FCooldownWeapon tempCool;
-					tempCool.Current = Weapon;
-					tempCool.bCanFire = true;
-					tempCool.cooldownTime = Weapon->ReturnCooldownTime();
-					tempCool.time = 0;
-					tempCool.SocketName = SocketName;
+				FCooldownWeapon tempCool;
+				tempCool.Current = Weapon;
+				tempCool.bCanFire = true;
+				tempCool.cooldownTime = Weapon->ReturnCooldownTime();
+				tempCool.time = 0;
+				tempCool.SocketName = SocketName;
 
-					AvailableWeapons.Add(tempCool);
+				AvailableWeapons.Add(tempCool);
 
-					CurrentWeapon = Cast<ABaseIRMissile>(Weapon);
-				}
-			}
+				CurrentWeapon = Cast<ABaseIRMissile>(Weapon);
 		}
 	}
 }

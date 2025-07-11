@@ -9,11 +9,12 @@
 
 class UAircraftButtonWidget;
 class UScrollBox;
+class UMenuManagerComponent;
 class UAircraftDatabase;
 
-/**
- * 
- */
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAircraftSelectedSignature, TSubclassOf<APawn>, SelectedAircraft);
+
 UCLASS()
 class MYPROJECT2_API UAircraftSelectionWidget : public UUserWidget
 {
@@ -25,8 +26,17 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	UAircraftDatabase* AircraftDatabase;
 
+	UPROPERTY(BlueprintAssignable,Category = "Events")
+	FAircraftSelectedSignature OnAircraftSelected;
+
 	UFUNCTION(BlueprintCallable)
 	void GetAllAircraft();
+
+	UMenuManagerComponent* MenuManager;
+
+	TArray<FName> Owned;
+
+	int CurrentMoney;
 
 protected:
 
@@ -35,9 +45,6 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> AircraftButtonClass;
-
-	UPROPERTY()
-	APawn* CurrentPreview;
 
 	UPROPERTY(meta=(BindWidget))
 	UScrollBox* AircraftScrollBox;

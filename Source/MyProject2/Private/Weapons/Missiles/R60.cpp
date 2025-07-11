@@ -9,6 +9,8 @@ AR60::AR60()
 	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Missile"));
 	RootComponent = WeaponMesh;
 
+	WeaponName = "R-60";
+
 	//Was being buggy without manually assigning Mesh, blueprint no work
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("/Game/Weapons/R-60M/R-60M_Final.R-60M_Final"));
 	if (MeshAsset.Succeeded()) 

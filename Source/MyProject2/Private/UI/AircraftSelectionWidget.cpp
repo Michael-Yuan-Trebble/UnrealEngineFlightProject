@@ -4,70 +4,64 @@
 #include "UI/AircraftSelectionWidget.h"
 #include "Components/ScrollBox.h"
 #include "Structs and Data/AircraftDatabase.h"
-#include "Gamemodes/AircraftSelectionGamemode.h"
+#include "AircraftPlayerController.h"
+#include "MenuManagerComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Gamemodes/AircraftSelectionGamemode.h"
 #include "UI/AircraftButtonWidget.h"
 
 
 UAircraftSelectionWidget::UAircraftSelectionWidget(const FObjectInitializer & ObjectInitializer) : Super(ObjectInitializer)
 {
-       static ConstructorHelpers::FClassFinder<UUserWidget> AircraftButtonBPClass(TEXT("/Game/Widgets/BPAircraftButton"));
-       if (AircraftButtonBPClass.Succeeded())
-       {
-           AircraftButtonClass = AircraftButtonBPClass.Class;
-       }
+    static ConstructorHelpers::FClassFinder<UUserWidget> AircraftButtonBPClass(TEXT("/Game/Widgets/BPAircraftButton"));
+    if (AircraftButtonBPClass.Succeeded())
+    {
+        AircraftButtonClass = AircraftButtonBPClass.Class;
+    }
 }
 
-void UAircraftSelectionWidget::GetAllAircraft() {
-	if (!AircraftButtonClass || !AircraftScrollBox) return;
+void UAircraftSelectionWidget::GetAllAircraft() 
+{
+	if (!AircraftButtonClass || !AircraftScrollBox || AircraftDatabase->AllAircraft.Num() <= 0) return;
 
     AircraftScrollBox->ClearChildren();
+
+    AAircraftSelectionGamemode* Gamemode = Cast<AAircraftSelectionGamemode>(UGameplayStatics::GetGameMode(this));
+    if (!Gamemode) return;
+
+    AAircraftPlayerController* PC = Cast<AAircraftPlayerController>(UGameplayStatics::GetPlayerController(Gamemode, 0));
+    if (!PC) return; 
+
+    MenuManager = PC->MenuManager;
+    if (!MenuManager) return;
 
     for (UAircraftData* Data : AircraftDatabase->AllAircraft)
     {
         if (!Data) continue;
 
         UAircraftButtonWidget* Card = CreateWidget<UAircraftButtonWidget>(GetWorld(), AircraftButtonClass);
-        if (Card)
+        if (!Card) continue;
+
+        Card->Setup(Data, CurrentMoney, Owned);
+        Card->OnAircraftSelected.AddDynamic(this, &UAircraftSelectionWidget::HandleAircraftSelected);
+
+        if (Owned.Contains(Data->AircraftName)) 
         {
-            Card->Setup(Data);
-
-            Card->OnAircraftSelected.AddDynamic(this, &UAircraftSelectionWidget::HandleAircraftSelected);
-            AAircraftSelectionGamemode* Gamemode = Cast<AAircraftSelectionGamemode>(UGameplayStatics::GetGameMode(this));
-            if (Gamemode) {
-                Card->OnAircraftPicked.AddDynamic(Gamemode, &AAircraftSelectionGamemode::PickedAircraft);
-            }
-
-            AircraftScrollBox->AddChild(Card);
+            Card->OnAircraftPicked.AddDynamic(MenuManager, &UMenuManagerComponent::SetAircraft);
         }
-    }
-    if (!CurrentPreview) {
-        FActorSpawnParameters SpawnParams;
-        SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-        FVector PreviewLocation = FVector::ZeroVector;
-        FRotator PreviewRotation = FRotator::ZeroRotator;
-        if (AircraftDatabase->AllAircraft.Num() > 0) 
+        else 
         {
-            CurrentPreview = GetWorld()->SpawnActor<APawn>(AircraftDatabase->AllAircraft[0]->AircraftClass, PreviewLocation, PreviewRotation, SpawnParams);
+            Card->OnBuyCreate.AddDynamic(MenuManager, &UMenuManagerComponent::BuyAircraft);
         }
+
+        AircraftScrollBox->AddChild(Card);
     }
+    
+    Gamemode->SpawnInAircraft(AircraftDatabase->AllAircraft[0]->AircraftClass);
 }
 
-void UAircraftSelectionWidget::HandleAircraftSelected(TSubclassOf<APawn> Aircraft) {
-    if (CurrentPreview && CurrentPreview->GetClass() == Aircraft) return;
-    if (CurrentPreview && CurrentPreview->IsValidLowLevel()) 
-    {
-        CurrentPreview->Destroy();
-        CurrentPreview = nullptr;
-    }
+void UAircraftSelectionWidget::HandleAircraftSelected(TSubclassOf<APawn> Aircraft) 
+{
     if (!Aircraft) return;
-
-    FActorSpawnParameters SpawnParams;
-    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-    FVector PreviewLocation = FVector::ZeroVector;
-    FRotator PreviewRotation = FRotator::ZeroRotator;
-
-    CurrentPreview = GetWorld()->SpawnActor<APawn>(Aircraft, PreviewLocation, PreviewRotation, SpawnParams);
+    OnAircraftSelected.Broadcast(Aircraft);
 }

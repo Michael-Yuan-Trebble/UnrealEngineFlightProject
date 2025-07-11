@@ -2,8 +2,16 @@
 
 
 #include "Gamemodes/CurrentPlayerState.h"
-#include "Weapons/Missiles/R60.h"
 
-ACurrentPlayerState::ACurrentPlayerState() {
-	SelectedWeapons.Add(AR60::StaticClass());
+ACurrentPlayerState::ACurrentPlayerState() 
+{
+
+}
+
+void ACurrentPlayerState::SetCurrentAircraft(UAircraftData* Aircraft) {
+	SelectedAircraft = Aircraft;
+}
+
+void ACurrentPlayerState::AddWeapon(FName Pylon, TSubclassOf<ABaseWeapon> Weapon) {
+	SelectedWeapons.Add(Pylon, *Weapon);
 }
