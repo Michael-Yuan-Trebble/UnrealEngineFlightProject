@@ -7,35 +7,34 @@
 #include "Kismet/GameplayStatics.h"
 #include "AircraftPlayerController.h"
 #include "MenuManagerComponent.h"
+#include "UI/BuySelectionComponent.h"
 
-UBuyPopupWidget::UBuyPopupWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {
+UBuyPopupWidget::UBuyPopupWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) 
+{
 	static ConstructorHelpers::FClassFinder<UUserWidget> BuyButtonBPClass(TEXT("/Game/Widgets/BPBuyButton"));
-	if (BuyButtonBPClass.Succeeded()) {
+	if (BuyButtonBPClass.Succeeded()) 
+	{
 		BuyButtonClass = BuyButtonBPClass.Class;
 	}
 }
 
-void UBuyPopupWidget::Setup(UAircraftData* AircraftData) {
+void UBuyPopupWidget::Setup(UAircraftData* AircraftData)
+{
 	Aircraft = AircraftData;
 	
 	AAircraftSelectionGamemode* Gamemode = Cast<AAircraftSelectionGamemode>(UGameplayStatics::GetGameMode(this));
 	if (!Gamemode) return;
 
-	AAircraftPlayerController* PC = Cast<AAircraftPlayerController>(UGameplayStatics::GetPlayerController(Gamemode, 0));
-	if (!PC) return;
-
-	MenuManager = PC->MenuManager;
-	if (!MenuManager) return;
-
 	UBuyButton* Button = CreateWidget<UBuyButton>(GetWorld(), BuyButtonClass);
 	if (!Button) return;
 
 	Button->Setup(Aircraft->AircraftName, Aircraft->price);
-	Button->OnBuyPicked.AddDynamic(MenuManager, &UMenuManagerComponent::BuyAircraft);
-	Button->OnCancelPicked.AddDynamic(MenuManager, &UMenuManagerComponent::CancelBuy);
+	Button->OnBuyPicked.AddDynamic(BuyUI, &UBuySelectionComponent::BuyAircraft);
+	Button->OnCancelPicked.AddDynamic(BuyUI, &UBuySelectionComponent::CancelBuy);
 
-	if (CurrentCurrency < Aircraft->price) {
-		Button->SetIsEnabled(false);
+	if (CurrentCurrency < Aircraft->price) 
+	{
+		Button->TurnOffBuy();
 	}
 	SizeBox->AddChild(Button);
-}
+} 

@@ -11,6 +11,7 @@
 #include "BuyPopupWidget.generated.h"
 
 class UMenuManagerComponent;
+class UBuySelectionComponent;
 
 UCLASS()
 class MYPROJECT2_API UBuyPopupWidget : public UUserWidget
@@ -21,8 +22,6 @@ public:
 
 	UBuyPopupWidget(const FObjectInitializer& ObjectInitializer);
 
-	UTextBlock* Question;
-
 	UAircraftData* Aircraft;
 
 	UFUNCTION(BlueprintCallable)
@@ -30,7 +29,8 @@ public:
 
 	int CurrentCurrency;
 
-	UMenuManagerComponent* MenuManager;
+	UPROPERTY()
+	UBuySelectionComponent* BuyUI;
 
 protected:
 
@@ -39,4 +39,9 @@ protected:
 
 	UPROPERTY(meta=(BindWidget))
 	USizeBox* SizeBox;
+
+	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
+		Super::ReleaseSlateResources(bReleaseChildren);
+		BuyUI = nullptr;
+	}
 };

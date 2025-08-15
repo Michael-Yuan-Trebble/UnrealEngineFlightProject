@@ -5,11 +5,10 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "PylonLoadout.h"
+#include "Specials/BaseSpecial.h"
+#include "Structs and Data/AircraftStats.h"
 #include "AircraftData.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MYPROJECT2_API UAircraftData : public UPrimaryDataAsset
 {
@@ -35,4 +34,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText Description;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UBaseSpecial>> Specials;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAircraftStats* AircraftStat;
 };

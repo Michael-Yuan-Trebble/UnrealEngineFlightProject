@@ -6,6 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Animation/AnimInstance.h"
+#include "FlightComponent.h"
 #include "AircraftPlayerController.h"
 #include "Weapons/Missiles/BaseIRMissile.h"
 #include "Weapons/AircraftBullet.h"
@@ -25,13 +26,7 @@ ASu25Pawn::ASu25Pawn()
 		Bullet = BulletClass.Class;
 	}
 
-	ListedAcceleration = 2.f;
 	TakeoffSpeed = 10.f;
-	RollRate = 10.f;
-	ListedTurnRate = 0.3f;
-	ListedMaximumSpeed = 1000.f;
-	ListedThrust = 10.f;
-	ListedRudder = 0.1f;
 	springArmLength = 400.f;
 	NumPylons = 2;
 	isGearUp = false;
@@ -56,7 +51,6 @@ void ASu25Pawn::PossessedBy(AController* NewController)
 		BackWheelCoverBody = 90;
 		BackWheel = 90;
 	}
-	power  = (log10(20 / (0.07 * 1.225))) / (log10(ListedMaximumSpeed));
 }
 
 void ASu25Pawn::BeginPlay()
@@ -75,8 +69,8 @@ void ASu25Pawn::Tick(float DeltaSeconds)
 		InputThrust = Controlled->inputThrust;
 		InputYawValue = Controlled->inputYaw;
 		InputRollValue = Controlled->inputRoll;
-
-		if ((currentSpeed > TakeoffSpeed + 5) && !isGearUp)
+		
+		if ((FlightComponent->currentSpeed > TakeoffSpeed + 5) && !isGearUp)
 		{
 			WheelCalculation(DeltaSeconds);
 			if (FrontWheelCoverTop == 0) 
@@ -88,7 +82,7 @@ void ASu25Pawn::Tick(float DeltaSeconds)
 		AirbrakeCalculation(DeltaSeconds);
 		RudderYawCalculation(DeltaSeconds);
 		RollElevatorCalculation(DeltaSeconds);
-		if (currentSpeed < TakeoffSpeed)
+		if (FlightComponent->currentSpeed < TakeoffSpeed)
 		{
 			MiddleFlap.Roll = FMath::FInterpTo(MiddleFlap.Roll, 0.1, DeltaSeconds, 2.f);
 			MiddleFlap.Pitch = FMath::FInterpTo(MiddleFlap.Pitch, 20, DeltaSeconds, 2.f);

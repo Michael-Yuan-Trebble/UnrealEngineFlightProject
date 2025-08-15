@@ -14,4 +14,8 @@ class MYPROJECT2_API AAim9 : public ABaseIRMissile
 {
 	GENERATED_BODY()
 	
+public:
+	AAim9();
+
+	
 };

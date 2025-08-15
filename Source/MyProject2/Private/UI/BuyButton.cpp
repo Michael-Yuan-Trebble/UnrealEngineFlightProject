@@ -3,16 +3,25 @@
 
 #include "UI/BuyButton.h"
 
-void UBuyButton::NativeConstruct() {
+void UBuyButton::NativeConstruct() 
+{
 	Super::NativeConstruct();
 	if (!AircraftBuyButton) return;
 	AircraftBuyButton->OnClicked.AddDynamic(this, &UBuyButton::HandleButtonClick);
 	CancelBuyButton->OnClicked.AddDynamic(this, &UBuyButton::HandleCancelClick);
 }
 
-void UBuyButton::Setup(FName InName, int InCost) {
+void UBuyButton::Setup(FName InName, int InCost)
+{
 	Name = InName;
 	Cost = InCost;
+}
+
+void UBuyButton::TurnOffBuy() 
+{
+	AircraftBuyButton->SetIsEnabled(false);
+	FLinearColor Tint = FLinearColor::Gray;
+	AircraftBuyButton->SetBackgroundColor(Tint);
 }
 
 void UBuyButton::HandleButtonClick() 

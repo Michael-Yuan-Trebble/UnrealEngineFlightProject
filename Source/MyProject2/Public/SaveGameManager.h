@@ -27,6 +27,8 @@ public:
 
 	void AddMoney(int Amount);
 
+	void AddAircraftOwned(FName AircraftName);
+
 	TArray<FName> GetAircraftOwned();
 
 	int ReturnMoney();

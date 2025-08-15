@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "AircraftPlayerController.h"
 #include "MenuManagerComponent.h"
+#include "UI/WeaponSelectionComponent.h"
 #include "UI/WeaponButtonWidget.h"
 
 UWeaponSelectionWidget::UWeaponSelectionWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -24,15 +25,6 @@ void UWeaponSelectionWidget::GetAllAircraft()
 
     WeaponScrollBox->ClearChildren();
 
-    AAircraftSelectionGamemode* Gamemode = Cast<AAircraftSelectionGamemode>(UGameplayStatics::GetGameMode(this));
-    if (!Gamemode) return;
-
-    AAircraftPlayerController* PC = Cast<AAircraftPlayerController>(UGameplayStatics::GetPlayerController(Gamemode, 0));
-    if (!PC) return;
-
-    MenuManager = PC->MenuManager;
-    if (!MenuManager) return;
-
     CreateButtons(CurrentLoadout->AllowedMissiles);
     CreateButtons(CurrentLoadout->AllowedBombs);
     CreateButtons(CurrentLoadout->AllowedMisc);
@@ -45,17 +37,17 @@ void UWeaponSelectionWidget::CreateButtons(TArray<TSubclassOf<ABaseWeapon>> Arra
         if (!SingleWeapon) continue;
 
         UWeaponButtonWidget* Card = CreateWidget<UWeaponButtonWidget>(GetWorld(), WeaponButtonClass);
-
         if (!Card) return;
 
         Card->SetupWeapons(SingleWeapon);
         Card->OnWeaponSelected.AddDynamic(this, &UWeaponSelectionWidget::HandleWeaponSelected);
-        Card->OnWeaponPicked.AddDynamic(MenuManager, &UMenuManagerComponent::AddWeapon);
+        Card->OnWeaponPicked.AddDynamic(WeaponUI, &UWeaponSelectionComponent::AddWeapon);
         WeaponScrollBox->AddChild(Card);
-    }
+    } 
 }
 
 void UWeaponSelectionWidget::HandleWeaponSelected(TSubclassOf<ABaseWeapon> Weapon)
 {
-    if (Weapon) OnWeaponSelected.Broadcast(Weapon);
+    if (!Weapon) return; 
+    OnWeaponSelected.Broadcast(Weapon);
 }

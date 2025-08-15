@@ -30,6 +30,8 @@ public:
 	
 	void Setup(FName Name, int Cost);
 
+	void TurnOffBuy();
+
 protected:
 	
 	UFUNCTION()

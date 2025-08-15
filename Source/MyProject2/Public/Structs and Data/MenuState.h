@@ -8,5 +8,6 @@ UENUM(BlueprintType)
 enum class EMenuState : uint8 {
 	AircraftSelect,
 	WeaponSelect,
-	SpecialSelect
+	SpecialSelect,
+	BuyPopup
 };

@@ -5,7 +5,8 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/AssetManager.h"
 
-void UAircraftDatabase::LoadAllAircraftFromFolder(FString Path) {
+void UAircraftDatabase::LoadAllAircraftFromFolder(FString Path) 
+{
     AllAircraft.Empty();
 
     FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
@@ -15,8 +16,8 @@ void UAircraftDatabase::LoadAllAircraftFromFolder(FString Path) {
 
     TArray<FAssetData> Assets;
     AssetRegistryModule.Get().GetAssets(Filter, Assets);
-    for (const FAssetData& Data : Assets) {
-        print(text)
+    for (const FAssetData& Data : Assets) 
+    {
         UBlueprint* BlueprintAsset = Cast<UBlueprint>(Data.GetAsset());
         if (!BlueprintAsset)
         {
@@ -29,13 +30,10 @@ void UAircraftDatabase::LoadAllAircraftFromFolder(FString Path) {
             if (BlueprintAsset->GeneratedClass->IsChildOf(UAircraftData::StaticClass()))
             {
                 
-                // Now load the default object from the blueprint class
                 UObject* CDO = BlueprintAsset->GeneratedClass->GetDefaultObject();
                 UAircraftData* AircraftData = Cast<UAircraftData>(CDO);
-                if (AircraftData)
-                {
-                    AllAircraft.Add(AircraftData);
-                }
+                if (!AircraftData) continue;
+                AllAircraft.Add(AircraftData);
             }
         }
     }

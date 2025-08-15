@@ -5,42 +5,31 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "FlightComponent.h"
 #include "Animation/AnimInstance.h"
 #include "AircraftPlayerController.h"
 
 AT38Pawn::AT38Pawn() {
 	PrimaryActorTick.bCanEverTick = true;
 
-	ListedAcceleration = 10.f;
 	TakeoffSpeed = 30.f;
-	RollRate = 10.f;
-	ListedTurnRate = 0.3f;
-	ListedMaximumSpeed = 10000.f;
-	ListedThrust = 20.f;
-	ListedRudder = 0.1f;
 	springArmLength = 1800.f;
 	NumPylons = 4;
-	AOAReturnSpeed = 1.5;
 }
 
 void AT38Pawn::PossessedBy(AController* NewController) {
 	Super::PossessedBy(NewController);
 	Controlled = Cast<AAircraftPlayerController>(NewController);
 	AddPylons();
-	power = (log10(20 / (0.07 * 1.225))) / (log10(ListedMaximumSpeed));
-}
-
-void AT38Pawn::BeginPlay() {
-	Super::BeginPlay();
 }
 
 void AT38Pawn::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 	if (Controlled) {
-		InputPitchValue = Controlled->inputPitch;
-		InputThrust = Controlled->inputThrust;
-		InputYawValue = Controlled->inputYaw;
-		InputRollValue = Controlled->inputRoll;
+		InputPitchValue = FlightComponent->UserPitch;
+		InputThrust = FlightComponent->CurrentThrust;
+		InputYawValue = FlightComponent->UserYaw;
+		InputRollValue = FlightComponent->UserRoll;
 		RollCalculation(DeltaSeconds);
 		PitchCalculation(DeltaSeconds);
 	}

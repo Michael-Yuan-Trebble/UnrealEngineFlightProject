@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("WeaponSelect!"));
 #include "UI/WeaponButtonWidget.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "Weapons/BaseWeapon.h"
@@ -33,7 +34,6 @@ void UWeaponButtonWidget::HandleButtonClick()
 
 void UWeaponButtonWidget::HandleButtonHover() 
 {
-	if (!ButtonWeapon) return
-
+	if (!ButtonWeapon) return;
 	OnWeaponSelected.Broadcast(ButtonWeapon);
 }

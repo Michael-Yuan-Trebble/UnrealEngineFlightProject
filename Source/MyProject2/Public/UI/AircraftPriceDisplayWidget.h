@@ -8,9 +8,6 @@
 #include "Components/TextBlock.h"
 #include "AircraftPriceDisplayWidget.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MYPROJECT2_API UAircraftPriceDisplayWidget : public UUserWidget
 {

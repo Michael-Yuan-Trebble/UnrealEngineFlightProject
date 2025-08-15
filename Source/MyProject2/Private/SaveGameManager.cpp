@@ -12,29 +12,38 @@ USaveGameManager::USaveGameManager()
 void USaveGameManager::CreateNewSave() 
 {
 	SaveGameData = Cast<UPlayerSaveData>(UGameplayStatics::CreateSaveGameObject(UPlayerSaveData::StaticClass()));
-	if (SaveGameData) {
+	if (SaveGameData)
+	{
+		SaveGameData->Money = 0;
 		UE_LOG(LogTemp, Warning, TEXT("Created new save data"));
 	}
-	else {
+	else
+	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to create new save data"));
 	}
 }
 
-void USaveGameManager::SaveGame() {
+void USaveGameManager::SaveGame() 
+{
 	if (!SaveGameData) CreateNewSave();
 	const bool bSuccess = UGameplayStatics::SaveGameToSlot(SaveGameData, SlotName, UserIndex);
-	if (bSuccess) {
+	if (bSuccess)
+	{
 		UE_LOG(LogTemp, Warning, TEXT("Game saved successfully"));
 	}
-	else {
+	else
+	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to save game"));
 	}
 }
 
-void USaveGameManager::LoadGame() {
-	if (UGameplayStatics::DoesSaveGameExist(SlotName, UserIndex)) {
+void USaveGameManager::LoadGame() 
+{
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, UserIndex)) 
+	{
 		SaveGameData = Cast<UPlayerSaveData>(UGameplayStatics::LoadGameFromSlot(SlotName, UserIndex));
-		if (SaveGameData) {
+		if (SaveGameData)
+		{
 			UE_LOG(LogTemp, Warning, TEXT("Save loaded successfully"));
 		}
 		else {
@@ -49,17 +58,26 @@ void USaveGameManager::LoadGame() {
 	}
 }
 
-void USaveGameManager::AddMoney(int Amount) {
+void USaveGameManager::AddMoney(int Amount) 
+{
 	SaveGameData->Money += Amount;
-	if (SaveGameData->Money < 0) {
+	if (SaveGameData->Money < 0) 
+	{
 		SaveGameData->Money = 0;
 	}
 }
 
-TArray<FName> USaveGameManager::GetAircraftOwned() {
+void USaveGameManager::AddAircraftOwned(FName AircraftAdd) 
+{
+	SaveGameData->AircraftOwned.Add(AircraftAdd);
+}
+
+TArray<FName> USaveGameManager::GetAircraftOwned() 
+{
 	return SaveGameData->AircraftOwned;
 }
 
-int USaveGameManager::ReturnMoney() {
+int USaveGameManager::ReturnMoney()
+{
 	return SaveGameData->Money;
 }

@@ -6,9 +6,6 @@
 #include "Engine/GameInstance.h"
 #include "PlayerGameInstance.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MYPROJECT2_API UPlayerGameInstance : public UGameInstance
 {

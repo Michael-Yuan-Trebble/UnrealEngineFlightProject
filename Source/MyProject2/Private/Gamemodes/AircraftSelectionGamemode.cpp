@@ -11,6 +11,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Structs and Data/MenuState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Aircraft/BaseAircraft.h"
+
+FActorSpawnParameters SpawnParams;
 
 AAircraftSelectionGamemode::AAircraftSelectionGamemode() 
 {
@@ -23,7 +26,6 @@ void AAircraftSelectionGamemode::BeginPlay()
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
 	if (!PC)  return;
 
-	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	ASpectatorPawn* Spectator = GetWorld()->SpawnActor<ASpectatorPawn>(ASpectatorPawn::StaticClass(), FVector::ZeroVector,FRotator::ZeroRotator,SpawnParams);
 
@@ -37,7 +39,7 @@ void AAircraftSelectionGamemode::BeginPlay()
 	APC->SetControlMode(EControlMode::Menu);
 	GetWorld()->GetTimerManager().SetTimerForNextTick([this]() 
 	{
-		APC->MenuManager->AddDatabase();
+
 		APC->MenuManager->ChooseAircraftUI();
 	});
 }
@@ -52,22 +54,14 @@ void AAircraftSelectionGamemode::SpawnInAircraft(TSubclassOf<APawn> SpawnIn)
 		AircraftDisplayed = nullptr;
 	}
 
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
 	FVector PreviewLocation = FVector::ZeroVector;
 	FRotator PreviewRotation = FRotator::ZeroRotator;
 	AircraftDisplayed = GetWorld()->SpawnActor<APawn>(SpawnIn, PreviewLocation, PreviewRotation, SpawnParams);
 }
 
-void AAircraftSelectionGamemode::SpawnInWeapon(TSubclassOf<ABaseWeapon> Weapon, FName Pylon) {
-	if (!AircraftDisplayed || (WeaponDisplayed && WeaponDisplayed->GetClass() == Weapon)) return;
-
-	if (WeaponDisplayed) 
-	{
-		WeaponDisplayed->Destroy();
-		WeaponDisplayed = nullptr;
-	}
+void AAircraftSelectionGamemode::SpawnInWeapon(TSubclassOf<ABaseWeapon> Weapon, FName Pylon) 
+{
+	if (!AircraftDisplayed || !Weapon) return;
 
 	ABaseAircraft* BaseAircraft = Cast<ABaseAircraft>(AircraftDisplayed);
 	if (!BaseAircraft) return;
@@ -75,12 +69,42 @@ void AAircraftSelectionGamemode::SpawnInWeapon(TSubclassOf<ABaseWeapon> Weapon, 
 	USkeletalMeshComponent* Mesh = BaseAircraft->Airframe;
 
 	FTransform SocketTransform = Mesh->GetSocketTransform(Pylon);
+	AActor* WeaponDisplayed;
+	if (AActor** WeaponPtr = EquippedWeapons.Find(Pylon)) 
+	{
+		WeaponDisplayed = *WeaponPtr;
+		if (WeaponDisplayed && WeaponDisplayed->IsValidLowLevel())
+		{
+			WeaponDisplayed->Destroy();
+			WeaponDisplayed = nullptr;
+		}
 
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		WeaponDisplayed = GetWorld()->SpawnActor<AActor>(Weapon, SocketTransform, SpawnParams);
+		WeaponDisplayed->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, Pylon);
+		EquippedWeapons[Pylon] = WeaponDisplayed;
+	}
+	else 
+	{
+		WeaponDisplayed = GetWorld()->SpawnActor<AActor>(Weapon, SocketTransform, SpawnParams);
+		WeaponDisplayed->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, Pylon);
+		EquippedWeapons.Add(Pylon, WeaponDisplayed);
+	}
+}
 
-	WeaponDisplayed = GetWorld()->SpawnActor<AActor>(Weapon, SocketTransform, SpawnParams);
-	if (!WeaponDisplayed) return;
+void AAircraftSelectionGamemode::EndSelection(AAircraftPlayerController* Controller)
+{
+	if (!ReadyPlayers.Contains(Controller)) 
+	{
+		ReadyPlayers.Add(Controller);
+		TryAdvanceToNextStage();
+	}
+}
 
-	WeaponDisplayed->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, Pylon);
+//Try to make it so it advances to a "Buffer" screen
+void AAircraftSelectionGamemode::TryAdvanceToNextStage() 
+{
+	if (ReadyPlayers.Num() >= PlayersRequired) 
+	{
+		UGameplayStatics::OpenLevel(this, MapSelected);
+	}
 }

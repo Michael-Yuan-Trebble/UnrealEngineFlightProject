@@ -21,6 +21,8 @@ class ASu25Pawn;
 class UInputMappingContext;
 class UEnhancedInputComponent;
 class UMenuManagerComponent;
+class UFlightComponent;
+class UWeaponSystemComponent;
 
 UCLASS()
 class MYPROJECT2_API AAircraftPlayerController : public APlayerController
@@ -96,16 +98,15 @@ public:
 
 	EControlMode CurrentMode = EControlMode::Null;
 
-	UPROPERTY()
-	EMenuState CurrentMenuState;
-
 	TArray<EMenuState> MenuHistory;
 
 	UMenuManagerComponent* MenuManager;
 
-	void ManageMenuSetting(EMenuState NewState);
+	UFlightComponent* FlightComp;
 
-	UUserWidget* CurrentWidget;
+	UWeaponSystemComponent* WeaponComp;
+
+	void ManageMenuSetting(EMenuState NewState);
 
 	//UVariables
 
@@ -142,8 +143,6 @@ public:
 	const TArray<FDetectedAircraftInfo>& GetDetectedTargets() const;
 
 	void SetControlMode(EControlMode NewMode);
-
-	void SetWidget(UUserWidget* Widget);
 
 private:
 

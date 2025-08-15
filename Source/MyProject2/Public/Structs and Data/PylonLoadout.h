@@ -6,9 +6,6 @@
 #include "Weapons/BaseWeapon.h"
 #include "PylonLoadout.generated.h"
 
-/**
- * 
- */
 USTRUCT(BlueprintType)
 struct MYPROJECT2_API FPylonLoadout
 {
@@ -18,16 +15,16 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FName PylonName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TSubclassOf<ABaseWeapon>> AllowedMissiles;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TSubclassOf<ABaseWeapon>> AllowedBombs;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TSubclassOf<ABaseWeapon>> AllowedMisc;
 
-	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 MaxWeapons;
 
 	FPylonLoadout()

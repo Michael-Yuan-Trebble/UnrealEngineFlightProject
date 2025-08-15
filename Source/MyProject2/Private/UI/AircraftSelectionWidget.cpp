@@ -6,6 +6,7 @@
 #include "Structs and Data/AircraftDatabase.h"
 #include "AircraftPlayerController.h"
 #include "MenuManagerComponent.h"
+#include "UI/AircraftSelectionComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "UI/AircraftButtonWidget.h"
@@ -20,6 +21,14 @@ UAircraftSelectionWidget::UAircraftSelectionWidget(const FObjectInitializer & Ob
     }
 }
 
+void UAircraftSelectionWidget::Setup(UAircraftDatabase* Database, TArray<FName> InOwn, UMenuManagerComponent* InMenu, UAircraftSelectionComponent* InSelect)
+{
+    Owned = InOwn;
+    AircraftDatabase = Database;
+    MenuManager = InMenu;
+    AircraftUI = InSelect;
+}
+
 void UAircraftSelectionWidget::GetAllAircraft() 
 {
 	if (!AircraftButtonClass || !AircraftScrollBox || AircraftDatabase->AllAircraft.Num() <= 0) return;
@@ -29,10 +38,6 @@ void UAircraftSelectionWidget::GetAllAircraft()
     AAircraftSelectionGamemode* Gamemode = Cast<AAircraftSelectionGamemode>(UGameplayStatics::GetGameMode(this));
     if (!Gamemode) return;
 
-    AAircraftPlayerController* PC = Cast<AAircraftPlayerController>(UGameplayStatics::GetPlayerController(Gamemode, 0));
-    if (!PC) return; 
-
-    MenuManager = PC->MenuManager;
     if (!MenuManager) return;
 
     for (UAircraftData* Data : AircraftDatabase->AllAircraft)
@@ -42,26 +47,38 @@ void UAircraftSelectionWidget::GetAllAircraft()
         UAircraftButtonWidget* Card = CreateWidget<UAircraftButtonWidget>(GetWorld(), AircraftButtonClass);
         if (!Card) continue;
 
-        Card->Setup(Data, CurrentMoney, Owned);
+        Card->Setup(Data, Owned);
         Card->OnAircraftSelected.AddDynamic(this, &UAircraftSelectionWidget::HandleAircraftSelected);
 
         if (Owned.Contains(Data->AircraftName)) 
         {
-            Card->OnAircraftPicked.AddDynamic(MenuManager, &UMenuManagerComponent::SetAircraft);
+            Card->OnAircraftPicked.AddDynamic(AircraftUI, &UAircraftSelectionComponent::SetAircraft);
         }
         else 
         {
-            Card->OnBuyCreate.AddDynamic(MenuManager, &UMenuManagerComponent::BuyAircraft);
+            Card->OnBuyCreate.AddDynamic(MenuManager, &UMenuManagerComponent::SpawnBuy);
         }
 
         AircraftScrollBox->AddChild(Card);
+        ButtonArray.Add(Data->AircraftName, Card);
     }
-    
     Gamemode->SpawnInAircraft(AircraftDatabase->AllAircraft[0]->AircraftClass);
 }
 
-void UAircraftSelectionWidget::HandleAircraftSelected(TSubclassOf<APawn> Aircraft) 
+void UAircraftSelectionWidget::UpdateAircraft(FName AircraftChange) 
+{
+    if (ButtonArray.Contains(AircraftChange)) 
+    {
+        UAircraftButtonWidget* Card = *ButtonArray.Find(AircraftChange);
+
+        Card->AdjustButtons();
+        Card->OnBuyCreate.RemoveDynamic(MenuManager, &UMenuManagerComponent::SpawnBuy);
+        Card->OnAircraftPicked.AddDynamic(AircraftUI, &UAircraftSelectionComponent::SetAircraft);
+    }
+}
+
+void UAircraftSelectionWidget::HandleAircraftSelected(UAircraftData* Aircraft)
 {
     if (!Aircraft) return;
-    OnAircraftSelected.Broadcast(Aircraft);
+    OnWidgetSelected.Broadcast(Aircraft);
 }

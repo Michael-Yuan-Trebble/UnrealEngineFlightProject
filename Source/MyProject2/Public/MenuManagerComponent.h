@@ -5,16 +5,19 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Structs and Data/MenuState.h"
-#include "UI/AircraftSelectionWidget.h"
-#include "UI/WeaponSelectionWidget.h"
-#include "UI/BuyPopupWidget.h"
-#include "Structs and Data/AircraftDatabase.h"
+#include "Structs and Data/AircraftData.h"
+#include "Specials/BaseSpecial.h"
+#include "Blueprint/UserWidget.h"
 #include "MenuManagerComponent.generated.h"
 
 class AAircraftPlayerController;
 class ACurrentPlayerState;
 class AAircraftSelectionGamemode;
 class UPlayerGameInstance;
+class UAircraftSelectionComponent;
+class UWeaponSelectionComponent;
+class UBuySelectionComponent;
+class USpecialSelectionComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UMenuManagerComponent : public UActorComponent
@@ -26,53 +29,42 @@ public:
 
 	void InitializePC(AAircraftPlayerController* InPC, ACurrentPlayerState* InPS);
 
-	void GoBack();
+	void GoBack(EMenuState Current);
 
 	void GetWidgetClassForState(EMenuState State);
 
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> MainMenuWidgetClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAircraftSelectionWidget* AircraftSelectUI;
-
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> WeaponSelectClass;
-
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	UWeaponSelectionWidget* WeaponSelectUI;
-
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> BuyPopupClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBuyPopupWidget* BuyWidget;
-
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> GreyOutClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UUserWidget* GreyOut;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBuyPopupWidget* BuyPopupUI;
-
 	UPROPERTY()
-	UAircraftDatabase* AircraftDatabase;
-
 	AAircraftPlayerController* PC;
 
+	UPROPERTY()
 	ACurrentPlayerState* PS;
 
+	UPROPERTY()
 	AAircraftSelectionGamemode* GM;
 
+	UPROPERTY()
 	UPlayerGameInstance* GameInstance;
-
-	TMap<FName, TSubclassOf<ABaseWeapon>> WeaponSelection;
 
 	UAircraftData* SelectedAircraft;
 
-	int32 CurrentPylonIndex;
+	UAircraftData* TempAircraft;
+
+	TSubclassOf<UBaseSpecial> SelectedSpecial;
+
+	UPROPERTY()
+	UUserWidget* CurrentWidget;
+
+	UPROPERTY()
+	UAircraftSelectionComponent* AircraftSelectionUI;
+
+	UPROPERTY()
+	UWeaponSelectionComponent* WeaponSelectionUI;
+
+	UPROPERTY()
+	UBuySelectionComponent* BuySelectionUI;
+
+	UPROPERTY()
+	USpecialSelectionComponent* SpecialSelectionUI;
 
 	void ChooseAircraftUI();
 
@@ -80,46 +72,8 @@ public:
 
 	void ChooseSpecialUI();
 
-	UFUNCTION()
-	void SetAircraft(UAircraftData* AircraftData);
+	void EndSelection();
 
 	UFUNCTION()
-	void AddWeapon(TSubclassOf<ABaseWeapon> Weapon);
-
-	UFUNCTION()
-	void SpawnBuy();
-
-	UFUNCTION()
-	void BuyAircraft(FName Name, int Cost);
-
-	UFUNCTION()
-	void CancelBuy();
-
-	void AddDatabase();
-
-
-protected:
-	virtual void BeginPlay() override;
-
-	UFUNCTION()
-	void HandleAircraftPicked(TSubclassOf<APawn> Aircraft);
-
-	UFUNCTION()
-	void HandleWeaponPicked(TSubclassOf<ABaseWeapon> Weapon);
-
-private:	
-
-	void AircraftSelectionMenu();
-
-	void WeaponSelectionMenu();
-
-	void SpecialSelectionMenu();
-
-	void CheckWeaponLoop();
-
-	UUserWidget* CurrentWidget;
-
-	TArray<EMenuState> MenuHistory;
-
-	EMenuState CurrentState;
+	void SpawnBuy(UAircraftData* AircraftData, int Cost);
 };

@@ -1,0 +1,39 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Engine/DataAsset.h"
+#include "AircraftStats.generated.h"
+
+UCLASS()
+class MYPROJECT2_API UAircraftStats : public UDataAsset
+{
+	GENERATED_BODY()
+	
+public:
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	float MaxSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Acceleration;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TurnRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AOARecoverySpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Thrust;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RudderRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RollRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SpringArmLength;
+
+};

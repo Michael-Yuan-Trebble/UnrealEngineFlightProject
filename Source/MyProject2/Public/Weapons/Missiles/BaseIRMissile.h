@@ -20,18 +20,26 @@ public:
 
 	bool isAir;
 
-	virtual void FireStatic(float launchSpeed);
+	AActor* Tracking;
 
-	virtual void FireTracking(float launchSpeed, AActor* Target);
+	float missileAcceleration;
+
+	float missileMaxSpeed;
+
+	float turnRate;
+
+	void FireStatic(float launchSpeed);
+
+	void FireTracking(float launchSpeed, AActor* Target);
+
+	void LaunchSequence();
+
+	float ReturnCooldownTime();
 
 protected:
 
 	virtual void BeginPlay() override;
 
-public:	
-
 	virtual void Tick(float DeltaTime) override;
-
-	float ReturnCooldownTime();
 
 };

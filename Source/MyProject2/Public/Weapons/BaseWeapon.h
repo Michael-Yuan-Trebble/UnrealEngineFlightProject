@@ -15,7 +15,7 @@ public:
 	
 	ABaseWeapon();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* WeaponMesh;
 
 	FName WeaponName;
@@ -30,8 +30,6 @@ protected:
 	
 	virtual void BeginPlay() override;
 
-public:	
-	
 	virtual void Tick(float DeltaTime) override;
 
 };

@@ -11,7 +11,7 @@
 class UAircraftSelectionWidget;
 class ACurrentPlayerState;
 class AAircraftPlayerController;
-class AMenuManagerComponent;
+class UMenuManagerComponent;
 
 UCLASS()
 class MYPROJECT2_API AAircraftSelectionGamemode : public AGameModeBase
@@ -25,21 +25,34 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	UAircraftData* ChosenAircraft;
 
+	UPROPERTY()
 	AAircraftPlayerController* APC;
 
+	UPROPERTY()
 	ACurrentPlayerState* PS;
-
-	AMenuManagerComponent* MenuManager;
-
-	virtual void BeginPlay() override;
+	
+	UPROPERTY()
+	UMenuManagerComponent* MenuManager;
 
 	void SpawnInAircraft(TSubclassOf<APawn> SpawnIn);
-
-	AActor* WeaponDisplayed;
 
 	APawn* AircraftDisplayed;
 
 	void SpawnInWeapon(TSubclassOf<ABaseWeapon> Weapon, FName Pylon);
 
-	TMap<FName, TSubclassOf<AActor>> EquippedWeapons;
+	UPROPERTY()
+	FName MapSelected;
+
+	TMap<FName, AActor*> EquippedWeapons;
+
+	void EndSelection(AAircraftPlayerController* Controller);
+
+	void TryAdvanceToNextStage();
+
+	int PlayersRequired = 1;
+
+	TSet<AAircraftPlayerController*> ReadyPlayers;
+
+protected:
+	virtual void BeginPlay() override;
 };

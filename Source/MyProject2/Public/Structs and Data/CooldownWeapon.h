@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Weapons/Missiles/BaseIRMissile.h"
+#include "Weapons/BaseWeapon.h"
 #include "CooldownWeapon.generated.h"
 
 USTRUCT(BlueprintType)
@@ -15,7 +15,7 @@ public:
 	FCooldownWeapon();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ABaseIRMissile* Current;
+	ABaseWeapon* Current;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanFire;

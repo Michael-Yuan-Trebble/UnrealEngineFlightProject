@@ -9,6 +9,7 @@
 
 class UWeaponButtonWidget;
 class UScrollBox;
+class UWeaponSelectionComponent;
 class UMenuManagerComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponSelectedSignature, TSubclassOf<ABaseWeapon>, SelectedWeapon);
@@ -26,10 +27,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FWeaponSelectedSignature OnWeaponSelected;
 
-	UFUNCTION(BlueprintCallable)
 	void GetAllAircraft();
-
-	UMenuManagerComponent* MenuManager;
+	
+	UPROPERTY()
+	UWeaponSelectionComponent* WeaponUI;
 
 protected:
 	UFUNCTION()
@@ -38,11 +39,14 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> WeaponButtonClass;
 
-	UPROPERTY()
-	AActor* CurrentPreview;
-
 	UPROPERTY(meta=(BindWidget))
 	UScrollBox* WeaponScrollBox;
+
+	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
+		Super::ReleaseSlateResources(bReleaseChildren);
+		WeaponUI = nullptr;
+		WeaponScrollBox = nullptr;
+	}
 
 private:
 	void CreateButtons(TArray<TSubclassOf<ABaseWeapon>> Array);

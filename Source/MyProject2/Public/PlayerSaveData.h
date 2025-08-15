@@ -6,9 +6,6 @@
 #include "GameFramework/SaveGame.h"
 #include "PlayerSaveData.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MYPROJECT2_API UPlayerSaveData : public USaveGame
 {
