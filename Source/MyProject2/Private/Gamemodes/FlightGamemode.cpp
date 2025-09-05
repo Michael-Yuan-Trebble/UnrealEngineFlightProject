@@ -11,6 +11,8 @@
 #include "UI/PlayerHUD.h"
 #include "Aircraft/AI/EnemyAircraftAI.h"
 #include "EngineUtils.h"
+#include "AircraftRegistry.h"
+#include "Weapons/Missiles/Aim9.h"
 #include "Aircraft/Player/T38Pawn.h"
 
 AFlightGamemode::AFlightGamemode() 
@@ -26,11 +28,20 @@ AFlightGamemode::AFlightGamemode()
 	{
 		AIAircraftClass = F16AIBPClass.Class;
 	}
+	static ConstructorHelpers::FClassFinder<AAim9> Aim9BPClass(TEXT("/Game/Weapons/Aim-9L/BPAim-9"));
+	if (Aim9BPClass.Succeeded()) {
+		Aim9 = Aim9BPClass.Class;
+	}
 }
 
 void AFlightGamemode::BeginPlay() 
 {
 	Super::BeginPlay();
+	FActorSpawnParameters Params;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	if (!AAircraftRegistry::Get(GetWorld())) {
+		GetWorld()->SpawnActor<AAircraftRegistry>(AAircraftRegistry::StaticClass(), FVector::ZeroVector,FRotator::ZeroRotator,Params);
+	}
 
 	PC = Cast<AAircraftPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	if (!PC) return;
@@ -50,7 +61,7 @@ void AFlightGamemode::BeginPlay()
 	{ 
 		PC->SetControlMode(EControlMode::Aircraft);
 	}
-	SpawnAIAircraft();
+	//SpawnAIAircraft();
 }
 
 void AFlightGamemode::SpawnAIAircraft() 
@@ -102,11 +113,19 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 	}
 
 	if (!PlayerStart) return;
-	PlayerSpawnedIn = GetWorld()->SpawnActor<ABaseAircraft>(AircraftSelected->AircraftClass, PlayerStart->GetActorTransform());
+	PlayerSpawnedIn = GetWorld()->SpawnActor<APlayerAircraft>(AircraftSelected->AircraftClass, PlayerStart->GetActorTransform());
 
 	PlayerSpawnedIn->SetStats(AircraftSelected->AircraftStat);
 
 	ABaseAircraft* SpawnedIn = PlayerSpawnedIn;
+	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
+	for (int i = 0; i < 4; i++) {
+		FString PylonName = FString::Printf(TEXT("Pylon%d"), i);
+		FName Pylon(*PylonName);
+		Loadout.Add(Pylon, Aim9);
+	}
+
+	PlayerSpawnedIn->SetWeapons(Loadout);
 
 	GetWorld()->GetTimerManager().SetTimerForNextTick([this, SpawnedIn]()
 		{

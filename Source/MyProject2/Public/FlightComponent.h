@@ -41,6 +41,12 @@ public:
 
 	float CurrentThrust;
 
+	float targetSpeed;
+
+	float Acceleration;
+	
+	float DownPitch;
+
 	FVector Velocity;
 
 	void ApplySpeed(float ThrottlePercentage, float DeltaSeconds);
@@ -74,4 +80,6 @@ public:
 	void AdjustSpringArm(float DeltaSeconds, float ThrottlePercentage);
 
 	float DragAOA(float AOA);
+
+	void RollAOA(float DeltaSeconds);
 };

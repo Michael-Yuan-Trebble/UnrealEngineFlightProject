@@ -18,7 +18,13 @@ public:
 
 	float range;
 
+	bool isDropPhase;
+
+	float DropTimer = 0;
+
 	bool isAir;
+
+	FVector CurrentDirection;
 
 	AActor* Tracking;
 
@@ -26,13 +32,11 @@ public:
 
 	float missileMaxSpeed;
 
+	float missileVelocity;
+
 	float turnRate;
 
-	void FireStatic(float launchSpeed);
-
-	void FireTracking(float launchSpeed, AActor* Target);
-
-	void LaunchSequence();
+	void LaunchSequence(float Speed);
 
 	float ReturnCooldownTime();
 
@@ -41,5 +45,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void FireTracking(float launchSpeed, AActor* Target);
+
+	virtual void FireStatic(float launchSpeed);
 
 };

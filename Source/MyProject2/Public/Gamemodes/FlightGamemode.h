@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Aircraft/BaseAircraft.h"
+#include "Aircraft/Player/PlayerAircraft.h"
 #include "Aircraft/AI/F16AI.h"
 #include "Structs and Data/AircraftDatabase.h"
 #include "Structs and Data/AircraftData.h"
@@ -13,6 +13,8 @@
 class AT38Pawn;
 class AAircraftPlayerController;
 class ACurrentPlayerState;
+class AAircraftRegistry;
+class AAim9;
 
 UCLASS()
 class MYPROJECT2_API AFlightGamemode : public AGameModeBase
@@ -36,7 +38,7 @@ protected:
 	UAircraftDatabase* Database;
 
 	UPROPERTY()
-	ABaseAircraft* PlayerSpawnedIn;
+	APlayerAircraft* PlayerSpawnedIn;
 
 	UPROPERTY()
 	AAircraftPlayerController* PC;
@@ -48,6 +50,9 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSubclassOf<AT38Pawn> Player;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	TSubclassOf<AAim9> Aim9;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AF16AI> AIAircraftClass;

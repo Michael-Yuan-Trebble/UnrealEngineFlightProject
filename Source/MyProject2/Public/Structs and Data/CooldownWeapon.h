@@ -7,15 +7,17 @@
 #include "CooldownWeapon.generated.h"
 
 USTRUCT(BlueprintType)
-struct FCooldownWeapon 
+struct FCooldownWeapon
 {
 	GENERATED_BODY()
-public:
 
 	FCooldownWeapon();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ABaseWeapon* Current;
+	TSubclassOf <ABaseWeapon> WeaponClass;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	ABaseWeapon* WeaponInstance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanFire;

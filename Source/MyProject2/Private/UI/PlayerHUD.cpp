@@ -31,6 +31,7 @@ void APlayerHUD::Tick(float DeltaSeconds)
 
 void APlayerHUD::UpdateTargetWidgets() 
 {
+	/*
 	const TArray<FDetectedAircraftInfo>& Targets = PC->GetDetectedTargets();
 	FVector2D ViewportSize;
 	GEngine->GameViewport->GetViewportSize(ViewportSize);
@@ -84,5 +85,5 @@ void APlayerHUD::UpdateTargetWidgets()
 				ActiveWidgets[Target]->SetVisibility(ESlateVisibility::Hidden);
 			}
 		}
-	}
+	}*/
 }

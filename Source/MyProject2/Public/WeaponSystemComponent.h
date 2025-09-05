@@ -10,7 +10,6 @@
 
 class ABaseAircraft;
 
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UWeaponSystemComponent : public UActorComponent
 {
@@ -25,25 +24,27 @@ public:
 
 	void FireBullets();
 
-	void ReEquip(FCooldownWeapon* Replace);
+	void ReEquip(FCooldownWeapon& Replace);
 
-	void EquipWeapons(TArray<TSubclassOf<ABaseWeapon>> WeaponClasses);
+	void EquipWeapons();
 
-	void FireWeaponNotSelected(int WeaponIndex);
-
-	void FireWeaponSelected(int WeaponIndex, AActor* Target);
+	void FireWeaponSelected(int WeaponIndex, AActor* Target, float Speed);
 
 	void SelectWeapon(int WeaponIndex);
+
+	bool bLocked;
 
 	ABaseAircraft* Controlled;
 
 	UAircraftStats* AirStats;
 
-	TArray<FName> PylonSockets;
+	ABaseWeapon* CurrentWeapon;
 
-	ABaseWeapon CurrentWeapon;
+	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
 
 	TArray<FCooldownWeapon> AvailableWeapons;
+
+	TArray<FCooldownWeapon> Cooldown;
 
 	TSubclassOf<AActor> Bullet;
 };

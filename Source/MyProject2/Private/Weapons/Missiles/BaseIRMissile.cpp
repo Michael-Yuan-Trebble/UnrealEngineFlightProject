@@ -10,6 +10,7 @@ ABaseIRMissile::ABaseIRMissile()
 	timeDet = 5;
 	timeTilDelt = 0;
 	isAir = false;
+	isDropPhase = false;
 }
 
 void ABaseIRMissile::BeginPlay()
@@ -22,6 +23,28 @@ void ABaseIRMissile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (!isAir) return;
+
+	if (isDropPhase) {
+		DropTimer += DeltaTime;
+
+		FVector DropMove = -GetOwner()->GetActorUpVector() * 600.f * DeltaTime;
+		FVector Forward = GetOwner()->GetActorForwardVector() * missileVelocity * DeltaTime;
+		FVector TotalMove = DropMove + Forward;
+		
+		AddActorWorldOffset(TotalMove, true);
+		if (DropTimer >= 0.1) {
+			isDropPhase = false;
+
+		}
+		return;
+	}
+	missileVelocity += missileAcceleration * DeltaTime;
+	missileVelocity = FMath::Clamp(missileVelocity, 0.f, missileMaxSpeed);
+
+	// move forward in world space
+	FVector DeltaMove = GetActorForwardVector() * missileVelocity * DeltaTime;
+	AddActorWorldOffset(DeltaMove, true);
+
 	timeTilDelt += DeltaTime;
 
 	if (!(timeTilDelt >= timeDet)) return;
@@ -30,22 +53,22 @@ void ABaseIRMissile::Tick(float DeltaTime)
 
 void ABaseIRMissile::FireStatic(float launchSpeed)
 {
-	LaunchSequence();
+	LaunchSequence(launchSpeed);
 }
 
 void ABaseIRMissile::FireTracking(float launchSpeed, AActor* Target) 
 {
 	Tracking = Target;
-	LaunchSequence();
+	LaunchSequence(launchSpeed);
 }
 
-void ABaseIRMissile::LaunchSequence() {
-	/*
-	
+void ABaseIRMissile::LaunchSequence(float Speed) {
 		if (GetOwner())
 	{
 		FVector AircraftForward = GetOwner()->GetActorForwardVector();
 		FVector AircraftUp = GetOwner()->GetActorUpVector();
+
+		CurrentDirection = (AircraftForward - AircraftUp * 0.2).GetSafeNormal();
 
 		FVector LaunchDirection = AircraftForward + (AircraftUp * 0.5f);
 		LaunchDirection.Normalize();
@@ -55,14 +78,13 @@ void ABaseIRMissile::LaunchSequence() {
 		WeaponMesh->SetCollisionObjectType(ECC_PhysicsBody);
 		WeaponMesh->SetCollisionResponseToAllChannels(ECR_Block);
 		WeaponMesh->SetCollisionProfileName(TEXT("PhysicsActor"));
-		WeaponMesh->SetSimulatePhysics(true);
-		WeaponMesh->SetEnableGravity(false);
+		//WeaponMesh->SetSimulatePhysics(true);
+		//WeaponMesh->SetEnableGravity(false);
 		//Missile->AddImpulse(AircraftUp * -20.f, NAME_None, true);
-		missileVelocity = currentSpeed;
+		missileVelocity = Speed;
 		isAir = true;
+		isDropPhase = true;
 	}
-	
-	*/
 }
 
 float ABaseIRMissile::ReturnCooldownTime() 

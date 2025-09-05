@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "BaseWeapon.generated.h"
 
 UCLASS()
@@ -18,6 +20,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* WeaponMesh;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UBoxComponent* Collision;
+
 	FName WeaponName;
 
 	float cooldownTime;
@@ -25,6 +30,10 @@ public:
 	float timeTilDelt;
 
 	float timeDet;
+
+	virtual void FireStatic(float speed);
+
+	virtual void FireTracking(float speed, AActor* Target);
 
 protected:
 	

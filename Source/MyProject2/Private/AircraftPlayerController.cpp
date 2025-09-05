@@ -11,12 +11,13 @@
 #include "cmath"
 #include "MenuManagerComponent.h"
 #include "WeaponSystemComponent.h"
+#include "RadarComponent.h"
 #include "Gamemodes/CurrentPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Aircraft/AI/F16AI.h"
 #include "UI/PlayerHUD.h"
 #include "TimerManager.h"
-#include "Aircraft/BaseAircraft.h"
+#include "Aircraft/Player/PlayerAircraft.h"
 
 AAircraftPlayerController::AAircraftPlayerController() 
 {
@@ -47,8 +48,9 @@ void AAircraftPlayerController::BeginPlay()
 
 void AAircraftPlayerController::OnPossess(APawn* InPawn) 
 {
+	Super::OnPossess(InPawn);
 	if (!InPawn) return;
-	Controlled = Cast<ABaseAircraft>(InPawn);
+	Controlled = Cast<APlayerAircraft>(InPawn);
 	if (!Controlled) return;
 
 	SpringArm = Controlled->GetSpringArm();
@@ -241,108 +243,6 @@ void AAircraftPlayerController::ManageMenuSetting(EMenuState NewMenu)
 	MenuManager->GetWidgetClassForState(NewMenu);
 }
 
-void AAircraftPlayerController::ScanTargets() 
-{
-	Detected.Empty();
-	TArray<AActor*> AllAircraft;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APawn::StaticClass(), AllAircraft);
-
-	for (AActor* Target : AllAircraft)
-	{
-		APawn* RegisteredPawn = Cast<APawn>(Target);
-		if (RegisteredPawn && RegisteredPawn != Controlled && !RegisteredPawn->IsA(ASpectatorPawn::StaticClass()))
-		{
-			FDetectedAircraftInfo TempInfo;
-			TempInfo.Location = RegisteredPawn->GetActorLocation();
-			TempInfo.Rotation = RegisteredPawn->GetActorRotation();
-			TempInfo.threatLevel = TempInfo.CalculateThreat();
-
-			if (TempInfo.threatLevel > 0)
-			{
-				TempInfo.CurrentPawn = RegisteredPawn;
-				Detected.Add(TempInfo);
-			}
-		}
-	}
-}
-
-const TArray<FDetectedAircraftInfo>& AAircraftPlayerController::GetDetectedTargets() const
-{
-	return Detected;
-}
-
-void AAircraftPlayerController::CycleTarget() 
-{
-	FVector CameraLoc;
-	FRotator CameraRot;
-	GetPlayerViewPoint(CameraLoc, CameraRot);
-	FVector Forward = CameraRot.Vector();
-
-	float BestDot = -1.0f;
-	AActor* ClosestTarget = nullptr;
-
-	for (FDetectedAircraftInfo Target : Detected)
-	{	
-		AActor* temp = Cast<AActor>(Target.CurrentPawn);
-		if (!IsValid(temp)) continue;
-
-		FVector ToTarget = (temp->GetActorLocation() - CameraLoc).GetSafeNormal();
-		float Dot = FVector::DotProduct(Forward, ToTarget);
-
-		if (Dot > BestDot)
-		{
-			BestDot = Dot;
-			ClosestTarget = temp;
-		}
-	}
-
-	if (ClosestTarget != Selected && ClosestTarget != nullptr)
-	{
-		Selected = ClosestTarget;
-		Controlled->Tracking = ClosestTarget;
-	}
-	else 
-	{
-		CycleToNextTarget();
-	}
-}
-
-void AAircraftPlayerController::CycleToNextTarget() 
-{
-	if (Detected.Num() == 0) return;
-
-	FVector CameraLoc;
-	FRotator CameraRot;
-	GetPlayerViewPoint(CameraLoc, CameraRot);
-	FVector Forward = CameraRot.Vector();
-
-	float BestAngleDiff = FLT_MAX;
-	AActor* BestTarget = nullptr;
-
-	for (FDetectedAircraftInfo Target : Detected)
-	{
-		AActor* temp = Cast<AActor>(Target.CurrentPawn);
-
-		if (!IsValid(temp) || temp == Selected) continue;
-
-		FVector ToTarget = (temp->GetActorLocation() - CameraLoc).GetSafeNormal();
-		float AngleDiff = FMath::Acos(FVector::DotProduct(Forward, ToTarget));
-
-		if (AngleDiff < BestAngleDiff)
-		{
-			BestAngleDiff = AngleDiff;
-			BestTarget = temp;
-		}
-	}
-
-	if (BestTarget)
-	{
-		Selected = BestTarget;
-		Controlled->Tracking = BestTarget;
-		//VFX here
-	}
-}
-
 //Neutral = 50% Throttle, increase/decrease accordingly
 void AAircraftPlayerController::Thrust(const FInputActionValue& Value)
 {
@@ -383,15 +283,8 @@ void AAircraftPlayerController::Rudder(const FInputActionValue& Value)
 
 void AAircraftPlayerController::Weapons()
 {
-	if (Controlled && !Selected) 
-	{
-		//When can switch change to CurrentWeaponIndex
-		WeaponComp->FireWeaponNotSelected(1);
-	}
-	else if (Controlled && Selected) 
-	{
-		WeaponComp->FireWeaponSelected(1, Selected);
-	}
+	if (!Controlled) return;
+	WeaponComp->FireWeaponSelected(1, Selected,FlightComp->currentSpeed);
 }
 
 void AAircraftPlayerController::Special() 
@@ -419,15 +312,16 @@ void AAircraftPlayerController::ShootEnd()
 void AAircraftPlayerController::Bullets() 
 {
 	if (!Controlled) return;
-	Controlled->FireBullets();
+	WeaponComp->FireBullets();
 }
 
 //Camera Movement
 
 void AAircraftPlayerController::Switch() 
 {
-	print(text)
-	CycleTarget();
+	//Return Selected
+	if (!RadarComp) return;
+	RadarComp->CycleTarget();
 	if (Selected)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %s"), *Selected->GetName()));
@@ -516,9 +410,6 @@ void AAircraftPlayerController::Tick(float DeltaSeconds)
 	if(FlightComp)
 	{
 		FlightComp->SetThrust(thrustPercentage);
-		FlightComp->AdjustSpringArm(DeltaSeconds, thrustPercentage);
-		FlightComp->ApplyRot(DeltaSeconds);
-		ScanTargets();
 	}
 	Super::Tick(DeltaSeconds);
 }

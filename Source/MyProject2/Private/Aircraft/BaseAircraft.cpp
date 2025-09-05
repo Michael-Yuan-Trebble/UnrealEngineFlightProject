@@ -6,7 +6,9 @@
 #include "DrawDebugHelpers.h"
 #include "Structs and Data/CooldownWeapon.h"
 #include "Weapons/AircraftBullet.h"
+#include "AircraftRegistry.h"
 #include "FlightComponent.h"
+#include "WeaponSystemComponent.h"
 #include "AircraftPlayerController.h"
 
 ABaseAircraft::ABaseAircraft()
@@ -31,45 +33,52 @@ ABaseAircraft::ABaseAircraft()
 	RudderCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("RudderCollision"));
 	RudderCollision->SetupAttachment(Collision);
 
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->bDoCollisionTest = false;
-	SpringArm->SetupAttachment(Airframe);
-
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-
 	PrimaryActorTick.bCanEverTick = true;
 	bLocked = false;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> PylonMeshObj(TEXT("/Game/Weapons/Pylons/NATO_Pylon.NATO_Pylon"));
 	if (!PylonMeshObj.Succeeded()) return; 
 	Pylon = PylonMeshObj.Object;
-
-	FlightComponent = CreateDefaultSubobject<UFlightComponent>(TEXT("FlightComponent"));
 }
 
 void ABaseAircraft::BeginPlay()
 {
 	Super::BeginPlay();
-	FlightComponent->Setup(this,AirStats);
+	if (UWorld* World = GetWorld()) 
+	{
+		if (AAircraftRegistry* Registry = AAircraftRegistry::Get(World)) 
+		{
+			Registry->Register(this);
+		}
+	}
+
+}
+
+void ABaseAircraft::EndPlay(const EEndPlayReason::Type EndPlayReason) 
+{
+	if (UWorld* World = GetWorld()) 
+	{
+		if (AAircraftRegistry* Registry = AAircraftRegistry::Get(World)) 
+		{
+			Registry->Unregister(this);
+		}
+	}
+	Super::EndPlay(EndPlayReason);
 }
 
 void ABaseAircraft::PossessedBy(AController* NewController) 
 {
 	Super::PossessedBy(NewController);
-
-	Controlled = Cast<AAircraftPlayerController>(NewController);
-	Controlled->FlightComp = FlightComponent;
 }
 
 void ABaseAircraft::Tick(float DeltaTime)
 {
 	for (int i = 0; i < AvailableWeapons.Num(); i++) 
 	{
-		if (AvailableWeapons[i].Current && !AvailableWeapons[i].CanFire()) 
+		if (AvailableWeapons[i].WeaponInstance && !AvailableWeapons[i].CanFire()) 
 		{
 			AvailableWeapons[i].UpdateCooldown(DeltaTime);
-			if (AvailableWeapons[i].CanFire()) ReEquip(&AvailableWeapons[i]);
+			//if (AvailableWeapons[i].CanFire()); //ReEquip(&AvailableWeapons[i]);
 		}
 	}
 	UpdateLockedOn(DeltaTime);
@@ -96,15 +105,9 @@ void ABaseAircraft::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ABaseAircraft::SetStats(UAircraftStats* InStats) 
-{
-	AirStats = InStats;
-	FlightComponent->AircraftStats = InStats;
-}
-
 void ABaseAircraft::AddPylons() 
 {
-	for (int i = 1; i <= NumPylons; i++) 
+	for (int i = 0; i <= NumPylons; i++) 
 	{
 		UStaticMeshComponent* TempPylon = NewObject<UStaticMeshComponent>(this);
 		FString SocketName = FString::Printf(TEXT("Pylon%d"), i);
@@ -156,21 +159,6 @@ bool ABaseAircraft::IsLockable() const
 float ABaseAircraft::ReturnTakeoffSpeed() const 
 {
 	return TakeoffSpeed;
-}
-
-float ABaseAircraft::ReturnSpringArmLength() const 
-{
-	return springArmLength;
-}
-
-USpringArmComponent* ABaseAircraft::GetSpringArm() const 
-{
-	return SpringArm;
-}
-
-UCameraComponent* ABaseAircraft::GetCamera() const 
-{
-	return Camera;
 }
 
 USkeletalMeshComponent* ABaseAircraft::GetMesh() const 

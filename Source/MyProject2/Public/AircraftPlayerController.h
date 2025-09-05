@@ -16,12 +16,13 @@
 #include "Structs and Data/ControlModeTypes.h"
 #include "AircraftPlayerController.generated.h"
 
-class ABaseAircraft;
+class APlayerAircraft;
 class ASu25Pawn;
 class UInputMappingContext;
 class UEnhancedInputComponent;
 class UMenuManagerComponent;
 class UFlightComponent;
+class URadarComponent;
 class UWeaponSystemComponent;
 
 UCLASS()
@@ -106,6 +107,8 @@ public:
 
 	UWeaponSystemComponent* WeaponComp;
 
+	URadarComponent* RadarComp;
+
 	void ManageMenuSetting(EMenuState NewState);
 
 	//UVariables
@@ -132,7 +135,8 @@ public:
 
 	FTimerHandle RepeatTimerHandle;
 
-	ABaseAircraft* Controlled;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	APlayerAircraft* Controlled;
 
 	TArray<FDetectedAircraftInfo> Detected;
 
@@ -154,11 +158,6 @@ private:
 	void Roll(const FInputActionValue& Value);
 	void Pitch(const FInputActionValue& Value);
 	void Rudder(const FInputActionValue& Value);
-
-	void CycleTarget();
-	void CycleToNextTarget();
-
-	void ScanTargets();
 
 	//Weapons
 	void Weapons();

@@ -9,6 +9,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "AircraftRegistry.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 
@@ -57,12 +58,6 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 		50.0f
 	);
 	GetWorldTimerManager().SetTimer(RadarScanTimer, this, &AEnemyAircraftAI::Retrieve, 0.5f, true);
-	maxSpeed = Controlled->ListedMaximumSpeed;
-	planeAcceleration = Controlled->ListedAcceleration;
-	thrust = Controlled->ListedThrust;
-	turnRate = Controlled->ListedTurnRate;
-	yawRate = Controlled->ListedRudder;
-	rollRate = Controlled->RollRate;
 	power = (log10(20 / (0.07 * 1.225))) / (log10(maxSpeed));
 
 }
@@ -75,10 +70,9 @@ void AEnemyAircraftAI::Tick(float DeltaTime)
 	currentYaw = Controlled->GetActorRotation().Yaw;
 	currentRoll = Controlled->GetActorRotation().Roll;
 
-	if (Controlled) 
-	{
-		Controlled->ApplySpeed(0.5);
-	}
+	if (!Controlled) return;
+
+	Controlled->ApplySpeed(0.5);
 
 	if (Tracking.CurrentPawn) 
 	{
@@ -173,20 +167,34 @@ void AEnemyAircraftAI::Rudder()
 
 }
 
-/*
-void Weapons();
+void AEnemyAircraftAI::Weapons() {
 
-void WeaponsCooldown();
+}
 
-void Special();
+void AEnemyAircraftAI::WeaponsCooldown() {
 
-void SpecialCooldown();
+}
 
-void ShootStart();
+void AEnemyAircraftAI::Special() {
 
-void ShootEnd();
+}
 
-void Bullets();
+void AEnemyAircraftAI::SpecialCooldown() {
 
-void TurnSpeedLoss();
-*/
+}
+
+void AEnemyAircraftAI::ShootStart() {
+
+}
+
+void AEnemyAircraftAI::ShootEnd() {
+
+}
+
+void AEnemyAircraftAI::Bullets() {
+
+}
+
+void AEnemyAircraftAI::TurnSpeedLoss() {
+
+}

@@ -6,9 +6,6 @@
 #include "BaseIRMissile.h"
 #include "Aim9.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MYPROJECT2_API AAim9 : public ABaseIRMissile
 {
@@ -17,5 +14,8 @@ class MYPROJECT2_API AAim9 : public ABaseIRMissile
 public:
 	AAim9();
 
-	
+protected:
+	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
 };

@@ -10,3 +10,11 @@ void UPlayerGameInstance::Init()
 	SaveManager = NewObject<USaveGameManager>(this, USaveGameManager::StaticClass());
 	SaveManager->LoadGame();
 }
+
+void UPlayerGameInstance::SetLoadout(UAircraftData* InData, TMap<FName, TSubclassOf<ABaseWeapon>> InWeapons, TSubclassOf<UBaseSpecial> InSpecial) {
+	SelectedAircraft = InData;
+
+	SelectedWeapons = InWeapons;
+
+	SelectedSpecial = InSpecial;
+}

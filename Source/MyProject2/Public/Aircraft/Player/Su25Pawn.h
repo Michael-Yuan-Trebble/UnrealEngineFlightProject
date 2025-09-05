@@ -3,14 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Aircraft/BaseAircraft.h"
+#include "Aircraft/Player/PlayerAircraft.h"
 #include "Su25Pawn.generated.h"
 
-/**
- * 
- */
 UCLASS()
-class MYPROJECT2_API ASu25Pawn : public ABaseAircraft
+class MYPROJECT2_API ASu25Pawn : public APlayerAircraft
 {
 	GENERATED_BODY()
 	

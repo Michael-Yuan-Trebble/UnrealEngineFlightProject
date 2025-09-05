@@ -4,7 +4,8 @@
 #include "Structs and Data/CooldownWeapon.h"
 
 FCooldownWeapon::FCooldownWeapon() 
-	: Current(nullptr)
+	: WeaponInstance(nullptr)
+	, WeaponClass(nullptr)
 	, bCanFire(true)
 	, time(0.f)
 	, cooldownTime(5.0f)

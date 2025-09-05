@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Aircraft/BaseAircraft.h"
+#include "Aircraft/Player/PlayerAircraft.h"
 #include "T38Pawn.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class MYPROJECT2_API AT38Pawn : public ABaseAircraft
+class MYPROJECT2_API AT38Pawn : public APlayerAircraft
 {
 	GENERATED_BODY()
 

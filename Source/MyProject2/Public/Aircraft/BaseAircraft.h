@@ -13,9 +13,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "BaseAircraft.generated.h"
 
-class AAircraftPlayerController;
 class ABaseIRMissile;
-class UFlightComponent;
 
 UCLASS()
 class MYPROJECT2_API ABaseAircraft : public APawn, public ILockableTarget
@@ -26,8 +24,6 @@ public:
 	ABaseAircraft();
 	
 	//Variables
-
-	UFlightComponent* FlightComponent;
 
 	UAircraftStats* AirStats;
 
@@ -60,8 +56,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMesh* Pylon;
-
-	AAircraftPlayerController* Controlled;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Airframe;
@@ -99,12 +93,6 @@ public:
 
 	//Return Functions for UObjects
 
-	void SetStats(UAircraftStats* InStats);
-
-	virtual USpringArmComponent* GetSpringArm() const;
-
-	virtual UCameraComponent* GetCamera() const;
-
 	virtual USkeletalMeshComponent* GetMesh() const;
 
 	virtual FVector GetTargetLocation() const override;
@@ -119,17 +107,12 @@ public:
 
 	void UpdateLockedOn(float DeltaSeconds);
 
-	virtual float ReturnSpringArmLength() const;
-
 	virtual void PossessedBy(AController* Controller) override;
 
 protected:
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaTime) override;
-
-private:
-
-	virtual void ReEquip(FCooldownWeapon* Replace);
 
 };

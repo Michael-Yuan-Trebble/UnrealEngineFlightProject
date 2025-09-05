@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Weapon Component!"));
 #include "WeaponSystemComponent.h"
 #include "Aircraft/BaseAircraft.h"
 #include "Weapons/AircraftBullet.h"
@@ -10,7 +10,8 @@ UWeaponSystemComponent::UWeaponSystemComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStats) {
+void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStats) 
+{
 	Controlled = InBase;
 	AirStats = InStats;
 }
@@ -22,6 +23,8 @@ void UWeaponSystemComponent::FireBullets()
 	FVector MuzzleLocation = Controlled->Airframe->GetSocketLocation("Gun");
 	FRotator MuzzleRotation = Controlled->Airframe->GetSocketRotation("Gun");
 	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = Controlled;
+	SpawnParams.Instigator = Controlled->GetInstigator();
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	AAircraftBullet* SpawnBullet = GetWorld()->SpawnActor<AAircraftBullet>(Bullet, MuzzleLocation, MuzzleRotation, SpawnParams);
@@ -31,90 +34,86 @@ void UWeaponSystemComponent::FireBullets()
 }
 
 //Create and Replace Missile in Array
-void UWeaponSystemComponent::ReEquip(FCooldownWeapon* Replace)
+void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace)
 {
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = Controlled;
-	//Replace->Current = GetWorld()->SpawnActor<AR60>(AR60::StaticClass(), Airframe->GetSocketTransform(Replace->SocketName),SpawnParams);
-	//Replace->Current->AttachToComponent(Airframe, FAttachmentTransformRules::SnapToTargetIncludingScale, Replace->SocketName);
+
+	Replace.WeaponInstance = GetWorld()->SpawnActor<ABaseWeapon>(Replace.WeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+
+	if (!Replace.WeaponInstance) return;
+
+	FAttachmentTransformRules AttachRules(EAttachmentRule::KeepRelative, true);
+	Replace.WeaponInstance->AttachToComponent(Controlled->Airframe, AttachRules, Replace.SocketName);
+
+	FTransform RelativeTransform;
+	RelativeTransform.SetLocation(FVector(0, -175.f, -40.f));
+	RelativeTransform.SetRotation(FRotator(0.f, -90.f, 0.f).Quaternion());
+	Replace.WeaponInstance->GetRootComponent()->SetRelativeTransform(RelativeTransform);
 }
 
 void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
-
-void UWeaponSystemComponent::EquipWeapons(TArray<TSubclassOf<ABaseWeapon>> WeaponClasses)
-{
-	for (int i = 0; i < WeaponClasses.Num(); i++)
-	{
-		if (WeaponClasses[i] == nullptr) continue;
-		//Find Socket, attach Weapon to that Socket
-
-		FName SocketName = FName(*FString::Printf(TEXT("Pylon%d"), i + 1));
-		if (Controlled->GetMesh()->GetSkeletalMeshAsset()->GetSkeleton()->FindSocket(SocketName))
-		{
-			FTransform SocketTransform = Controlled->Airframe->GetSocketTransform(SocketName);
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = Controlled;
-			/*
-			AR60* Weapon = GetWorld()->SpawnActor<AR60>(WeaponClasses[i], SocketTransform, SpawnParams);
-
-			if (!Weapon) continue;
-				Weapon->SetActorEnableCollision(false);
-				Weapon->AttachToComponent(Airframe, FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
-
-				FCooldownWeapon tempCool;
-				tempCool.Current = Weapon;
-				tempCool.bCanFire = true;
-				tempCool.cooldownTime = Weapon->ReturnCooldownTime();
-				tempCool.time = 0;
-				tempCool.SocketName = SocketName;
-
-				AvailableWeapons.Add(tempCool);
-
-				CurrentWeapon = Cast<ABaseIRMissile>(Weapon);*/
-		}
-	}
-}
-
-void UWeaponSystemComponent::FireWeaponNotSelected(int WeaponIndex)
-{
-	if (AvailableWeapons.IsValidIndex(WeaponIndex - 1))
-	{
-		if (AvailableWeapons[WeaponIndex - 1].Current && AvailableWeapons[WeaponIndex - 1].CanFire())
-		{
-			//AvailableWeapons[WeaponIndex - 1].Current->FireStatic(currentSpeed);
-			AvailableWeapons[WeaponIndex - 1].StartCooldown();
-		}
-	}
-}
-
-void UWeaponSystemComponent::FireWeaponSelected(int WeaponIndex, AActor* Target)
-{
-	if (AvailableWeapons.IsValidIndex(WeaponIndex - 1))
-	{
-		if (AvailableWeapons[WeaponIndex - 1].Current && AvailableWeapons[WeaponIndex - 1].CanFire())
-		{
-			if (bLocked)
-			{
-				AvailableWeapons[WeaponIndex - 1].Current->SetActorEnableCollision(true);
-				//AvailableWeapons[WeaponIndex - 1].Current->FireTracking(currentSpeed, Target);
-				AvailableWeapons[WeaponIndex - 1].StartCooldown();
-			}
-			else
-			{
-				FireWeaponNotSelected(WeaponIndex);
+	for (FCooldownWeapon& Weapon : AvailableWeapons) {
+		if (!Weapon.CanFire()) {
+			Weapon.UpdateCooldown(DeltaTime);
+			if (Weapon.CanFire()) {
+				ReEquip(Weapon);
 			}
 		}
 	}
+}
+
+void UWeaponSystemComponent::EquipWeapons()
+{
+	for (const TPair<FName, TSubclassOf<ABaseWeapon>>&Pair : Loadout)
+	{
+		FTransform SocketTransform = Controlled->Airframe->GetSocketTransform(Pair.Key);
+		FRotator RotationOffset = FRotator(0.f, -90.f, 0.f);
+		FVector PosOffset = FVector(-175, 0, -40.f);
+		SocketTransform.ConcatenateRotation(RotationOffset.Quaternion());
+		SocketTransform.AddToTranslation(PosOffset);
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = Controlled;
+		ABaseWeapon* SpawnIn = GetWorld()->SpawnActor<ABaseWeapon>(Pair.Value, SocketTransform, SpawnParams);
+		if (!SpawnIn) continue;
+		SpawnIn->AttachToComponent(Controlled->Airframe, FAttachmentTransformRules::KeepWorldTransform, Pair.Key);
+
+		FCooldownWeapon tempCool;
+		tempCool.WeaponClass = Pair.Value;
+		tempCool.WeaponInstance = SpawnIn;
+		tempCool.bCanFire = true;
+		tempCool.cooldownTime = SpawnIn->cooldownTime;
+		tempCool.time = 0;
+		tempCool.SocketName = Pair.Key;
+		AvailableWeapons.Add(tempCool);
+	}
+}
+
+void UWeaponSystemComponent::FireWeaponSelected(int WeaponIndex, AActor* Target, float Speed)
+{
+	if (!AvailableWeapons.IsValidIndex(WeaponIndex - 1)) return;
+
+	FCooldownWeapon& Weapon = AvailableWeapons[WeaponIndex - 1];
+	if (!Weapon.WeaponInstance || !Weapon.CanFire()) return;
+	if (Target && bLocked)
+	{
+		Weapon.WeaponInstance->FireTracking(Speed, Target);
+	}
+	else
+	{
+		Weapon.WeaponInstance->FireStatic(Speed);
+	}
+	Weapon.StartCooldown();
 }
 
 void UWeaponSystemComponent::SelectWeapon(int WeaponIndex)
 {
 	if (AvailableWeapons.IsValidIndex(WeaponIndex - 1))
 	{
-		CurrentWeapon = AvailableWeapons[WeaponIndex - 1].Current;
+		CurrentWeapon = AvailableWeapons[WeaponIndex - 1].WeaponInstance;
 	}
 }
 
