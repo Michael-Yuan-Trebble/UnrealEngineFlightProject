@@ -5,11 +5,12 @@
 #include "Aircraft/AI/EnemyAircraftAI.h"
 #include "RadarComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "FlightComponent.h"
 #include "Aircraft/AI/AIFlightComponent.h"
 
 AEnemyAircraft::AEnemyAircraft() 
 {
-	FlightComponent = CreateDefaultSubobject<UAIFlightComponent>(TEXT("FlightComponent"));
+	FlightComponent = CreateDefaultSubobject<UFlightComponent>(TEXT("FlightComponent"));
 	Radar = CreateDefaultSubobject<URadarComponent>(TEXT("Radar"));
 }
 
@@ -24,7 +25,6 @@ void AEnemyAircraft::PossessedBy(AController* NewController) {
 		FVector CapsuleLocation = Collision->GetComponentLocation();
 		FRotator CapsuleRotation = Collision->GetComponentRotation();
 
-		// Draw a debug capsule (you can adjust the duration, color, and other settings)
 		DrawDebugCapsule(
 			GetWorld(),
 			CapsuleLocation,

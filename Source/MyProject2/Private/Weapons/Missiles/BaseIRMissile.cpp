@@ -2,6 +2,7 @@
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Missile!"));
 #include "Weapons/Missiles/BaseIRMissile.h"
+#include "NiagaraFunctionLibrary.h"
 
 ABaseIRMissile::ABaseIRMissile()
 {
@@ -24,7 +25,14 @@ void ABaseIRMissile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (!isAir) return;
 
-	if (isDropPhase) {
+	if (SmokeTrail) 
+	{
+		SmokeTrail->SetWorldLocation(WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")));
+		SmokeTrail->SetWorldRotation(WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")));
+	}
+
+	if (isDropPhase) 
+	{
 		DropTimer += DeltaTime;
 
 		FVector DropMove = -GetOwner()->GetActorUpVector() * 600.f * DeltaTime;
@@ -38,6 +46,7 @@ void ABaseIRMissile::Tick(float DeltaTime)
 		}
 		return;
 	}
+
 	missileVelocity += missileAcceleration * DeltaTime;
 	missileVelocity = FMath::Clamp(missileVelocity, 0.f, missileMaxSpeed);
 
@@ -48,6 +57,11 @@ void ABaseIRMissile::Tick(float DeltaTime)
 	timeTilDelt += DeltaTime;
 
 	if (!(timeTilDelt >= timeDet)) return;
+
+	if (SmokeTrail) {
+		SmokeTrail->Deactivate();
+	}
+
 	Destroy();
 }
 
@@ -78,12 +92,19 @@ void ABaseIRMissile::LaunchSequence(float Speed) {
 		WeaponMesh->SetCollisionObjectType(ECC_PhysicsBody);
 		WeaponMesh->SetCollisionResponseToAllChannels(ECR_Block);
 		WeaponMesh->SetCollisionProfileName(TEXT("PhysicsActor"));
-		//WeaponMesh->SetSimulatePhysics(true);
-		//WeaponMesh->SetEnableGravity(false);
-		//Missile->AddImpulse(AircraftUp * -20.f, NAME_None, true);
 		missileVelocity = Speed;
 		isAir = true;
 		isDropPhase = true;
+
+		SmokeTrail = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			SmokeTrailSystem,
+			WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")),
+			WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")),
+			FVector(1.f),
+			false,
+			true
+		);
 	}
 }
 

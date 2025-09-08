@@ -8,6 +8,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Actor.h"
+#include "Aircraft/BaseAircraft.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "AircraftRegistry.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -72,7 +73,7 @@ void AEnemyAircraftAI::Tick(float DeltaTime)
 
 	if (!Controlled) return;
 
-	Controlled->ApplySpeed(0.5);
+	//Controlled->ApplySpeed(0.5);
 
 	if (Tracking.CurrentPawn) 
 	{
@@ -121,7 +122,7 @@ void AEnemyAircraftAI::ShouldYaw()
 
 void AEnemyAircraftAI::Retrieve() 
 {
-	Tracking = Controlled->ReturnTargeting();
+	//Tracking = Controlled->ReturnTargeting();
 }
 
 //Only Roll to Target
@@ -144,7 +145,7 @@ void AEnemyAircraftAI::RotationTarget(float DeltaTime)
 	}
 
 	//Add Roll to AI Plane Function
-	Controlled->RollToTarget(RollAmount, DeltaTime);
+	//Controlled->RollToTarget(RollAmount, DeltaTime);
 }
 
 void AEnemyAircraftAI::PitchTarget(float DeltaTime)
@@ -155,7 +156,7 @@ void AEnemyAircraftAI::PitchTarget(float DeltaTime)
 	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(TrackingRotation, CurrentRot);
 	float pitchDif = DeltaRot.Pitch;
 
-	Controlled->PitchToTarget(pitchDif, DeltaTime);
+	//Controlled->PitchToTarget(pitchDif, DeltaTime);
 	if (GEngine)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %f"), pitchDif));

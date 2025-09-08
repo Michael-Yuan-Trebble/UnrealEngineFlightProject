@@ -10,6 +10,7 @@
 
 class AEnemyAircraftAI;
 class URadarComponent;
+class UFlightComponent;
 
 UCLASS()
 class MYPROJECT2_API AEnemyAircraft : public ABaseAircraft
@@ -20,7 +21,7 @@ public:
 
 	AEnemyAircraft();
 
-	UAIFlightComponent* FlightComponent;
+	UFlightComponent* FlightComponent;
 
 	URadarComponent* Radar;
 

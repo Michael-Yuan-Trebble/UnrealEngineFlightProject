@@ -1,0 +1,33 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "BehaviorTree/BTService.h"
+#include "Structs and Data/FDetectedAircraftInfo.h"
+#include "ChooseTarget.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class MYPROJECT2_API UBTServiceChooseTarget : public UBTService
+{
+	GENERATED_BODY()
+	
+public:
+	UBTServiceChooseTarget();
+
+protected:
+	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+
+	void PickTarget();
+
+	TArray<FDetectedAircraftInfo> AllAircraft;
+
+	FDetectedAircraftInfo Selected;
+
+	float timeSinceLastPick;
+
+	float PickInterval;
+};

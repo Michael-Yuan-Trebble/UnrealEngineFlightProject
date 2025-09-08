@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Weapons/BaseWeapon.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "TimerManager.h"
 #include "BaseIRMissile.generated.h"
 
@@ -18,11 +20,19 @@ public:
 
 	float range;
 
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	bool isDropPhase;
 
 	float DropTimer = 0;
 
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	bool isAir;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UNiagaraSystem* SmokeTrailSystem;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	UNiagaraComponent* SmokeTrail;
 
 	FVector CurrentDirection;
 

@@ -8,6 +8,8 @@
 #include "Structs and Data/FDetectedAircraftInfo.h"
 #include "EnemyAircraftAI.generated.h"
 
+class ABaseAircraft;
+
 UCLASS()
 class MYPROJECT2_API AEnemyAircraftAI : public AAIController
 {
@@ -29,7 +31,7 @@ public:
 	float currentSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	class AF16AI* Controlled;
+	ABaseAircraft* Controlled;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float planeAcceleration;

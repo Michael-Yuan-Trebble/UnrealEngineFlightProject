@@ -75,16 +75,12 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 	FVector F = Controlled->Airframe->GetForwardVector().GetSafeNormal();
 	FVector VelocityDir = Velocity.GetSafeNormal();
 
-	// Dot product gives cosine of the angle
 	float CosTheta = FVector::DotProduct(F, VelocityDir);
 
-	// Clamp to avoid NANs
 	CosTheta = FMath::Clamp(CosTheta, -1.0f, 1.0f);
 
-	// Angle in degrees
 	float AOA = FMath::RadiansToDegrees(FMath::Acos(CosTheta));
 
-	// Optional: Use cross product to determine sign (nose up vs nose down)
 	FVector Cross = FVector::CrossProduct(F, VelocityDir);
 	float Sign = (Cross.Z >= 0.f) ? 1.f : -1.f;
 
