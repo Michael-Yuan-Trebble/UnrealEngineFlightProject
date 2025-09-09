@@ -4,14 +4,47 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
+#include "Aircraft/BaseAircraft.h"
 #include "Attack.generated.h"
 
-/**
- * 
- */
-UCLASS()
-class MYPROJECT2_API UAttack : public UBTService
+class AEnemyAircraftAI;
+
+UCLASS(Blueprintable, BlueprintType, meta = (DisplayName="Attack Service"))
+class MYPROJECT2_API UBTServiceAttack : public UBTService
 {
 	GENERATED_BODY()
 	
+public:
+
+	UBTServiceAttack();
+
+protected:
+	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+
+	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+
+	AActor* Selected;
+
+	ABaseAircraft* Controlled;
+
+	UBlackboardComponent* BlackboardComp;
+
+	AEnemyAircraftAI* Controller;
+
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	FBlackboardKeySelector YawKey;
+
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	FBlackboardKeySelector PitchKey;
+
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	FBlackboardKeySelector RollKey;
+
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	FBlackboardKeySelector ThrottleKey;
+
+private:
+	void CalculateAngle();
+
+	void PitchAngle();
 };

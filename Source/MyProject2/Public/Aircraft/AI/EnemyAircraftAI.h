@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Components/SphereComponent.h"
 #include "AIController.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Structs and Data/FDetectedAircraftInfo.h"
 #include "EnemyAircraftAI.generated.h"
 
@@ -24,6 +26,12 @@ public:
 
 	virtual void OnPossess(APawn* PawnPossess) override;
 
+	UPROPERTY(EditAnywhere,Category = "AI")
+	UBehaviorTree* BehaviorTreeAsset;
+
+	UPROPERTY(EditAnywhere,Category="AI")
+	UBlackboardComponent* BlackboardComp;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly);
 	FRotator Target;
 
@@ -35,9 +43,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float planeAcceleration;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBehaviorTree* BehaviorTree;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FDetectedAircraftInfo Tracking;

@@ -1,10 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("AI Choose!"));
 #include "ChooseTarget.h"
 #include "Aircraft/AI/EnemyAircraftAI.h"
 #include "Aircraft/BaseAircraft.h"
 #include "Aircraft/AI/EnemyAircraft.h"
+#include "Aircraft/BaseAircraft.h"
 #include "RadarComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
@@ -21,11 +22,10 @@ UBTServiceChooseTarget::UBTServiceChooseTarget() {
 
 void UBTServiceChooseTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-
 	AEnemyAircraftAI* Controller = Cast<AEnemyAircraftAI>(OwnerComp.GetAIOwner());
 	if (!Controller) return;
 
-	AEnemyAircraft* Controlled = Cast<AEnemyAircraft>(Controller->Controlled);
+	Controlled = Cast<AEnemyAircraft>(Controller->Controlled);
 	if (!Controlled) return;
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComponent) return;
@@ -51,7 +51,12 @@ void UBTServiceChooseTarget::PickTarget()
 {
 	for (FDetectedAircraftInfo Info : AllAircraft)
 	{
-
+		if (Info.CurrentPawn == Controlled) return;
+		if (GEngine && Info.CurrentPawn)
+		{
+			FString PawnName = Info.CurrentPawn->GetName();  
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Current Radar: %s"), *PawnName));
+		}
 		Info.threatLevel = Info.CalculateThreat();
 
 		if (!Selected.CurrentPawn) {

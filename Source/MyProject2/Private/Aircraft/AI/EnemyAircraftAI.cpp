@@ -7,6 +7,7 @@
 #include "AircraftPlayerController.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
 #include "GameFramework/Actor.h"
 #include "Aircraft/BaseAircraft.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -18,7 +19,6 @@
 AEnemyAircraftAI::AEnemyAircraftAI() 
 {
 	PrimaryActorTick.bCanEverTick = true;
-	BehaviorTree = nullptr;
 }
 
 void AEnemyAircraftAI::BeginPlay() 
@@ -35,17 +35,23 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 {
 	Super::OnPossess(PawnPossess);
 
-	if (BehaviorTree) 
+	if (BehaviorTreeAsset) 
 	{
-		UBlackboardComponent* defaultBlackboard = nullptr;
-		UseBlackboard(BehaviorTree->BlackboardAsset, defaultBlackboard);
-		//RunBehaviorTree(BehaviorTree);
+		if (UseBlackboard(BehaviorTreeAsset->BlackboardAsset, BlackboardComp)) {
+			RunBehaviorTree(BehaviorTreeAsset);
+			BlackboardComp->SetValueAsBool(TEXT("bIsAttacking"), false);
+			BlackboardComp->SetValueAsFloat(TEXT("PitchAmount"), 0.f);
+			BlackboardComp->SetValueAsFloat(TEXT("RollAmount"), 0.f);
+			BlackboardComp->SetValueAsFloat(TEXT("YawAmount"), 0.f);
+		}
 	}
 
 	//Doesn't have Base AI Aircraft Class yet, will change the Cast and others based on different AI Airplane
 
 	//Get Variables from AI
-	Controlled = Cast<AF16AI>(GetPawn());
+
+	Controlled = Cast<AEnemyAircraft>(GetPawn());
+	if (!Controlled) return;
 	DrawDebugCone(
 		GetWorld(),
 		Controlled->GetActorLocation(),
@@ -67,11 +73,11 @@ void AEnemyAircraftAI::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!Controlled) return;
+
 	currentPitch = Controlled->GetActorRotation().Pitch;
 	currentYaw = Controlled->GetActorRotation().Yaw;
 	currentRoll = Controlled->GetActorRotation().Roll;
-
-	if (!Controlled) return;
 
 	//Controlled->ApplySpeed(0.5);
 
@@ -128,39 +134,10 @@ void AEnemyAircraftAI::Retrieve()
 //Only Roll to Target
 void AEnemyAircraftAI::RotationTarget(float DeltaTime) 
 {
-	//Find the current up Vector of AI, then find out how much roll needed to match that up vector toward the plane (User)	
-	FVector CurrentUp = Controlled->GetActorUpVector();
-	FVector Forward = Controlled->GetActorForwardVector();
-	FVector TargetUp = (TrackingLocation - Controlled->GetActorLocation()).GetSafeNormal();
-
-	FVector NeedVector = TargetUp - (FVector::DotProduct(TargetUp, Forward) * Forward);
-	NeedVector.Normalize();
-
-	float RollAmount = FVector::DotProduct(FVector::CrossProduct(CurrentUp, NeedVector), Forward);
-	RollAmount = FMath::Clamp(RollAmount, -1.f, 1.f);
-
-	if (GEngine)
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Roll: %f"), RollAmount));
-	}
-
-	//Add Roll to AI Plane Function
-	//Controlled->RollToTarget(RollAmount, DeltaTime);
 }
 
 void AEnemyAircraftAI::PitchTarget(float DeltaTime)
 {
-	FVector DistanceBetween = (TrackingLocation - Controlled->GetActorLocation()).GetSafeNormal();
-	FVector Forward = Controlled->GetActorForwardVector();
-	FRotator CurrentRot = Controlled->GetActorRotation();
-	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(TrackingRotation, CurrentRot);
-	float pitchDif = DeltaRot.Pitch;
-
-	//Controlled->PitchToTarget(pitchDif, DeltaTime);
-	if (GEngine)
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %f"), pitchDif));
-	}
 }
 
 void AEnemyAircraftAI::Rudder() 

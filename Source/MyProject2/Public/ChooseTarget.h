@@ -7,10 +7,9 @@
 #include "Structs and Data/FDetectedAircraftInfo.h"
 #include "ChooseTarget.generated.h"
 
-/**
- * 
- */
-UCLASS()
+class AEnemyAircraft;
+
+UCLASS(Blueprintable, BlueprintType, meta = (DisplayName = "Tracking Service"))
 class MYPROJECT2_API UBTServiceChooseTarget : public UBTService
 {
 	GENERATED_BODY()
@@ -26,6 +25,8 @@ protected:
 	TArray<FDetectedAircraftInfo> AllAircraft;
 
 	FDetectedAircraftInfo Selected;
+
+	AEnemyAircraft* Controlled;
 
 	float timeSinceLastPick;
 
