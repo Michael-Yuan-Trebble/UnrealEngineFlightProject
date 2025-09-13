@@ -19,7 +19,8 @@ URadarComponent::URadarComponent()
 void URadarComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	//Radar only triggers 0.5 seconds at a time
+
+	// Radar only triggers 0.5 seconds at a time
 	GetWorld()->GetTimerManager().SetTimer(RadarScanTimer, this, &URadarComponent::ScanTargets, 0.5f, true);
 }
 
@@ -35,6 +36,8 @@ void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 void URadarComponent::ScanTargets() 
 {
+	// Gather aircraft from cached registry
+
 	Detected.Empty();
 	if (!GetWorld()) return;
 	AAircraftRegistry* Registry = AAircraftRegistry::Get(GetWorld());
@@ -56,6 +59,10 @@ void URadarComponent::ScanTargets()
 	}
 }
 
+// ====================================
+// Player Aircraft selection
+// ====================================
+
 void URadarComponent::CycleTarget() 
 {
 	if (Detected.Num() == 0) return;
@@ -72,6 +79,7 @@ void URadarComponent::CycleTarget()
 	{;
 		if (!IsValid(Target.CurrentPawn)) continue;
 
+		// Find the distance between target and where the player's camera is pointing
 		FVector ToTarget = (Target.CurrentPawn->GetActorLocation() - CameraLoc).GetSafeNormal();
 		float Dot = FVector::DotProduct(Forward, ToTarget);
 
@@ -126,9 +134,11 @@ void URadarComponent::CycleToNextTarget()
 	}
 }
 
-void URadarComponent::SetTarget(AActor* NewTarget) {
+void URadarComponent::SetTarget(AActor* NewTarget) 
+{
 	Selected = NewTarget;
-	if (Controlled) {
+	if (Controlled) 
+	{
 		Controlled->Tracking = NewTarget;
 	}
 	// VFX

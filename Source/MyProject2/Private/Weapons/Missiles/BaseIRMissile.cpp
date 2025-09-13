@@ -25,15 +25,23 @@ void ABaseIRMissile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (!isAir) return;
 
+	// VFX
 	if (SmokeTrail) 
 	{
 		SmokeTrail->SetWorldLocation(WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")));
 		SmokeTrail->SetWorldRotation(WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")));
 	}
 
+	// ====================================
+	// Missile is Deployed
+	// Initial drop movement and transition into pathing
+	// ====================================
+
 	if (isDropPhase) 
 	{
 		DropTimer += DeltaTime;
+
+		// Drop Sequence: "Launch" downwards
 
 		FVector DropMove = -GetOwner()->GetActorUpVector() * 600.f * DeltaTime;
 		FVector Forward = GetOwner()->GetActorForwardVector() * missileVelocity * DeltaTime;
@@ -50,11 +58,14 @@ void ABaseIRMissile::Tick(float DeltaTime)
 	missileVelocity += missileAcceleration * DeltaTime;
 	missileVelocity = FMath::Clamp(missileVelocity, 0.f, missileMaxSpeed);
 
-	// move forward in world space
+	// Movement Forward
+
 	FVector DeltaMove = GetActorForwardVector() * missileVelocity * DeltaTime;
 	AddActorWorldOffset(DeltaMove, true);
 
 	timeTilDelt += DeltaTime;
+
+	// Missile explodes at range
 
 	if (!(timeTilDelt >= timeDet)) return;
 
@@ -76,16 +87,14 @@ void ABaseIRMissile::FireTracking(float launchSpeed, AActor* Target)
 	LaunchSequence(launchSpeed);
 }
 
-void ABaseIRMissile::LaunchSequence(float Speed) {
-		if (GetOwner())
+void ABaseIRMissile::LaunchSequence(float Speed) 
+{
+	if (GetOwner())
 	{
-		FVector AircraftForward = GetOwner()->GetActorForwardVector();
-		FVector AircraftUp = GetOwner()->GetActorUpVector();
+		// ====================================
+		// Unbound Missile from Socket
+		// ====================================
 
-		CurrentDirection = (AircraftForward - AircraftUp * 0.2).GetSafeNormal();
-
-		FVector LaunchDirection = AircraftForward + (AircraftUp * 0.5f);
-		LaunchDirection.Normalize();
 		DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);

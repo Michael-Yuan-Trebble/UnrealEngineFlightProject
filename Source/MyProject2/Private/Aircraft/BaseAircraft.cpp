@@ -44,6 +44,9 @@ ABaseAircraft::ABaseAircraft()
 void ABaseAircraft::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Update world registry with each aircraft spawned, caching all aircraft fielded
+
 	if (UWorld* World = GetWorld()) 
 	{
 		if (AAircraftRegistry* Registry = AAircraftRegistry::Get(World)) 
@@ -56,6 +59,9 @@ void ABaseAircraft::BeginPlay()
 
 void ABaseAircraft::EndPlay(const EEndPlayReason::Type EndPlayReason) 
 {
+
+	// Safely unregister all aircraft from cache
+
 	if (UWorld* World = GetWorld()) 
 	{
 		if (AAircraftRegistry* Registry = AAircraftRegistry::Get(World)) 
@@ -73,6 +79,9 @@ void ABaseAircraft::PossessedBy(AController* NewController)
 
 void ABaseAircraft::Tick(float DeltaTime)
 {
+
+	// Update cooldown timer
+
 	for (int i = 0; i < AvailableWeapons.Num(); i++) 
 	{
 		if (AvailableWeapons[i].WeaponInstance && !AvailableWeapons[i].CanFire()) 
@@ -87,6 +96,8 @@ void ABaseAircraft::Tick(float DeltaTime)
 
 	if (!CurrentWeapon) return; 
 	ConeLength = CurrentWeapon->range;
+
+	// Draw cone for aircraft's weapon lockon cone
 
 	DrawDebugCone(
 		GetWorld(),
@@ -116,6 +127,7 @@ void ABaseAircraft::AddPylons()
 			TempPylon->SetupAttachment(Airframe, FName(*SocketName));
 			TempPylon->RegisterComponent();
 			TempPylon->SetStaticMesh(Pylon);
+			// TODO: Fix Pylon's rotation and socket's rotation so transform is not neccessary
 			TempPylon->SetRelativeLocation(FVector(0,-100,-40));
 		}
 		PylonSockets.Add(FName(*FString::Printf(TEXT("Pylon%d"), i)));
@@ -124,6 +136,9 @@ void ABaseAircraft::AddPylons()
 
 void ABaseAircraft::UpdateLockedOn(float DeltaSeconds) 
 {
+
+	// Update timer on missile lock
+
 	if (!Tracking) return;
 
 	FVector ToTarget = Tracking->GetActorLocation() - GetActorLocation();

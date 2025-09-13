@@ -20,6 +20,8 @@ void AEnemyAircraft::PossessedBy(AController* NewController) {
 
 	Controller = Cast<AEnemyAircraftAI>(NewController);
 
+	// Debug capsule for radar
+
 	if (Collision)
 	{
 		FVector CapsuleLocation = Collision->GetComponentLocation();
@@ -47,7 +49,11 @@ void AEnemyAircraft::PossessedBy(AController* NewController) {
 	}
 */
 
-void AEnemyAircraft::PickTarget() {
+// Iterate through All Aircraft in range
+// Store the largest threat and make it the one targeted
+
+void AEnemyAircraft::PickTarget() 
+{
 	for (int i = 0; i < DetectedTargets.Num(); i++)
 	{
 		if (Targeting.CurrentPawn)

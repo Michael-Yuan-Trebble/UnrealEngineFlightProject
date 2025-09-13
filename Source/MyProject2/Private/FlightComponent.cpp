@@ -14,6 +14,8 @@ enum class ThrottleStage
 
 ThrottleStage getThrottleStage(float throttle)
 {
+	// Throttle Stages for pronounced acceleration differences
+
 	throttle *= 100.f;
 	if (throttle >= 0 && throttle <= 40) return ThrottleStage::Slow;
 	else if (throttle <= 80) return ThrottleStage::Normal;
@@ -37,6 +39,11 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	if (!isFlying && currentSpeed > 10.f) isFlying = true;
 
 	if (!Controlled || !AircraftStats) return;
+
+	// ====================================
+	// Movement Application Components
+	// ====================================
+
 	ApplySpeed(CurrentThrust, DeltaTime);
 	RollAOA(DeltaTime);
 	ApplyRot(DeltaTime);
@@ -58,6 +65,9 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 	float totalFlightPercent = 0;
 	float drag = 0;
 	float trueAcceleration = 0;
+
+	// Target speed for better acceleration until a certain point feeling
+
 	if (targetSpeed == 0)
 	{
 		trueAcceleration = Acceleration;
@@ -71,6 +81,8 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 		}
 		trueAcceleration = Acceleration - drag;
 	}
+
+	// TODO: Apply AOA drag into acceleration calculation, fine tune numbers
 
 	FVector F = Controlled->Airframe->GetForwardVector().GetSafeNormal();
 	FVector VelocityDir = Velocity.GetSafeNormal();
@@ -104,9 +116,18 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 
 	Controlled->AddActorWorldOffset(Velocity * DeltaSeconds, true);
 
+	// ====================================
+	// Draw AOA lines
+	// Blue = Root forward
+	// Red = Mesh Forward
+	// ====================================
+
 	DrawDebugLine(GetWorld(), Controlled->GetActorLocation(), Controlled->GetActorLocation() + Forward * 300, FColor::Blue, false, 0.f, 0, 2.f);
 	DrawDebugLine(GetWorld(), Controlled->GetActorLocation(), Controlled->GetActorLocation() + Controlled->Airframe->GetForwardVector() * 300, FColor::Green, false, 0.f, 0, 2.f);
 }
+
+// ====================================
+// Throttle Stage for Acceleration and Target Speed
 
 void UFlightComponent::SlowSpeed(float ThrottlePercentage)
 {
@@ -143,9 +164,18 @@ void UFlightComponent::AfterburnerSpeed(float ThrottlePercentage)
 	}
 }
 
+// ====================================
+// Turning/Rotation Calculations
+// ====================================
+
 void UFlightComponent::ApplyRot(float DeltaSeconds)
 {
 	if (!Controlled || !AircraftStats) return;
+
+	// ====================================
+	// Apply User Inputs
+	// ====================================
+
 	ApplyYaw(DeltaSeconds);
 	ApplyRoll(DeltaSeconds);
 	ApplyPitch(DeltaSeconds);
@@ -160,6 +190,7 @@ void UFlightComponent::ApplyRot(float DeltaSeconds)
 
 void UFlightComponent::ReturnAOA(float DeltaSeconds)
 {
+	// Rotates the Root vector toward Airframe's vector
 	FQuat CurrentQuat = Controlled->GetActorQuat();
 	FQuat TargetQuat = Controlled->Airframe->GetComponentQuat();
 	float RootTurnSpeed = 2.0f;
@@ -167,6 +198,7 @@ void UFlightComponent::ReturnAOA(float DeltaSeconds)
 	FQuat NewRootQuat = FQuat::Slerp(CurrentQuat, TargetQuat, RootAlpha);
 	Controlled->SetActorRotation(NewRootQuat);
 
+	// Resets the Airframe's vector 
 	FQuat AirframeCurrentRelQuat = Controlled->Airframe->GetRelativeRotation().Quaternion();
 	FQuat IdentityQuat = FQuat::Identity;
 	float NoseAlpha = FMath::Clamp(AircraftStats->AOARecoverySpeed * DeltaSeconds, 0.f, 1.f);
@@ -177,6 +209,7 @@ void UFlightComponent::ReturnAOA(float DeltaSeconds)
 void UFlightComponent::AdjustSpringArm(float DeltaSeconds, float ThrottlePercentage)
 {
 	if (!AircraftStats) return;
+	//TODO: Move SpringArm based on User's throttle input
 	//Controlled->SpringArm->TargetArmLength = FMath::FInterpTo(Controlled->SpringArm->TargetArmLength, AircraftStats->SpringArmLength + (50 * (0.5 - ThrottlePercentage)), DeltaSeconds, 2.f);
 }
 
@@ -189,7 +222,12 @@ float UFlightComponent::DragAOA(float AOA)
 	return drag;
 }
 
-void UFlightComponent::RollAOA(float DeltaSeconds) {
+void UFlightComponent::RollAOA(float DeltaSeconds)
+{
+	// ====================================
+	// Apply a downward AOA based on user's roll orientation with the ground
+	// ====================================
+
 	FVector Forward = Controlled->Airframe->GetForwardVector();
 	FVector Up = Controlled->Airframe->GetUpVector();
 
@@ -205,6 +243,7 @@ void UFlightComponent::RollAOA(float DeltaSeconds) {
 
 	FVector WorldPitchAxis = FVector::CrossProduct(Forward, FVector::UpVector).GetSafeNormal();
 
+	// Prevent potential Gimbal Lock, investigating further if it is truly needed
 	if (PitchAngle > -85.f)
 	{
 		FQuat Rotate = FQuat(WorldPitchAxis, FMath::DegreesToRadians(DownPitch));
@@ -212,6 +251,10 @@ void UFlightComponent::RollAOA(float DeltaSeconds) {
 		Controlled->Airframe->AddWorldRotation(Rotate);
 	}
 }
+
+// ====================================
+// Apply Rotations
+// ====================================
 
 void UFlightComponent::ApplyPitch(float DeltaSeconds)
 {

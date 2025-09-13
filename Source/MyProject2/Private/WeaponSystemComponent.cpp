@@ -18,6 +18,7 @@ void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStat
 
 void UWeaponSystemComponent::FireBullets()
 {
+	//Spawns a bullet actor whilst firing at socket
 	if (!Bullet || !(Controlled->Airframe->DoesSocketExist("Gun"))) return;
 
 	FVector MuzzleLocation = Controlled->Airframe->GetSocketLocation("Gun");
@@ -47,6 +48,7 @@ void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace)
 	Replace.WeaponInstance->AttachToComponent(Controlled->Airframe, AttachRules, Replace.SocketName);
 
 	FTransform RelativeTransform;
+	// TODO: Update pylon to include socket for weapon, current transform is temporary
 	RelativeTransform.SetLocation(FVector(0, -175.f, -40.f));
 	RelativeTransform.SetRotation(FRotator(0.f, -90.f, 0.f).Quaternion());
 	Replace.WeaponInstance->GetRootComponent()->SetRelativeTransform(RelativeTransform);
@@ -55,10 +57,18 @@ void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace)
 void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	for (FCooldownWeapon& Weapon : AvailableWeapons) {
-		if (!Weapon.CanFire()) {
+
+	// ====================================
+	// Weapon refresh to check respawning conditions
+	// ====================================
+
+	for (FCooldownWeapon& Weapon : AvailableWeapons) 
+	{
+		if (!Weapon.CanFire()) 
+		{
 			Weapon.UpdateCooldown(DeltaTime);
-			if (Weapon.CanFire()) {
+			if (Weapon.CanFire()) 
+			{
 				ReEquip(Weapon);
 			}
 		}
@@ -69,6 +79,7 @@ void UWeaponSystemComponent::EquipWeapons()
 {
 	for (const TPair<FName, TSubclassOf<ABaseWeapon>>&Pair : Loadout)
 	{
+		// TODO: Introduce socket on Pylon and attach to that, remove transform
 		FTransform SocketTransform = Controlled->Airframe->GetSocketTransform(Pair.Key);
 		FRotator RotationOffset = FRotator(0.f, -90.f, 0.f);
 		FVector PosOffset = FVector(-175, 0, -40.f);
@@ -97,7 +108,9 @@ void UWeaponSystemComponent::FireWeaponSelected(int WeaponIndex, AActor* Target,
 	if (!AvailableWeapons.IsValidIndex(WeaponIndex - 1)) return;
 
 	FCooldownWeapon& Weapon = AvailableWeapons[WeaponIndex - 1];
+
 	if (!Weapon.WeaponInstance || !Weapon.CanFire()) return;
+
 	if (Target && bLocked)
 	{
 		Weapon.WeaponInstance->FireTracking(Speed, Target);

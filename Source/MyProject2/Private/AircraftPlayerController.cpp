@@ -66,6 +66,8 @@ void AAircraftPlayerController::OnPossess(APawn* InPawn)
 	HUD->PC = this;
 }
 
+// Setting controls
+
 void AAircraftPlayerController::BindAircraftInputs(UEnhancedInputComponent* EnhancedInputComp) 
 {
 	if (!EnhancedInputComp) return;
@@ -203,6 +205,8 @@ void AAircraftPlayerController::SetupInputComponent()
 	}
 }
 
+// TODO: Change between two control modes mid game based on options and active gameplay
+
 void AAircraftPlayerController::SetControlMode(EControlMode NewMode) 
 {
 	if (CurrentMode == NewMode || !GetLocalPlayer()) return;
@@ -228,6 +232,8 @@ void AAircraftPlayerController::SetControlMode(EControlMode NewMode)
 		bShowMouseCursor = false;
 	}
 }
+
+// TODO: Currently passing Menu States, will delegate this to purely menumanager
 
 void AAircraftPlayerController::MenuBack() 
 {
@@ -350,6 +356,8 @@ void AAircraftPlayerController::LookHor(const FInputActionValue& ValueX)
 	prevYaw = currentYaw;
 	currentYaw += lookX;
 
+	// Lock the camera at 180 degrees horizontally
+
 	if (currentYaw >= 180)
 	{
 		lookX = 180 - prevYaw;
@@ -375,6 +383,8 @@ void AAircraftPlayerController::LookVer(const FInputActionValue& ValueY)
 
 	prevPitch = seePitch;
 	seePitch += lookY;
+
+	// Lock the camera at 85 degrees vertically
 
 	if (seePitch >= 85) 
 	{

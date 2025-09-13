@@ -17,6 +17,9 @@
 
 AFlightGamemode::AFlightGamemode() 
 {
+	// ====================================
+	// Temporary Fill In classes for testing
+	// ====================================
 	static ConstructorHelpers::FClassFinder<AT38Pawn> T38PawnBPClass(TEXT("/Game/Aircraft/T-38/T-38Pawn"));
 	if (T38PawnBPClass.Succeeded())
 	{
@@ -67,11 +70,13 @@ void AFlightGamemode::BeginPlay()
 void AFlightGamemode::SpawnAIAircraft() 
 {
 	APlayerStart* PlayerStart = nullptr;
-	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It) {
+	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It) 
+	{
 		PlayerStart = *It;
 		break;
 	}
-	if (PlayerStart) {
+	if (PlayerStart) 
+	{
 		FVector OffSet(10, 10, 0);
 		FVector SpawnLocation = PlayerStart->GetActorLocation() + OffSet;
 		FRotator SpawnRotation = PlayerStart->GetActorRotation();
@@ -88,6 +93,8 @@ void AFlightGamemode::SpawnAIAircraft()
 		}
 	}
 }
+
+// TODO: Make Playerstate actually set the aircraft and other necessities
 
 void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl) 
 {

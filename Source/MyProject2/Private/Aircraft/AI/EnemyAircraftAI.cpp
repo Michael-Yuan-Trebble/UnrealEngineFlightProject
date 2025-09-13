@@ -15,7 +15,6 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 
-//Initialize AI
 AEnemyAircraftAI::AEnemyAircraftAI() 
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -30,14 +29,14 @@ void AEnemyAircraftAI::BeginPlay()
 
 }
 
-//Possession Function
 void AEnemyAircraftAI::OnPossess(APawn* PawnPossess) 
 {
 	Super::OnPossess(PawnPossess);
 
 	if (BehaviorTreeAsset) 
 	{
-		if (UseBlackboard(BehaviorTreeAsset->BlackboardAsset, BlackboardComp)) {
+		if (UseBlackboard(BehaviorTreeAsset->BlackboardAsset, BlackboardComp)) 
+		{
 			RunBehaviorTree(BehaviorTreeAsset);
 			BlackboardComp->SetValueAsBool(TEXT("bIsAttacking"), false);
 			BlackboardComp->SetValueAsFloat(TEXT("PitchAmount"), 0.f);
@@ -46,12 +45,11 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 		}
 	}
 
-	//Doesn't have Base AI Aircraft Class yet, will change the Cast and others based on different AI Airplane
-
-	//Get Variables from AI
-
 	Controlled = Cast<AEnemyAircraft>(GetPawn());
 	if (!Controlled) return;
+
+	// Draw Radar Cone
+
 	DrawDebugCone(
 		GetWorld(),
 		Controlled->GetActorLocation(),
@@ -79,7 +77,8 @@ void AEnemyAircraftAI::Tick(float DeltaTime)
 	currentYaw = Controlled->GetActorRotation().Yaw;
 	currentRoll = Controlled->GetActorRotation().Roll;
 
-	//Controlled->ApplySpeed(0.5);
+	// TODO: Move tracking logic into Blackboard instead of in the AI 
+	// Prioritize Pitch and Roll, with Yaw only being used in a certain distance and in a certain cone around an area
 
 	if (Tracking.CurrentPawn) 
 	{
@@ -108,6 +107,8 @@ void AEnemyAircraftAI::Tick(float DeltaTime)
 
 void AEnemyAircraftAI::ShouldYaw() 
 {
+	// Find the angle and distance between target and self to see if yaw is needed
+
 	FVector TargetDistance = TrackingLocation - Controlled->GetActorLocation();
 	float LengthDistance = TargetDistance.Length();
 	TargetDistance.Normalize();
@@ -116,7 +117,7 @@ void AEnemyAircraftAI::ShouldYaw()
 
 	float ConeAngleCosine = FMath::Acos(DotProduct) * (180.f/PI);
 
-	//30 Degrees for now, will change with every aircraft probably
+	// TODO: Make angle variable between aircraft
 	if ((ConeAngleCosine <= 30.f) && (LengthDistance <= 100.f)) 
 	{
 		bUseYaw = true;

@@ -41,6 +41,8 @@ void APlayerAircraft::PossessedBy(AController* NewController)
 
 void APlayerAircraft::SetStats(UAircraftStats* InStats)
 {
+	// Get Aircraft stats from UDataAssets
+
 	AirStats = InStats;
 	FlightComponent->AircraftStats = InStats;
 }
@@ -60,11 +62,13 @@ float APlayerAircraft::ReturnSpringArmLength() const
 	return springArmLength;
 }
 
-void APlayerAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) {
+void APlayerAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) 
+{
 	WeaponComponent->Loadout = In;
 	WeaponComponent->EquipWeapons();
 }
 
-UFlightComponent* APlayerAircraft::GetFlightComp() {
+UFlightComponent* APlayerAircraft::GetFlightComp() 
+{
 	return FlightComponent;
 }
