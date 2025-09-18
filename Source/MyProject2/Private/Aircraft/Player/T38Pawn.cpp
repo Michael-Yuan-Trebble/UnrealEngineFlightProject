@@ -5,7 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "FlightComponent.h"
+#include "Aircraft/FlightComponent.h"
 #include "Animation/AnimInstance.h"
 #include "AircraftPlayerController.h"
 

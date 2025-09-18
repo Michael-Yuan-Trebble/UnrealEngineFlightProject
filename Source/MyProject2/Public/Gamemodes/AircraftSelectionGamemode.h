@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Structs and Data/AircraftDatabase.h"
-#include "Structs and Data/AircraftData.h"
+#include "Structs and Data/Aircraft Data/AircraftDatabase.h"
+#include "Structs and Data/Aircraft Data/AircraftData.h"
 #include "AircraftSelectionGamemode.generated.h"
 
 class UAircraftSelectionWidget;

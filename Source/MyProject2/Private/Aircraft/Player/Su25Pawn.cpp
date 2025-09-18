@@ -6,7 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Animation/AnimInstance.h"
-#include "FlightComponent.h"
+#include "Aircraft/FlightComponent.h"
 #include "AircraftPlayerController.h"
 #include "Weapons/Missiles/BaseIRMissile.h"
 #include "Weapons/AircraftBullet.h"

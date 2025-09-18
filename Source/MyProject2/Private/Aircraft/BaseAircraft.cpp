@@ -7,8 +7,8 @@
 #include "Structs and Data/CooldownWeapon.h"
 #include "Weapons/AircraftBullet.h"
 #include "AircraftRegistry.h"
-#include "FlightComponent.h"
-#include "WeaponSystemComponent.h"
+#include "Aircraft/FlightComponent.h"
+#include "Aircraft/WeaponSystemComponent.h"
 #include "AircraftPlayerController.h"
 
 ABaseAircraft::ABaseAircraft()
@@ -159,6 +159,7 @@ void ABaseAircraft::UpdateLockedOn(float DeltaSeconds)
 		bLocked = false;
 		LockTime = 0.f;
 	} 
+	
 }
 
 FVector ABaseAircraft::GetTargetLocation() const 

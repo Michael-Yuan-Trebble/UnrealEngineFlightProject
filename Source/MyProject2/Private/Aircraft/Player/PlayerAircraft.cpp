@@ -3,9 +3,9 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Player!"));
 #include "Aircraft/Player/PlayerAircraft.h"
 #include "AircraftPlayerController.h"
-#include "FlightComponent.h"
-#include "RadarComponent.h"
-#include "WeaponSystemComponent.h"
+#include "Aircraft/FlightComponent.h"
+#include "Aircraft/RadarComponent.h"
+#include "Aircraft/WeaponSystemComponent.h"
 
 APlayerAircraft::APlayerAircraft() 
 {
@@ -27,6 +27,11 @@ void APlayerAircraft::BeginPlay()
 	FlightComponent->Setup(this, AirStats);
 	WeaponComponent->Setup(this, AirStats);
 	RadarComponent->Setup(this);
+}
+
+void APlayerAircraft::Tick(float DeltaSeconds) {
+	Super::Tick(DeltaSeconds);
+	WeaponComponent->UpdateLockedOn(DeltaSeconds, Tracking);
 }
 
 void APlayerAircraft::PossessedBy(AController* NewController) 

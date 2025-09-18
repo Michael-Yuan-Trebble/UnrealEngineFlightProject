@@ -18,8 +18,6 @@ class MYPROJECT2_API ABaseIRMissile : public ABaseWeapon
 public:	
 	ABaseIRMissile();
 
-	float range;
-
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	bool isDropPhase;
 

@@ -3,9 +3,9 @@
 
 #include "Aircraft/AI/EnemyAircraft.h"
 #include "Aircraft/AI/EnemyAircraftAI.h"
-#include "RadarComponent.h"
+#include "Aircraft/RadarComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "FlightComponent.h"
+#include "Aircraft/FlightComponent.h"
 #include "Aircraft/AI/AIFlightComponent.h"
 
 AEnemyAircraft::AEnemyAircraft() 
@@ -48,9 +48,6 @@ void AEnemyAircraft::PossessedBy(AController* NewController) {
 		PickTarget();
 	}
 */
-
-// Iterate through All Aircraft in range
-// Store the largest threat and make it the one targeted
 
 void AEnemyAircraft::PickTarget() 
 {

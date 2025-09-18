@@ -70,7 +70,7 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 void AEnemyAircraftAI::Tick(float DeltaTime) 
 {
 	Super::Tick(DeltaTime);
-
+	/*
 	if (!Controlled) return;
 
 	currentPitch = Controlled->GetActorRotation().Pitch;
@@ -102,7 +102,7 @@ void AEnemyAircraftAI::Tick(float DeltaTime)
 			RotationTarget(DeltaTime);
 		}
 		PitchTarget(DeltaTime);
-	}
+	}*/
 }
 
 void AEnemyAircraftAI::ShouldYaw() 

@@ -9,7 +9,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
-#include "Structs and Data/AircraftStats.h"
+#include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "BaseAircraft.generated.h"
 

@@ -31,6 +31,10 @@ public:
 
 	float timeDet;
 
+	bool canLock;
+
+	float range;
+
 	virtual void FireStatic(float speed);
 
 	virtual void FireTracking(float speed, AActor* Target);

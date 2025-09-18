@@ -6,8 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "Aircraft/Player/PlayerAircraft.h"
 #include "Aircraft/AI/F16AI.h"
-#include "Structs and Data/AircraftDatabase.h"
-#include "Structs and Data/AircraftData.h"
+#include "Structs and Data/Aircraft Data/AircraftDatabase.h"
+#include "Structs and Data/Aircraft Data/AircraftData.h"
 #include "FlightGamemode.generated.h"
 
 class AT38Pawn;

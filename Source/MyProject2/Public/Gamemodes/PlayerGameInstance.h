@@ -6,7 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "Weapons/BaseWeapon.h"
 #include "Specials/BaseSpecial.h"
-#include "Structs and Data/AircraftData.h"
+#include "Structs and Data/Aircraft Data/AircraftData.h"
 #include "PlayerGameInstance.generated.h"
 
 UCLASS()

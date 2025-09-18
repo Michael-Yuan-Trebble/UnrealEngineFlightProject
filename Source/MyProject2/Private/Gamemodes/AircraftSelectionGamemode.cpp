@@ -3,10 +3,10 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Gamemode!"));
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "GameFramework/SpectatorPawn.h"
-#include "UI/AircraftSelectionWidget.h"
+#include "UI/SelectionUI/AircraftSelectionWidget.h"
 #include "AircraftPlayerController.h"
 #include "Gamemodes/CurrentPlayerState.h"
-#include "MenuManagerComponent.h"
+#include "Aircraft/MenuManagerComponent.h"
 #include "Structs and Data/ControlModeTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Structs and Data/MenuState.h"

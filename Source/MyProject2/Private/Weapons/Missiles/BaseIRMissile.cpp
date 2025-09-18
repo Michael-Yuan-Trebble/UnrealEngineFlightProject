@@ -12,6 +12,7 @@ ABaseIRMissile::ABaseIRMissile()
 	timeTilDelt = 0;
 	isAir = false;
 	isDropPhase = false;
+	canLock = true;
 }
 
 void ABaseIRMissile::BeginPlay()
