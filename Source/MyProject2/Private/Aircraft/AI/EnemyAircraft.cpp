@@ -38,7 +38,8 @@ void AEnemyAircraft::PossessedBy(AController* NewController) {
 			500.0f
 		);
 	}
-
+	FlightComponent->Controlled = this;
+	//FlightComponent->AircraftStats
 	
 }
 
