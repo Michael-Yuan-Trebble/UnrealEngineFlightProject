@@ -6,6 +6,7 @@
 #include "Aircraft/BaseAircraft.h"
 #include "Structs and Data/FDetectedAircraftInfo.h"
 #include "Aircraft/AI/AIFlightComponent.h"
+#include "Structs and Data/Aircraft Data/AIAircraftData.h"
 #include "EnemyAircraft.generated.h"
 
 class AEnemyAircraftAI;

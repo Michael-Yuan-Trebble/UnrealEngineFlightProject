@@ -35,10 +35,10 @@ void UBTTaskFlightTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* N
 	float RollOffset = BlackboardComp->GetValueAsFloat(RollKey.SelectedKeyName);
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %f"), PitchOffset));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %f"), PitchOffset));
 	}
 	FlightComp->isFlying = true;
-	FlightComp->SetPitch(PitchOffset);
+	//FlightComp->SetPitch(PitchOffset);
 	FlightComp->SetRoll(RollOffset);
 	FlightComp->ApplyRot(DeltaSeconds);
 }

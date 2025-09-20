@@ -47,7 +47,7 @@ protected:
 	FBlackboardKeySelector ThrottleKey;
 
 private:
-	void CalculateAngle();
+	void CalculateAngle(float DeltaSeconds);
 
 	void PitchAngle();
 };

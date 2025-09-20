@@ -24,34 +24,47 @@ void UBTServiceAttack::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8
 
 void UBTServiceAttack::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) {
 	if (!Controlled || !BlackboardComp || !Selected) return;
-	CalculateAngle();
+	CalculateAngle(DeltaSeconds);
 	PitchAngle();
 }
 
-void UBTServiceAttack::CalculateAngle() 
+void UBTServiceAttack::CalculateAngle(float DeltaSeconds)
 {
 	FVector TrackingLocation = Selected->GetActorLocation();
 
-	FVector CurrentUp = Controlled->GetActorUpVector();
 	FVector Forward = Controlled->GetActorForwardVector();
-	FVector TargetUp = (TrackingLocation - Controlled->GetActorLocation());
+	FVector CurrentUp = Controlled->GetActorUpVector();
+	FVector ToTarget = (TrackingLocation - Controlled->GetActorLocation());
 
-	if (TargetUp.IsNearlyZero()) return;
-	TargetUp.Normalize();
+	if (ToTarget.IsNearlyZero()) return;
+	ToTarget.Normalize();
 
+	// Project target vector onto plane perpendicular to Forward (lateral error)
+	FVector Lateral = ToTarget - (FVector::DotProduct(ToTarget, Forward) * Forward);
+	if (Lateral.IsNearlyZero()) return;
+	Lateral.Normalize();
 
-	FVector NeedVector = TargetUp - (FVector::DotProduct(TargetUp, Forward) * Forward);
-	if (NeedVector.IsNearlyZero()) return;
-	NeedVector.Normalize();
+	// Roll correction: how much to tilt wings so "up" points toward target plane
+	float RollAmount = FVector::DotProduct(FVector::CrossProduct(CurrentUp, Lateral), Forward);
 
-	float RollAmount = FVector::DotProduct(FVector::CrossProduct(CurrentUp, NeedVector), Forward);
+	// Clamp
 	RollAmount = FMath::Clamp(RollAmount, -1.f, 1.f);
 
-	BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, RollAmount);
+	// Deadzone
+	if (FMath::Abs(RollAmount) < 0.05f)
+	{
+		RollAmount = 0.f;
+	}
+
+	// Smooth it out
+	float CurrentRoll = BlackboardComp->GetValueAsFloat(RollKey.SelectedKeyName);
+	float SmoothedRoll = FMath::FInterpTo(CurrentRoll, RollAmount, DeltaSeconds, 2.f);
+
+	BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, SmoothedRoll);
 
 	if (GEngine)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Roll: %f"), RollAmount));
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Roll: %f"), RollAmount));
 	}
 	
 }

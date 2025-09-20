@@ -7,7 +7,7 @@
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "AIAircraftData.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType)
 class MYPROJECT2_API UAIAircraftData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
