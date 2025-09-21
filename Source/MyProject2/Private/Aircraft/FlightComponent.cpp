@@ -45,7 +45,7 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ====================================
 
 	ApplySpeed(CurrentThrust, DeltaTime);
-	RollAOA(DeltaTime);
+	//RollAOA(DeltaTime);
 	ApplyRot(DeltaTime);
 	ReturnAOA(DeltaTime);
 
@@ -180,7 +180,7 @@ void UFlightComponent::ApplyRot(float DeltaSeconds)
 	ApplyRoll(DeltaSeconds);
 	ApplyPitch(DeltaSeconds);
 
-	FQuat DeltaRotation = isFlying ? FQuat(FRotator(NextPitch, NextYaw, NextRoll))
+	FQuat DeltaRotation = isFlying ? FQuat(FRotator(NextPitch, NextYaw, 0))
 		: FQuat(FRotator(0, NextYaw, 0));
 
 	Controlled->Airframe->AddLocalRotation(DeltaRotation);
@@ -283,12 +283,44 @@ void UFlightComponent::ApplyYaw(float DeltaSeconds)
 
 void UFlightComponent::ApplyRoll(float DeltaSeconds)
 {
-	if (UserRoll == 0) NextRoll = FMath::FInterpTo(NextRoll, 0, DeltaSeconds, 3.5f);
-	else
+	float InterpSpeed = 0;
+	if (Controlled->GetController() && Controlled->GetController()->IsPlayerController())
 	{
-		NextRoll = FMath::FInterpTo(NextRoll, UserRoll, DeltaSeconds, 8.f);
-		NextRoll = FMath::Clamp(NextRoll, -AircraftStats->RollRate, AircraftStats->RollRate);
+		 InterpSpeed = AircraftStats->RollRate * 10;
+		 float TargetRollRate = UserRoll * InterpSpeed;
+		 NextRoll = FMath::FInterpTo(NextRoll, TargetRollRate, DeltaSeconds, 5.f);
+
+		 FRotator DeltaRot(0.f, 0.f, NextRoll * DeltaSeconds);
+		 Controlled->Airframe->AddLocalRotation(DeltaRot);
 	}
+	else {
+		 InterpSpeed = AircraftStats->RollRate;
+		 float TargetRollAngle = UserRoll * InterpSpeed;
+		 FRotator CurrentRot = Controlled->Airframe->GetRelativeRotation();
+		 float NewRoll = FMath::FInterpTo(CurrentRot.Roll, TargetRollAngle, DeltaSeconds, InterpSpeed);
+
+		 // Snap to zero if close
+		 if (FMath::IsNearlyZero(NewRoll, 0.01f) && FMath::IsNearlyZero(UserRoll, 0.01f))
+			 NewRoll = 0.f;
+
+		 CurrentRot.Roll = NewRoll;
+		 Controlled->Airframe->SetRelativeRotation(CurrentRot);
+	}
+
+
+	/*
+	float TargetRollRate = UserRoll * InterpSpeed;
+	NextRoll = FMath::FInterpTo(NextRoll, TargetRollRate, DeltaSeconds, 5.f);
+
+	if (FMath::IsNearlyZero(NextRoll, 0.1f) && FMath::IsNearlyZero(UserRoll, 0.01f)) {
+		NextRoll = 0.f;
+		Controlled->Airframe->SetRelativeRotation(FRotator::ZeroRotator);
+		return;
+	}
+
+	FRotator DeltaRot(0.f, 0.f, NextRoll * DeltaSeconds);
+	Controlled->Airframe->AddLocalRotation(DeltaRot);*/
+
 }
 
 void UFlightComponent::SetPitch(float PitchValue)

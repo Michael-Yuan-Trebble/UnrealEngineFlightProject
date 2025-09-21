@@ -3,6 +3,8 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Attack!"));
 #include "AI/Service/Attack.h"
 #include "Aircraft/AI/EnemyAircraft.h"
+#include "Aircraft/FlightComponent.h"
+#include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Aircraft/AI/EnemyAircraftAI.h"
 
 UBTServiceAttack::UBTServiceAttack() {
@@ -30,43 +32,42 @@ void UBTServiceAttack::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 
 void UBTServiceAttack::CalculateAngle(float DeltaSeconds)
 {
-	FVector TrackingLocation = Selected->GetActorLocation();
-
-	FVector Forward = Controlled->GetActorForwardVector();
-	FVector CurrentUp = Controlled->GetActorUpVector();
-	FVector ToTarget = (TrackingLocation - Controlled->GetActorLocation());
-
-	if (ToTarget.IsNearlyZero()) return;
-	ToTarget.Normalize();
-
-	// Project target vector onto plane perpendicular to Forward (lateral error)
-	FVector Lateral = ToTarget - (FVector::DotProduct(ToTarget, Forward) * Forward);
-	if (Lateral.IsNearlyZero()) return;
-	Lateral.Normalize();
-
-	// Roll correction: how much to tilt wings so "up" points toward target plane
-	float RollAmount = FVector::DotProduct(FVector::CrossProduct(CurrentUp, Lateral), Forward);
-
-	// Clamp
-	RollAmount = FMath::Clamp(RollAmount, -1.f, 1.f);
-
-	// Deadzone
-	if (FMath::Abs(RollAmount) < 0.05f)
-	{
-		RollAmount = 0.f;
+	float neededRoll = CalculateRollDegrees();
+	neededRoll = FMath::Clamp(neededRoll, -1, 1);
+	if (FMath::Abs(neededRoll) < 0.1) {
+		BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, 0);
 	}
-
-	// Smooth it out
-	float CurrentRoll = BlackboardComp->GetValueAsFloat(RollKey.SelectedKeyName);
-	float SmoothedRoll = FMath::FInterpTo(CurrentRoll, RollAmount, DeltaSeconds, 2.f);
-
-	BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, SmoothedRoll);
+	else {
+		BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, neededRoll);
+	}
 
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Roll: %f"), RollAmount));
+		//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow,
+		//	FString::Printf(TEXT("Roll Input: %f"),neededRoll));
 	}
-	
+}
+
+// 180 to -180 degrees
+float UBTServiceAttack::CalculateRollDegrees()
+{
+	FVector Forward = Controlled->Airframe->GetForwardVector();
+	FVector Up = Controlled->Airframe->GetUpVector();
+
+	FVector ToTarget = (Selected->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
+	if (ToTarget.IsNearlyZero()) return 0;
+
+	// Project onto plane perpendicular to Forward
+	FVector ToTargetPlane = ToTarget - FVector::DotProduct(ToTarget, Forward) * Forward;
+	if (ToTargetPlane.IsNearlyZero()) return 0;
+	ToTargetPlane.Normalize();
+
+	float RollRad = FMath::Atan2(
+		FVector::DotProduct(FVector::CrossProduct(ToTargetPlane, Up), Forward),
+		FVector::DotProduct(Up, ToTargetPlane)
+	);
+
+	return FMath::RadiansToDegrees(RollRad);
 }
 
 void UBTServiceAttack::PitchAngle() 

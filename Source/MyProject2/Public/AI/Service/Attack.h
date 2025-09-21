@@ -8,6 +8,7 @@
 #include "Attack.generated.h"
 
 class AEnemyAircraftAI;
+class AEnemyAircraft;
 
 UCLASS(Blueprintable, BlueprintType, meta = (DisplayName="Attack Service"))
 class MYPROJECT2_API UBTServiceAttack : public UBTService
@@ -28,7 +29,7 @@ protected:
 
 	AActor* Selected;
 
-	ABaseAircraft* Controlled;
+	AEnemyAircraft* Controlled;
 
 	UBlackboardComponent* BlackboardComp;
 
@@ -46,8 +47,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector ThrottleKey;
 
+	float LastRoll = 0.f;
+
 private:
 	void CalculateAngle(float DeltaSeconds);
 
 	void PitchAngle();
+
+	float CalculateRollDegrees();
 };

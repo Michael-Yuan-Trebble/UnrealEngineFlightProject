@@ -33,12 +33,13 @@ void UBTTaskFlightTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* N
 	float YawOffset = BlackboardComp->GetValueAsFloat(YawKey.SelectedKeyName);
 	float PitchOffset = BlackboardComp->GetValueAsFloat(PitchKey.SelectedKeyName);
 	float RollOffset = BlackboardComp->GetValueAsFloat(RollKey.SelectedKeyName);
-	if (GEngine)
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %f"), PitchOffset));
-	}
 	FlightComp->isFlying = true;
 	//FlightComp->SetPitch(PitchOffset);
-	FlightComp->SetRoll(RollOffset);
+	if (FMath::IsNearlyZero(RollOffset,0.01f)) {
+		FlightComp->SetRoll(0);
+	}
+	else {
+		FlightComp->SetRoll(RollOffset);
+	}
 	FlightComp->ApplyRot(DeltaSeconds);
 }
