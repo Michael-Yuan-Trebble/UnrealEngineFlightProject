@@ -181,11 +181,6 @@ void UFlightComponent::ApplyRot(float DeltaSeconds)
 	ApplyRoll(DeltaSeconds);
 	ApplyPitch(DeltaSeconds);
 
-	FQuat DeltaRotation = isFlying ? FQuat(FRotator(NextPitch, NextYaw, 0))
-		: FQuat(FRotator(0, NextYaw, 0));
-
-	Controlled->Airframe->AddLocalRotation(DeltaRotation);
-
 	ReturnAOA(DeltaSeconds);
 }
 
@@ -262,16 +257,16 @@ void UFlightComponent::ApplyPitch(float DeltaSeconds)
 	float InterpSpeed = 0;
 	if (Controlled->GetController() && Controlled->GetController()->IsPlayerController())
 	{
-		InterpSpeed = AircraftStats->TurnRate * 10;
+		InterpSpeed = AircraftStats->TurnRate * 50;
 		float TargetPitchRate = UserPitch * InterpSpeed;
 		NextPitch = FMath::FInterpTo(NextPitch, TargetPitchRate, DeltaSeconds, 5.f);
 
-		FRotator DeltaRot(0.f, 0.f, NextPitch * DeltaSeconds);
+		FRotator DeltaRot(NextPitch * DeltaSeconds, 0.f, 0.f);
 		Controlled->Airframe->AddLocalRotation(DeltaRot);
 	}
 	else
 	{
-		InterpSpeed = AircraftStats->TurnRate;
+		InterpSpeed = AircraftStats->TurnRate * 10;
 		float TargetPitchAngle = UserPitch * InterpSpeed;
 		FRotator CurrentRot = Controlled->Airframe->GetRelativeRotation();
 		float NewPitch = FMath::FInterpTo(CurrentRot.Pitch, TargetPitchAngle, DeltaSeconds, InterpSpeed);
@@ -283,27 +278,33 @@ void UFlightComponent::ApplyPitch(float DeltaSeconds)
 		CurrentRot.Pitch = NewPitch;
 		Controlled->Airframe->SetRelativeRotation(CurrentRot);
 	}
-	/*
-	if (FMath::IsNearlyZero(UserPitch, 0.01f))
-	{
-		NextPitch = FMath::FInterpTo(NextPitch, 0, DeltaSeconds, 5.f);
-	}
-	else
-	{
-		NextPitch = FMath::FInterpTo(NextPitch, UserPitch, DeltaSeconds, 8.f);
-		NextPitch = FMath::Clamp(NextPitch, -AircraftStats->TurnRate, AircraftStats->TurnRate);
-
-		if (UserPitch < 0.01) NextPitch *= 0.7f;
-	}*/
 }
 
 void UFlightComponent::ApplyYaw(float DeltaSeconds)
 {
-	if (UserYaw == 0) NextYaw = FMath::FInterpTo(NextYaw, 0, DeltaSeconds, 7.f);
+	float InterpSpeed = 0;
+	if (Controlled->GetController() && Controlled->GetController()->IsPlayerController())
+	{
+		InterpSpeed = AircraftStats->RudderRate * 50;
+		float TargetYawRate = UserYaw * InterpSpeed;
+		NextYaw = FMath::FInterpTo(UserYaw, TargetYawRate, DeltaSeconds, 5.f);
+
+		FRotator DeltaRot(0.f, NextYaw * DeltaSeconds,0.f);
+		Controlled->Airframe->AddLocalRotation(DeltaRot);
+	}
 	else
 	{
-		NextYaw = FMath::FInterpTo(NextYaw, UserYaw, DeltaSeconds, 2.f);
-		NextYaw = FMath::Clamp(NextYaw, -AircraftStats->RudderRate, AircraftStats->RudderRate);
+		InterpSpeed = AircraftStats->RudderRate;
+		float TargetYawAngle = UserYaw * InterpSpeed;
+		FRotator CurrentRot = Controlled->Airframe->GetRelativeRotation();
+		float NewYaw = FMath::FInterpTo(CurrentRot.Yaw, TargetYawAngle, DeltaSeconds, InterpSpeed);
+
+		if (FMath::IsNearlyZero(NewYaw, 0.01f) && FMath::IsNearlyZero(UserYaw, 0.01f))
+		{
+			NewYaw = 0.f;
+		}
+		CurrentRot.Yaw = NewYaw;
+		Controlled->Airframe->SetRelativeRotation(CurrentRot);
 	}
 }
 
@@ -334,21 +335,10 @@ void UFlightComponent::ApplyRoll(float DeltaSeconds)
 	}
 }
 
-void UFlightComponent::SetPitch(float PitchValue)
-{
-	UserPitch = PitchValue;
-}
+void UFlightComponent::SetPitch(float PitchValue) {UserPitch = PitchValue;}
 
-void UFlightComponent::SetYaw(float YawValue)
-{
-	UserYaw = YawValue;
-}
+void UFlightComponent::SetYaw(float YawValue) {UserYaw = YawValue;}
 
-void UFlightComponent::SetRoll(float RollValue)
-{
-	UserRoll = RollValue;
-}
+void UFlightComponent::SetRoll(float RollValue) {UserRoll = RollValue;}
 
-void UFlightComponent::SetThrust(float Thrust) {
-	CurrentThrust = Thrust;
-}
+void UFlightComponent::SetThrust(float Thrust) {CurrentThrust = Thrust;}

@@ -26,66 +26,107 @@ void UBTServiceAttack::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8
 	Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
 }
 
-void UBTServiceAttack::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) {
+void UBTServiceAttack::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
+{
 	if (!Controlled || !BlackboardComp || !Selected) return;
 	CalculateAngle(DeltaSeconds);
-	PitchAngle();
 }
 
 void UBTServiceAttack::CalculateAngle(float DeltaSeconds)
 {
-	float neededRoll = CalculateRollDegrees();
+	float PitchErrorDeg = CalculatePitchDegrees();
+	if (FMath::Abs(PitchErrorDeg) < 2) {
+		PitchErrorDeg = 0.f;
+	}
+	float YawErrorDeg = CalculateYawDegrees();
+
+	float pitchInput = PitchErrorDeg / 45.f;
+	pitchInput = FMath::Clamp(pitchInput, -1, 1);
+	if (FMath::Abs(pitchInput) < 0.05f) {
+		pitchInput = 0.f;
+	}
+
+	BlackboardComp->SetValueAsFloat(PitchKey.SelectedKeyName, pitchInput);
+	float neededRoll = CalculateRollDegrees(PitchErrorDeg, YawErrorDeg);
+
 	neededRoll = FMath::Clamp(neededRoll, -1, 1);
-	if (FMath::Abs(neededRoll) < 0.1) {
+	if (FMath::Abs(neededRoll) < 0.1) 
+	{
 		BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, 0);
 	}
-	else {
+	else
+	{
 		BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, neededRoll);
 	}
 
 	if (GEngine)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow,
-		//	FString::Printf(TEXT("Roll Input: %f"),neededRoll));
+		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow,
+			FString::Printf(TEXT("Roll Input: %f"),neededRoll));
 	}
 }
 
 // 180 to -180 degrees
-float UBTServiceAttack::CalculateRollDegrees()
+float UBTServiceAttack::CalculateRollDegrees(float CurrentPitchErrorDeg, float CurrentYawErrorDeg)
 {
+	if (FMath::Abs(CurrentPitchErrorDeg) > 60.f)
+		return 0.f;
+
+	float rollInput = CurrentYawErrorDeg / 45.f; 
+	rollInput = FMath::Clamp(rollInput, -1.f, 1.f);
+
+	if (FMath::Abs(rollInput) < 0.05f)
+		rollInput = 0.f;
+
+	return rollInput;
+}
+
+float UBTServiceAttack::CalculatePitchDegrees() 
+{
+	FVector ToTarget = (Selected->GetActorLocation() - Controlled->GetActorLocation());
+	if (ToTarget.IsNearlyZero()) return 0.f;
+	ToTarget.Normalize();
+
 	FVector Forward = Controlled->Airframe->GetForwardVector();
 	FVector Up = Controlled->Airframe->GetUpVector();
 
-	FVector ToTarget = (Selected->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
-	if (ToTarget.IsNearlyZero()) return 0;
-
-	FVector ToTargetPlane = ToTarget - FVector::DotProduct(ToTarget, Forward) * Forward;
-	if (ToTargetPlane.IsNearlyZero()) return 0;
+	FVector ToTargetPlane = ToTarget - FVector::DotProduct(ToTarget, Controlled->Airframe->GetRightVector()) * Controlled->Airframe->GetRightVector();
+	if (ToTargetPlane.IsNearlyZero()) return 0.f;
 	ToTargetPlane.Normalize();
 
-	float RollRad = FMath::Atan2(
-		FVector::DotProduct(FVector::CrossProduct(ToTargetPlane, Up), Forward),
-		FVector::DotProduct(Up, ToTargetPlane)
+	float PitchRad = FMath::Atan2(
+		FVector::DotProduct(ToTargetPlane, Up),
+		FVector::DotProduct(ToTargetPlane, Forward)
 	);
-
-	return FMath::RadiansToDegrees(RollRad);
-}
-
-void UBTServiceAttack::PitchAngle() 
-{
-	FVector TrackingLocation = Selected->GetActorLocation();
-	FVector DistanceBetween = (TrackingLocation - Controlled->GetActorLocation());
-	if (DistanceBetween.IsNearlyZero()) return;
-	DistanceBetween.Normalize();
-	FVector Forward = Controlled->GetActorForwardVector();
-	float PitchAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Forward, DistanceBetween)));
-	float Sign = FMath::Sign(FVector::DotProduct(DistanceBetween, Controlled->GetActorUpVector()));
-	float PitchOffset = PitchAngle * Sign;
-
-	BlackboardComp->SetValueAsFloat(PitchKey.SelectedKeyName, PitchOffset);
 
 	if (GEngine)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %f"), PitchOffset));
+		//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green,
+		//	FString::Printf(TEXT("Pitch: %f"), PitchRad));
 	}
+
+	return FMath::RadiansToDegrees(PitchRad);
+}
+
+float UBTServiceAttack::CalculateYawDegrees()
+{
+	FVector ToTarget = (Selected->GetActorLocation() - Controlled->GetActorLocation());
+	if (ToTarget.IsNearlyZero()) return 0.f;
+	ToTarget.Normalize();
+
+	FVector Forward = Controlled->Airframe->GetForwardVector();
+	FVector Right = Controlled->Airframe->GetRightVector();
+
+	FVector FlatForward = FVector(Forward.X, Forward.Y, 0.f).GetSafeNormal();
+	FVector FlatToTarget = FVector(ToTarget.X, ToTarget.Y, 0.f).GetSafeNormal();
+
+	if (FlatForward.IsNearlyZero() || FlatToTarget.IsNearlyZero())
+		return 0.f;
+
+	float YawRad = FMath::Atan2(
+		FVector::DotProduct(FlatToTarget, Right),
+		FVector::DotProduct(FlatToTarget, FlatForward)
+	);
+
+	return FMath::RadiansToDegrees(YawRad);
 }

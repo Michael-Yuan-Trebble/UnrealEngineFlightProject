@@ -44,5 +44,7 @@ void AEnemyAircraft::PossessedBy(AController* NewController) {
 	UAircraftStats* Temp = NewObject<UAircraftStats>(this);
 	Temp->TurnRate = 0.3;
 	Temp->RollRate = 10;
+	Temp->Thrust = 10;
+	Temp->MaxSpeed = 1000;
 	FlightComponent->AircraftStats = Temp;
 }

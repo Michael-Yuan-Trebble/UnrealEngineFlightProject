@@ -33,8 +33,11 @@ void UBTTaskFlightTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* N
 	float YawOffset = BlackboardComp->GetValueAsFloat(YawKey.SelectedKeyName);
 	float PitchOffset = BlackboardComp->GetValueAsFloat(PitchKey.SelectedKeyName);
 	float RollOffset = BlackboardComp->GetValueAsFloat(RollKey.SelectedKeyName);
-	//FlightComp->SetPitch(PitchOffset);
+	float Throttle = BlackboardComp->GetValueAsFloat(ThrottleKey.SelectedKeyName);
+	PitchOffset = FMath::IsNearlyZero(PitchOffset) ? 0.0f : PitchOffset;
+	FlightComp->SetPitch(PitchOffset);
 	RollOffset = FMath::IsNearlyZero(RollOffset) ? 0.0f : RollOffset;
 	FlightComp->SetRoll(RollOffset);
-	FlightComp->ApplyRot(DeltaSeconds);
+	//FlightComp->ApplyRot(DeltaSeconds);
+	FlightComp->SetThrust(0.5);
 }

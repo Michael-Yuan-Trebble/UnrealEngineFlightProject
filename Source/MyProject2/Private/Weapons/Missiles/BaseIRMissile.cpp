@@ -118,7 +118,4 @@ void ABaseIRMissile::LaunchSequence(float Speed)
 	}
 }
 
-float ABaseIRMissile::ReturnCooldownTime() 
-{
-	return cooldownTime;
-}
+float ABaseIRMissile::ReturnCooldownTime() {return cooldownTime;}

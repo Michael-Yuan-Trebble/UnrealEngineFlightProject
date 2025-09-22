@@ -29,7 +29,8 @@ void APlayerAircraft::BeginPlay()
 	RadarComponent->Setup(this);
 }
 
-void APlayerAircraft::Tick(float DeltaSeconds) {
+void APlayerAircraft::Tick(float DeltaSeconds) 
+{
 	Super::Tick(DeltaSeconds);
 	WeaponComponent->UpdateLockedOn(DeltaSeconds, Tracking);
 }
@@ -46,34 +47,20 @@ void APlayerAircraft::PossessedBy(AController* NewController)
 
 void APlayerAircraft::SetStats(UAircraftStats* InStats)
 {
-	// Get Aircraft stats from UDataAssets
-
 	AirStats = InStats;
 	FlightComponent->AircraftStats = InStats;
 }
 
-USpringArmComponent* APlayerAircraft::GetSpringArm() const 
-{
-	return SpringArm;
-}
-
-UCameraComponent* APlayerAircraft::GetCamera() const
-{
-	return Camera;
-}
-
-float APlayerAircraft::ReturnSpringArmLength() const
-{
-	return springArmLength;
-}
-
-void APlayerAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) 
+void APlayerAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In)
 {
 	WeaponComponent->Loadout = In;
 	WeaponComponent->EquipWeapons();
 }
 
-UFlightComponent* APlayerAircraft::GetFlightComp() 
-{
-	return FlightComponent;
-}
+USpringArmComponent* APlayerAircraft::GetSpringArm() const {return SpringArm;}
+
+UCameraComponent* APlayerAircraft::GetCamera() const {return Camera;}
+
+float APlayerAircraft::ReturnSpringArmLength() const {return springArmLength;}
+
+UFlightComponent* APlayerAircraft::GetFlightComp() {return FlightComponent;}

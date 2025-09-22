@@ -162,22 +162,10 @@ void ABaseAircraft::UpdateLockedOn(float DeltaSeconds)
 	
 }
 
-FVector ABaseAircraft::GetTargetLocation() const 
-{
-	return this->GetActorLocation();
-}
+FVector ABaseAircraft::GetTargetLocation() const {return this->GetActorLocation();}
 
-bool ABaseAircraft::IsLockable() const 
-{
-	return isAlive;
-}
+bool ABaseAircraft::IsLockable() const {return isAlive;}
 
-float ABaseAircraft::ReturnTakeoffSpeed() const 
-{
-	return TakeoffSpeed;
-}
+float ABaseAircraft::ReturnTakeoffSpeed() const {return TakeoffSpeed;}
 
-USkeletalMeshComponent* ABaseAircraft::GetMesh() const 
-{
-	return Airframe;
-}
+USkeletalMeshComponent* ABaseAircraft::GetMesh() const {return Airframe;}

@@ -52,7 +52,9 @@ protected:
 private:
 	void CalculateAngle(float DeltaSeconds);
 
-	void PitchAngle();
+	float CalculateRollDegrees(float CurrentPitchErrorDeg, float CurrentYawErrorDeg);
 
-	float CalculateRollDegrees();
+	float CalculatePitchDegrees();
+
+	float CalculateYawDegrees();
 };
