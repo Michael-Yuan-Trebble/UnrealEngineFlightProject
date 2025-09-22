@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
+#include "Aircraft/FlightComponent.h"
 #include "FlightTaskNode.generated.h"
 /**
  * 
@@ -30,4 +31,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector ThrottleKey;
+
+	UBlackboardComponent* BlackboardComp;
+
+	UFlightComponent* FlightComp;
 };

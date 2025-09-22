@@ -7,13 +7,15 @@
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Aircraft/AI/EnemyAircraftAI.h"
 
-UBTServiceAttack::UBTServiceAttack() {
+UBTServiceAttack::UBTServiceAttack()
+{
 	NodeName = "Update Attack Movement";
 	Interval = 0.2f;
 	bNotifyBecomeRelevant = true;
 }
 
-void UBTServiceAttack::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) {
+void UBTServiceAttack::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) 
+{
 	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
 	BlackboardComp = OwnerComp.GetBlackboardComponent();
 	Controller = Cast<AEnemyAircraftAI>(OwnerComp.GetAIOwner());
@@ -57,7 +59,6 @@ float UBTServiceAttack::CalculateRollDegrees()
 	FVector ToTarget = (Selected->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
 	if (ToTarget.IsNearlyZero()) return 0;
 
-	// Project onto plane perpendicular to Forward
 	FVector ToTargetPlane = ToTarget - FVector::DotProduct(ToTarget, Forward) * Forward;
 	if (ToTargetPlane.IsNearlyZero()) return 0;
 	ToTargetPlane.Normalize();

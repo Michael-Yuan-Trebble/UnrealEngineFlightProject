@@ -46,28 +46,3 @@ void AEnemyAircraft::PossessedBy(AController* NewController) {
 	Temp->RollRate = 10;
 	FlightComponent->AircraftStats = Temp;
 }
-
-/*
-	if (!Targeting.CurrentPawn || (Targeting.CurrentPawn && Targeting.threatLevel < 0.5))
-	{
-		PickTarget();
-	}
-*/
-
-void AEnemyAircraft::PickTarget() 
-{
-	for (int i = 0; i < DetectedTargets.Num(); i++)
-	{
-		if (Targeting.CurrentPawn)
-		{
-			if (Targeting.threatLevel < DetectedTargets[i].threatLevel)
-			{
-				Targeting = DetectedTargets[i];
-			}
-		}
-		else
-		{
-			Targeting = DetectedTargets[i];
-		}
-	}
-}

@@ -15,31 +15,26 @@ UBTTaskFlightTaskNode::UBTTaskFlightTaskNode()
 
 EBTNodeResult::Type UBTTaskFlightTaskNode::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) 
 {
+	BlackboardComp = OwnerComp.GetBlackboardComponent();
+	if (!BlackboardComp) return EBTNodeResult::Aborted;
+
+	AEnemyAircraftAI* Controller = Cast<AEnemyAircraftAI>(OwnerComp.GetAIOwner());
+	if (!Controller) return EBTNodeResult::Aborted;
+
+	AEnemyAircraft* Controlled = Cast<AEnemyAircraft>(Controller->Controlled);
+
+	FlightComp = Controlled->FlightComponent;
+	FlightComp->isFlying = true;
 	return EBTNodeResult::InProgress;
 }
 
 void UBTTaskFlightTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
-	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
-	if (!BlackboardComp) return;
-
-	AEnemyAircraftAI* Controller = Cast<AEnemyAircraftAI>(OwnerComp.GetAIOwner());
-	if (!Controller) return;
-
-	AEnemyAircraft* Controlled = Cast<AEnemyAircraft>(Controller->Controlled);
-
-	UFlightComponent* FlightComp = Controlled->FlightComponent;
-
 	float YawOffset = BlackboardComp->GetValueAsFloat(YawKey.SelectedKeyName);
 	float PitchOffset = BlackboardComp->GetValueAsFloat(PitchKey.SelectedKeyName);
 	float RollOffset = BlackboardComp->GetValueAsFloat(RollKey.SelectedKeyName);
-	FlightComp->isFlying = true;
 	//FlightComp->SetPitch(PitchOffset);
-	if (FMath::IsNearlyZero(RollOffset,0.01f)) {
-		FlightComp->SetRoll(0);
-	}
-	else {
-		FlightComp->SetRoll(RollOffset);
-	}
+	RollOffset = FMath::IsNearlyZero(RollOffset) ? 0.0f : RollOffset;
+	FlightComp->SetRoll(RollOffset);
 	FlightComp->ApplyRot(DeltaSeconds);
 }

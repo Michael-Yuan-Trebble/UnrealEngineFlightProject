@@ -70,39 +70,6 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 void AEnemyAircraftAI::Tick(float DeltaTime) 
 {
 	Super::Tick(DeltaTime);
-	/*
-	if (!Controlled) return;
-
-	currentPitch = Controlled->GetActorRotation().Pitch;
-	currentYaw = Controlled->GetActorRotation().Yaw;
-	currentRoll = Controlled->GetActorRotation().Roll;
-
-	// TODO: Move tracking logic into Blackboard instead of in the AI 
-	// Prioritize Pitch and Roll, with Yaw only being used in a certain distance and in a certain cone around an area
-
-	if (Tracking.CurrentPawn) 
-	{
-		TrackingPawn = Tracking.CurrentPawn;
-		TrackingLocation = TrackingPawn->GetActorLocation();
-		TrackingRotation = TrackingPawn->GetActorRotation();
-
-		FVector DistanceWorld = TrackingLocation - Controlled->GetActorLocation();
-		FVector LocalDistance = Controlled->GetActorTransform().InverseTransformVectorNoScale(DistanceWorld);
-
-		//bUseYaw =  FMath::Abs(LocalDistance.Y) <= Controlled->YawBoxWidth * 0.5f && FMath::Abs(LocalDistance.Z) <= Controlled->YawBoxHeight;
-		//LocalDistance.X <= Controlled->YawBoxDepth &&
-
-		ShouldYaw();
-		if (bUseYaw) 
-		{
-			print(text)
-		}
-		else 
-		{
-			RotationTarget(DeltaTime);
-		}
-		PitchTarget(DeltaTime);
-	}*/
 }
 
 void AEnemyAircraftAI::ShouldYaw() 
