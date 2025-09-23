@@ -55,6 +55,11 @@ void URadarComponent::ScanTargets()
 		if (TempInfo.threatLevel > 0) 
 		{
 			Detected.Add(TempInfo);
+			if (!Selected && Controlled)
+			{
+				Selected = RegisteredPawn;
+				Controlled->Tracking = Selected;
+			}
 		}
 	}
 }

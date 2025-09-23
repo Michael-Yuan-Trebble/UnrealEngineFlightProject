@@ -290,7 +290,7 @@ void AAircraftPlayerController::Rudder(const FInputActionValue& Value)
 void AAircraftPlayerController::Weapons()
 {
 	if (!Controlled) return;
-	WeaponComp->FireWeaponSelected(1, Selected,FlightComp->currentSpeed);
+	WeaponComp->FireWeaponSelected(1, Controlled->Tracking,FlightComp->currentSpeed);
 }
 
 void AAircraftPlayerController::Special() 

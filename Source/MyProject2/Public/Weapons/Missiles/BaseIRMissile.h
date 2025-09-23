@@ -58,4 +58,9 @@ protected:
 
 	virtual void FireStatic(float launchSpeed);
 
+private:
+	float calculatePitchAngle();
+
+	float calculateYawAngle();
+
 };

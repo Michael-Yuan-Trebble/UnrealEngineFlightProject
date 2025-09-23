@@ -8,8 +8,9 @@ ABaseIRMissile::ABaseIRMissile()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	timeDet = 5;
+	timeDet = 20;
 	timeTilDelt = 0;
+	turnRate = 60;
 	isAir = false;
 	isDropPhase = false;
 	canLock = true;
@@ -64,17 +65,83 @@ void ABaseIRMissile::Tick(float DeltaTime)
 	FVector DeltaMove = GetActorForwardVector() * missileVelocity * DeltaTime;
 	AddActorWorldOffset(DeltaMove, true);
 
+	bool destroyNeeded = false;
+
+	if (Tracking) {
+		float pitchRad = calculatePitchAngle();
+		float yawRad = calculateYawAngle();
+		FRotator DeltaRot(pitchRad, yawRad, 0);
+		AddActorLocalRotation(DeltaRot);
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green,
+				FString::Printf(TEXT("Pitch: %f Yaw: %f"), pitchRad, yawRad));
+		}
+		FVector Distance = (Tracking->GetActorLocation() - this->GetActorLocation());
+		if (Distance.Size() <= 1000.f) {
+			destroyNeeded = true;
+		}
+	}
+
 	timeTilDelt += DeltaTime;
 
 	// Missile explodes at range
 
-	if (!(timeTilDelt >= timeDet)) return;
+	if (!(timeTilDelt >= timeDet) && !destroyNeeded) return;
 
-	if (SmokeTrail) {
+	if (SmokeTrail) 
+	{
 		SmokeTrail->Deactivate();
 	}
 
 	Destroy();
+}
+
+float ABaseIRMissile::calculatePitchAngle() 
+{
+	FVector MissileLoc = this->GetActorLocation();
+	FVector ToTarget = Tracking->GetActorLocation() - MissileLoc;
+	if (ToTarget.IsNearlyZero()) return 0.f;
+	ToTarget.Normalize();
+
+	FVector Forward = this->GetActorForwardVector();
+	FVector Up = this->GetActorUpVector();
+	FVector Right = this->GetActorRightVector();
+
+	FVector ToTargetInPitch = ToTarget - FVector::DotProduct(ToTarget, Right) * Right;
+	if (ToTargetInPitch.IsNearlyZero()) return 0.f;
+	ToTargetInPitch.Normalize();
+
+	float pitchRad = FMath::Atan2(FVector::DotProduct(ToTargetInPitch, Up), FVector::DotProduct(ToTargetInPitch, Forward));
+	pitchRad = FMath::Clamp(pitchRad, -turnRate, turnRate);
+
+	return pitchRad;
+}
+
+float ABaseIRMissile::calculateYawAngle()
+{
+	FVector MissileLoc = this->GetActorLocation();
+	FVector ToTarget = Tracking->GetActorLocation() - MissileLoc;
+	if (ToTarget.IsNearlyZero()) return 0.f;
+	ToTarget.Normalize();
+
+	FVector Forward = this->GetActorForwardVector();
+	FVector Right = this->GetActorRightVector();
+	FVector Up = this->GetActorUpVector();
+
+	FVector FlatToTarget = ToTarget - FVector::DotProduct(ToTarget, Up) * Up;
+	if (FlatToTarget.IsNearlyZero()) return 0.f;
+	FlatToTarget.Normalize();
+
+	float yawRad = FMath::Atan2(
+		FVector::DotProduct(FlatToTarget, Right),
+		FVector::DotProduct(FlatToTarget, Forward)
+	);
+
+	yawRad = FMath::Clamp(yawRad, -turnRate, turnRate);
+
+	return yawRad;
 }
 
 void ABaseIRMissile::FireStatic(float launchSpeed)

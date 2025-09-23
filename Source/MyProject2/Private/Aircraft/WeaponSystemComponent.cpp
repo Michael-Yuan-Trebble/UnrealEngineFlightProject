@@ -4,6 +4,7 @@
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/BaseAircraft.h"
 #include "Weapons/AircraftBullet.h"
+#include "DrawDebugHelpers.h"
 
 UWeaponSystemComponent::UWeaponSystemComponent()
 {
@@ -73,6 +74,27 @@ void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 			}
 		}
 	}
+	UpdateLockedOn(DeltaTime, Controlled->Tracking);
+
+	FVector Start = Controlled->GetActorLocation();
+	FVector Direction = Controlled->GetActorForwardVector();
+	float Length = 10000.f;
+	float AngleRad = FMath::DegreesToRadians(30.f);
+
+	DrawDebugCone(
+		GetWorld(),
+		Start,
+		Direction,
+		Length, 
+		AngleRad, 
+		AngleRad, 
+		12,
+		FColor::Red,
+		false,
+		-1.f,
+		0,
+		1.f
+	);
 }
 
 void UWeaponSystemComponent::EquipWeapons()
@@ -91,6 +113,10 @@ void UWeaponSystemComponent::EquipWeapons()
 		ABaseWeapon* SpawnIn = GetWorld()->SpawnActor<ABaseWeapon>(Pair.Value, SocketTransform, SpawnParams);
 		if (!SpawnIn) continue;
 		SpawnIn->AttachToComponent(Controlled->Airframe, FAttachmentTransformRules::KeepWorldTransform, Pair.Key);
+
+		if (!CurrentWeapon) {
+			CurrentWeapon = SpawnIn;
+		}
 
 		FCooldownWeapon tempCool;
 		tempCool.WeaponClass = Pair.Value;
@@ -155,6 +181,7 @@ void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target)
 	bool bInCone = Dot > FMath::Cos(FMath::DegreesToRadians(CONE_ANGLE));
 	if (bInCone)
 	{
+		//if (bLocked) return;
 		LockTime += DeltaSeconds;
 		bLocked = LockTime >= 1;
 	}

@@ -22,7 +22,7 @@ AAim9::AAim9() {
 		WeaponMesh->SetStaticMesh(MeshAsset.Object);
 	}
 	cooldownTime = 1.0;
-	range = 10000;
+	range = 1000000;
 }
 
 void AAim9::BeginPlay() {
