@@ -1,14 +1,15 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ // Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "UI/PlayerHUD.h"
 #include "AircraftPlayerController.h"
 #include "DrawDebugHelpers.h"
+#include "Aircraft/BaseAircraft.h"
 #include "UI/LockBoxWidget.h"
 
 APlayerHUD::APlayerHUD() 
 {
-	static ConstructorHelpers::FClassFinder<ULockBoxWidget> WidgetBPClass(TEXT("/Game/UI/MyLockBoxWidget"));
+	static ConstructorHelpers::FClassFinder<ULockBoxWidget> WidgetBPClass(TEXT("/Game/UI/LockBoxBP"));
 	if (WidgetBPClass.Succeeded()) 
 	{
 		LockBoxWidgetClass = WidgetBPClass.Class;
@@ -18,6 +19,7 @@ APlayerHUD::APlayerHUD()
 void APlayerHUD::BeginPlay()
 {
 	Super::BeginPlay();
+    PC = Cast<AAircraftPlayerController>(GetOwningPlayerController());
 }
 
 void APlayerHUD::Tick(float DeltaSeconds) 
@@ -29,61 +31,87 @@ void APlayerHUD::Tick(float DeltaSeconds)
 	}
 }
 
+void APlayerHUD::UpdateLocked(bool Locked)
+{
+    if (!SelectedAircraftWidget) return;
+    SelectedAircraftWidget->SetLockedOn(Locked);
+}
+
 void APlayerHUD::UpdateTargetWidgets() 
 {
-	/*
-	const TArray<FDetectedAircraftInfo>& Targets = PC->GetDetectedTargets();
-	FVector2D ViewportSize;
-	GEngine->GameViewport->GetViewportSize(ViewportSize);
-	FVector2D ScreenCenter = ViewportSize * 0.5f;
+	if (!PC || !LockBoxWidgetClass) return;
+    for (auto It = ActiveWidgets.CreateIterator(); It; ++It)
+    {
+        ABaseAircraft* Target = It.Key();
+        if (!Target || !Targets.Contains(Target))
+        {
+            if (ULockBoxWidget* Reticle = It.Value())
+            {
+                Reticle->RemoveFromParent();
+            }
+            It.RemoveCurrent();
+        }
+    }
 
-	for (const FDetectedAircraftInfo& Info : Targets) 
-	{
-		AActor* Target = Info.CurrentPawn;
-		if (!ActiveWidgets.Contains(Target)) 
-		{
-			ULockBoxWidget* Widget = CreateWidget<ULockBoxWidget>(PC, LockBoxWidgetClass);
-			Widget->AddToViewport();
-			Widget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
-			ActiveWidgets.Add(Target, Widget);
-			//Widget->SetPositionInViewport(ScreenCenter, false);
-		}
-		FVector WorldLocation = FVector::ZeroVector;
+    for (ABaseAircraft* Target : Targets)
+    {
+        if (!Target) continue;
 
-		if (UPrimitiveComponent* CollisionComp = Target->FindComponentByClass<UPrimitiveComponent>())
-		{
-			WorldLocation = CollisionComp->GetComponentLocation();
-		}
-		else
-		{
-			WorldLocation = Target->GetActorLocation();
-		}
-		FVector CameraLoc;
-		FRotator CameraRot;
-		PC->GetPlayerViewPoint(CameraLoc, CameraRot);
+        ULockBoxWidget* Reticle = ActiveWidgets.FindRef(Target);
+        if (!Reticle)
+        {
+            Reticle = CreateWidget<ULockBoxWidget>(GetWorld(), LockBoxWidgetClass);
+            if (Reticle)
+            {
+                Reticle->AddToViewport();
+                ActiveWidgets.Add(Target, Reticle);
+            }
+        }
 
-		FVector ToTarget = (WorldLocation - CameraLoc).GetSafeNormal();
-		float Dot = FVector::DotProduct(CameraRot.Vector(), ToTarget);
+        FVector WorldLocation;
+        if (Target->BodyCollision) 
+        {
+            WorldLocation = Target->BodyCollision->GetComponentLocation();
+        } 
+        else
+        {
+            WorldLocation = Target->GetActorLocation();
+        }
 
-		bool bIsInFront = Dot > 0.0f;
+        if (!Reticle) continue;
 
-		FVector2D ScreenPos;
+        FVector2D ScreenPos;
+        bool bProjected = PC->ProjectWorldLocationToScreen(WorldLocation, ScreenPos);
 
-		DrawDebugSphere(GetWorld(), WorldLocation, 1.0f, 8, FColor::Red, false, 0.1f);
+        FVector CameraLoc;
+        FRotator CameraRot;
+        PC->GetPlayerViewPoint(CameraLoc, CameraRot);
 
-		if (PC->ProjectWorldLocationToScreen(WorldLocation, ScreenPos))
-		{
-			FVector2D& CachedScreenPos = TargetScreenPositions.FindOrAdd(Target);
-			CachedScreenPos = FMath::Vector2DInterpTo(CachedScreenPos, ScreenPos, GetWorld()->GetDeltaSeconds(), 10.0f);
-			if (bIsInFront)
-			{
-				ActiveWidgets[Target]->SetVisibility(ESlateVisibility::Visible);
-				ActiveWidgets[Target]->SetPositionInViewport(ScreenPos, false);
-			}
-			else
-			{
-				ActiveWidgets[Target]->SetVisibility(ESlateVisibility::Hidden);
-			}
-		}
-	}*/
+        FVector ToTarget = Target->GetActorLocation() - CameraLoc;
+        bool bInFront = FVector::DotProduct(CameraRot.Vector(), ToTarget) > 0;
+
+        if (bProjected && bInFront)
+        {
+            FVector2D WidgetSize = Reticle->GetDesiredSize();
+            FVector2D CenteredPos = ScreenPos - (WidgetSize * 0.5f);
+            Reticle->SetPositionInViewport(CenteredPos, true);
+            Reticle->SetVisibility(ESlateVisibility::Visible);
+        }
+        else
+        {
+            Reticle->SetVisibility(ESlateVisibility::Hidden);
+        }
+    }
+}
+
+void APlayerHUD::UpdateSelected(ABaseAircraft* In) 
+{
+    if (ULockBoxWidget** FoundWidget = ActiveWidgets.Find(In))
+    {
+        SelectedAircraftWidget = *FoundWidget;
+    }
+    else
+    {
+        SelectedAircraftWidget = nullptr; 
+    }
 }

@@ -20,25 +20,6 @@ void AEnemyAircraft::PossessedBy(AController* NewController) {
 	Super::PossessedBy(NewController);
 
 	Controller = Cast<AEnemyAircraftAI>(NewController);
-
-	// Debug capsule for radar
-
-	if (Collision)
-	{
-		FVector CapsuleLocation = Collision->GetComponentLocation();
-		FRotator CapsuleRotation = Collision->GetComponentRotation();
-
-		DrawDebugCapsule(
-			GetWorld(),
-			CapsuleLocation,
-			100,
-			100,
-			CapsuleRotation.Quaternion(),
-			FColor::Green,
-			false,
-			500.0f
-		);
-	}
 	FlightComponent->Controlled = this;
 	
 	UAircraftStats* Temp = NewObject<UAircraftStats>(this);

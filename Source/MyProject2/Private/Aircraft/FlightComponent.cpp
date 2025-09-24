@@ -235,7 +235,7 @@ void UFlightComponent::RollAOA(float DeltaSeconds)
 
 	float DownPitchStrength = FMath::Clamp(1.f - UpDot, 0.f, 2.f) * 2.f;
 
-	 DownPitch = -DownPitchStrength * DeltaSeconds;
+	DownPitch = -DownPitchStrength * DeltaSeconds;
 
 	FVector WorldPitchAxis = FVector::CrossProduct(Forward, FVector::UpVector).GetSafeNormal();
 

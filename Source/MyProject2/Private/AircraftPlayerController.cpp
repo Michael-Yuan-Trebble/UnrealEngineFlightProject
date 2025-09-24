@@ -12,6 +12,7 @@
 #include "Aircraft/MenuManagerComponent.h"
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/RadarComponent.h"
+#include "UI/PlayerHUD.h"
 #include "Gamemodes/CurrentPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Aircraft/AI/F16AI.h"
@@ -420,6 +421,15 @@ void AAircraftPlayerController::Tick(float DeltaSeconds)
 	if(FlightComp)
 	{
 		FlightComp->SetThrust(thrustPercentage);
+	}
+	if (RadarComp) {
+		APlayerHUD* HUD = Cast<APlayerHUD>(GetHUD());
+		if (HUD) {
+			ABaseAircraft* Temp = Cast<ABaseAircraft>(RadarComp->Selected);
+			if (Temp) {
+				HUD->Targets.Add(Temp);
+			}
+		}
 	}
 	Super::Tick(DeltaSeconds);
 }

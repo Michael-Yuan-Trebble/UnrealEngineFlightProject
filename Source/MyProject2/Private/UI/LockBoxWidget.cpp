@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Lock!"));
 #include "UI/LockBoxWidget.h"
 #include "Engine/Texture2D.h"
 #include "Components/SizeBox.h"
@@ -9,10 +9,12 @@
 
 void ULockBoxWidget::SetLockedOn(bool isLocked) 
 {
+	if (isLockedOn == isLocked) return;
+	print(text)
 	isLockedOn = isLocked;
 	if (ReticleImage) 
 	{
-		ReticleImage->SetColorAndOpacity(FLinearColor::Green);
+		ReticleImage->SetColorAndOpacity(FLinearColor::White);
 	}
 }
 

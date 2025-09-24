@@ -3,7 +3,9 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Weapon Component!"));
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/BaseAircraft.h"
+#include "UI/PlayerHUD.h"
 #include "Weapons/AircraftBullet.h"
+#include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 
 UWeaponSystemComponent::UWeaponSystemComponent()
@@ -15,6 +17,11 @@ void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStat
 {
 	Controlled = InBase;
 	AirStats = InStats;
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC)
+	{
+		HUD = Cast<APlayerHUD>(PC->GetHUD());
+	}
 }
 
 void UWeaponSystemComponent::FireBullets()
@@ -161,7 +168,8 @@ float CONE_ANGLE = 30.f;
 void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target) 
 {
 	if (!CurrentWeapon || !CurrentWeapon->canLock) return;
-	if (!Target) {
+	if (!Target) 
+	{
 		bLocked = false;
 		LockTime = 0.f;
 		return;
@@ -173,6 +181,7 @@ void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target)
 	if (Distance > CurrentWeapon->range) 
 	{
 		bLocked = false;
+		HUD->UpdateLocked(bLocked);
 		LockTime = 0.f;
 		return;
 	}
@@ -184,10 +193,12 @@ void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target)
 		//if (bLocked) return;
 		LockTime += DeltaSeconds;
 		bLocked = LockTime >= 1;
+		HUD->UpdateLocked(bLocked);
 	}
 	else
 	{
 		bLocked = false;
+		HUD->UpdateLocked(bLocked);
 		LockTime = 0.f;
 	}
 

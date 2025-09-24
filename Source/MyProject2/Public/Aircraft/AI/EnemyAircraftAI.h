@@ -32,9 +32,6 @@ public:
 	UPROPERTY(EditAnywhere,Category="AI")
 	UBlackboardComponent* BlackboardComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly);
-	FRotator Target;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite);
 	float currentSpeed;
 
@@ -42,18 +39,8 @@ public:
 	ABaseAircraft* Controlled;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float planeAcceleration;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FDetectedAircraftInfo Tracking;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FVector vectorLocation;
-
-	FVector TrackingLocation;
-	FRotator TrackingRotation;
-	APawn* TrackingPawn;
-	float TrackingDistance;
 
 protected:
 
@@ -68,8 +55,6 @@ protected:
 	float currentYaw;
 
 	float currentRoll;
-
-	FTimerHandle RadarScanTimer;
 
 private:
 
@@ -106,10 +91,6 @@ private:
 	void Bullets();
 
 	void TurnSpeedLoss();
-
-	void RotationTarget(float DeltaTime);
-
-	void PitchTarget(float DeltaTime);
 
 	void ShouldYaw();
 

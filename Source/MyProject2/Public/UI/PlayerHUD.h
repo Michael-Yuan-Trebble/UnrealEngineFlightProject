@@ -8,6 +8,8 @@
 #include "AircraftPlayerController.h"
 #include "PlayerHUD.generated.h"
 
+class ABaseAircraft;
+
 UCLASS()
 class MYPROJECT2_API APlayerHUD : public AHUD
 {
@@ -25,9 +27,16 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	AAircraftPlayerController* PC;
 
+	TArray<ABaseAircraft*> Targets;
+
+	ULockBoxWidget* SelectedAircraftWidget;
+
+	void UpdateLocked(bool Locked);
+
+	void UpdateSelected(ABaseAircraft* In);
+
 private:
-	TMap<AActor*, UUserWidget*> ActiveWidgets;
-	TMap<AActor*, FVector2D> TargetScreenPositions;
+	TMap<ABaseAircraft*, ULockBoxWidget*> ActiveWidgets;
 	void UpdateTargetWidgets();
 
 };

@@ -8,6 +8,8 @@
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "WeaponSystemComponent.generated.h"
 
+class APlayerHUD;
+
 class ABaseAircraft;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -39,6 +41,8 @@ public:
 	float LockTime = 5.f;
 
 	ABaseAircraft* Controlled;
+
+	APlayerHUD* HUD;
 
 	UAircraftStats* AirStats;
 

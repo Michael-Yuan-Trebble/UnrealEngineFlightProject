@@ -8,6 +8,7 @@
 #include "RadarComponent.generated.h"
 
 class ABaseAircraft;
+class APlayerHUD;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API URadarComponent : public UActorComponent
@@ -32,6 +33,8 @@ public:
 	ABaseAircraft* Controlled;
 
 	AActor* Selected;
+
+	APlayerHUD* HUD;
 
 	FTimerHandle RadarScanTimer;
 

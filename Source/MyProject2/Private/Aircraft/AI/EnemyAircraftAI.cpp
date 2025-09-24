@@ -47,22 +47,6 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 
 	Controlled = Cast<AEnemyAircraft>(GetPawn());
 	if (!Controlled) return;
-
-	// Draw Radar Cone
-
-	DrawDebugCone(
-		GetWorld(),
-		Controlled->GetActorLocation(),
-		Controlled->GetActorForwardVector(),
-		10000.f,
-		FMath::DegreesToRadians(40.f),
-		FMath::DegreesToRadians(10.0f),
-		12,
-		FColor::Green,
-		false,
-		50.0f
-	);
-	GetWorldTimerManager().SetTimer(RadarScanTimer, this, &AEnemyAircraftAI::Retrieve, 0.5f, true);
 	power = (log10(20 / (0.07 * 1.225))) / (log10(maxSpeed));
 
 }
@@ -76,36 +60,28 @@ void AEnemyAircraftAI::ShouldYaw()
 {
 	// Find the angle and distance between target and self to see if yaw is needed
 
-	FVector TargetDistance = TrackingLocation - Controlled->GetActorLocation();
-	float LengthDistance = TargetDistance.Length();
-	TargetDistance.Normalize();
+	//FVector TargetDistance = TrackingLocation - Controlled->GetActorLocation();
+	//float LengthDistance = TargetDistance.Length();
+	//TargetDistance.Normalize();
 
-	float DotProduct = FVector::DotProduct(Controlled->GetActorForwardVector(), TargetDistance);
+	//float DotProduct = FVector::DotProduct(Controlled->GetActorForwardVector(), TargetDistance);
 
-	float ConeAngleCosine = FMath::Acos(DotProduct) * (180.f/PI);
+	//float ConeAngleCosine = FMath::Acos(DotProduct) * (180.f/PI);
 
 	// TODO: Make angle variable between aircraft
-	if ((ConeAngleCosine <= 30.f) && (LengthDistance <= 100.f)) 
-	{
-		bUseYaw = true;
-	}
-	else {
-		bUseYaw = false;
-	}
+	//if ((ConeAngleCosine <= 30.f) && (LengthDistance <= 100.f)) 
+	//{
+	//	bUseYaw = true;
+	//}
+	//else 
+	//{
+	//	bUseYaw = false;
+	//}
 }
 
 void AEnemyAircraftAI::Retrieve() 
 {
 	//Tracking = Controlled->ReturnTargeting();
-}
-
-//Only Roll to Target
-void AEnemyAircraftAI::RotationTarget(float DeltaTime) 
-{
-}
-
-void AEnemyAircraftAI::PitchTarget(float DeltaTime)
-{
 }
 
 void AEnemyAircraftAI::Rudder() 

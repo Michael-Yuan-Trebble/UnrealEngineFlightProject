@@ -6,6 +6,7 @@
 #include "Aircraft/BaseAircraft.h"
 #include "AircraftRegistry.h"
 #include "Engine/World.h"
+#include "UI/PlayerHUD.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/SpectatorPawn.h"
 
@@ -27,6 +28,11 @@ void URadarComponent::BeginPlay()
 void URadarComponent::Setup(ABaseAircraft* InControl) 
 {
 	Controlled = InControl;
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC)
+	{
+		HUD = Cast<APlayerHUD>(PC->GetHUD());
+	}
 }
 
 void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -59,6 +65,7 @@ void URadarComponent::ScanTargets()
 			{
 				Selected = RegisteredPawn;
 				Controlled->Tracking = Selected;
+				HUD->UpdateSelected(RegisteredPawn);
 			}
 		}
 	}
