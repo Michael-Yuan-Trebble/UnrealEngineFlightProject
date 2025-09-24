@@ -35,11 +35,14 @@ Another Angle of Attack variable is the current orientation of the aircraft, as 
 Currently there is a level that displays all available aircraft (so far only 2) and from that, select weapons and a special. This is then transfered from the gamemode's player state to the overall game instance in order to equip the right 
 items in actual combat level. Hovering over options displays the object temporarily and clicking keeps that selection on screen, there are also aircraft designated "permanent", meaning they can't be sold and come free, while all the other aircraft have a cost and the button is clickable once the player has the right amount of currency.
 
-### Basis Missile Functionality
+### Basic Missile Functionality
 Missiles are primitive, but do simulate a launch sequence as of now. The missiles get pushed a downward force that is relative to the aircraft, simulating the push that missiles are given in real life to separate them and avoid collision.
-The missile also inherits the velocity of the aircraft when launched.
+The missile also inherits the velocity of the aircraft when launched. Missiles also can track and turn based on yaw and pitch only and turn at the same rate with both.
 
 ![Missile Launch Demo](Gifs/Missile-Gif.gif)
+
+### Basic AI
+Very primative AI as of now, it calculates the roll needed to pitch up into its given target and can move, however it doesn't implement ideas such as lag pursuit or changes state from attack.
 
 ## Tech Stack
 - Unreal Engine 5 (C++ and Blueprints)
