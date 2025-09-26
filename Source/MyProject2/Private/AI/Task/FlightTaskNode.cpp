@@ -38,6 +38,6 @@ void UBTTaskFlightTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* N
 	FlightComp->SetPitch(PitchOffset);
 	RollOffset = FMath::IsNearlyZero(RollOffset) ? 0.0f : RollOffset;
 	FlightComp->SetRoll(RollOffset);
-	//FlightComp->ApplyRot(DeltaSeconds);
+	FlightComp->ReturnAOA(DeltaSeconds);
 	//FlightComp->SetThrust(0.5);
 }

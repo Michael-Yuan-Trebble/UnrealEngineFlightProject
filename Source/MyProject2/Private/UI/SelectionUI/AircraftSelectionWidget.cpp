@@ -50,7 +50,7 @@ void UAircraftSelectionWidget::GetAllAircraft()
         Card->Setup(Data, Owned);
         Card->OnAircraftSelected.AddDynamic(this, &UAircraftSelectionWidget::HandleAircraftSelected);
 
-        if (Owned.Contains(Data->AircraftName)) 
+        if (Owned.Contains(Data->AircraftStat->AircraftName))
         {
             Card->OnAircraftPicked.AddDynamic(AircraftUI, &UAircraftSelectionComponent::SetAircraft);
         }
@@ -60,7 +60,7 @@ void UAircraftSelectionWidget::GetAllAircraft()
         }
 
         AircraftScrollBox->AddChild(Card);
-        ButtonArray.Add(Data->AircraftName, Card);
+        ButtonArray.Add(Data->AircraftStat->AircraftName, Card);
     }
     Gamemode->SpawnInAircraft(AircraftDatabase->AllAircraft[0]->AircraftClass);
 }

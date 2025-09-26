@@ -28,7 +28,7 @@ void UBuyPopupWidget::Setup(UAircraftData* AircraftData)
 	UBuyButton* Button = CreateWidget<UBuyButton>(GetWorld(), BuyButtonClass);
 	if (!Button) return;
 
-	Button->Setup(Aircraft->AircraftName, Aircraft->price);
+	Button->Setup(Aircraft->AircraftStat->AircraftName, Aircraft->price);
 	Button->OnBuyPicked.AddDynamic(BuyUI, &UBuySelectionComponent::BuyAircraft);
 	Button->OnCancelPicked.AddDynamic(BuyUI, &UBuySelectionComponent::CancelBuy);
 

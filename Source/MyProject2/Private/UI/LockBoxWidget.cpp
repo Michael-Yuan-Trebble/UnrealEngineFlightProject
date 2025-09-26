@@ -10,11 +10,13 @@
 void ULockBoxWidget::SetLockedOn(bool isLocked) 
 {
 	if (isLockedOn == isLocked) return;
-	print(text)
 	isLockedOn = isLocked;
 	if (ReticleImage) 
 	{
-		ReticleImage->SetColorAndOpacity(FLinearColor::White);
+		// TODO: Change from opacity to color when reticle texture changes
+		FLinearColor Color = ReticleImage->ColorAndOpacity;
+		Color.A = !isLocked ? 1 : 0.1f;
+		ReticleImage->SetColorAndOpacity(Color);
 	}
 }
 

@@ -18,9 +18,6 @@ public:
 	TSubclassOf<APawn> AircraftClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName AircraftName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText Class;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)

@@ -58,13 +58,19 @@ void URadarComponent::ScanTargets()
 		TempInfo.CurrentPawn = RegisteredPawn;
 		TempInfo.threatLevel = TempInfo.CalculateThreat();
 
+
 		if (TempInfo.threatLevel > 0) 
 		{
 			Detected.Add(TempInfo);
-			if (!Selected && Controlled)
+			if (!Controlled) continue;
+			if (!Controlled->GetController()->IsPlayerController()) continue;
+			if (!Selected)
 			{
 				Selected = RegisteredPawn;
 				Controlled->Tracking = Selected;
+				FTimerHandle TempHandle;
+			}
+			if (HUD && !IsValid(HUD->SelectedAircraftWidget)) {
 				HUD->UpdateSelected(RegisteredPawn);
 			}
 		}

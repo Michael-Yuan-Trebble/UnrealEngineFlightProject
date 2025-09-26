@@ -121,7 +121,8 @@ void UWeaponSystemComponent::EquipWeapons()
 		if (!SpawnIn) continue;
 		SpawnIn->AttachToComponent(Controlled->Airframe, FAttachmentTransformRules::KeepWorldTransform, Pair.Key);
 
-		if (!CurrentWeapon) {
+		if (!CurrentWeapon)
+		{
 			CurrentWeapon = SpawnIn;
 		}
 
@@ -190,7 +191,6 @@ void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target)
 	bool bInCone = Dot > FMath::Cos(FMath::DegreesToRadians(CONE_ANGLE));
 	if (bInCone)
 	{
-		//if (bLocked) return;
 		LockTime += DeltaSeconds;
 		bLocked = LockTime >= 1;
 		HUD->UpdateLocked(bLocked);

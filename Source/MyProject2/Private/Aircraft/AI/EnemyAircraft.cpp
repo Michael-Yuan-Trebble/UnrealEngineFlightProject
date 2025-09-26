@@ -16,7 +16,8 @@ AEnemyAircraft::AEnemyAircraft()
 }
 
 
-void AEnemyAircraft::PossessedBy(AController* NewController) {
+void AEnemyAircraft::PossessedBy(AController* NewController)
+{
 	Super::PossessedBy(NewController);
 
 	Controller = Cast<AEnemyAircraftAI>(NewController);

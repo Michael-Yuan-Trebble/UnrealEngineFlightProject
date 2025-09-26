@@ -1,6 +1,6 @@
  // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("HUD!"));
 #include "UI/PlayerHUD.h"
 #include "AircraftPlayerController.h"
 #include "DrawDebugHelpers.h"
@@ -20,6 +20,7 @@ void APlayerHUD::BeginPlay()
 {
 	Super::BeginPlay();
     PC = Cast<AAircraftPlayerController>(GetOwningPlayerController());
+    UpdateTargetWidgets();
 }
 
 void APlayerHUD::Tick(float DeltaSeconds) 
@@ -33,7 +34,7 @@ void APlayerHUD::Tick(float DeltaSeconds)
 
 void APlayerHUD::UpdateLocked(bool Locked)
 {
-    if (!SelectedAircraftWidget) return;
+    if (!IsValid(SelectedAircraftWidget)) return;
     SelectedAircraftWidget->SetLockedOn(Locked);
 }
 
@@ -43,7 +44,7 @@ void APlayerHUD::UpdateTargetWidgets()
     for (auto It = ActiveWidgets.CreateIterator(); It; ++It)
     {
         ABaseAircraft* Target = It.Key();
-        if (!Target || !Targets.Contains(Target))
+        if (!IsValid(Target) || !Targets.Contains(Target))
         {
             if (ULockBoxWidget* Reticle = It.Value())
             {
@@ -55,7 +56,7 @@ void APlayerHUD::UpdateTargetWidgets()
 
     for (ABaseAircraft* Target : Targets)
     {
-        if (!Target) continue;
+        if (!IsValid(Target)) continue;
 
         ULockBoxWidget* Reticle = ActiveWidgets.FindRef(Target);
         if (!Reticle)
@@ -112,6 +113,6 @@ void APlayerHUD::UpdateSelected(ABaseAircraft* In)
     }
     else
     {
-        SelectedAircraftWidget = nullptr; 
+        SelectedAircraftWidget = nullptr;
     }
 }

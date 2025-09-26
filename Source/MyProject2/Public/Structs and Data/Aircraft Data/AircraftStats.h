@@ -12,6 +12,9 @@ class MYPROJECT2_API UAircraftStats : public UDataAsset
 	GENERATED_BODY()
 	
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName AircraftName;
+
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	float MaxSpeed;
 

@@ -422,11 +422,14 @@ void AAircraftPlayerController::Tick(float DeltaSeconds)
 	{
 		FlightComp->SetThrust(thrustPercentage);
 	}
-	if (RadarComp) {
+	if (RadarComp) 
+	{
 		APlayerHUD* HUD = Cast<APlayerHUD>(GetHUD());
-		if (HUD) {
+		if (HUD)
+		{
 			ABaseAircraft* Temp = Cast<ABaseAircraft>(RadarComp->Selected);
-			if (Temp) {
+			if (Temp) 
+			{
 				HUD->Targets.Add(Temp);
 			}
 		}

@@ -21,22 +21,27 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds);
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY()
 	TSubclassOf<ULockBoxWidget> LockBoxWidgetClass;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY()
 	AAircraftPlayerController* PC;
 
+	UPROPERTY()
 	TArray<ABaseAircraft*> Targets;
 
-	ULockBoxWidget* SelectedAircraftWidget;
+	UPROPERTY()
+	ULockBoxWidget* SelectedAircraftWidget = nullptr;
+
+	UPROPERTY()
+	TMap<ABaseAircraft*, ULockBoxWidget*> ActiveWidgets;
 
 	void UpdateLocked(bool Locked);
 
 	void UpdateSelected(ABaseAircraft* In);
 
 private:
-	TMap<ABaseAircraft*, ULockBoxWidget*> ActiveWidgets;
+
 	void UpdateTargetWidgets();
 
 };
