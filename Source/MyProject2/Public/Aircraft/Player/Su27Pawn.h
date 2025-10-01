@@ -16,37 +16,22 @@ public:
 	ASu27Pawn();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator LeftRudder;
+	FRotator Rudder;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator RightRudder;
+	FRotator Slat;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator LeftSlat;
+	FRotator Flap;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator RightSlat;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator LeftFlap;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator RightFlap;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float LeftNozzle;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RightNozzle;
+	float Nozzle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AirBrake;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	float LeftElevator;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RightElevator;
+	float Elevator;
 
 	virtual void PossessedBy(AController* NewController);
 

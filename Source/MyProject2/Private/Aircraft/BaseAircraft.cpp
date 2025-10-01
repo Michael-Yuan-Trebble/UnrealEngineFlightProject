@@ -35,10 +35,6 @@ ABaseAircraft::ABaseAircraft()
 
 	PrimaryActorTick.bCanEverTick = true;
 	bLocked = false;
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> PylonMeshObj(TEXT("/Game/Weapons/Pylons/NATO_Pylon.NATO_Pylon"));
-	if (!PylonMeshObj.Succeeded()) return; 
-	Pylon = PylonMeshObj.Object;
 }
 
 void ABaseAircraft::BeginPlay()
@@ -118,25 +114,23 @@ void ABaseAircraft::Tick(float DeltaTime)
 
 void ABaseAircraft::AddPylons() 
 {
-	for (int i = 0; i <= NumPylons; i++) 
+	for (int i = 0; i < AirStats->NumOfPylons; i++)
 	{
 		UStaticMeshComponent* TempPylon = NewObject<UStaticMeshComponent>(this);
-		FString SocketName = FString::Printf(TEXT("Pylon%d"), i);
-		if (TempPylon && Pylon) 
+		FName SocketName = FName(*FString::Printf(TEXT("Pylon%d"), i));
+		if (TempPylon && AirStats->Pylon)
 		{
-			TempPylon->SetupAttachment(Airframe, FName(*SocketName));
+			TempPylon->SetupAttachment(Airframe, SocketName);
 			TempPylon->RegisterComponent();
-			TempPylon->SetStaticMesh(Pylon);
-			// TODO: Fix Pylon's rotation and socket's rotation so transform is not neccessary
-			TempPylon->SetRelativeLocation(FVector(0,-100,-40));
+			TempPylon->SetStaticMesh(AirStats->Pylon);
+			TempPylon->SetRelativeLocation(FVector(0,0,-20));
+			PylonSockets.Add(SocketName, TempPylon);
 		}
-		PylonSockets.Add(FName(*FString::Printf(TEXT("Pylon%d"), i)));
 	}
 }
 
 void ABaseAircraft::UpdateLockedOn(float DeltaSeconds) 
 {
-
 	// Update timer on missile lock
 
 	if (!Tracking) return;

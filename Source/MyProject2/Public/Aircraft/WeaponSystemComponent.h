@@ -54,5 +54,6 @@ public:
 
 	TArray<FCooldownWeapon> Cooldown;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TSubclassOf<AActor> Bullet;
 };

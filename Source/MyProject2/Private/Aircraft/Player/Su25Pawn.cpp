@@ -19,16 +19,8 @@ ASu25Pawn::ASu25Pawn()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	Bullet = AAircraftBullet::StaticClass();
-	static ConstructorHelpers::FClassFinder<AAircraftBullet> BulletClass(TEXT("/Game/Weapons/Bullet/20mmBullet"));
-	if (BulletClass.Succeeded())
-	{
-		Bullet = BulletClass.Class;
-	}
-
 	TakeoffSpeed = 10.f;
 	springArmLength = 400.f;
-	NumPylons = 2;
 	isGearUp = false;
 }
 void ASu25Pawn::PossessedBy(AController* NewController) 
@@ -36,9 +28,6 @@ void ASu25Pawn::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 
 	Controlled = Cast<AAircraftPlayerController>(NewController);
-	
-	//Put Weapons on Pylons
-	AddPylons();
 
 	//Put Gears down if Grounded
 	if (isGearUp == false)
@@ -108,24 +97,22 @@ void ASu25Pawn::PitchElevatorCalculation(float DeltaSeconds)
 		ElevatorMain.Roll = FMath::FInterpTo(ElevatorMain.Roll, 0, DeltaSeconds, 4);
 		ElevatorSub.X = FMath::FInterpTo(ElevatorSub.X, 0, DeltaSeconds, 4);
 		ElevatorSub.Z = FMath::FInterpTo(ElevatorSub.Z, 0, DeltaSeconds, 4);
+		return;
 	}
-	else
-	{
-		ElevatorMain.Pitch = FMath::Clamp(((InputPitchValue) +ElevatorMain.Pitch), -20.f, 20.f);
-		ElevatorMain.Pitch = FMath::FInterpTo(ElevatorMain.Pitch, InputPitchValue * 20.f, DeltaSeconds, 0.2);
+	ElevatorMain.Pitch = FMath::Clamp(((InputPitchValue) +ElevatorMain.Pitch), -20.f, 20.f);
+	ElevatorMain.Pitch = FMath::FInterpTo(ElevatorMain.Pitch, InputPitchValue * 20.f, DeltaSeconds, 0.2);
 
-		ElevatorMain.Yaw = FMath::Clamp(((InputPitchValue) +ElevatorMain.Yaw), -2.f, 2.f);
-		ElevatorMain.Yaw = FMath::FInterpTo(ElevatorMain.Yaw, InputPitchValue * 2.f, DeltaSeconds, 0.2);
+	ElevatorMain.Yaw = FMath::Clamp(((InputPitchValue) +ElevatorMain.Yaw), -2.f, 2.f);
+	ElevatorMain.Yaw = FMath::FInterpTo(ElevatorMain.Yaw, InputPitchValue * 2.f, DeltaSeconds, 0.2);
 
-		ElevatorMain.Roll = FMath::Clamp(((InputPitchValue)+ElevatorMain.Roll), -0.7f, 0.7f);
-		ElevatorMain.Roll = FMath::FInterpTo(ElevatorMain.Roll, InputPitchValue * 0.7f, DeltaSeconds, 0.2);
+	ElevatorMain.Roll = FMath::Clamp(((InputPitchValue)+ElevatorMain.Roll), -0.7f, 0.7f);
+	ElevatorMain.Roll = FMath::FInterpTo(ElevatorMain.Roll, InputPitchValue * 0.7f, DeltaSeconds, 0.2);
 
-		ElevatorSub.X = FMath::Clamp(((InputPitchValue)+ElevatorSub.X), -5.f, 5.f);
-		ElevatorSub.X = FMath::FInterpTo(ElevatorSub.X, InputPitchValue * 5.f, DeltaSeconds, 0.2);
+	ElevatorSub.X = FMath::Clamp(((InputPitchValue)+ElevatorSub.X), -5.f, 5.f);
+	ElevatorSub.X = FMath::FInterpTo(ElevatorSub.X, InputPitchValue * 5.f, DeltaSeconds, 0.2);
 
-		ElevatorSub.Z = FMath::Clamp(((InputPitchValue)+ElevatorSub.Z), -12.f, 12.f);
-		ElevatorSub.Z = FMath::FInterpTo(ElevatorSub.Z, InputPitchValue * 12.f, DeltaSeconds, 0.2);
-	}
+	ElevatorSub.Z = FMath::Clamp(((InputPitchValue)+ElevatorSub.Z), -12.f, 12.f);
+	ElevatorSub.Z = FMath::FInterpTo(ElevatorSub.Z, InputPitchValue * 12.f, DeltaSeconds, 0.2);
 }
 
 void ASu25Pawn::RollElevatorCalculation(float DeltaSeconds) 
@@ -135,17 +122,15 @@ void ASu25Pawn::RollElevatorCalculation(float DeltaSeconds)
 		OuterFlap.Roll = FMath::FInterpTo(OuterFlap.Roll, 0, DeltaSeconds, 2.f);
 		OuterFlap.Pitch = FMath::FInterpTo(OuterFlap.Pitch, 0, DeltaSeconds, 2.f);
 		OuterFlap.Yaw = FMath::FInterpTo(OuterFlap.Yaw, 0, DeltaSeconds, 2.f);
+		return;
 	}
-	else 
-	{
-		OuterFlap.Roll = FMath::Clamp(((InputPitchValue)+OuterFlap.Roll), -1.2, 1.2f);
-		OuterFlap.Pitch = FMath::Clamp(((InputPitchValue)+OuterFlap.Pitch), -15.f, 15.f);
-		OuterFlap.Yaw = FMath::Clamp(((InputPitchValue)+OuterFlap.Yaw), -0.5f, 0.5f);
+	OuterFlap.Roll = FMath::Clamp(((InputPitchValue)+OuterFlap.Roll), -1.2, 1.2f);
+	OuterFlap.Pitch = FMath::Clamp(((InputPitchValue)+OuterFlap.Pitch), -15.f, 15.f);
+	OuterFlap.Yaw = FMath::Clamp(((InputPitchValue)+OuterFlap.Yaw), -0.5f, 0.5f);
 
-		OuterFlap.Roll = FMath::FInterpTo(OuterFlap.Roll, InputRollValue * 1.2, DeltaSeconds, 2.f);
-		OuterFlap.Pitch = FMath::FInterpTo(OuterFlap.Pitch, InputRollValue * 15, DeltaSeconds, 2.f);
-		OuterFlap.Yaw = FMath::FInterpTo(OuterFlap.Yaw, InputRollValue * 0.5, DeltaSeconds, 2.f);
-	}
+	OuterFlap.Roll = FMath::FInterpTo(OuterFlap.Roll, InputRollValue * 1.2, DeltaSeconds, 2.f);
+	OuterFlap.Pitch = FMath::FInterpTo(OuterFlap.Pitch, InputRollValue * 15, DeltaSeconds, 2.f);
+	OuterFlap.Yaw = FMath::FInterpTo(OuterFlap.Yaw, InputRollValue * 0.5, DeltaSeconds, 2.f);
 }
 
 void ASu25Pawn::SlatsElevationCalculation(float DeltaSeconds)
@@ -154,22 +139,20 @@ void ASu25Pawn::SlatsElevationCalculation(float DeltaSeconds)
 
 void ASu25Pawn::RudderYawCalculation(float DeltaSeconds)
 {
-	if (InputYawValue == 0) {
+	if (InputYawValue == 0) 
+	{
 		RudderTopYaw = FMath::FInterpTo(RudderTopYaw, 0, DeltaSeconds, 2.f);
 		RudderBottomYaw = FMath::FInterpTo(RudderBottomYaw, 0, DeltaSeconds, 2.f);
+		return;
 	}
-	else {
-		if (InputYawValue < 0)
-		{
-			RudderTopYaw = FMath::FInterpTo(RudderTopYaw, 35, DeltaSeconds, 2.f);
-			RudderBottomYaw = FMath::FInterpTo(RudderBottomYaw, -30, DeltaSeconds, 2.f);
-		}
-		else
-		{
-			RudderTopYaw = FMath::FInterpTo(RudderTopYaw, -35, DeltaSeconds, 2.f);
-			RudderBottomYaw = FMath::FInterpTo(RudderBottomYaw, 30, DeltaSeconds, 2.f);
-		}
+	if (InputYawValue < 0)
+	{
+		RudderTopYaw = FMath::FInterpTo(RudderTopYaw, 35, DeltaSeconds, 2.f);
+		RudderBottomYaw = FMath::FInterpTo(RudderBottomYaw, -30, DeltaSeconds, 2.f);
+		return;
 	}
+	RudderTopYaw = FMath::FInterpTo(RudderTopYaw, -35, DeltaSeconds, 2.f);
+	RudderBottomYaw = FMath::FInterpTo(RudderBottomYaw, 30, DeltaSeconds, 2.f);
 }
 
 void ASu25Pawn::AirbrakeCalculation(float DeltaSeconds) 
@@ -178,20 +161,19 @@ void ASu25Pawn::AirbrakeCalculation(float DeltaSeconds)
 	{
 		AirbrakeTop = FMath::FInterpTo(AirbrakeTop, -80, DeltaSeconds, 2.f);
 		AirbrakeBottom = FMath::FInterpTo(AirbrakeTop, 80, DeltaSeconds, 2.f);
+		return;
 	}
-	else 
-	{
-		AirbrakeTop = FMath::FInterpTo(AirbrakeTop, 0, DeltaSeconds, 2.f);
-		AirbrakeBottom = FMath::FInterpTo(AirbrakeTop, 0, DeltaSeconds, 2.f);
-	}
+	AirbrakeTop = FMath::FInterpTo(AirbrakeTop, 0, DeltaSeconds, 2.f);
+	AirbrakeBottom = FMath::FInterpTo(AirbrakeTop, 0, DeltaSeconds, 2.f);
 }
 
-void ASu25Pawn::WheelCalculation(float DeltaSeconds) {
-		FrontWheelCoverTop = FMath::FInterpTo(FrontWheelCoverTop, 0, DeltaSeconds, 2.f);
-		FrontWheelCoverBottom = FMath::FInterpTo(FrontWheelCoverBottom, 0, DeltaSeconds, 2.f);
-		FrontWheel = FMath::FInterpTo(FrontWheel, 0, DeltaSeconds, 2.f);
+void ASu25Pawn::WheelCalculation(float DeltaSeconds)
+{
+	FrontWheelCoverTop = FMath::FInterpTo(FrontWheelCoverTop, 0, DeltaSeconds, 2.f);
+	FrontWheelCoverBottom = FMath::FInterpTo(FrontWheelCoverBottom, 0, DeltaSeconds, 2.f);
+	FrontWheel = FMath::FInterpTo(FrontWheel, 0, DeltaSeconds, 2.f);
 
-		BackWheelCoverSide = FMath::FInterpTo(BackWheelCoverSide, 0, DeltaSeconds, 2.f);
-		BackWheelCoverBody = FMath::FInterpTo(BackWheelCoverBody, 0, DeltaSeconds, 2.f);
-		BackWheel = FMath::FInterpTo(BackWheel, 0, DeltaSeconds, 2.f);
+	BackWheelCoverSide = FMath::FInterpTo(BackWheelCoverSide, 0, DeltaSeconds, 2.f);
+	BackWheelCoverBody = FMath::FInterpTo(BackWheelCoverBody, 0, DeltaSeconds, 2.f);
+	BackWheel = FMath::FInterpTo(BackWheel, 0, DeltaSeconds, 2.f);
 }

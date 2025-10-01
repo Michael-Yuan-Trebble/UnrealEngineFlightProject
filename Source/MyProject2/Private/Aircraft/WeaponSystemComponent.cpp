@@ -11,6 +11,11 @@
 UWeaponSystemComponent::UWeaponSystemComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	static ConstructorHelpers::FClassFinder<AAircraftBullet> WidgetBPClass(TEXT("/Game/Weapons/Bullet/20mmBullet"));
+	if (WidgetBPClass.Succeeded())
+	{
+		Bullet = WidgetBPClass.Class;
+	}
 }
 
 void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStats) 
@@ -28,7 +33,6 @@ void UWeaponSystemComponent::FireBullets()
 {
 	//Spawns a bullet actor whilst firing at socket
 	if (!Bullet || !(Controlled->Airframe->DoesSocketExist("Gun"))) return;
-
 	FVector MuzzleLocation = Controlled->Airframe->GetSocketLocation("Gun");
 	FRotator MuzzleRotation = Controlled->Airframe->GetSocketRotation("Gun");
 	FActorSpawnParameters SpawnParams;
@@ -45,21 +49,14 @@ void UWeaponSystemComponent::FireBullets()
 //Create and Replace Missile in Array
 void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace)
 {
+	UStaticMeshComponent* PylonComp = Controlled->PylonSockets.FindRef(Replace.SocketName);
+	if (!PylonComp) return;
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = Controlled;
-
 	Replace.WeaponInstance = GetWorld()->SpawnActor<ABaseWeapon>(Replace.WeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-
 	if (!Replace.WeaponInstance) return;
-
-	FAttachmentTransformRules AttachRules(EAttachmentRule::KeepRelative, true);
-	Replace.WeaponInstance->AttachToComponent(Controlled->Airframe, AttachRules, Replace.SocketName);
-
-	FTransform RelativeTransform;
-	// TODO: Update pylon to include socket for weapon, current transform is temporary
-	RelativeTransform.SetLocation(FVector(0, -175.f, -40.f));
-	RelativeTransform.SetRotation(FRotator(0.f, -90.f, 0.f).Quaternion());
-	Replace.WeaponInstance->GetRootComponent()->SetRelativeTransform(RelativeTransform);
+	FTransform SocketTransform = PylonComp->GetSocketTransform(FName("Socket"));
+	Replace.WeaponInstance->AttachToComponent(PylonComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Socket"));
 }
 
 void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -108,23 +105,17 @@ void UWeaponSystemComponent::EquipWeapons()
 {
 	for (const TPair<FName, TSubclassOf<ABaseWeapon>>&Pair : Loadout)
 	{
-		// TODO: Introduce socket on Pylon and attach to that, remove transform
-		FTransform SocketTransform = Controlled->Airframe->GetSocketTransform(Pair.Key);
-		FRotator RotationOffset = FRotator(0.f, -90.f, 0.f);
-		FVector PosOffset = FVector(-175, 0, -40.f);
-		SocketTransform.ConcatenateRotation(RotationOffset.Quaternion());
-		SocketTransform.AddToTranslation(PosOffset);
-
+		UStaticMeshComponent* PylonComp = Controlled->PylonSockets.FindRef(Pair.Key);
+		if (!PylonComp)  continue;
+		FTransform SocketTransform = PylonComp->GetSocketTransform(FName("Socket"));
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = Controlled;
 		ABaseWeapon* SpawnIn = GetWorld()->SpawnActor<ABaseWeapon>(Pair.Value, SocketTransform, SpawnParams);
 		if (!SpawnIn) continue;
-		SpawnIn->AttachToComponent(Controlled->Airframe, FAttachmentTransformRules::KeepWorldTransform, Pair.Key);
+		SpawnIn->AttachToComponent(PylonComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Socket"));
 
-		if (!CurrentWeapon)
-		{
-			CurrentWeapon = SpawnIn;
-		}
+		if (!CurrentWeapon) CurrentWeapon = SpawnIn;
+
 
 		FCooldownWeapon tempCool;
 		tempCool.WeaponClass = Pair.Value;
@@ -158,10 +149,8 @@ void UWeaponSystemComponent::FireWeaponSelected(int WeaponIndex, AActor* Target,
 
 void UWeaponSystemComponent::SelectWeapon(int WeaponIndex)
 {
-	if (AvailableWeapons.IsValidIndex(WeaponIndex - 1))
-	{
-		CurrentWeapon = AvailableWeapons[WeaponIndex - 1].WeaponInstance;
-	}
+	if (!AvailableWeapons.IsValidIndex(WeaponIndex - 1)) return;
+	CurrentWeapon = AvailableWeapons[WeaponIndex - 1].WeaponInstance;
 }
 // TODO: Make the cone angle weapon specific (or maybe general)
 float CONE_ANGLE = 30.f;
@@ -193,13 +182,11 @@ void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target)
 	{
 		LockTime += DeltaSeconds;
 		bLocked = LockTime >= 1;
-		HUD->UpdateLocked(bLocked);
 	}
 	else
 	{
 		bLocked = false;
-		HUD->UpdateLocked(bLocked);
 		LockTime = 0.f;
 	}
-
+	HUD->UpdateLocked(bLocked);
 }

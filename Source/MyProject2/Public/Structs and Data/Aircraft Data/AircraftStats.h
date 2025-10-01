@@ -39,4 +39,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SpringArmLength;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int NumOfPylons;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMesh* Pylon;
 };

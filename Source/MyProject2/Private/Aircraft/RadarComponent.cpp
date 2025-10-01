@@ -13,9 +13,7 @@
 URadarComponent::URadarComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
 }
-
 
 void URadarComponent::BeginPlay()
 {
@@ -29,10 +27,8 @@ void URadarComponent::Setup(ABaseAircraft* InControl)
 {
 	Controlled = InControl;
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (PC)
-	{
-		HUD = Cast<APlayerHUD>(PC->GetHUD());
-	}
+	if (!PC) return;
+	HUD = Cast<APlayerHUD>(PC->GetHUD());
 }
 
 void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -59,20 +55,19 @@ void URadarComponent::ScanTargets()
 		TempInfo.threatLevel = TempInfo.CalculateThreat();
 
 
-		if (TempInfo.threatLevel > 0) 
+		if (TempInfo.threatLevel <= 0) continue;
+		Detected.Add(TempInfo);
+		if (!Controlled) continue;
+		if (!Controlled->GetController()->IsPlayerController()) continue;
+		if (!Selected)
 		{
-			Detected.Add(TempInfo);
-			if (!Controlled) continue;
-			if (!Controlled->GetController()->IsPlayerController()) continue;
-			if (!Selected)
-			{
-				Selected = RegisteredPawn;
-				Controlled->Tracking = Selected;
-				FTimerHandle TempHandle;
-			}
-			if (HUD && !IsValid(HUD->SelectedAircraftWidget)) {
-				HUD->UpdateSelected(RegisteredPawn);
-			}
+			Selected = RegisteredPawn;
+			Controlled->Tracking = Selected;
+			FTimerHandle TempHandle;
+		}
+		if (HUD && !IsValid(HUD->SelectedAircraftWidget)) 
+		{
+			HUD->UpdateSelected(RegisteredPawn);
 		}
 	}
 }
@@ -155,9 +150,7 @@ void URadarComponent::CycleToNextTarget()
 void URadarComponent::SetTarget(AActor* NewTarget) 
 {
 	Selected = NewTarget;
-	if (Controlled) 
-	{
-		Controlled->Tracking = NewTarget;
-	}
+	if (!Controlled) return;
+	Controlled->Tracking = NewTarget;
 	// VFX
 }

@@ -54,6 +54,7 @@ void APlayerAircraft::SetStats(UAircraftStats* InStats)
 void APlayerAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In)
 {
 	WeaponComponent->Loadout = In;
+	AddPylons();
 	WeaponComponent->EquipWeapons();
 }
 

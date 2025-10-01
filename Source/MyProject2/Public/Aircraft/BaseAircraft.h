@@ -31,8 +31,6 @@ public:
 
 	float TakeoffSpeed;
 
-	int NumPylons;
-
 	float InputPitchValue;
 
 	float InputRollValue;
@@ -51,11 +49,7 @@ public:
 
 	//UObjects
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FName> PylonSockets;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMesh* Pylon;
+	TMap<FName, UStaticMeshComponent*> PylonSockets;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Airframe;
@@ -79,11 +73,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FCooldownWeapon> AvailableWeapons;
-
 	ABaseIRMissile* CurrentWeapon;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AActor> Bullet;
 
 	//Return Functions for UObjects
 

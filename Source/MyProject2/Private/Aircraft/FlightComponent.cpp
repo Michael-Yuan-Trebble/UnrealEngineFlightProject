@@ -15,7 +15,6 @@ enum class ThrottleStage
 ThrottleStage getThrottleStage(float throttle)
 {
 	// Throttle Stages for pronounced acceleration differences
-
 	throttle *= 100.f;
 	if (throttle >= 0 && throttle <= 40) return ThrottleStage::Slow;
 	else if (throttle <= 80) return ThrottleStage::Normal;
@@ -136,12 +135,10 @@ void UFlightComponent::SlowSpeed(float ThrottlePercentage)
 	{
 		Acceleration = -(AircraftStats->Thrust * negation * 5);
 		targetSpeed = 0;
+		return;
 	}
-	else
-	{
-		Acceleration = -(AircraftStats->Thrust * negation * 2);
-		targetSpeed = 0;
-	}
+	Acceleration = -(AircraftStats->Thrust * negation * 2);
+	targetSpeed = 0;
 }
 
 void UFlightComponent::NormalSpeed(float ThrottlePercentage)
@@ -156,12 +153,10 @@ void UFlightComponent::AfterburnerSpeed(float ThrottlePercentage)
 	{
 		Acceleration = AircraftStats->Thrust * ThrottlePercentage * 5;
 		targetSpeed = AircraftStats->MaxSpeed;
+		return;
 	}
-	else
-	{
-		Acceleration = AircraftStats->Thrust * ThrottlePercentage * 2;
-		targetSpeed = AircraftStats->MaxSpeed * 0.9;
-	}
+	Acceleration = AircraftStats->Thrust * ThrottlePercentage * 2;
+	targetSpeed = AircraftStats->MaxSpeed * 0.9;
 }
 
 // ====================================
