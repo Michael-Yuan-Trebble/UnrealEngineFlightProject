@@ -37,7 +37,6 @@ void UFlightComponent::Setup(ABaseAircraft* InControl, UAircraftStats* InStats)
 void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	if (!isFlying && currentSpeed > 10.f) isFlying = true;
-
 	if (!Controlled || !AircraftStats) return;
 
 	// ====================================

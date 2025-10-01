@@ -32,8 +32,10 @@ public:
 
 	URadarComponent* RadarComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USpringArmComponent* SpringArm;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCameraComponent* Camera;
 
 	void SetWeapons(TMap<FName,TSubclassOf<ABaseWeapon>> In);

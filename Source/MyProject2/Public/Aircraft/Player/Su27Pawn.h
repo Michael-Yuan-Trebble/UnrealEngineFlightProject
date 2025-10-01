@@ -5,59 +5,58 @@
 #include "CoreMinimal.h"
 #include "Aircraft/BaseAircraft.h"
 #include "Aircraft/Player/PlayerAircraft.h"
-#include "T38Pawn.generated.h"
+#include "Su27Pawn.generated.h"
 
 UCLASS()
-class MYPROJECT2_API AT38Pawn : public APlayerAircraft
+class MYPROJECT2_API ASu27Pawn : public APlayerAircraft
 {
 	GENERATED_BODY()
-
+	
 public:
-	AT38Pawn();
+	ASu27Pawn();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Rudder;
+	FRotator LeftRudder;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float LeftTurningFlap;
+	FRotator RightRudder;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RightTurningFlap;
+	FRotator LeftSlat;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float LeftLandingFlap;
+	FRotator RightSlat;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RightLandingFlap;
+	FRotator LeftFlap;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator RightFlap;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float LeftNozzle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RightNozzle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AirBrake;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	float LeftElevator;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RightElevator;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float LeftExhaust;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RightExhaust;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float LeftAirBrake;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RightAirBrake;
-
 	virtual void PossessedBy(AController* NewController);
 
 protected:
-
 	virtual void Tick(float DeltaTime) override;
+
 private:
-	void PitchCalculation(float DeltaSeconds);
-	void RollCalculation(float DeltaSeconds);
-	void YawCalculation(float DeltaSeconds);
-	void AirBrakeCalculation(float DeltaSeconds);
-	
-	
+	void PitchCalculation(float Delta);
+	void RollCalculation(float Delta);
+	void YawCalculation(float Delta);
+	void AirBrakeCalculation(float Delta);
+	void ThrustCalculation(float Delta);
 };

@@ -61,12 +61,6 @@ public:
 	USkeletalMeshComponent* Airframe;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USpringArmComponent* SpringArm;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCameraComponent* Camera;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* Collision;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

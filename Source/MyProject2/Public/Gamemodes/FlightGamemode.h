@@ -49,7 +49,7 @@ protected:
 	ACurrentPlayerState* PS;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	TSubclassOf<AT38Pawn> Player;
+	TSubclassOf<APlayerAircraft> Player;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	TSubclassOf<AAim9> Aim9;

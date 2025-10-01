@@ -20,7 +20,7 @@ AFlightGamemode::AFlightGamemode()
 	// ====================================
 	// Temporary Fill In classes for testing
 	// ====================================
-	static ConstructorHelpers::FClassFinder<AT38Pawn> T38PawnBPClass(TEXT("/Game/Aircraft/T-38/T-38Pawn"));
+	static ConstructorHelpers::FClassFinder<AT38Pawn> T38PawnBPClass(TEXT("/Game/Aircraft/Su27/Su27BP.Su27BP"));
 	if (T38PawnBPClass.Succeeded())
 	{
 		Player = T38PawnBPClass.Class;
