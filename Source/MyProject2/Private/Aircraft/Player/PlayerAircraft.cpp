@@ -9,6 +9,7 @@
 
 APlayerAircraft::APlayerAircraft() 
 {
+
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->bDoCollisionTest = false;
 	SpringArm->SetupAttachment(Airframe, USpringArmComponent::SocketName);
@@ -19,6 +20,8 @@ APlayerAircraft::APlayerAircraft()
 	FlightComponent = CreateDefaultSubobject<UFlightComponent>(TEXT("FlightComponent"));
 	WeaponComponent = CreateDefaultSubobject<UWeaponSystemComponent>(TEXT("WeaponComponent"));
 	RadarComponent = CreateDefaultSubobject<URadarComponent>(TEXT("Radar"));
+
+	health = 100;
 }
 
 void APlayerAircraft::BeginPlay()

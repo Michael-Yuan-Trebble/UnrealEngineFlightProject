@@ -10,23 +10,22 @@ AAircraftBullet::AAircraftBullet()
 	PrimaryActorTick.bCanEverTick = true;
 
 	BulletMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BulletMesh"));
-	RootComponent = BulletMesh;
 
 	BulletMesh->SetWorldScale3D(FVector(5.f));
 
-	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision"));
-	Collision->SetupAttachment(BulletMesh);
-
-	BulletMesh->SetSimulatePhysics(true);
-	BulletMesh->SetEnableGravity(true);
-	BulletMesh->SetVisibility(true);
-	BulletMesh->SetCollisionProfileName(TEXT("BlockAll"));
+	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
+	RootComponent = Collision;
+	Collision->SetCollisionProfileName("BlockAllDynamic");
+	Collision->SetSimulatePhysics(true);
+	Collision->SetNotifyRigidBodyCollision(true);
+	Collision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	BulletMesh->SetupAttachment(RootComponent);
 }
 
 void AAircraftBullet::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	Collision->OnComponentHit.AddDynamic(this, &AAircraftBullet::OnHit);
 }
 
 // Called every frame
@@ -34,7 +33,6 @@ void AAircraftBullet::Tick(float DeltaTime)
 {
 	if (currentTime >= LifeTime) 
 	{
-		print(text)
 		Destroy();
 	}
 	currentTime += DeltaTime;
@@ -45,6 +43,17 @@ void AAircraftBullet::Tick(float DeltaTime)
 
 void AAircraftBullet::FireInDirection(const FVector& ShootDirection) 
 {
-	BulletMesh->AddImpulse(ShootDirection * BulletSpeed, NAME_None, true);
+	FVector Impulse = ShootDirection * BulletSpeed;
+	Collision->AddImpulse(Impulse, NAME_None, true);
 }
 
+void AAircraftBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
+	
+	if (OtherActor && OtherActor != this) 
+	{
+		if (OtherActor && OtherComp->GetCollisionObjectType() == ECC_WorldStatic) 
+		{
+			Destroy();
+		}
+	}
+}

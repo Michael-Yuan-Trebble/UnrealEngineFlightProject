@@ -11,7 +11,7 @@
 UWeaponSystemComponent::UWeaponSystemComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	static ConstructorHelpers::FClassFinder<AAircraftBullet> WidgetBPClass(TEXT("/Game/Weapons/Bullet/20mmBullet"));
+	static ConstructorHelpers::FClassFinder<AAircraftBullet> WidgetBPClass(TEXT("/Game/Weapons/Bullet/20mmBulletBP"));
 	if (WidgetBPClass.Succeeded())
 	{
 		Bullet = WidgetBPClass.Class;

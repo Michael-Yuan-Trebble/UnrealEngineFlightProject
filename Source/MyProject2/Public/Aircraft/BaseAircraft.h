@@ -45,6 +45,8 @@ public:
 
 	bool bLocked;
 
+	float health;
+
 	AActor* Tracking;
 
 	//UObjects

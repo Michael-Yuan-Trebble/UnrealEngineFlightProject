@@ -307,10 +307,16 @@ void UFlightComponent::ApplyRoll(float DeltaSeconds)
 	float InterpSpeed = 0;
 	if (Controlled->GetController() && Controlled->GetController()->IsPlayerController())
 	{
+		 if (UserRoll == 0) 
+		 {
+			 NextRoll = FMath::FInterpTo(NextRoll, 0, DeltaSeconds, 3.f);
+			 FRotator DeltaRot(0.f, 0.f, NextRoll * DeltaSeconds);
+			 Controlled->Airframe->AddLocalRotation(DeltaRot);
+			 return;
+		 }
 		 InterpSpeed = AircraftStats->RollRate * 10;
 		 float TargetRollRate = UserRoll * InterpSpeed;
 		 NextRoll = FMath::FInterpTo(NextRoll, TargetRollRate, DeltaSeconds, 5.f);
-
 		 FRotator DeltaRot(0.f, 0.f, NextRoll * DeltaSeconds);
 		 Controlled->Airframe->AddLocalRotation(DeltaRot);
 	}

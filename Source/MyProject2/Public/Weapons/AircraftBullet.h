@@ -22,7 +22,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* Collision;
 
-	float BulletSpeed = 10000.f;
+	float BulletSpeed = 100000.f;
 
 	float LifeTime = 10.f;
 
@@ -36,4 +36,7 @@ public:
 
 	void FireInDirection(const FVector& ShootDirection);
 
+protected:
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 };
