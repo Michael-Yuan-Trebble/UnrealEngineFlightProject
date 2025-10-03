@@ -25,10 +25,12 @@ AAim9::AAim9() {
 	range = 1000000;
 }
 
-void AAim9::BeginPlay() {
+void AAim9::BeginPlay()
+{
 	Super::BeginPlay();
 }
 
-void AAim9::Tick(float DeltaTime) {
+void AAim9::Tick(float DeltaTime) 
+{
 	Super::Tick(DeltaTime);
 }

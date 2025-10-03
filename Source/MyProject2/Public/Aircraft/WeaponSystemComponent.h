@@ -30,11 +30,13 @@ public:
 
 	void EquipWeapons();
 
-	void FireWeaponSelected(int WeaponIndex, AActor* Target, float Speed);
+	void FireWeaponSelected(TSubclassOf<ABaseWeapon> WeaponClass, AActor* Target, float Speed);
 
 	void SelectWeapon(int WeaponIndex);
 
 	void UpdateLockedOn(float DeltaSeconds, AActor* Target);
+
+	void BuildWeaponGroups();
 
 	bool bLocked;
 
@@ -49,6 +51,8 @@ public:
 	ABaseWeapon* CurrentWeapon;
 
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
+
+	TMap<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon*>> WeaponGroups;
 
 	TArray<FCooldownWeapon> AvailableWeapons;
 

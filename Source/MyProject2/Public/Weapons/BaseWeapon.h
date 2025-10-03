@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Structs and Data/Weapon Data/BaseWeaponStats.h"
 #include "BaseWeapon.generated.h"
 
 UCLASS()
@@ -22,6 +23,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UBoxComponent* Collision;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBaseWeaponStats* WeaponStats;
 
 	FName WeaponName;
 

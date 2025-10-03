@@ -126,25 +126,44 @@ void UWeaponSystemComponent::EquipWeapons()
 		tempCool.SocketName = Pair.Key;
 		AvailableWeapons.Add(tempCool);
 	}
+	BuildWeaponGroups();
 }
 
-void UWeaponSystemComponent::FireWeaponSelected(int WeaponIndex, AActor* Target, float Speed)
+void UWeaponSystemComponent::BuildWeaponGroups() 
 {
-	if (!AvailableWeapons.IsValidIndex(WeaponIndex - 1)) return;
-
-	FCooldownWeapon& Weapon = AvailableWeapons[WeaponIndex - 1];
-
-	if (!Weapon.WeaponInstance || !Weapon.CanFire()) return;
-
-	if (Target && bLocked)
+	WeaponGroups.Empty();
+	for (FCooldownWeapon& CW : AvailableWeapons)
 	{
-		Weapon.WeaponInstance->FireTracking(Speed, Target);
+		if (!CW.WeaponInstance) continue;
+
+		TSubclassOf<ABaseWeapon> WeaponClass = CW.WeaponClass;
+
+		if (!WeaponGroups.Contains(WeaponClass)) 
+		{
+			WeaponGroups.Add(WeaponClass, TArray<FCooldownWeapon*>());
+		}
+		WeaponGroups[WeaponClass].Add(&CW);
 	}
-	else
+}
+
+void UWeaponSystemComponent::FireWeaponSelected(TSubclassOf<ABaseWeapon> WeaponClass, AActor* Target, float Speed)
+{
+	if (!WeaponGroups.Contains(WeaponClass)) return;
+	for (FCooldownWeapon* Weapon : WeaponGroups[WeaponClass])
 	{
-		Weapon.WeaponInstance->FireStatic(Speed);
+		if (!Weapon->WeaponInstance || !Weapon->CanFire()) continue;
+
+		if (Target && bLocked)
+		{
+			Weapon->WeaponInstance->FireTracking(Speed, Target);
+		}
+		else 
+		{
+			Weapon->WeaponInstance->FireStatic(Speed);
+		}
+		Weapon->StartCooldown();
+		return;
 	}
-	Weapon.StartCooldown();
 }
 
 void UWeaponSystemComponent::SelectWeapon(int WeaponIndex)

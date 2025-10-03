@@ -109,6 +109,8 @@ public:
 
 	URadarComponent* RadarComp;
 
+	TSubclassOf<ABaseWeapon> CurrentWeaponClass;
+
 	void ManageMenuSetting(EMenuState NewState);
 
 	//UVariables
@@ -165,6 +167,8 @@ private:
 	void ShootStart();
 	void ShootEnd();
 	void Bullets();
+	void NextWeapon();
+	void PreviousWeapon();
 
 	//Camera
 	void LookHor(const FInputActionValue& ValueX);

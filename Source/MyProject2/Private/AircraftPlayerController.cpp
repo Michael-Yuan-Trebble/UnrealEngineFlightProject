@@ -291,7 +291,40 @@ void AAircraftPlayerController::Rudder(const FInputActionValue& Value)
 void AAircraftPlayerController::Weapons()
 {
 	if (!Controlled) return;
-	WeaponComp->FireWeaponSelected(1, Controlled->Tracking,FlightComp->currentSpeed);
+	if (!WeaponComp) return;
+	if (WeaponComp->WeaponGroups.Num() > 0)
+	{
+		TArray<TSubclassOf<ABaseWeapon>> Keys;
+		WeaponComp->WeaponGroups.GetKeys(Keys);
+		CurrentWeaponClass = Keys[0];
+	}
+	WeaponComp->FireWeaponSelected(CurrentWeaponClass, Controlled->Tracking,FlightComp->currentSpeed);
+}
+
+void AAircraftPlayerController::NextWeapon() 
+{
+	if (!WeaponComp) return;
+	if (WeaponComp->WeaponGroups.Num() == 0) return;
+
+	TArray<TSubclassOf<ABaseWeapon>> Keys;
+	WeaponComp->WeaponGroups.GetKeys(Keys);
+
+	int32 CurrentIndex = Keys.IndexOfByKey(CurrentWeaponClass);
+	CurrentIndex = (CurrentIndex + 1) % Keys.Num();
+	CurrentWeaponClass = Keys[CurrentIndex];
+}
+
+void AAircraftPlayerController::PreviousWeapon() 
+{
+	if (!WeaponComp) return;
+	if (WeaponComp->WeaponGroups.Num() == 0) return;
+
+	TArray<TSubclassOf<ABaseWeapon>> Keys;
+	WeaponComp->WeaponGroups.GetKeys(Keys);
+
+	int32 CurrentIndex = Keys.IndexOfByKey(CurrentWeaponClass);
+	CurrentIndex = (CurrentIndex - 1 + Keys.Num()) % Keys.Num();
+	CurrentWeaponClass = Keys[CurrentIndex];
 }
 
 void AAircraftPlayerController::Special() 

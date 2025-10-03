@@ -56,7 +56,7 @@ void ABaseIRMissile::Tick(float DeltaTime)
 		}
 		return;
 	}
-
+	
 	missileVelocity += missileAcceleration * DeltaTime;
 	missileVelocity = FMath::Clamp(missileVelocity, 0.f, missileMaxSpeed);
 
