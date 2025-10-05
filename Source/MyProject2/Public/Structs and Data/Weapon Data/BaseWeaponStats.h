@@ -28,5 +28,8 @@ public:
 	float LifeTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Cooldown;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EWeaponType WeaponType;
 };

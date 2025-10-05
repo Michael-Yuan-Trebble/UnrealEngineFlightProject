@@ -14,7 +14,7 @@ class AT38Pawn;
 class AAircraftPlayerController;
 class ACurrentPlayerState;
 class AAircraftRegistry;
-class AAim9;
+class ABaseWeapon;
 
 UCLASS()
 class MYPROJECT2_API AFlightGamemode : public AGameModeBase
@@ -52,7 +52,7 @@ protected:
 	TSubclassOf<APlayerAircraft> Player;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
-	TSubclassOf<AAim9> Aim9;
+	TSubclassOf<ABaseWeapon> Aim9;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AF16AI> AIAircraftClass;

@@ -12,7 +12,7 @@
 #include "Aircraft/AI/EnemyAircraftAI.h"
 #include "EngineUtils.h"
 #include "AircraftRegistry.h"
-#include "Weapons/Missiles/Aim9.h"
+#include "Weapons/BaseWeapon.h"
 #include "Aircraft/Player/T38Pawn.h"
 
 AFlightGamemode::AFlightGamemode() 
@@ -31,8 +31,9 @@ AFlightGamemode::AFlightGamemode()
 	{
 		AIAircraftClass = F16AIBPClass.Class;
 	}
-	static ConstructorHelpers::FClassFinder<AAim9> Aim9BPClass(TEXT("/Game/Weapons/Aim-9L/BPAim-9"));
-	if (Aim9BPClass.Succeeded()) {
+	static ConstructorHelpers::FClassFinder<ABaseWeapon> Aim9BPClass(TEXT("/Game/Weapons/R-77/R-77BP"));
+	if (Aim9BPClass.Succeeded()) 
+	{
 		Aim9 = Aim9BPClass.Class;
 	}
 }
@@ -126,7 +127,7 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 
 	ABaseAircraft* SpawnedIn = PlayerSpawnedIn;
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < PlayerSpawnedIn->AirStats->NumOfPylons; i++) {
 		FString PylonName = FString::Printf(TEXT("Pylon%d"), i);
 		FName Pylon(*PylonName);
 		Loadout.Add(Pylon, Aim9);

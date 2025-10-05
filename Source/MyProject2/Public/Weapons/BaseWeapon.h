@@ -18,10 +18,10 @@ public:
 	
 	ABaseWeapon();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* WeaponMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* Collision;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

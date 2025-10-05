@@ -1,17 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Missile!"));
-#include "Weapons/Missiles/BaseIRMissile.h"
+
+#include "Weapons/Missiles/BaseAHRMissile.h"
 #include "NiagaraFunctionLibrary.h"
 
-ABaseIRMissile::ABaseIRMissile()
+ABaseAHRMissile::ABaseAHRMissile()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	timeTilDelt = 0;
 	isAir = false;
 	isDropPhase = false;
 	canLock = true;
-
 	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Missile Collision"));
 	RootComponent = Collision;
 
@@ -19,10 +18,10 @@ ABaseIRMissile::ABaseIRMissile()
 	WeaponMesh->SetupAttachment(RootComponent);
 }
 
-void ABaseIRMissile::BeginPlay()
+void ABaseAHRMissile::BeginPlay() 
 {
 	Super::BeginPlay();
-	if (MissileStats)
+	if (MissileStats) 
 	{
 		timeDet = MissileStats->LifeTime;
 		WeaponName = MissileStats->InGameName;
@@ -31,25 +30,34 @@ void ABaseIRMissile::BeginPlay()
 		cooldownTime = MissileStats->Cooldown;
 		range = MissileStats->LockOnRange;
 		turnRate = MissileStats->TurnRate;
-	}	
+	}
 }
 
-void ABaseIRMissile::Tick(float DeltaTime)
-{
+void ABaseAHRMissile::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	if (!isAir) return;
 
-	// VFX
-	if (SmokeTrail) 
-	{
+	if (SmokeTrail) {
 		SmokeTrail->SetWorldLocation(WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")));
 		SmokeTrail->SetWorldRotation(WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")));
 	}
 
-	// ====================================
-	// Missile is Deployed
-	// ====================================
+	if (isDropPhase) {
+		DropTimer += DeltaTime;
 
+		// Drop Sequence: "Launch" downwards
+
+		FVector DropMove = -GetOwner()->GetActorUpVector() * 600.f * DeltaTime;
+		FVector Forward = GetOwner()->GetActorForwardVector() * missileVelocity * DeltaTime;
+		FVector TotalMove = DropMove + Forward;
+
+		AddActorWorldOffset(TotalMove, true);
+		if (DropTimer >= 0.1) {
+			isDropPhase = false;
+
+		}
+		return;
+	}
 	missileVelocity += missileAcceleration * DeltaTime;
 	missileVelocity = FMath::Clamp(missileVelocity, 0.f, missileMaxSpeed);
 
@@ -60,12 +68,17 @@ void ABaseIRMissile::Tick(float DeltaTime)
 
 	bool destroyNeeded = false;
 
-	if (Tracking) 
-	{
+	if (Tracking) {
 		float pitchRad = calculatePitchAngle();
 		float yawRad = calculateYawAngle();
 		FRotator DeltaRot(pitchRad, yawRad, 0);
 		AddActorLocalRotation(DeltaRot);
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green,
+				FString::Printf(TEXT("Pitch: %f Yaw: %f"), pitchRad, yawRad));
+		}
 		FVector Distance = (Tracking->GetActorLocation() - this->GetActorLocation());
 		if (Distance.Size() <= 1000.f) {
 			destroyNeeded = true;
@@ -78,7 +91,7 @@ void ABaseIRMissile::Tick(float DeltaTime)
 
 	if (!(timeTilDelt >= timeDet) && !destroyNeeded) return;
 
-	if (SmokeTrail) 
+	if (SmokeTrail)
 	{
 		SmokeTrail->Deactivate();
 	}
@@ -86,7 +99,7 @@ void ABaseIRMissile::Tick(float DeltaTime)
 	Destroy();
 }
 
-float ABaseIRMissile::calculatePitchAngle() 
+float ABaseAHRMissile::calculatePitchAngle()
 {
 	FVector MissileLoc = this->GetActorLocation();
 	FVector ToTarget = Tracking->GetActorLocation() - MissileLoc;
@@ -107,7 +120,7 @@ float ABaseIRMissile::calculatePitchAngle()
 	return pitchRad;
 }
 
-float ABaseIRMissile::calculateYawAngle()
+float ABaseAHRMissile::calculateYawAngle()
 {
 	FVector MissileLoc = this->GetActorLocation();
 	FVector ToTarget = Tracking->GetActorLocation() - MissileLoc;
@@ -132,18 +145,18 @@ float ABaseIRMissile::calculateYawAngle()
 	return yawRad;
 }
 
-void ABaseIRMissile::FireStatic(float launchSpeed)
+void ABaseAHRMissile::FireStatic(float launchSpeed)
 {
 	LaunchSequence(launchSpeed);
 }
 
-void ABaseIRMissile::FireTracking(float launchSpeed, AActor* Target) 
+void ABaseAHRMissile::FireTracking(float launchSpeed, AActor* Target)
 {
 	Tracking = Target;
 	LaunchSequence(launchSpeed);
 }
 
-void ABaseIRMissile::LaunchSequence(float Speed) 
+void ABaseAHRMissile::LaunchSequence(float Speed)
 {
 	if (GetOwner())
 	{
@@ -159,6 +172,7 @@ void ABaseIRMissile::LaunchSequence(float Speed)
 		WeaponMesh->SetCollisionProfileName(TEXT("PhysicsActor"));
 		missileVelocity = Speed;
 		isAir = true;
+		isDropPhase = true;
 
 		SmokeTrail = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 			GetWorld(),
@@ -172,4 +186,4 @@ void ABaseIRMissile::LaunchSequence(float Speed)
 	}
 }
 
-float ABaseIRMissile::ReturnCooldownTime() {return cooldownTime;}
+float ABaseAHRMissile::ReturnCooldownTime() { return cooldownTime; }

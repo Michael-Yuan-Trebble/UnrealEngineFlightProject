@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Weapons/BaseWeapon.h"
-#include "NiagaraFunctionLibrary.h"
-#include "Structs and Data/Weapon Data/IRMissileStats.h"
 #include "NiagaraComponent.h"
-#include "BaseIRMissile.generated.h"
+#include "NiagaraSystem.h"
+#include "Weapons/BaseWeapon.h"
+#include "Structs and Data/Weapon Data/ARHMissileStats.h"
+#include "BaseAHRMissile.generated.h"
 
 UCLASS()
-class MYPROJECT2_API ABaseIRMissile : public ABaseWeapon
+class MYPROJECT2_API ABaseAHRMissile : public ABaseWeapon
 {
 	GENERATED_BODY()
 	
-public:	
-	ABaseIRMissile();
+public:
+	ABaseAHRMissile();
 
 	bool isDropPhase;
 
@@ -24,25 +24,25 @@ public:
 
 	bool isAir;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UNiagaraSystem* SmokeTrailSystem;
 
-	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UNiagaraComponent* SmokeTrail;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	UIRMissileStats* MissileStats;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UARHMissileStats* MissileStats;
 
 	FVector CurrentDirection;
 
 	AActor* Tracking;
-
+	
 	float missileAcceleration;
 
 	float missileMaxSpeed;
 
 	float missileVelocity;
-
+	
 	float turnRate;
 
 	void LaunchSequence(float Speed);
@@ -63,5 +63,4 @@ private:
 	float calculatePitchAngle();
 
 	float calculateYawAngle();
-
 };

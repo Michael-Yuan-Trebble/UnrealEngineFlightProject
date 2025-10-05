@@ -79,7 +79,7 @@ void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 		}
 	}
 	UpdateLockedOn(DeltaTime, Controlled->Tracking);
-
+	/*
 	FVector Start = Controlled->GetActorLocation();
 	FVector Direction = Controlled->GetActorForwardVector();
 	float Length = 10000.f;
@@ -98,7 +98,7 @@ void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 		-1.f,
 		0,
 		1.f
-	);
+	);*/
 }
 
 void UWeaponSystemComponent::EquipWeapons()
