@@ -10,17 +10,10 @@ FCooldownWeapon::FCooldownWeapon()
 	, time(0.f)
 	, cooldownTime(5.0f)
 	, SocketName(NAME_None)
-
-{
-
-}
+{}
 
 void FCooldownWeapon::UpdateCooldown(float DeltaTime) 
 {
-	time -= DeltaTime;
-	if (time <= 0) 
-	{
-		bCanFire = true;
-		time = 0;
-	}
+	time = FMath::Max(0, time-DeltaTime);
+	bCanFire = (time <= 0);
 }

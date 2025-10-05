@@ -18,8 +18,6 @@ class MYPROJECT2_API ABaseIRMissile : public ABaseWeapon
 public:	
 	ABaseIRMissile();
 
-	bool isDropPhase;
-
 	float DropTimer = 0;
 
 	bool isAir;
@@ -30,7 +28,7 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	UNiagaraComponent* SmokeTrail;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	UIRMissileStats* MissileStats;
 
 	FVector CurrentDirection;

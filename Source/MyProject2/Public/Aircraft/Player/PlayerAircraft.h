@@ -38,15 +38,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCameraComponent* Camera;
 
-	void SetWeapons(TMap<FName,TSubclassOf<ABaseWeapon>> In);
-
-	void BuildWeaponGroups();
-
 	float ReturnSpringArmLength() const;
-
-	void SetStats(UAircraftStats* InStats);
-
-	UFlightComponent* GetFlightComp();
 
 protected:
 	virtual void BeginPlay() override;

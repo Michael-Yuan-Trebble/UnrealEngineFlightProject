@@ -48,6 +48,7 @@ void URadarComponent::ScanTargets()
 	for (ABaseAircraft* RegisteredPawn : Registry->RegisteredAircraft) 
 	{
 		if (!IsValid(RegisteredPawn) || RegisteredPawn == Controlled) continue;
+		if (RegisteredPawn->Faction == Controlled->Faction) continue;
 		FDetectedAircraftInfo TempInfo;
 		TempInfo.Location = RegisteredPawn->GetActorLocation();
 		TempInfo.Rotation = RegisteredPawn->GetActorRotation();

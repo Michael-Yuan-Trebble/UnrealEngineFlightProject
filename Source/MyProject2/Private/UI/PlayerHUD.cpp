@@ -26,10 +26,8 @@ void APlayerHUD::BeginPlay()
 void APlayerHUD::Tick(float DeltaSeconds) 
 {
 	Super::Tick(DeltaSeconds);
-	if (LockBoxWidgetClass && PC) 
-	{
-		UpdateTargetWidgets();
-	}
+    if (!LockBoxWidgetClass || !PC) return;
+	UpdateTargetWidgets();
 }
 
 void APlayerHUD::UpdateLocked(bool Locked)
@@ -40,7 +38,6 @@ void APlayerHUD::UpdateLocked(bool Locked)
 
 void APlayerHUD::UpdateTargetWidgets() 
 {
-	if (!PC || !LockBoxWidgetClass) return;
     for (auto It = ActiveWidgets.CreateIterator(); It; ++It)
     {
         ABaseAircraft* Target = It.Key();

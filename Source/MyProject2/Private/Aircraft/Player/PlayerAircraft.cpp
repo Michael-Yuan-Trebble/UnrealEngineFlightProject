@@ -17,25 +17,21 @@ APlayerAircraft::APlayerAircraft()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 
-	FlightComponent = CreateDefaultSubobject<UFlightComponent>(TEXT("FlightComponent"));
 	WeaponComponent = CreateDefaultSubobject<UWeaponSystemComponent>(TEXT("WeaponComponent"));
-	RadarComponent = CreateDefaultSubobject<URadarComponent>(TEXT("Radar"));
 
 	health = 100;
+	Faction = EFaction::Allied;
 }
 
 void APlayerAircraft::BeginPlay()
 {
 	Super::BeginPlay();
-	FlightComponent->Setup(this, AirStats);
 	WeaponComponent->Setup(this, AirStats);
-	RadarComponent->Setup(this);
 }
 
 void APlayerAircraft::Tick(float DeltaSeconds) 
 {
 	Super::Tick(DeltaSeconds);
-	WeaponComponent->UpdateLockedOn(DeltaSeconds, Tracking);
 }
 
 void APlayerAircraft::PossessedBy(AController* NewController) 
@@ -43,22 +39,10 @@ void APlayerAircraft::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 
 	Controlled = Cast<AAircraftPlayerController>(NewController);
+	if (!Controlled) return;
 	Controlled->FlightComp = FlightComponent;
 	Controlled->WeaponComp = WeaponComponent;
 	Controlled->RadarComp = RadarComponent;
-}
-
-void APlayerAircraft::SetStats(UAircraftStats* InStats)
-{
-	AirStats = InStats;
-	FlightComponent->AircraftStats = InStats;
-}
-
-void APlayerAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In)
-{
-	WeaponComponent->Loadout = In;
-	AddPylons();
-	WeaponComponent->EquipWeapons();
 }
 
 USpringArmComponent* APlayerAircraft::GetSpringArm() const {return SpringArm;}
@@ -66,5 +50,3 @@ USpringArmComponent* APlayerAircraft::GetSpringArm() const {return SpringArm;}
 UCameraComponent* APlayerAircraft::GetCamera() const {return Camera;}
 
 float APlayerAircraft::ReturnSpringArmLength() const {return springArmLength;}
-
-UFlightComponent* APlayerAircraft::GetFlightComp() {return FlightComponent;}

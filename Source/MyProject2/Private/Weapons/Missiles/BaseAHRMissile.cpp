@@ -21,28 +21,27 @@ ABaseAHRMissile::ABaseAHRMissile()
 void ABaseAHRMissile::BeginPlay() 
 {
 	Super::BeginPlay();
-	if (MissileStats) 
-	{
-		timeDet = MissileStats->LifeTime;
-		WeaponName = MissileStats->InGameName;
-		missileAcceleration = MissileStats->Acceleration;
-		missileMaxSpeed = MissileStats->MaxSpeed;
-		cooldownTime = MissileStats->Cooldown;
-		range = MissileStats->LockOnRange;
-		turnRate = MissileStats->TurnRate;
-	}
+	if (!MissileStats) return;
+	WeaponName = MissileStats->InGameName;
+	missileAcceleration = MissileStats->Acceleration;
+	missileMaxSpeed = MissileStats->MaxSpeed;
+	cooldownTime = MissileStats->Cooldown;
+	range = MissileStats->LockOnRange;
+	turnRate = MissileStats->TurnRate;
 }
 
 void ABaseAHRMissile::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	if (!isAir) return;
 
-	if (SmokeTrail) {
+	if (SmokeTrail) 
+	{
 		SmokeTrail->SetWorldLocation(WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")));
 		SmokeTrail->SetWorldRotation(WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")));
 	}
 
-	if (isDropPhase) {
+	if (isDropPhase) 
+	{
 		DropTimer += DeltaTime;
 
 		// Drop Sequence: "Launch" downwards
@@ -52,10 +51,7 @@ void ABaseAHRMissile::Tick(float DeltaTime) {
 		FVector TotalMove = DropMove + Forward;
 
 		AddActorWorldOffset(TotalMove, true);
-		if (DropTimer >= 0.1) {
-			isDropPhase = false;
-
-		}
+		isDropPhase = DropTimer >= 0.1;
 		return;
 	}
 	missileVelocity += missileAcceleration * DeltaTime;
@@ -68,7 +64,8 @@ void ABaseAHRMissile::Tick(float DeltaTime) {
 
 	bool destroyNeeded = false;
 
-	if (Tracking) {
+	if (Tracking) 
+	{
 		float pitchRad = calculatePitchAngle();
 		float yawRad = calculateYawAngle();
 		FRotator DeltaRot(pitchRad, yawRad, 0);
@@ -80,21 +77,16 @@ void ABaseAHRMissile::Tick(float DeltaTime) {
 				FString::Printf(TEXT("Pitch: %f Yaw: %f"), pitchRad, yawRad));
 		}
 		FVector Distance = (Tracking->GetActorLocation() - this->GetActorLocation());
-		if (Distance.Size() <= 1000.f) {
-			destroyNeeded = true;
-		}
+		destroyNeeded = Distance.Size() <= 1000.f;
 	}
 
 	timeTilDelt += DeltaTime;
 
 	// Missile explodes at range
 
-	if (!(timeTilDelt >= timeDet) && !destroyNeeded) return;
+	if (!(timeTilDelt >= MissileStats->LifeTime) && !destroyNeeded) return;
 
-	if (SmokeTrail)
-	{
-		SmokeTrail->Deactivate();
-	}
+	if (SmokeTrail) SmokeTrail->Deactivate();
 
 	Destroy();
 }

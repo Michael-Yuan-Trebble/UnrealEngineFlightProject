@@ -11,8 +11,7 @@
 
 AEnemyAircraft::AEnemyAircraft() 
 {
-	FlightComponent = CreateDefaultSubobject<UFlightComponent>(TEXT("FlightComponent"));
-	Radar = CreateDefaultSubobject<URadarComponent>(TEXT("Radar"));
+	Faction = EFaction::Enemy;
 }
 
 
@@ -21,12 +20,4 @@ void AEnemyAircraft::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 
 	Controller = Cast<AEnemyAircraftAI>(NewController);
-	FlightComponent->Controlled = this;
-	
-	UAircraftStats* Temp = NewObject<UAircraftStats>(this);
-	Temp->TurnRate = 0.3;
-	Temp->RollRate = 10;
-	Temp->Thrust = 10;
-	Temp->MaxSpeed = 1000;
-	FlightComponent->AircraftStats = Temp;
 }

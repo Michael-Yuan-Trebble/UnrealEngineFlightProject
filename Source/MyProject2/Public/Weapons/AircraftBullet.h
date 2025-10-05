@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Structs and Data/Weapon Data/BulletStats.h"
 #include "AircraftBullet.generated.h"
 
 UCLASS()
@@ -21,6 +22,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* Collision;
+
+	UPROPERTY(EditAnywhere)
+	UBulletStats* BulletStat;
 
 	float BulletSpeed = 100000.f;
 

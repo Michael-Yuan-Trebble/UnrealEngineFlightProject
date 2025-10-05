@@ -14,6 +14,15 @@
 #include "BaseAircraft.generated.h"
 
 class ABaseIRMissile;
+class UFlightComponent;
+class URadarComponent;
+
+UENUM(BlueprintType)
+enum class EFaction : uint8
+{
+	Allied UMETA(DisplayName="Allied"),
+	Enemy UMETA(DisplayName="Enemy")
+};
 
 UCLASS()
 class MYPROJECT2_API ABaseAircraft : public APawn, public ILockableTarget
@@ -25,7 +34,15 @@ public:
 	
 	//Variables
 
+	UPROPERTY(EditAnywhere)
+	EFaction Faction;
+
+	UPROPERTY(EditAnywhere)
 	UAircraftStats* AirStats;
+
+	UFlightComponent* FlightComponent;
+
+	URadarComponent* RadarComponent;
 
 	float springArmLength;
 
@@ -71,12 +88,6 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	UBoxComponent* RudderCollision;
 
-	//Arrays
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FCooldownWeapon> AvailableWeapons;
-	ABaseIRMissile* CurrentWeapon;
-
 	//Return Functions for UObjects
 
 	virtual USkeletalMeshComponent* GetMesh() const;
@@ -88,10 +99,6 @@ public:
 	//Return Functions for Vars
 
 	virtual float ReturnTakeoffSpeed() const;
-
-	void AddPylons();
-
-	void UpdateLockedOn(float DeltaSeconds);
 
 	virtual void PossessedBy(AController* Controller) override;
 

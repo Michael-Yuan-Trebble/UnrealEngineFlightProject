@@ -11,11 +11,6 @@
 UWeaponSystemComponent::UWeaponSystemComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	static ConstructorHelpers::FClassFinder<AAircraftBullet> WidgetBPClass(TEXT("/Game/Weapons/Bullet/20mmBulletBP"));
-	if (WidgetBPClass.Succeeded())
-	{
-		Bullet = WidgetBPClass.Class;
-	}
 }
 
 void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStats) 
@@ -46,19 +41,6 @@ void UWeaponSystemComponent::FireBullets()
 	SpawnBullet->FireInDirection(MuzzleRotation.Vector());
 }
 
-//Create and Replace Missile in Array
-void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace)
-{
-	UStaticMeshComponent* PylonComp = Controlled->PylonSockets.FindRef(Replace.SocketName);
-	if (!PylonComp) return;
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = Controlled;
-	Replace.WeaponInstance = GetWorld()->SpawnActor<ABaseWeapon>(Replace.WeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-	if (!Replace.WeaponInstance) return;
-	FTransform SocketTransform = PylonComp->GetSocketTransform(FName("Socket"));
-	Replace.WeaponInstance->AttachToComponent(PylonComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Socket"));
-}
-
 void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -79,33 +61,36 @@ void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 		}
 	}
 	UpdateLockedOn(DeltaTime, Controlled->Tracking);
-	/*
-	FVector Start = Controlled->GetActorLocation();
-	FVector Direction = Controlled->GetActorForwardVector();
-	float Length = 10000.f;
-	float AngleRad = FMath::DegreesToRadians(30.f);
+}
 
-	DrawDebugCone(
-		GetWorld(),
-		Start,
-		Direction,
-		Length, 
-		AngleRad, 
-		AngleRad, 
-		12,
-		FColor::Red,
-		false,
-		-1.f,
-		0,
-		1.f
-	);*/
+void UWeaponSystemComponent::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) {
+	Loadout = In;
+	AddPylons();
+	EquipWeapons();
+}
+
+void UWeaponSystemComponent::AddPylons() 
+{
+	for (int i = 0; i < AirStats->NumOfPylons; i++)
+	{
+		UStaticMeshComponent* TempPylon = NewObject<UStaticMeshComponent>(this);
+		FName SocketName = FName(*FString::Printf(TEXT("Pylon%d"), i));
+		if (TempPylon && AirStats->Pylon)
+		{
+			TempPylon->SetupAttachment(Controlled->Airframe, SocketName);
+			TempPylon->RegisterComponent();
+			TempPylon->SetStaticMesh(AirStats->Pylon);
+			TempPylon->SetRelativeLocation(FVector(0, 0, -20));
+			PylonSockets.Add(SocketName, TempPylon);
+		}
+	}
 }
 
 void UWeaponSystemComponent::EquipWeapons()
 {
 	for (const TPair<FName, TSubclassOf<ABaseWeapon>>&Pair : Loadout)
 	{
-		UStaticMeshComponent* PylonComp = Controlled->PylonSockets.FindRef(Pair.Key);
+		UStaticMeshComponent* PylonComp = PylonSockets.FindRef(Pair.Key);
 		if (!PylonComp)  continue;
 		FTransform SocketTransform = PylonComp->GetSocketTransform(FName("Socket"));
 		FActorSpawnParameters SpawnParams;
@@ -127,6 +112,19 @@ void UWeaponSystemComponent::EquipWeapons()
 		AvailableWeapons.Add(tempCool);
 	}
 	BuildWeaponGroups();
+}
+
+//Create and Replace Missile in Array
+void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace)
+{
+	UStaticMeshComponent* PylonComp = PylonSockets.FindRef(Replace.SocketName);
+	if (!PylonComp) return;
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = Controlled;
+	Replace.WeaponInstance = GetWorld()->SpawnActor<ABaseWeapon>(Replace.WeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+	if (!Replace.WeaponInstance) return;
+	FTransform SocketTransform = PylonComp->GetSocketTransform(FName("Socket"));
+	Replace.WeaponInstance->AttachToComponent(PylonComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Socket"));
 }
 
 void UWeaponSystemComponent::BuildWeaponGroups() 

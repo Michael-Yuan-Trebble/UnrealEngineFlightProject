@@ -35,8 +35,8 @@ void UFlightComponent::Setup(ABaseAircraft* InControl, UAircraftStats* InStats)
 
 void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	if (!isFlying && currentSpeed > 10.f) isFlying = true;
 	if (!Controlled || !AircraftStats) return;
+	if (!isFlying) isFlying = currentSpeed > 10.f;
 
 	// ====================================
 	// Movement Application Components
@@ -45,7 +45,6 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	ApplySpeed(CurrentThrust, DeltaTime);
 	RollAOA(DeltaTime);
 	ApplyRot(DeltaTime);
-	ReturnAOA(DeltaTime);
 
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
@@ -165,8 +164,6 @@ void UFlightComponent::AfterburnerSpeed(float ThrottlePercentage)
 
 void UFlightComponent::ApplyRot(float DeltaSeconds)
 {
-	if (!Controlled || !AircraftStats) return;
-
 	// ====================================
 	// Apply User Inputs
 	// ====================================
@@ -198,7 +195,6 @@ void UFlightComponent::ReturnAOA(float DeltaSeconds)
 
 void UFlightComponent::AdjustSpringArm(float DeltaSeconds, float ThrottlePercentage)
 {
-	if (!AircraftStats) return;
 	//TODO: Move SpringArm based on User's throttle input
 	//Controlled->SpringArm->TargetArmLength = FMath::FInterpTo(Controlled->SpringArm->TargetArmLength, AircraftStats->SpringArmLength + (50 * (0.5 - ThrottlePercentage)), DeltaSeconds, 2.f);
 }

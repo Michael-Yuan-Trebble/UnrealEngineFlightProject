@@ -12,6 +12,7 @@
 #include "Aircraft/AI/EnemyAircraftAI.h"
 #include "EngineUtils.h"
 #include "AircraftRegistry.h"
+#include "Aircraft/WeaponSystemComponent.h"
 #include "Weapons/BaseWeapon.h"
 #include "Aircraft/Player/T38Pawn.h"
 
@@ -123,17 +124,13 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 	if (!PlayerStart) return;
 	PlayerSpawnedIn = GetWorld()->SpawnActor<APlayerAircraft>(AircraftSelected->AircraftClass, PlayerStart->GetActorTransform());
 
-	PlayerSpawnedIn->SetStats(AircraftSelected->AircraftStat);
-
 	ABaseAircraft* SpawnedIn = PlayerSpawnedIn;
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
-	for (int i = 0; i < PlayerSpawnedIn->AirStats->NumOfPylons; i++) {
+	for (int i = 0; i < AircraftSelected->AircraftStat->NumOfPylons; i++) {
 		FString PylonName = FString::Printf(TEXT("Pylon%d"), i);
 		FName Pylon(*PylonName);
 		Loadout.Add(Pylon, Aim9);
 	}
-
-	PlayerSpawnedIn->SetWeapons(Loadout);
 
 	GetWorld()->GetTimerManager().SetTimerForNextTick([this, SpawnedIn]()
 		{
@@ -141,4 +138,6 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 			PC->Possess(SpawnedIn);
 			SpawnedIn->PossessedBy(PC);
 		});
+
+	PlayerSpawnedIn->WeaponComponent->SetWeapons(Loadout);
 }

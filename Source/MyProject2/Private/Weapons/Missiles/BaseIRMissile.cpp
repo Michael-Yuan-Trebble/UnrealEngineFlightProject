@@ -9,7 +9,6 @@ ABaseIRMissile::ABaseIRMissile()
 	PrimaryActorTick.bCanEverTick = true;
 	timeTilDelt = 0;
 	isAir = false;
-	isDropPhase = false;
 	canLock = true;
 
 	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Missile Collision"));
@@ -22,16 +21,13 @@ ABaseIRMissile::ABaseIRMissile()
 void ABaseIRMissile::BeginPlay()
 {
 	Super::BeginPlay();
-	if (MissileStats)
-	{
-		timeDet = MissileStats->LifeTime;
-		WeaponName = MissileStats->InGameName;
-		missileAcceleration = MissileStats->Acceleration;
-		missileMaxSpeed = MissileStats->MaxSpeed;
-		cooldownTime = MissileStats->Cooldown;
-		range = MissileStats->LockOnRange;
-		turnRate = MissileStats->TurnRate;
-	}	
+	if (!MissileStats) return;
+	WeaponName = MissileStats->InGameName;
+	missileAcceleration = MissileStats->Acceleration;
+	missileMaxSpeed = MissileStats->MaxSpeed;
+	cooldownTime = MissileStats->Cooldown;
+	range = MissileStats->LockOnRange;
+	turnRate = MissileStats->TurnRate;
 }
 
 void ABaseIRMissile::Tick(float DeltaTime)
@@ -46,9 +42,7 @@ void ABaseIRMissile::Tick(float DeltaTime)
 		SmokeTrail->SetWorldRotation(WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")));
 	}
 
-	// ====================================
-	// Missile is Deployed
-	// ====================================
+	// Missile is Fired
 
 	missileVelocity += missileAcceleration * DeltaTime;
 	missileVelocity = FMath::Clamp(missileVelocity, 0.f, missileMaxSpeed);
@@ -67,21 +61,16 @@ void ABaseIRMissile::Tick(float DeltaTime)
 		FRotator DeltaRot(pitchRad, yawRad, 0);
 		AddActorLocalRotation(DeltaRot);
 		FVector Distance = (Tracking->GetActorLocation() - this->GetActorLocation());
-		if (Distance.Size() <= 1000.f) {
-			destroyNeeded = true;
-		}
+		destroyNeeded = Distance.Size() <= 1000.f;
 	}
 
 	timeTilDelt += DeltaTime;
 
 	// Missile explodes at range
 
-	if (!(timeTilDelt >= timeDet) && !destroyNeeded) return;
+	if (!(timeTilDelt >= MissileStats->LifeTime) && !destroyNeeded) return;
 
-	if (SmokeTrail) 
-	{
-		SmokeTrail->Deactivate();
-	}
+	if (SmokeTrail) SmokeTrail->Deactivate();
 
 	Destroy();
 }

@@ -9,7 +9,7 @@
 #include "WeaponSystemComponent.generated.h"
 
 class APlayerHUD;
-
+class AAircraftBullet;
 class ABaseAircraft;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -36,7 +36,11 @@ public:
 
 	void UpdateLockedOn(float DeltaSeconds, AActor* Target);
 
+	void SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In);
+
 	void BuildWeaponGroups();
+
+	void AddPylons();
 
 	bool bLocked;
 
@@ -54,10 +58,12 @@ public:
 
 	TMap<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon*>> WeaponGroups;
 
+	TMap<FName, UStaticMeshComponent*> PylonSockets;
+
 	TArray<FCooldownWeapon> AvailableWeapons;
 
 	TArray<FCooldownWeapon> Cooldown;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TSubclassOf<AActor> Bullet;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AAircraftBullet> Bullet;
 };

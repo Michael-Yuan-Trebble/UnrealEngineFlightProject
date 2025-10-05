@@ -9,6 +9,7 @@
 #include "AircraftRegistry.h"
 #include "Aircraft/FlightComponent.h"
 #include "Aircraft/WeaponSystemComponent.h"
+#include "Aircraft/RadarComponent.h"
 #include "AircraftPlayerController.h"
 
 ABaseAircraft::ABaseAircraft()
@@ -32,6 +33,9 @@ ABaseAircraft::ABaseAircraft()
 
 	RudderCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("RudderCollision"));
 	RudderCollision->SetupAttachment(Collision);
+
+	FlightComponent = CreateDefaultSubobject<UFlightComponent>(TEXT("FlightComponent"));
+	RadarComponent = CreateDefaultSubobject<URadarComponent>(TEXT("Radar"));
 
 	PrimaryActorTick.bCanEverTick = true;
 	bLocked = false;
@@ -71,89 +75,15 @@ void ABaseAircraft::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ABaseAircraft::PossessedBy(AController* NewController) 
 {
 	Super::PossessedBy(NewController);
+
+	RadarComponent->Setup(this);
+	FlightComponent->Setup(this, AirStats);
+
 }
 
 void ABaseAircraft::Tick(float DeltaTime)
 {
-
-	// Update cooldown timer
-
-	for (int i = 0; i < AvailableWeapons.Num(); i++) 
-	{
-		if (AvailableWeapons[i].WeaponInstance && !AvailableWeapons[i].CanFire()) 
-		{
-			AvailableWeapons[i].UpdateCooldown(DeltaTime);
-			//if (AvailableWeapons[i].CanFire()); //ReEquip(&AvailableWeapons[i]);
-		}
-	}
-	UpdateLockedOn(DeltaTime);
-
-	float ConeLength = 0;
-
-	if (!CurrentWeapon) return; 
-	ConeLength = CurrentWeapon->range;
-
-	// Draw cone for aircraft's weapon lockon cone
-
-	DrawDebugCone(
-		GetWorld(),
-		Airframe->GetComponentLocation(),
-		Airframe->GetForwardVector(),
-		ConeLength,
-		FMath::DegreesToRadians(30 * 0.5f),
-		FMath::DegreesToRadians(30 * 0.5f),
-		12,
-		FColor::Red,
-		false,
-		0.1,
-		0
-	);
-
 	Super::Tick(DeltaTime);
-}
-
-void ABaseAircraft::AddPylons() 
-{
-	for (int i = 0; i < AirStats->NumOfPylons; i++)
-	{
-		UStaticMeshComponent* TempPylon = NewObject<UStaticMeshComponent>(this);
-		FName SocketName = FName(*FString::Printf(TEXT("Pylon%d"), i));
-		if (TempPylon && AirStats->Pylon)
-		{
-			TempPylon->SetupAttachment(Airframe, SocketName);
-			TempPylon->RegisterComponent();
-			TempPylon->SetStaticMesh(AirStats->Pylon);
-			TempPylon->SetRelativeLocation(FVector(0,0,-20));
-			PylonSockets.Add(SocketName, TempPylon);
-		}
-	}
-}
-
-void ABaseAircraft::UpdateLockedOn(float DeltaSeconds) 
-{
-	// Update timer on missile lock
-
-	if (!Tracking) return;
-
-	FVector ToTarget = Tracking->GetActorLocation() - GetActorLocation();
-	float Distance = ToTarget.Size();
-	ToTarget.Normalize();
-
-	float Dot = FVector::DotProduct(Airframe->GetForwardVector(), ToTarget);
-	bool bInRange = false;
-	if (CurrentWeapon) bInRange = Distance <= CurrentWeapon->range;
-	bool bInCone = Dot > FMath::Cos(FMath::DegreesToRadians(30.f));
-	if (bInRange && bInCone) 
-	{
-		LockTime += DeltaSeconds;
-		bLocked = LockTime >= 1 ? true : false;
-	}
-	else 
-	{
-		bLocked = false;
-		LockTime = 0.f;
-	} 
-	
 }
 
 FVector ABaseAircraft::GetTargetLocation() const {return this->GetActorLocation();}

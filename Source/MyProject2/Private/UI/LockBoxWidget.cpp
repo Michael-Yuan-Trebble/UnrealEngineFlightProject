@@ -22,12 +22,10 @@ void ULockBoxWidget::SetLockedOn(bool isLocked)
 
 void ULockBoxWidget::SetReticleImage(UTexture2D* NewTexture) 
 {
-	if (ReticleImage && NewTexture) 
-	{
-		FSlateBrush Brush;
-		Brush.SetResourceObject(NewTexture);
-		Brush.ImageSize = FVector2D(128, 128);
-		Brush.DrawAs = ESlateBrushDrawType::Image;
-		ReticleImage->SetBrush(Brush);
-	}
+	if (!ReticleImage || !NewTexture) return;
+	FSlateBrush Brush;
+	Brush.SetResourceObject(NewTexture);
+	Brush.ImageSize = FVector2D(128, 128);
+	Brush.DrawAs = ESlateBrushDrawType::Image;
+	ReticleImage->SetBrush(Brush);
 }

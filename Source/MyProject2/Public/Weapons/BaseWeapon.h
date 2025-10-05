@@ -24,16 +24,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* Collision;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBaseWeaponStats* WeaponStats;
-
 	FName WeaponName;
 
 	float cooldownTime;
 
 	float timeTilDelt;
-
-	float timeDet;
 
 	bool canLock;
 
