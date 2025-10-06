@@ -6,11 +6,14 @@
 #include "Structs and Data/Weapon Data/BaseWeaponStats.h"
 #include "BulletStats.generated.h"
 
+class AAircraftBullet;
+
 UCLASS()
 class MYPROJECT2_API UBulletStats : public UBaseWeaponStats
 {
 	GENERATED_BODY()
 	
 public:
-	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AAircraftBullet> BulletClass;
 };

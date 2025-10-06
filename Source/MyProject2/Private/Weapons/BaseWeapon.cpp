@@ -20,3 +20,12 @@ void ABaseWeapon::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
+
+void ABaseWeapon::FireStatic(float speed) {
+
+ }
+
+void ABaseWeapon::FireTracking(float speed, AActor* Target) {
+
+ }

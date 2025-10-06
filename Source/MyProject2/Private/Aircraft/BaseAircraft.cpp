@@ -45,6 +45,9 @@ void ABaseAircraft::BeginPlay()
 {
 	Super::BeginPlay();
 
+	RadarComponent->Setup(this);
+	FlightComponent->Setup(this, AirStats);
+
 	// Update world registry with each aircraft spawned, caching all aircraft fielded
 
 	if (UWorld* World = GetWorld()) 
@@ -76,8 +79,6 @@ void ABaseAircraft::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	RadarComponent->Setup(this);
-	FlightComponent->Setup(this, AirStats);
 
 }
 

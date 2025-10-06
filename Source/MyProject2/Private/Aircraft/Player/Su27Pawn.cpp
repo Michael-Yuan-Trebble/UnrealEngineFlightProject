@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Su27"));
 #include "Aircraft/Player/Su27Pawn.h"
 #include "Aircraft/FlightComponent.h"
 #include "AircraftPlayerController.h"
@@ -22,7 +22,7 @@ void ASu27Pawn::PossessedBy(AController* NewController)
 void ASu27Pawn::Tick(float DeltaSeconds) 
 {
 	Super::Tick(DeltaSeconds);
-	if (!Controlled) return;
+	if (!Controlled || !FlightComponent) return;
 	InputPitchValue = FlightComponent->UserPitch;
 	InputThrust = FlightComponent->CurrentThrust;
 	InputYawValue = FlightComponent->UserYaw;

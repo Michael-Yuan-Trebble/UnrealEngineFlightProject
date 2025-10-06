@@ -30,6 +30,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UNiagaraComponent* SmokeTrail;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UNiagaraSystem* MissileRocketSystem;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraComponent* MissileRocket;
+
 	UPROPERTY(EditAnywhere)
 	UARHMissileStats* MissileStats;
 
@@ -41,6 +47,10 @@ public:
 
 	float missileMaxSpeed;
 
+	float DropAcceleration = 40;
+
+	float dropVelocity = 0;
+
 	float missileVelocity;
 	
 	float turnRate;
@@ -48,6 +58,8 @@ public:
 	void LaunchSequence(float Speed);
 
 	float ReturnCooldownTime();
+
+	void activateSmoke();
 
 protected:
 

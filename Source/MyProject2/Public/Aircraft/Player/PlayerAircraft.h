@@ -26,11 +26,7 @@ public:
 
 	AAircraftPlayerController* Controlled;
 
-	UFlightComponent* FlightComponent;
-
 	UWeaponSystemComponent* WeaponComponent;
-
-	URadarComponent* RadarComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USpringArmComponent* SpringArm;

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Structs and Data/Weapon Data/BulletStats.h"
 #include "AircraftStats.generated.h"
 
 UCLASS()

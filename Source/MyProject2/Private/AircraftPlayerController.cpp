@@ -290,8 +290,7 @@ void AAircraftPlayerController::Rudder(const FInputActionValue& Value)
 
 void AAircraftPlayerController::Weapons()
 {
-	if (!Controlled) return;
-	if (!WeaponComp) return;
+	if (!Controlled || !WeaponComp) return;
 	if (WeaponComp->WeaponGroups.Num() > 0)
 	{
 		TArray<TSubclassOf<ABaseWeapon>> Keys;

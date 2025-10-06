@@ -7,9 +7,11 @@
 #include "Structs and Data/LockableTarget.h"
 #include "Structs and Data/CooldownWeapon.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Weapons/AircraftBullet.h"
 #include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
+#include "Structs and Data/Weapon Data/BulletStats.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "BaseAircraft.generated.h"
 
@@ -39,6 +41,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UAircraftStats* AirStats;
+
+	UPROPERTY(EditAnywhere)
+	UBulletStats* BulletStats;
 
 	UFlightComponent* FlightComponent;
 

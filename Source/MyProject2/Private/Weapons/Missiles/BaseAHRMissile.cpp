@@ -33,27 +33,40 @@ void ABaseAHRMissile::BeginPlay()
 void ABaseAHRMissile::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	if (!isAir) return;
-
-	if (SmokeTrail) 
-	{
-		SmokeTrail->SetWorldLocation(WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")));
-		SmokeTrail->SetWorldRotation(WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")));
-	}
-
 	if (isDropPhase) 
 	{
 		DropTimer += DeltaTime;
 
 		// Drop Sequence: "Launch" downwards
-
-		FVector DropMove = -GetOwner()->GetActorUpVector() * 600.f * DeltaTime;
+		dropVelocity += DropAcceleration * DeltaTime;
+		FVector DropMove = -GetOwner()->GetActorUpVector() * dropVelocity;
 		FVector Forward = GetOwner()->GetActorForwardVector() * missileVelocity * DeltaTime;
 		FVector TotalMove = DropMove + Forward;
 
 		AddActorWorldOffset(TotalMove, true);
-		isDropPhase = DropTimer >= 0.1;
+		isDropPhase = DropTimer < 0.2;
 		return;
 	}
+
+	if (!SmokeTrail || !MissileRocket)
+	{
+		activateSmoke();
+		return;
+	}
+
+	if (SmokeTrail)
+	{
+		SmokeTrail->SetWorldLocation(WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")));
+		SmokeTrail->SetWorldRotation(WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")));
+	}
+
+	if (MissileRocket)
+	{
+		MissileRocket->SetWorldLocation(WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")));
+		MissileRocket->SetWorldRotation(WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")));
+	}
+
+
 	missileVelocity += missileAcceleration * DeltaTime;
 	missileVelocity = FMath::Clamp(missileVelocity, 0.f, missileMaxSpeed);
 
@@ -87,6 +100,7 @@ void ABaseAHRMissile::Tick(float DeltaTime) {
 	if (!(timeTilDelt >= MissileStats->LifeTime) && !destroyNeeded) return;
 
 	if (SmokeTrail) SmokeTrail->Deactivate();
+	if (MissileRocket) MissileRocket->Deactivate();
 
 	Destroy();
 }
@@ -166,16 +180,30 @@ void ABaseAHRMissile::LaunchSequence(float Speed)
 		isAir = true;
 		isDropPhase = true;
 
-		SmokeTrail = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(),
-			SmokeTrailSystem,
-			WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")),
-			WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")),
-			FVector(1.f),
-			false,
-			true
-		);
 	}
+}
+
+void ABaseAHRMissile::activateSmoke() 
+{
+	SmokeTrail = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		GetWorld(),
+		SmokeTrailSystem,
+		WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")),
+		WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")),
+		FVector(1.f),
+		false,
+		true
+	);
+
+	MissileRocket = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		GetWorld(),
+		MissileRocketSystem,
+		WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")),
+		WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")),
+		FVector(1.f),
+		false,
+		true
+	);
 }
 
 float ABaseAHRMissile::ReturnCooldownTime() { return cooldownTime; }

@@ -27,7 +27,7 @@ void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStat
 void UWeaponSystemComponent::FireBullets()
 {
 	//Spawns a bullet actor whilst firing at socket
-	if (!Bullet || !(Controlled->Airframe->DoesSocketExist("Gun"))) return;
+	if (!Controlled->BulletStats->BulletClass || !(Controlled->Airframe->DoesSocketExist("Gun"))) return;
 	FVector MuzzleLocation = Controlled->Airframe->GetSocketLocation("Gun");
 	FRotator MuzzleRotation = Controlled->Airframe->GetSocketRotation("Gun");
 	FActorSpawnParameters SpawnParams;
@@ -35,7 +35,7 @@ void UWeaponSystemComponent::FireBullets()
 	SpawnParams.Instigator = Controlled->GetInstigator();
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	AAircraftBullet* SpawnBullet = GetWorld()->SpawnActor<AAircraftBullet>(Bullet, MuzzleLocation, MuzzleRotation, SpawnParams);
+	AAircraftBullet* SpawnBullet = GetWorld()->SpawnActor<AAircraftBullet>(Controlled->BulletStats->BulletClass, MuzzleLocation, MuzzleRotation, SpawnParams);
 	if (!SpawnBullet) return;
 
 	SpawnBullet->FireInDirection(MuzzleRotation.Vector());
