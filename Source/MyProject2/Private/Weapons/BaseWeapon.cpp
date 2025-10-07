@@ -6,7 +6,6 @@
 ABaseWeapon::ABaseWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 void ABaseWeapon::BeginPlay()

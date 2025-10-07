@@ -22,10 +22,6 @@ public:
 
 	AEnemyAircraft();
 
-	UFlightComponent* FlightComponent;
-
-	URadarComponent* Radar;
-
 	AEnemyAircraftAI* Controller;
 
 	virtual void PossessedBy(AController* Controller) override;

@@ -14,25 +14,34 @@
 
 ABaseAircraft::ABaseAircraft()
 {
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	SetRootComponent(RootComponent);
-	Airframe = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Airframe"));
-	Airframe->SetupAttachment(RootComponent);
-
 	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision"));
-	Collision->SetupAttachment(Airframe);
+
+	SetRootComponent(Collision);
+
+	Collision->SetCollisionProfileName(TEXT("Pawn"));
+	Collision->SetNotifyRigidBodyCollision(true);
+	Collision->SetGenerateOverlapEvents(true);
+	Collision->SetBoxExtent(FVector(30.f));
+
+	Airframe = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Airframe"));
+	Airframe->SetupAttachment(Collision);
+	Airframe->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	BodyCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BodyCollision"));
 	BodyCollision->SetupAttachment(Collision);
+	BodyCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	LeftWingCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftWingCollision"));
 	LeftWingCollision->SetupAttachment(Collision);
+	LeftWingCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	RightWingCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("RightWingCollision"));
 	RightWingCollision->SetupAttachment(Collision);
+	RightWingCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	RudderCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("RudderCollision"));
 	RudderCollision->SetupAttachment(Collision);
+	RudderCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	FlightComponent = CreateDefaultSubobject<UFlightComponent>(TEXT("FlightComponent"));
 	RadarComponent = CreateDefaultSubobject<URadarComponent>(TEXT("Radar"));
@@ -85,6 +94,15 @@ void ABaseAircraft::PossessedBy(AController* NewController)
 void ABaseAircraft::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void ABaseAircraft::OnHitByMissile_Implementation(AActor* Missile, float Damage)
+{
+	health -= Damage;
+	if (health <= 0.f) 
+	{
+		Destroy();
+	}
 }
 
 FVector ABaseAircraft::GetTargetLocation() const {return this->GetActorLocation();}

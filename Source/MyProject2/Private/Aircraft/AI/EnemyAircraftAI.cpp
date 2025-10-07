@@ -47,7 +47,6 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 
 	Controlled = Cast<AEnemyAircraft>(GetPawn());
 	if (!Controlled) return;
-	power = (log10(20 / (0.07 * 1.225))) / (log10(maxSpeed));
 
 }
 

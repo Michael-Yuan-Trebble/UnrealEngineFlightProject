@@ -12,6 +12,7 @@
 AEnemyAircraft::AEnemyAircraft() 
 {
 	Faction = EFaction::Enemy;
+	health = 100;
 }
 
 

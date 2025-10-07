@@ -8,6 +8,7 @@
 #include "Gamemodes/CurrentPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Aircraft/AI/F16AI.h"
+#include "Aircraft/Player/Su27Pawn.h"
 #include "UI/PlayerHUD.h"
 #include "Aircraft/AI/EnemyAircraftAI.h"
 #include "EngineUtils.h"
@@ -21,7 +22,7 @@ AFlightGamemode::AFlightGamemode()
 	// ====================================
 	// Temporary Fill In classes for testing
 	// ====================================
-	static ConstructorHelpers::FClassFinder<AT38Pawn> T38PawnBPClass(TEXT("/Game/Aircraft/Su27/Su27BP.Su27BP"));
+	static ConstructorHelpers::FClassFinder<ASu27Pawn> T38PawnBPClass(TEXT("/Game/Aircraft/Su27/Su27BP.Su27BP"));
 	if (T38PawnBPClass.Succeeded())
 	{
 		Player = T38PawnBPClass.Class;

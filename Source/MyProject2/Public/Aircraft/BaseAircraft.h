@@ -13,6 +13,7 @@
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Structs and Data/Weapon Data/BulletStats.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Structs and Data/DamageableInterface.h"
 #include "BaseAircraft.generated.h"
 
 class ABaseIRMissile;
@@ -27,7 +28,7 @@ enum class EFaction : uint8
 };
 
 UCLASS()
-class MYPROJECT2_API ABaseAircraft : public APawn, public ILockableTarget
+class MYPROJECT2_API ABaseAircraft : public APawn, public ILockableTarget, public IDamageableInterface
 {
 	GENERATED_BODY()
 
@@ -78,7 +79,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Airframe;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision", meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* Collision;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -106,6 +107,8 @@ public:
 	virtual float ReturnTakeoffSpeed() const;
 
 	virtual void PossessedBy(AController* Controller) override;
+
+	virtual void OnHitByMissile_Implementation(AActor* Missile, float Damage) override;
 
 protected:
 

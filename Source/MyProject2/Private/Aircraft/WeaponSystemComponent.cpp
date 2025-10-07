@@ -27,7 +27,7 @@ void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStat
 void UWeaponSystemComponent::FireBullets()
 {
 	//Spawns a bullet actor whilst firing at socket
-	if (!Controlled->BulletStats->BulletClass || !(Controlled->Airframe->DoesSocketExist("Gun"))) return;
+	if (!Controlled || !Controlled->BulletStats->BulletClass || !(Controlled->Airframe->DoesSocketExist("Gun"))) return;
 	FVector MuzzleLocation = Controlled->Airframe->GetSocketLocation("Gun");
 	FRotator MuzzleRotation = Controlled->Airframe->GetSocketRotation("Gun");
 	FActorSpawnParameters SpawnParams;
@@ -44,6 +44,8 @@ void UWeaponSystemComponent::FireBullets()
 void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!Controlled || !AirStats) return;
 
 	// ====================================
 	// Weapon refresh to check respawning conditions
@@ -63,7 +65,9 @@ void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	UpdateLockedOn(DeltaTime, Controlled->Tracking);
 }
 
-void UWeaponSystemComponent::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) {
+void UWeaponSystemComponent::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) 
+{
+	if (!AirStats || !Controlled || !Controlled->Airframe) return;
 	Loadout = In;
 	AddPylons();
 	EquipWeapons();
@@ -97,6 +101,7 @@ void UWeaponSystemComponent::EquipWeapons()
 		SpawnParams.Owner = Controlled;
 		ABaseWeapon* SpawnIn = GetWorld()->SpawnActor<ABaseWeapon>(Pair.Value, SocketTransform, SpawnParams);
 		if (!SpawnIn) continue;
+		SpawnIn->Collision->SetSimulatePhysics(false);
 		SpawnIn->AttachToComponent(PylonComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Socket"));
 
 		if (!CurrentWeapon) CurrentWeapon = SpawnIn;

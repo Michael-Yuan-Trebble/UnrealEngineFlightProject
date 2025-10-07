@@ -1,8 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Hit!"));
 #include "Weapons/Missiles/BaseAHRMissile.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Structs and Data/DamageableInterface.h"
 
 ABaseAHRMissile::ABaseAHRMissile()
 {
@@ -14,13 +15,27 @@ ABaseAHRMissile::ABaseAHRMissile()
 	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Missile Collision"));
 	RootComponent = Collision;
 
+	Collision->SetCollisionProfileName(TEXT("Projectile"));
+	Collision->SetNotifyRigidBodyCollision(true);
+	Collision->SetGenerateOverlapEvents(false);
+
+	Collision->OnComponentBeginOverlap.AddDynamic(this, &ABaseAHRMissile::OnOverlapBegin);
+
+	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
+	ProjectileMovement->InitialSpeed = 0;
+	ProjectileMovement->bRotationFollowsVelocity = true;
+	ProjectileMovement->bShouldBounce = false;
+	ProjectileMovement->ProjectileGravityScale = 0.f;
+
 	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Missile"));
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponMesh->SetupAttachment(RootComponent);
 }
 
 void ABaseAHRMissile::BeginPlay() 
 {
 	Super::BeginPlay();
+	Collision->IgnoreActorWhenMoving(GetOwner(), true);
 	if (!MissileStats) return;
 	WeaponName = MissileStats->InGameName;
 	missileAcceleration = MissileStats->Acceleration;
@@ -28,9 +43,11 @@ void ABaseAHRMissile::BeginPlay()
 	cooldownTime = MissileStats->Cooldown;
 	range = MissileStats->LockOnRange;
 	turnRate = MissileStats->TurnRate;
+	ProjectileMovement->MaxSpeed = MissileStats->MaxSpeed;
 }
 
-void ABaseAHRMissile::Tick(float DeltaTime) {
+void ABaseAHRMissile::Tick(float DeltaTime)
+{
 	Super::Tick(DeltaTime);
 	if (!isAir) return;
 	if (isDropPhase) 
@@ -54,6 +71,9 @@ void ABaseAHRMissile::Tick(float DeltaTime) {
 		return;
 	}
 
+	ProjectileMovement->Velocity += GetActorForwardVector() * missileAcceleration * DeltaTime;
+	ProjectileMovement->Velocity = ProjectileMovement->Velocity.GetClampedToMaxSize(ProjectileMovement->MaxSpeed);
+
 	if (SmokeTrail)
 	{
 		SmokeTrail->SetWorldLocation(WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")));
@@ -66,89 +86,16 @@ void ABaseAHRMissile::Tick(float DeltaTime) {
 		MissileRocket->SetWorldRotation(WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")));
 	}
 
-
-	missileVelocity += missileAcceleration * DeltaTime;
-	missileVelocity = FMath::Clamp(missileVelocity, 0.f, missileMaxSpeed);
-
-	// Movement Forward
-
-	FVector DeltaMove = GetActorForwardVector() * missileVelocity * DeltaTime;
-	AddActorWorldOffset(DeltaMove, true);
-
-	bool destroyNeeded = false;
-
-	if (Tracking) 
-	{
-		float pitchRad = calculatePitchAngle();
-		float yawRad = calculateYawAngle();
-		FRotator DeltaRot(pitchRad, yawRad, 0);
-		AddActorLocalRotation(DeltaRot);
-
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green,
-				FString::Printf(TEXT("Pitch: %f Yaw: %f"), pitchRad, yawRad));
-		}
-		FVector Distance = (Tracking->GetActorLocation() - this->GetActorLocation());
-		destroyNeeded = Distance.Size() <= 1000.f;
-	}
-
 	timeTilDelt += DeltaTime;
 
 	// Missile explodes at range
 
-	if (!(timeTilDelt >= MissileStats->LifeTime) && !destroyNeeded) return;
+	if (!(timeTilDelt >= MissileStats->LifeTime)) return;
 
 	if (SmokeTrail) SmokeTrail->Deactivate();
 	if (MissileRocket) MissileRocket->Deactivate();
 
 	Destroy();
-}
-
-float ABaseAHRMissile::calculatePitchAngle()
-{
-	FVector MissileLoc = this->GetActorLocation();
-	FVector ToTarget = Tracking->GetActorLocation() - MissileLoc;
-	if (ToTarget.IsNearlyZero()) return 0.f;
-	ToTarget.Normalize();
-
-	FVector Forward = this->GetActorForwardVector();
-	FVector Up = this->GetActorUpVector();
-	FVector Right = this->GetActorRightVector();
-
-	FVector ToTargetInPitch = ToTarget - FVector::DotProduct(ToTarget, Right) * Right;
-	if (ToTargetInPitch.IsNearlyZero()) return 0.f;
-	ToTargetInPitch.Normalize();
-
-	float pitchRad = FMath::Atan2(FVector::DotProduct(ToTargetInPitch, Up), FVector::DotProduct(ToTargetInPitch, Forward));
-	pitchRad = FMath::Clamp(pitchRad, -turnRate, turnRate);
-
-	return pitchRad;
-}
-
-float ABaseAHRMissile::calculateYawAngle()
-{
-	FVector MissileLoc = this->GetActorLocation();
-	FVector ToTarget = Tracking->GetActorLocation() - MissileLoc;
-	if (ToTarget.IsNearlyZero()) return 0.f;
-	ToTarget.Normalize();
-
-	FVector Forward = this->GetActorForwardVector();
-	FVector Right = this->GetActorRightVector();
-	FVector Up = this->GetActorUpVector();
-
-	FVector FlatToTarget = ToTarget - FVector::DotProduct(ToTarget, Up) * Up;
-	if (FlatToTarget.IsNearlyZero()) return 0.f;
-	FlatToTarget.Normalize();
-
-	float yawRad = FMath::Atan2(
-		FVector::DotProduct(FlatToTarget, Right),
-		FVector::DotProduct(FlatToTarget, Forward)
-	);
-
-	yawRad = FMath::Clamp(yawRad, -turnRate, turnRate);
-
-	return yawRad;
 }
 
 void ABaseAHRMissile::FireStatic(float launchSpeed)
@@ -159,28 +106,25 @@ void ABaseAHRMissile::FireStatic(float launchSpeed)
 void ABaseAHRMissile::FireTracking(float launchSpeed, AActor* Target)
 {
 	Tracking = Target;
+	if (Tracking) 
+	{
+		ProjectileMovement->bIsHomingProjectile = true;
+		ProjectileMovement->HomingTargetComponent = Tracking->GetRootComponent();
+		ProjectileMovement->HomingAccelerationMagnitude = turnRate;
+	}
 	LaunchSequence(launchSpeed);
 }
 
 void ABaseAHRMissile::LaunchSequence(float Speed)
 {
-	if (GetOwner())
-	{
 		// ====================================
 		// Unbound Missile from Socket
 		// ====================================
 
-		DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		WeaponMesh->SetCollisionObjectType(ECC_PhysicsBody);
-		WeaponMesh->SetCollisionResponseToAllChannels(ECR_Block);
-		WeaponMesh->SetCollisionProfileName(TEXT("PhysicsActor"));
-		missileVelocity = Speed;
-		isAir = true;
-		isDropPhase = true;
-
-	}
+	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	missileVelocity = Speed;
+	isAir = true;
+	isDropPhase = true;
 }
 
 void ABaseAHRMissile::activateSmoke() 
@@ -204,6 +148,29 @@ void ABaseAHRMissile::activateSmoke()
 		false,
 		true
 	);
+
+	ProjectileMovement->InitialSpeed = missileVelocity;
+	ProjectileMovement->Activate();
+}
+
+void ABaseAHRMissile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult) {
+	if (!OtherActor || OtherActor == this || OtherActor == GetOwner())
+		return;
+	if (!isAir) return;
+	if (OtherActor->Implements<UDamageableInterface>()) 
+	{
+		IDamageableInterface::Execute_OnHitByMissile(OtherActor, this, MissileStats->Damage);
+	}
+
+	if (SmokeTrail) SmokeTrail->Deactivate();
+	if (MissileRocket) MissileRocket->Deactivate();
+
+	Destroy();
 }
 
 float ABaseAHRMissile::ReturnCooldownTime() { return cooldownTime; }
