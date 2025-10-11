@@ -6,7 +6,6 @@
 #include "Engine/World.h"
 #include "Aircraft/FlightComponent.h"
 #include "Math/UnrealMathUtility.h"
-#include "EnhancedInput/Public/InputMappingContext.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "cmath"
 #include "Aircraft/MenuManagerComponent.h"
@@ -16,7 +15,6 @@
 #include "Gamemodes/CurrentPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Aircraft/AI/F16AI.h"
-#include "UI/PlayerHUD.h"
 #include "TimerManager.h"
 #include "Aircraft/Player/PlayerAircraft.h"
 

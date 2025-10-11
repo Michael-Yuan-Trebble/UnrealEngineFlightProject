@@ -104,9 +104,6 @@ void UWeaponSystemComponent::EquipWeapons()
 		SpawnIn->Collision->SetSimulatePhysics(false);
 		SpawnIn->AttachToComponent(PylonComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Socket"));
 
-		if (!CurrentWeapon) CurrentWeapon = SpawnIn;
-
-
 		FCooldownWeapon tempCool;
 		tempCool.WeaponClass = Pair.Value;
 		tempCool.WeaponInstance = SpawnIn;
@@ -130,6 +127,7 @@ void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace)
 	if (!Replace.WeaponInstance) return;
 	FTransform SocketTransform = PylonComp->GetSocketTransform(FName("Socket"));
 	Replace.WeaponInstance->AttachToComponent(PylonComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Socket"));
+	GetCount();
 }
 
 void UWeaponSystemComponent::BuildWeaponGroups() 
@@ -146,6 +144,11 @@ void UWeaponSystemComponent::BuildWeaponGroups()
 			WeaponGroups.Add(WeaponClass, TArray<FCooldownWeapon*>());
 		}
 		WeaponGroups[WeaponClass].Add(&CW);
+	}
+
+	if (WeaponGroups.Num() > 0) 
+	{
+		SelectWeapon(1);
 	}
 }
 
@@ -165,6 +168,7 @@ void UWeaponSystemComponent::FireWeaponSelected(TSubclassOf<ABaseWeapon> WeaponC
 			Weapon->WeaponInstance->FireStatic(Speed);
 		}
 		Weapon->StartCooldown();
+		GetCount();
 		return;
 	}
 }
@@ -173,7 +177,32 @@ void UWeaponSystemComponent::SelectWeapon(int WeaponIndex)
 {
 	if (!AvailableWeapons.IsValidIndex(WeaponIndex - 1)) return;
 	CurrentWeapon = AvailableWeapons[WeaponIndex - 1].WeaponInstance;
+	GetCount();
 }
+
+void UWeaponSystemComponent::GetCount() 
+{
+	if (!CurrentWeapon) return;
+
+	MaxWeaponCountSelected = 0;
+	CurrentWeaponCount = 0;
+
+	TSubclassOf<ABaseWeapon> CurrentClass = CurrentWeapon->GetClass();
+
+	const TArray<FCooldownWeapon*>* WeaponArray = WeaponGroups.Find(CurrentClass);
+	if (!WeaponArray) return;
+
+	MaxWeaponCountSelected = WeaponArray->Num();
+
+	for (const FCooldownWeapon* Weapon : *WeaponArray)
+	{
+		if (Weapon && Weapon->WeaponInstance && Weapon->bCanFire)
+		{
+			CurrentWeaponCount++;
+		}
+	}
+}
+
 // TODO: Make the cone angle weapon specific (or maybe general)
 float CONE_ANGLE = 30.f;
 

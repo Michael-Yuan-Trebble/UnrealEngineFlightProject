@@ -18,9 +18,9 @@ APlayerHUD::APlayerHUD()
 
 void APlayerHUD::BeginPlay()
 {
-	Super::BeginPlay();
     PC = Cast<AAircraftPlayerController>(GetOwningPlayerController());
     UpdateTargetWidgets();
+    Super::BeginPlay();
 }
 
 void APlayerHUD::Tick(float DeltaSeconds) 

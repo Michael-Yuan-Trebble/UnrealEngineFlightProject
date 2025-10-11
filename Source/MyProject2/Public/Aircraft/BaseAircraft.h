@@ -19,6 +19,7 @@
 class ABaseIRMissile;
 class UFlightComponent;
 class URadarComponent;
+class UWeaponSystemComponent;
 
 UENUM(BlueprintType)
 enum class EFaction : uint8
@@ -46,7 +47,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	UBulletStats* BulletStats;
 
+	UPROPERTY(BlueprintReadWrite)
 	UFlightComponent* FlightComponent;
+
+	UPROPERTY(BlueprintReadWrite)
+	UWeaponSystemComponent* WeaponComponent;
 
 	URadarComponent* RadarComponent;
 

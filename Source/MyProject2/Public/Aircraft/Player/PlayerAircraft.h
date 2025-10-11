@@ -26,8 +26,6 @@ public:
 
 	AAircraftPlayerController* Controlled;
 
-	UWeaponSystemComponent* WeaponComponent;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USpringArmComponent* SpringArm;
 

@@ -68,7 +68,6 @@ void ABaseAHRMissile::Tick(float DeltaTime)
 	if (!SmokeTrail || !MissileRocket)
 	{
 		activateSmoke();
-		return;
 	}
 
 	ProjectileMovement->Velocity += GetActorForwardVector() * missileAcceleration * DeltaTime;
@@ -149,7 +148,7 @@ void ABaseAHRMissile::activateSmoke()
 		true
 	);
 
-	ProjectileMovement->InitialSpeed = missileVelocity;
+	ProjectileMovement->InitialSpeed = missileVelocity <= 0 ? 1 : missileVelocity;
 	ProjectileMovement->Activate();
 }
 
@@ -162,6 +161,7 @@ void ABaseAHRMissile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	if (!OtherActor || OtherActor == this || OtherActor == GetOwner())
 		return;
 	if (!isAir) return;
+
 	if (OtherActor->Implements<UDamageableInterface>()) 
 	{
 		IDamageableInterface::Execute_OnHitByMissile(OtherActor, this, MissileStats->Damage);

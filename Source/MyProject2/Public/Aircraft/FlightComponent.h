@@ -25,6 +25,7 @@ public:
 
 	bool isFlying = false;
 
+	UPROPERTY(BlueprintReadOnly)
 	float currentSpeed;
 
 	float UserPitch;

@@ -46,6 +46,12 @@ public:
 
 	float LockTime = 5.f;
 
+	UPROPERTY(BlueprintReadOnly)
+	float MaxWeaponCountSelected;
+
+	UPROPERTY(BlueprintReadOnly)
+	float CurrentWeaponCount;
+
 	ABaseAircraft* Controlled;
 
 	APlayerHUD* HUD;
@@ -66,4 +72,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AAircraftBullet> Bullet;
+
+private:
+	void GetCount();
 };

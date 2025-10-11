@@ -42,7 +42,6 @@ AFlightGamemode::AFlightGamemode()
 
 void AFlightGamemode::BeginPlay() 
 {
-	Super::BeginPlay();
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	if (!AAircraftRegistry::Get(GetWorld())) {
@@ -67,6 +66,8 @@ void AFlightGamemode::BeginPlay()
 	{ 
 		PC->SetControlMode(EControlMode::Aircraft);
 	}
+
+	Super::BeginPlay();
 	//SpawnAIAircraft();
 }
 

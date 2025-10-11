@@ -97,6 +97,8 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 
 	float t = DragAOA(AOA);
 
+	trueAcceleration = FMath::Abs(trueAcceleration) < 0.01 ? 0 : trueAcceleration;
+
 	currentSpeed += trueAcceleration;
 	currentSpeed = FMath::Clamp(currentSpeed, 0, AircraftStats->MaxSpeed);
 
