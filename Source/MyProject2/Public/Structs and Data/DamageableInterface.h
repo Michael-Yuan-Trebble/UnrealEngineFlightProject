@@ -6,7 +6,7 @@
 #include "UObject/Interface.h"
 #include "DamageableInterface.generated.h"
 
-UINTERFACE(MinimalAPI, Blueprintable)
+UINTERFACE(MinimalAPI)
 class UDamageableInterface : public UInterface
 {
 	GENERATED_BODY()

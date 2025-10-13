@@ -3,6 +3,7 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Hit!"));
 #include "Weapons/Missiles/BaseAHRMissile.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Aircraft/BaseAircraft.h"
 #include "Structs and Data/DamageableInterface.h"
 
 ABaseAHRMissile::ABaseAHRMissile()
@@ -20,6 +21,7 @@ ABaseAHRMissile::ABaseAHRMissile()
 	Collision->SetGenerateOverlapEvents(false);
 
 	Collision->OnComponentBeginOverlap.AddDynamic(this, &ABaseAHRMissile::OnOverlapBegin);
+	Collision->OnComponentHit.AddDynamic(this, &ABaseAHRMissile::OnHit);
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 0;
@@ -35,7 +37,11 @@ ABaseAHRMissile::ABaseAHRMissile()
 void ABaseAHRMissile::BeginPlay() 
 {
 	Super::BeginPlay();
-	Collision->IgnoreActorWhenMoving(GetOwner(), true);
+	if (GetOwner()) 
+	{
+		Collision->IgnoreActorWhenMoving(GetOwner(), true);
+		Owner = Cast<ABaseAircraft>(GetOwner());
+	}
 	if (!MissileStats) return;
 	WeaponName = MissileStats->InGameName;
 	missileAcceleration = MissileStats->Acceleration;
@@ -116,9 +122,7 @@ void ABaseAHRMissile::FireTracking(float launchSpeed, AActor* Target)
 
 void ABaseAHRMissile::LaunchSequence(float Speed)
 {
-		// ====================================
-		// Unbound Missile from Socket
-		// ====================================
+	// Unbound Missile from Socket
 
 	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	missileVelocity = Speed;
@@ -158,11 +162,28 @@ void ABaseAHRMissile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	int32 OtherBodyIndex,
 	bool bFromSweep,
 	const FHitResult& SweepResult) {
-	if (!OtherActor || OtherActor == this || OtherActor == GetOwner())
-		return;
-	if (!isAir) return;
+	if (!OtherActor || OtherActor == this || OtherActor == GetOwner() || !isAir) return;
+
 
 	if (OtherActor->Implements<UDamageableInterface>()) 
+	{
+		IDamageableInterface::Execute_OnHitByMissile(OtherActor, this, MissileStats->Damage); 
+	}
+
+	if (SmokeTrail) SmokeTrail->Deactivate();
+	if (MissileRocket) MissileRocket->Deactivate();
+
+	Destroy();
+}
+
+void ABaseAHRMissile::OnHit(UPrimitiveComponent* HitComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	FVector NormalImpulse,
+	const FHitResult& Hit) {
+	if (!OtherActor || OtherActor == this || OtherActor == GetOwner() || !isAir) return;
+
+	if (OtherActor->Implements<UDamageableInterface>())
 	{
 		IDamageableInterface::Execute_OnHitByMissile(OtherActor, this, MissileStats->Damage);
 	}

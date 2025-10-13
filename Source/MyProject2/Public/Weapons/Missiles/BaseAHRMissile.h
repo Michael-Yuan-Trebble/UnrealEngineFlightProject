@@ -11,6 +11,8 @@
 #include "Structs and Data/Weapon Data/ARHMissileStats.h"
 #include "BaseAHRMissile.generated.h"
 
+class ABaseAircraft;
+
 UCLASS()
 class MYPROJECT2_API ABaseAHRMissile : public ABaseWeapon
 {
@@ -64,6 +66,8 @@ public:
 
 	void activateSmoke();
 
+	ABaseAircraft* Owner;
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -82,4 +86,11 @@ private:
 		int32 OtherBodyIndex,
 		bool bFromSweep,
 		const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		FVector NormalImpulse,
+		const FHitResult& Hit);
 };
