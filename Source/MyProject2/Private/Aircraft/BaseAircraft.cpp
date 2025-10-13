@@ -2,15 +2,10 @@
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Base!"));
 #include "Aircraft/BaseAircraft.h"
-#include "Engine/SkeletalMeshSocket.h"
-#include "DrawDebugHelpers.h"
-#include "Structs and Data/CooldownWeapon.h"
-#include "Weapons/AircraftBullet.h"
 #include "AircraftRegistry.h"
 #include "Aircraft/FlightComponent.h"
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/RadarComponent.h"
-#include "AircraftPlayerController.h"
 
 ABaseAircraft::ABaseAircraft()
 {
@@ -103,6 +98,11 @@ void ABaseAircraft::OnHitByMissile_Implementation(AActor* Missile, float Damage)
 	{
 		Destroy();
 	}
+}
+
+EFaction ABaseAircraft::GetFaction_Implementation() const 
+{
+	return Faction;
 }
 
 FVector ABaseAircraft::GetTargetLocation() const {return this->GetActorLocation();}

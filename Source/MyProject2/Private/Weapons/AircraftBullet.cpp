@@ -3,6 +3,10 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Bullet!"));
 #include "Weapons/AircraftBullet.h"
 #include "Components/BoxComponent.h"
+#include "Aircraft/BaseAircraft.h"
+#include "Structs and Data/Weapon Data/BulletStats.h"
+#include "Structs and Data/TeamInterface.h"
+#include "Structs and Data/DamageableInterface.h"
 #include "DrawDebugHelpers.h"
 
 AAircraftBullet::AAircraftBullet()
@@ -26,6 +30,10 @@ void AAircraftBullet::BeginPlay()
 {
 	Super::BeginPlay();
 	Collision->OnComponentHit.AddDynamic(this, &AAircraftBullet::OnHit);
+	damage = BulletStat->Damage;
+	if (GetOwner()) {
+		Owner = Cast<ABaseAircraft>(GetOwner());
+	}
 }
 
 // Called every frame
@@ -55,5 +63,21 @@ void AAircraftBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 		{
 			Destroy();
 		}
+	}
+}
+
+void AAircraftBullet::DestroyBullet(AActor* OtherActor) {
+	if (!OtherActor || OtherActor == this || OtherActor == GetOwner()) return;
+
+	if (OtherActor->Implements<UTeamInterface>())
+	{
+		EFaction OtherFaction = Owner->Faction;
+		OtherFaction = ITeamInterface::Execute_GetFaction(OtherActor);
+		if (OtherFaction == Owner->Faction) return;
+	}
+
+	if (OtherActor->Implements<UDamageableInterface>())
+	{
+		IDamageableInterface::Execute_OnHitByMissile(OtherActor, this, damage);
 	}
 }

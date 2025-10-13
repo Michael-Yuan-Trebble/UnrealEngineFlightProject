@@ -9,7 +9,6 @@
 #include "WeaponSystemComponent.generated.h"
 
 class APlayerHUD;
-class AAircraftBullet;
 class ABaseAircraft;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -67,8 +66,6 @@ public:
 	TMap<FName, UStaticMeshComponent*> PylonSockets;
 
 	TArray<FCooldownWeapon> AvailableWeapons;
-
-	TArray<FCooldownWeapon> Cooldown;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AAircraftBullet> Bullet;

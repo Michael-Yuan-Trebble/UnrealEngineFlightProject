@@ -5,6 +5,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Aircraft/BaseAircraft.h"
 #include "Structs and Data/DamageableInterface.h"
+#include "Structs and Data/TeamInterface.h"
 
 ABaseAHRMissile::ABaseAHRMissile()
 {
@@ -71,10 +72,8 @@ void ABaseAHRMissile::Tick(float DeltaTime)
 		return;
 	}
 
-	if (!SmokeTrail || !MissileRocket)
-	{
-		activateSmoke();
-	}
+	if (!SmokeTrail || !MissileRocket) activateSmoke();
+	
 
 	ProjectileMovement->Velocity += GetActorForwardVector() * missileAcceleration * DeltaTime;
 	ProjectileMovement->Velocity = ProjectileMovement->Velocity.GetClampedToMaxSize(ProjectileMovement->MaxSpeed);
@@ -97,10 +96,7 @@ void ABaseAHRMissile::Tick(float DeltaTime)
 
 	if (!(timeTilDelt >= MissileStats->LifeTime)) return;
 
-	if (SmokeTrail) SmokeTrail->Deactivate();
-	if (MissileRocket) MissileRocket->Deactivate();
-
-	Destroy();
+	DestroyMissile();
 }
 
 void ABaseAHRMissile::FireStatic(float launchSpeed)
@@ -161,36 +157,43 @@ void ABaseAHRMissile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex,
 	bool bFromSweep,
-	const FHitResult& SweepResult) {
-	if (!OtherActor || OtherActor == this || OtherActor == GetOwner() || !isAir) return;
-
-
-	if (OtherActor->Implements<UDamageableInterface>()) 
-	{
-		IDamageableInterface::Execute_OnHitByMissile(OtherActor, this, MissileStats->Damage); 
-	}
-
-	if (SmokeTrail) SmokeTrail->Deactivate();
-	if (MissileRocket) MissileRocket->Deactivate();
-
-	Destroy();
+	const FHitResult& SweepResult) 
+{
+	CheckAndDelete(OtherActor);
 }
 
 void ABaseAHRMissile::OnHit(UPrimitiveComponent* HitComp,
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse,
-	const FHitResult& Hit) {
+	const FHitResult& Hit) 
+{
+	CheckAndDelete(OtherActor);
+}
+
+void ABaseAHRMissile::CheckAndDelete(AActor* OtherActor) 
+{
 	if (!OtherActor || OtherActor == this || OtherActor == GetOwner() || !isAir) return;
+
+	if (OtherActor->Implements<UTeamInterface>())
+	{
+		EFaction OtherFaction = Owner->Faction;
+		OtherFaction = ITeamInterface::Execute_GetFaction(OtherActor);
+		if (OtherFaction == Owner->Faction) return;
+	}
 
 	if (OtherActor->Implements<UDamageableInterface>())
 	{
 		IDamageableInterface::Execute_OnHitByMissile(OtherActor, this, MissileStats->Damage);
 	}
 
+	DestroyMissile();
+}
+
+void ABaseAHRMissile::DestroyMissile() 
+{
 	if (SmokeTrail) SmokeTrail->Deactivate();
 	if (MissileRocket) MissileRocket->Deactivate();
-
 	Destroy();
 }
 

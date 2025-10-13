@@ -20,7 +20,7 @@ APlayerAircraft::APlayerAircraft()
 	WeaponComponent = CreateDefaultSubobject<UWeaponSystemComponent>(TEXT("WeaponComponent"));
 
 	health = 100;
-	Faction = EFaction::Allied;
+	Faction = EFaction::Ally;
 }
 
 void APlayerAircraft::BeginPlay()

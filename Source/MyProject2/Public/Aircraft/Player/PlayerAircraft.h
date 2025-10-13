@@ -4,12 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Aircraft/BaseAircraft.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "PlayerAircraft.generated.h"
 
 class AAircraftPlayerController;
-class UFlightComponent;
-class UWeaponSystemComponent;
-class URadarComponent;
 
 UCLASS()
 class MYPROJECT2_API APlayerAircraft : public ABaseAircraft

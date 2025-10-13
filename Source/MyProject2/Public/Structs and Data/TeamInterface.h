@@ -4,14 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "TeamInterface.h"
+#include "TeamInterface.generated.h"
 
+UENUM(BlueprintType)
 enum class EFaction : uint8 {
-	Ally,
-	Enemy
+	Ally UMETA(DisplayName = "Ally"),
+	Enemy UMETA(DisplayName = "Enemy")
 };
 
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, Blueprintable)
 class UTeamInterface : public UInterface
 {
 	GENERATED_BODY()

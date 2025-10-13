@@ -7,6 +7,8 @@
 #include "Structs and Data/Weapon Data/BulletStats.h"
 #include "AircraftBullet.generated.h"
 
+class ABaseAircraft;
+
 UCLASS()
 class MYPROJECT2_API AAircraftBullet : public AActor
 {
@@ -26,7 +28,11 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UBulletStats* BulletStat;
 
+	ABaseAircraft* Owner;
+
 	float BulletSpeed = 100000.f;
+
+	float damage = 0.f;
 
 	float LifeTime = 10.f;
 
@@ -43,4 +49,6 @@ public:
 protected:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	void DestroyBullet(AActor* OtherActor);
 };

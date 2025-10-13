@@ -6,9 +6,12 @@
 #include "GameFramework/Actor.h"
 #include "Weapons/BaseWeapon.h"
 #include "NiagaraFunctionLibrary.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "Structs and Data/Weapon Data/IRMissileStats.h"
 #include "NiagaraComponent.h"
 #include "BaseIRMissile.generated.h"
+
+class ABaseAircraft;
 
 UCLASS()
 class MYPROJECT2_API ABaseIRMissile : public ABaseWeapon
@@ -18,8 +21,6 @@ class MYPROJECT2_API ABaseIRMissile : public ABaseWeapon
 public:	
 	ABaseIRMissile();
 
-	float DropTimer = 0;
-
 	bool isAir;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
@@ -28,8 +29,16 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	UNiagaraComponent* SmokeTrail;
 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UNiagaraSystem* MissileRocketSystem;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraComponent* MissileRocket;
+
 	UPROPERTY(EditAnywhere)
 	UIRMissileStats* MissileStats;
+
+	UProjectileMovementComponent* ProjectileMovement;
 
 	FVector CurrentDirection;
 
@@ -47,6 +56,10 @@ public:
 
 	float ReturnCooldownTime();
 
+	void activateSmoke();
+
+	ABaseAircraft* Owner;
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -58,8 +71,23 @@ protected:
 	virtual void FireStatic(float launchSpeed);
 
 private:
-	float calculatePitchAngle();
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
 
-	float calculateYawAngle();
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		FVector NormalImpulse,
+		const FHitResult& Hit);
+
+	void CheckAndDelete(AActor* OtherActor);
+
+	void DestroyMissile();
 
 };

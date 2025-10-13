@@ -10,8 +10,6 @@
 #include "EnemyAircraft.generated.h"
 
 class AEnemyAircraftAI;
-class URadarComponent;
-class UFlightComponent;
 
 UCLASS()
 class MYPROJECT2_API AEnemyAircraft : public ABaseAircraft
@@ -29,12 +27,4 @@ public:
 	void PickTarget();
 
 protected:
-
-	TArray<FDetectedAircraftInfo> DetectedTargets;
-
-	FDetectedAircraftInfo Targeting;
-
-	float RadarRange = 1000;
-
-	FTimerHandle RadarScanTimer;
 };

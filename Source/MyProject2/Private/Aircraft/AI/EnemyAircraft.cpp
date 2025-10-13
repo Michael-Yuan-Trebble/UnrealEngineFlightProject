@@ -3,11 +3,7 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Enemy Stats!"));
 #include "Aircraft/AI/EnemyAircraft.h"
 #include "Aircraft/AI/EnemyAircraftAI.h"
-#include "Aircraft/RadarComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Aircraft/FlightComponent.h"
-#include "Aircraft/AI/AIFlightComponent.h"
 
 AEnemyAircraft::AEnemyAircraft() 
 {

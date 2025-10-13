@@ -5,11 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "Structs and Data/LockableTarget.h"
-#include "Structs and Data/CooldownWeapon.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Weapons/AircraftBullet.h"
 #include "Components/BoxComponent.h"
-#include "Camera/CameraComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Structs and Data/Weapon Data/BulletStats.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -17,17 +13,9 @@
 #include "Structs and Data/TeamInterface.h"
 #include "BaseAircraft.generated.h"
 
-class ABaseIRMissile;
 class UFlightComponent;
 class URadarComponent;
 class UWeaponSystemComponent;
-
-UENUM(BlueprintType)
-enum class EFaction : uint8
-{
-	Allied UMETA(DisplayName="Allied"),
-	Enemy UMETA(DisplayName="Enemy")
-};
 
 UCLASS()
 class MYPROJECT2_API ABaseAircraft : public APawn, public ILockableTarget, public IDamageableInterface, public ITeamInterface
@@ -79,8 +67,6 @@ public:
 	AActor* Tracking;
 
 	//UObjects
-
-	TMap<FName, UStaticMeshComponent*> PylonSockets;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Airframe;

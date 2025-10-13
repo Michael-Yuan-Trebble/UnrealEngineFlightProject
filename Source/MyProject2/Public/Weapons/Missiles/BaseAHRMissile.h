@@ -93,4 +93,8 @@ private:
 		UPrimitiveComponent* OtherComp,
 		FVector NormalImpulse,
 		const FHitResult& Hit);
+
+	void CheckAndDelete(AActor* OtherActor);
+
+	void DestroyMissile();
 };
