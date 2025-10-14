@@ -48,7 +48,7 @@ public:
 
 	AActor* Tracking;
 	
-	float missileAcceleration;
+	float missileAcceleration = 0;
 
 	float missileMaxSpeed;
 
@@ -93,6 +93,10 @@ private:
 		UPrimitiveComponent* OtherComp,
 		FVector NormalImpulse,
 		const FHitResult& Hit);
+
+	UFUNCTION()
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	void CheckAndDelete(AActor* OtherActor);
 

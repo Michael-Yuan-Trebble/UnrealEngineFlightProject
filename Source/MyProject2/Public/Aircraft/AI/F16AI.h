@@ -21,7 +21,7 @@ public:
 
 	//UObjects and Animation Variables
 
-	FDetectedAircraftInfo ReturnTargeting();
+	FDetectedAircraftInfo* ReturnTargeting();
 
 	void ApplySpeed(float ThrottlePercentage);
 
@@ -34,6 +34,8 @@ public:
 	float YawBoxHeight = 100.f;
 
 	float YawBoxDepth = 100.f;
+
+	FDetectedAircraftInfo* Targeting;
 
 protected:
 

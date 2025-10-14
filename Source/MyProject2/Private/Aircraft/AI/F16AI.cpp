@@ -59,7 +59,7 @@ void AF16AI::PitchToTarget(float PitchInput, float DeltaSeconds)
 	//this->SetActorRotation(DeltaRot);
 }
 
-FDetectedAircraftInfo AF16AI::ReturnTargeting() 
+FDetectedAircraftInfo* AF16AI::ReturnTargeting() 
 {
 	return Targeting;
 }

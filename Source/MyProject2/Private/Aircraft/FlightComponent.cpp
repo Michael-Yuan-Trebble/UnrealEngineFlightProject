@@ -5,20 +5,13 @@
 
 //power = (log10(20 / (0.07 * 1.225))) / (log10(ListedMaximumSpeed));
 
-enum class ThrottleStage
-{
-	Slow,
-	Normal,
-	Afterburner
-};
-
-ThrottleStage getThrottleStage(float throttle)
+EThrottleStage getThrottleStage(float throttle)
 {
 	// Throttle Stages for pronounced acceleration differences
 	throttle *= 100.f;
-	if (throttle >= 0 && throttle <= 40) return ThrottleStage::Slow;
-	else if (throttle <= 80) return ThrottleStage::Normal;
-	else return ThrottleStage::Afterburner;
+	if (throttle >= 0 && throttle <= 40) return EThrottleStage::Slow;
+	else if (throttle <= 80) return EThrottleStage::Normal;
+	else return EThrottleStage::Afterburner;
 }
 
 
@@ -51,67 +44,70 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 {
-	ThrottleStage currentStage = getThrottleStage(ThrottlePercentage);
+	EThrottleStage currentStage = getThrottleStage(ThrottlePercentage);
 	switch (currentStage)
 	{
-	case ThrottleStage::Slow: SlowSpeed(ThrottlePercentage); break;
-	case ThrottleStage::Normal: NormalSpeed(ThrottlePercentage); break;
-	case ThrottleStage::Afterburner: AfterburnerSpeed(ThrottlePercentage);break;
+	case EThrottleStage::Slow: SlowSpeed(ThrottlePercentage); break;
+	case EThrottleStage::Normal: NormalSpeed(ThrottlePercentage); break;
+	case EThrottleStage::Afterburner: AfterburnerSpeed(ThrottlePercentage);break;
 	}
+
+	if (prevStage != currentStage)
+	{
+		switchingPhase = true;
+	}
+
 	AdjustSpringArm(DeltaSeconds, ThrottlePercentage);
-	float totalFlightPercent = 0;
+
+	// TODO: Finterpto Acceleration
+
 	float drag = 0;
-	float trueAcceleration = 0;
+	float trueAcceleration = Acceleration;
 
 	// Target speed for better acceleration until a certain point feeling
+	// drag calculation is behaving a bit wonky after safety checks
 
-	if (targetSpeed == 0)
+	float totalFlightPercent = currentSpeed / targetSpeed;
+	if (totalFlightPercent >= 0.8)
 	{
-		trueAcceleration = Acceleration;
-	}
-	else
+		drag = Acceleration * (1.f + FMath::Pow(2.f, -0.03f * (currentSpeed - targetSpeed)));
+	} 
+	if (totalFlightPercent > 1.05 && switchingPhase) 
 	{
-		totalFlightPercent = currentSpeed / targetSpeed;
-		if (totalFlightPercent >= 0.8)
-		{
-			drag = (Acceleration * 2) / (1.f + FMath::Pow(2.f, -0.1f * (currentSpeed - targetSpeed)));
-		}
-		trueAcceleration = Acceleration - drag;
+		drag = Acceleration * 4 / (1.f + FMath::Pow(2.f, -0.01f * (currentSpeed - targetSpeed)));
+	}
+	else 
+	{
+		switchingPhase = false;
 	}
 
-	// TODO: Apply AOA drag into acceleration calculation, fine tune numbers
+	prevStage = currentStage;
 
-	FVector F = Controlled->Airframe->GetForwardVector().GetSafeNormal();
-	FVector VelocityDir = Velocity.GetSafeNormal();
+	// Safety check
+	drag = FMath::Clamp(drag, 0, Acceleration * 10.f);
+	trueAcceleration -= drag;
 
-	float CosTheta = FVector::DotProduct(F, VelocityDir);
+	float t = DragAOA();
+	if (!FMath::IsFinite(t)) t = 0;
 
-	CosTheta = FMath::Clamp(CosTheta, -1.0f, 1.0f);
+	float pitchDrag = PitchDrag();
+	if (!FMath::IsFinite(pitchDrag)) pitchDrag = 0;
 
-	float AOA = FMath::RadiansToDegrees(FMath::Acos(CosTheta));
-
-	FVector Cross = FVector::CrossProduct(F, VelocityDir);
-	float Sign = (Cross.Z >= 0.f) ? 1.f : -1.f;
-
-	AOA *= Sign;
-
-	float t = DragAOA(AOA);
-
+	trueAcceleration -= t + pitchDrag;
 	trueAcceleration = FMath::Abs(trueAcceleration) < 0.01 ? 0 : trueAcceleration;
 
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
+
 	currentSpeed += trueAcceleration;
-	currentSpeed = FMath::Clamp(currentSpeed, 0, AircraftStats->MaxSpeed);
+	currentSpeed = FMath::FInterpTo(currentSpeed, Velocity.Size(), DeltaSeconds, 20.f);
 
-	if (GEngine)
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Current Speed: %.2f"), trueAcceleration));
-	}
+	if (!FMath::IsFinite(currentSpeed) || FMath::IsNaN(currentSpeed)) currentSpeed = 0;
 
-	float InterpSpeed = FMath::FInterpTo(Velocity.Size(), currentSpeed, DeltaSeconds, 2.f);
+	currentSpeed = FMath::Clamp(currentSpeed, 0, 1000000);
 
-	FVector Forward = Controlled->GetActorForwardVector();
+	Velocity = Controlled->GetActorForwardVector() * currentSpeed;
 
-	Velocity = Forward * InterpSpeed;
+	if (Velocity.ContainsNaN() || !FMath::IsFinite(Velocity.X) || Velocity.Size() > 1e6f) return;
 
 	Controlled->AddActorWorldOffset(Velocity * DeltaSeconds, true);
 
@@ -121,7 +117,7 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 	// Red = Mesh Forward
 	// ====================================
 
-	DrawDebugLine(GetWorld(), Controlled->GetActorLocation(), Controlled->GetActorLocation() + Forward * 300, FColor::Blue, false, 0.f, 0, 2.f);
+	DrawDebugLine(GetWorld(), Controlled->GetActorLocation(), Controlled->GetActorLocation() + Controlled->GetActorForwardVector() * 300, FColor::Blue, false, 0.f, 0, 2.f);
 	DrawDebugLine(GetWorld(), Controlled->GetActorLocation(), Controlled->GetActorLocation() + Controlled->Airframe->GetForwardVector() * 300, FColor::Green, false, 0.f, 0, 2.f);
 }
 
@@ -145,7 +141,7 @@ void UFlightComponent::SlowSpeed(float ThrottlePercentage)
 void UFlightComponent::NormalSpeed(float ThrottlePercentage)
 {
 	Acceleration = AircraftStats->Thrust * ThrottlePercentage;
-	targetSpeed = AircraftStats->MaxSpeed * 0.75;
+	targetSpeed = AircraftStats->MaxSpeed * 0.5;
 }
 
 void UFlightComponent::AfterburnerSpeed(float ThrottlePercentage)
@@ -201,12 +197,22 @@ void UFlightComponent::AdjustSpringArm(float DeltaSeconds, float ThrottlePercent
 	//Controlled->SpringArm->TargetArmLength = FMath::FInterpTo(Controlled->SpringArm->TargetArmLength, AircraftStats->SpringArmLength + (50 * (0.5 - ThrottlePercentage)), DeltaSeconds, 2.f);
 }
 
-float UFlightComponent::DragAOA(float AOA)
+float UFlightComponent::DragAOA()
 {
+	FVector F = Controlled->Airframe->GetForwardVector().GetSafeNormal();
+	FVector VelocityDir = Velocity.GetSafeNormal();
+	if (Velocity.IsNearlyZero()) VelocityDir = F;
+	float CosTheta = FVector::DotProduct(F, VelocityDir);
+	CosTheta = FMath::Clamp(CosTheta, -1.0f, 1.0f);
+	float AOA = FMath::RadiansToDegrees(FMath::Acos(CosTheta));
+	FVector Cross = FVector::CrossProduct(F, VelocityDir);
+	float Sign = (Cross.Z >= 0.f) ? 1.f : -1.f;
+	AOA *= Sign;
+
 	AOA = FMath::Abs(AOA);
 	float AOARadians = FMath::DegreesToRadians(AOA);
-	float drag = 0.75 * FMath::Pow(AOARadians, 2);
-	//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%f"), AOA));
+	float drag = 15 * FMath::Pow(AOARadians, 2);
+	//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%f"), drag));
 	return drag;
 }
 
@@ -238,6 +244,23 @@ void UFlightComponent::RollAOA(float DeltaSeconds)
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), DownPitch));
 		Controlled->Airframe->AddWorldRotation(Rotate);
 	}
+}
+
+float UFlightComponent::PitchDrag() 
+{
+	FVector Up = Controlled->Airframe->GetUpVector();
+	FVector Forward = Controlled->Airframe->GetForwardVector();
+
+	float PitchAngle = FMath::RadiansToDegrees(
+		FMath::Atan2(Forward.Z, FVector(Forward.X, Forward.Y, 0.f).Size())
+	);
+
+	float UpDot = FVector::DotProduct(Up, FVector::UpVector);
+
+	return PitchAngle / 50;
+
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), PitchAngle));
+	
 }
 
 // ====================================

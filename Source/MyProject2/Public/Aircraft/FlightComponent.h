@@ -8,6 +8,14 @@
 #include "Aircraft/BaseAircraft.h"
 #include "FlightComponent.generated.h"
 
+UENUM(BlueprintType)
+enum class EThrottleStage : uint8
+{
+	Slow UMETA(DisplayName = "Slow"),
+	Normal UMETA(DisplayName = "Normal"),
+	Afterburner UMETA(DisplayName = "Afterburner")
+};
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UFlightComponent : public UActorComponent
@@ -50,6 +58,10 @@ public:
 
 	FVector Velocity;
 
+	EThrottleStage prevStage = EThrottleStage::Slow;
+
+	bool switchingPhase = false;
+
 	void ApplySpeed(float ThrottlePercentage, float DeltaSeconds);
 
 	void ApplyRot(float DletaSeconds);
@@ -80,7 +92,9 @@ public:
 
 	void AdjustSpringArm(float DeltaSeconds, float ThrottlePercentage);
 
-	float DragAOA(float AOA);
+	float DragAOA();
 
 	void RollAOA(float DeltaSeconds);
+
+	float PitchDrag();
 };
