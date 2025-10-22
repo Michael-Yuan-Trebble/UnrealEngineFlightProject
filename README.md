@@ -1,5 +1,7 @@
 # UnrealEngineFlightProject
 
+Website for the project is located [at this link](https://unrealenginepersonalflightproject.netlify.app/)
+
 A custom flight simulation project built in Unreal Engine 5 using C++ and Blueprints.
 The goal of this project is to explore advanced gameplay programming and implementing flight mechanics and physics in the Unreal Engine.
 Inspirations of my project come from flight games/simulators such as War Thunder, Ace Combat, and Project Wingman.
@@ -12,7 +14,7 @@ Some of my goals of the project are:
 - Gain experience in designing modular and scalable game systems
 - Gain experience in optimization in game making
 
-## Features (WIP)
+## Features
 
 ### Thrust / Speed
 Currently, the calculations for velocity use a Engine State Model in order to make slowing down and speeding up more pronounced. Each state has a designated speed when the speed nears that target, drag is applied using a Sigmoid Function.
@@ -32,11 +34,11 @@ Another Angle of Attack variable is the current orientation of the aircraft, as 
 ![AoA Gravity Demo](Gifs/Gravity-Gif.gif)
 
 ### Aircraft Selection / Display
-Currently there is a level that displays all available aircraft (so far only 2) and from that, select weapons and a special. This is then transfered from the gamemode's player state to the overall game instance in order to equip the right 
+Currently there is a level that displays all available aircraft and from that, select weapons and a special. This is then transfered from the gamemode's player state to the overall game instance in order to equip the right 
 items in actual combat level. Hovering over options displays the object temporarily and clicking keeps that selection on screen, there are also aircraft designated "permanent", meaning they can't be sold and come free, while all the other aircraft have a cost and the button is clickable once the player has the right amount of currency.
 
 ### Basic Missile Functionality
-There are two groups of missiles as of now, however they function the same except for visually. Infrared (IR) Missiles and Active Radar Homing (ARH) Missiles, both lock on and track a target after firing and upon hit deal damage. They also destroy themselves upon impacting the ground and can be fired without lock. Missiles have exhaust effects and ARH Missiles first go through a "drop" phase instead of immediately going off the rail like IR, currently they also use Projectile Movement and use stats from data assets.
+There are two groups of missiles as of now, however they function the same except for visually. Infrared (IR) Missiles and Active Radar Homing (ARH) Missiles, both lock on and track a target after firing and upon hit deal damage. They also destroy themselves upon impacting the ground and can be fired without lock. Missiles have exhaust effects and ARH Missiles first go through a "drop" phase instead of immediately going off the rail like IR, currently they also use Projectile Movement and use stats from data assets. The plan for ARH missiles is to eventually have multilock on for all available missiles on pylons in order to have some distinction that ARH missiles are faster to fire due to their long range, Active Homing nature, and multiple data links on modern aircraft. As of now there is no plan to make how many ARH missiles can be simultaneously launched at once, however this may change if it helps gameplay and makes progression more significant.
 
 ![Missile Launch Demo](Gifs/Missile-Gif.gif)
 
@@ -46,7 +48,7 @@ Weapons are grouped with each other, making it so the player can fire all of the
 ![Re-Equip Demo](Gifs/ReEquip-Gif.gif)
 
 ### Shooting
-Aircraft can shoot now and these bullets deal damage, destroy upon impact, and use impulse to traverse. They have a simple visual effect and aircraft have the ability to change bullets, each of which has its own data asset for stats.
+Aircraft can shoot now and these bullets deal damage, destroy upon impact, and use impulse to traverse. They have a simple visual effect and aircraft have the ability to change bullets, each of which has its own data asset for stats. In the future I will add a visual in order to indicate lead needed to hit a target, mimicing a radar gun sight.
 
 ![Shooting-Demo](Gifs/Shoot-Gif.gif)
 
