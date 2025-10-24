@@ -6,6 +6,7 @@
 #include "Aircraft/FlightComponent.h"
 #include "Aircraft/RadarComponent.h"
 #include "Aircraft/WeaponSystemComponent.h"
+#include "Aircraft/Player/CameraManagerComponent.h"
 
 APlayerAircraft::APlayerAircraft() 
 {
@@ -18,6 +19,7 @@ APlayerAircraft::APlayerAircraft()
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponSystemComponent>(TEXT("WeaponComponent"));
+	ManagerComp = CreateDefaultSubobject<UCameraManagerComponent>(TEXT("CameraManagerComponent"));
 
 	health = 100;
 	Faction = EFaction::Ally;
@@ -27,6 +29,7 @@ void APlayerAircraft::BeginPlay()
 {
 	Super::BeginPlay();
 	WeaponComponent->Setup(this, AirStats);
+	ManagerComp->SetSpringArm(SpringArm);
 }
 
 void APlayerAircraft::Tick(float DeltaSeconds) 
@@ -43,6 +46,7 @@ void APlayerAircraft::PossessedBy(AController* NewController)
 	Controlled->FlightComp = FlightComponent;
 	Controlled->WeaponComp = WeaponComponent;
 	Controlled->RadarComp = RadarComponent;
+	Controlled->ManagerComp = ManagerComp;
 }
 
 USpringArmComponent* APlayerAircraft::GetSpringArm() const {return SpringArm;}

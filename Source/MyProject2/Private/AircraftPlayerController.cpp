@@ -10,6 +10,7 @@
 #include "cmath"
 #include "Aircraft/MenuManagerComponent.h"
 #include "Aircraft/WeaponSystemComponent.h"
+#include "Aircraft/Player/CameraManagerComponent.h"
 #include "Aircraft/RadarComponent.h"
 #include "UI/PlayerHUD.h"
 #include "Gamemodes/CurrentPlayerState.h"
@@ -52,12 +53,6 @@ void AAircraftPlayerController::OnPossess(APawn* InPawn)
 	Controlled = Cast<APlayerAircraft>(InPawn);
 	if (!Controlled) return;
 
-	SpringArm = Controlled->GetSpringArm();
-	CameraComp = Controlled->GetCamera();
-	SpringArm = Controlled->GetSpringArm();
-	Airframe = Controlled->GetMesh();
-
-	if (!CameraComp) return;
 	SetViewTarget(InPawn);
 
 	APlayerHUD* HUD = Cast<APlayerHUD>(GetHUD());
@@ -167,7 +162,8 @@ void AAircraftPlayerController::BindAircraftInputs(UEnhancedInputComponent* Enha
 	}
 }
 
-void AAircraftPlayerController::BindMenuInputs(UEnhancedInputComponent* EnhancedInputComp) {
+void AAircraftPlayerController::BindMenuInputs(UEnhancedInputComponent* EnhancedInputComp) 
+{
 	if (!EnhancedInputComp) return;
 	FSoftObjectPath UpPath(TEXT("/Game/Controls/MenuInputs/Up.Up"));
 	TSoftObjectPtr<UInputAction> SoftUp(UpPath);
@@ -251,37 +247,29 @@ void AAircraftPlayerController::ManageMenuSetting(EMenuState NewMenu)
 //Neutral = 50% Throttle, increase/decrease accordingly
 void AAircraftPlayerController::Thrust(const FInputActionValue& Value)
 {
-	inputThrust = Value.Get<float>();
-	thrustNeeded = FMath::Clamp(thrustPercentage + (inputThrust / 2.f), 0, 1.f);
+	float thrustNeeded = FMath::Clamp(thrustPercentage + (Value.Get<float>() / 2.f), 0, 1.f);
 	thrustPercentage = FMath::FInterpTo(thrustPercentage, thrustNeeded, GetWorld()->GetDeltaSeconds(), 2.f);
-	isThrust = true;
-	if (inputThrust == 0)
-	{
-		isThrust = false;
-	}
+	isThrust = Value.Get<float>() != 0;
 } 
 
 //Movement Functions
 
 void AAircraftPlayerController::Roll(const FInputActionValue& Value) 
 {
-	inputRoll = Value.Get<float>();
 	if (!FlightComp) return;
-	FlightComp->SetRoll(inputRoll);
+	FlightComp->SetRoll(Value.Get<float>());
 }
 
 void AAircraftPlayerController::Pitch(const FInputActionValue& Value)
 {
-	inputPitch = Value.Get<float>();
 	if (!FlightComp) return;
-	FlightComp->SetPitch(inputPitch);
+	FlightComp->SetPitch(Value.Get<float>());
 }
 
 void AAircraftPlayerController::Rudder(const FInputActionValue& Value) 
 {
-	inputYaw = Value.Get<float>();
 	if (!FlightComp) return;
-	FlightComp->SetYaw(inputYaw);
+	FlightComp->SetYaw(Value.Get<float>());
 }
 
 //Specials
@@ -348,7 +336,7 @@ void AAircraftPlayerController::ShootEnd()
 
 void AAircraftPlayerController::Bullets() 
 {
-	if (!Controlled) return;
+	if (!WeaponComp) return;
 	WeaponComp->FireBullets();
 }
 
@@ -356,7 +344,6 @@ void AAircraftPlayerController::Bullets()
 
 void AAircraftPlayerController::Switch() 
 {
-	//Return Selected
 	if (!RadarComp) return;
 	RadarComp->CycleTarget();
 	if (Selected)
@@ -377,57 +364,14 @@ void AAircraftPlayerController::FocusStop()
 
 void AAircraftPlayerController::LookHor(const FInputActionValue& ValueX) 
 {
-	lookX = ValueX.Get<float>();
-
-	if(FMath::Abs(lookX)==0.f)
-	{
-		lookX = 0;
-	}
-
-	prevYaw = currentYaw;
-	currentYaw += lookX;
-
-	// Lock the camera at 180 degrees horizontally
-
-	if (currentYaw >= 180)
-	{
-		lookX = 180 - prevYaw;
-		currentYaw = 180;
-	}
-	if (currentYaw <= -180)
-	{
-		lookX = 180 - prevYaw;
-		currentYaw = -180;
-	}
-
-	SpringArm->AddRelativeRotation(FRotator(0.f, lookX, 0.f));
+	if (!ManagerComp) return;
+	ManagerComp->LookHor(ValueX.Get<float>());
 }
 
 void AAircraftPlayerController::LookVer(const FInputActionValue& ValueY) 
 {
-	lookY = ValueY.Get<float>();
-
-	if (FMath::Abs(lookY)==0.f) 
-	{
-		lookY = 0;
-	}
-
-	prevPitch = seePitch;
-	seePitch += lookY;
-
-	// Lock the camera at 85 degrees vertically
-
-	if (seePitch >= 85) 
-	{
-		lookY = 85 - prevPitch;
-		seePitch = 85;
-	}
-	if (seePitch <= -85)
-	{
-		lookY = 85 + prevPitch;
-		seePitch = -85;
-	}
-	SpringArm->AddRelativeRotation(FRotator(lookY, 0.f, 0.f));
+	if (!ManagerComp) return;
+	ManagerComp->LookVer(ValueY.Get<float>());
 }
 
 //Map

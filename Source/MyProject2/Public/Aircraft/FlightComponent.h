@@ -56,6 +56,9 @@ public:
 	
 	float DownPitch;
 
+	UPROPERTY(BlueprintReadOnly)
+	int displayG = 1;
+
 	FVector Velocity;
 
 	FVector PreviousVelocity;
@@ -95,6 +98,8 @@ public:
 	void Setup(ABaseAircraft* InControl, UAircraftStats* InStats);
 
 	void AdjustSpringArm(float DeltaSeconds, float ThrottlePercentage);
+
+	void CalculateGForce(float DeltaSeconds);
 
 	float DragAOA();
 

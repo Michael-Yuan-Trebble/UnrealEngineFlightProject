@@ -106,16 +106,7 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 
 	Controlled->AddActorWorldOffset(Velocity * DeltaSeconds, true);
 
-	FVector vectorAccel = (Velocity - PreviousVelocity) / DeltaSeconds;
-	
-	vectorAccel += FVector(0.f, 0.f, -9.81f);
-
-	FVector LocalAccel = Controlled->Airframe->GetComponentTransform().InverseTransformVector(vectorAccel);
-	FVector Gs = LocalAccel / 9.81f;
-
-	float TotalG = Gs.Size();
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), TotalG));
+	CalculateGForce(DeltaSeconds);
 
 	// ====================================
 	// Draw AOA lines
@@ -125,6 +116,20 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 
 	DrawDebugLine(GetWorld(), Controlled->GetActorLocation(), Controlled->GetActorLocation() + Controlled->GetActorForwardVector() * 300, FColor::Blue, false, 0.f, 0, 2.f);
 	DrawDebugLine(GetWorld(), Controlled->GetActorLocation(), Controlled->GetActorLocation() + Controlled->Airframe->GetForwardVector() * 300, FColor::Green, false, 0.f, 0, 2.f);
+}
+
+void UFlightComponent::CalculateGForce(float DeltaSeconds) 
+{
+	FVector vectorAccel = (Velocity - PreviousVelocity) / DeltaSeconds / 100.f;
+
+	float alpha = 0.15f;
+	FVector accel = FMath::Lerp(accel, vectorAccel, alpha);
+
+	FVector LocalAccel = Controlled->Airframe->GetComponentTransform().InverseTransformVector(vectorAccel);
+	FVector Gs = LocalAccel / 9.81f;
+
+	float VerticalG = Gs.Z + 1;
+	displayG = FMath::RoundToInt(VerticalG);
 }
 
 // ====================================

@@ -54,10 +54,10 @@ void ASu25Pawn::Tick(float DeltaSeconds)
 	{
 		
 		//Calculate Animation Values
-		InputPitchValue = Controlled->inputPitch;
-		InputThrust = Controlled->inputThrust;
-		InputYawValue = Controlled->inputYaw;
-		InputRollValue = Controlled->inputRoll;
+		InputPitchValue = FlightComponent->UserPitch;
+		InputThrust = FlightComponent->CurrentThrust;
+		InputYawValue = FlightComponent->UserYaw;
+		InputRollValue = FlightComponent->UserRoll;
 		
 		if ((FlightComponent->currentSpeed > TakeoffSpeed + 5) && !isGearUp)
 		{

@@ -9,6 +9,7 @@
 #include "PlayerAircraft.generated.h"
 
 class AAircraftPlayerController;
+class UCameraManagerComponent;
 
 UCLASS()
 class MYPROJECT2_API APlayerAircraft : public ABaseAircraft
@@ -24,6 +25,8 @@ public:
 	virtual void PossessedBy(AController* Controller) override;
 
 	AAircraftPlayerController* Controlled;
+
+	UCameraManagerComponent* ManagerComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USpringArmComponent* SpringArm;

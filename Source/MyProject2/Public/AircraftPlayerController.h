@@ -24,6 +24,7 @@ class UMenuManagerComponent;
 class UFlightComponent;
 class URadarComponent;
 class UWeaponSystemComponent;
+class UCameraManagerComponent;
 
 UCLASS()
 class MYPROJECT2_API AAircraftPlayerController : public APlayerController
@@ -95,6 +96,7 @@ public:
 	UInputAction* IA_Zoom;
 
 	int32 AircraftMappingPriority = 0;
+
 	int32 MenuMappingPriority = 1;
 
 	EControlMode CurrentMode = EControlMode::Null;
@@ -109,6 +111,8 @@ public:
 
 	URadarComponent* RadarComp;
 
+	UCameraManagerComponent* ManagerComp;
+
 	TSubclassOf<ABaseWeapon> CurrentWeaponClass;
 
 	void ManageMenuSetting(EMenuState NewState);
@@ -117,23 +121,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isFlying = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float inputThrust;
-
-	UPROPERTY(EditAnywhere)
-	float inputRoll;
-
-	UPROPERTY(EditAnywhere)
-	float inputPitch;
-
-	UPROPERTY(EditAnywhere)
-	float inputYaw;
-
-	float thrustNeeded;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UCameraComponent* CameraComp;
 
 	FTimerHandle RepeatTimerHandle;
 
@@ -145,8 +132,6 @@ public:
 	AActor* Selected;
 
 	int SelectedIndex = -1;
-
-	const TArray<FDetectedAircraftInfo>& GetDetectedTargets() const;
 
 	void SetControlMode(EControlMode NewMode);
 
@@ -183,35 +168,13 @@ private:
 
 	void MenuBack();
 
-	//U Stuff
-
-	USkeletalMeshComponent* Airframe;
-
-	USpringArmComponent* SpringArm;
-
-	TArray<ABaseIRMissile*> WeaponList;
-
 	//Variables
 
 	bool fire = false;
 
-	float LastActionTime = -2.f;
-
-	float LastSpecialTime = -2.f;
-
 	float thrustPercentage = 0.5f;
-
-	float seePitch;
-
-	float currentYaw;
-
-	float lookX;
-
-	float lookY;
 
 	int CurrentWeaponIndex = 0;
 
 	bool isThrust = false;
-	float prevPitch;
-	float prevYaw;
 };
