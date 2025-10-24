@@ -24,8 +24,6 @@ class MYPROJECT2_API ABaseAircraft : public APawn, public ILockableTarget, publi
 
 public:
 	ABaseAircraft();
-	
-	//Variables
 
 	UPROPERTY(EditAnywhere)
 	EFaction Faction;

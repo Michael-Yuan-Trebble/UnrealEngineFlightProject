@@ -10,9 +10,6 @@
 ABaseAHRMissile::ABaseAHRMissile()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	timeTilDelt = 0;
-	isAir = false;
-	isDropPhase = false;
 	canLock = true;
 	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Missile Collision"));
 	RootComponent = Collision;
@@ -137,7 +134,6 @@ void ABaseAHRMissile::LaunchSequence(float Speed)
 
 void ABaseAHRMissile::activateSmoke() 
 {
-
 	if (!WeaponMesh || !WeaponMesh->DoesSocketExist(TEXT("ExhaustSocket"))) return;
 
 	if (SmokeTrail != nullptr && !SmokeTrailSystem) return;
@@ -177,7 +173,8 @@ void ABaseAHRMissile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 }
 
 void ABaseAHRMissile::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) 
+{
 	return;
 }
 
@@ -193,7 +190,6 @@ void ABaseAHRMissile::OnHit(UPrimitiveComponent* HitComp,
 void ABaseAHRMissile::CheckAndDelete(AActor* OtherActor) 
 {
 	if (!OtherActor || OtherActor == this || OtherActor == GetOwner() || !isAir) return;
-
 	if (!Owner || !Owner->IsValidLowLevelFast()) return;
 
 	if (OtherActor->Implements<UTeamInterface>())
@@ -215,7 +211,6 @@ bool bDestroyed = false;
 
 void ABaseAHRMissile::DestroyMissile() 
 {
-
 	if (bDestroyed) return;
 	bDestroyed = true;
 

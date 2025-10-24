@@ -18,10 +18,7 @@ void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStat
 	Controlled = InBase;
 	AirStats = InStats;
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (PC)
-	{
-		HUD = Cast<APlayerHUD>(PC->GetHUD());
-	}
+	if (PC) HUD = Cast<APlayerHUD>(PC->GetHUD());
 }
 
 void UWeaponSystemComponent::FireBullets()
@@ -202,9 +199,6 @@ void UWeaponSystemComponent::GetCount()
 		}
 	}
 }
-
-// TODO: Make the cone angle weapon specific (or maybe general)
-float CONE_ANGLE = 30.f;
 
 void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target) 
 {

@@ -29,9 +29,6 @@ public:
 	float AOARecoverySpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Thrust;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RudderRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

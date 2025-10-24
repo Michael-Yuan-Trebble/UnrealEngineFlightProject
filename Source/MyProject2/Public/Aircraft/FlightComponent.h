@@ -58,6 +58,10 @@ public:
 
 	FVector Velocity;
 
+	FVector PreviousVelocity;
+	
+	float gForce;
+
 	EThrottleStage prevStage = EThrottleStage::Slow;
 
 	bool switchingPhase = false;

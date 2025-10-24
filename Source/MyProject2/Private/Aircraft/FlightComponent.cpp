@@ -3,8 +3,6 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Flight Component!"));
 #include "Aircraft/FlightComponent.h"
 
-//power = (log10(20 / (0.07 * 1.225))) / (log10(ListedMaximumSpeed));
-
 EThrottleStage getThrottleStage(float throttle)
 {
 	// Throttle Stages for pronounced acceleration differences
@@ -47,36 +45,31 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 	EThrottleStage currentStage = getThrottleStage(ThrottlePercentage);
 	switch (currentStage)
 	{
-	case EThrottleStage::Slow: SlowSpeed(ThrottlePercentage); break;
-	case EThrottleStage::Normal: NormalSpeed(ThrottlePercentage); break;
-	case EThrottleStage::Afterburner: AfterburnerSpeed(ThrottlePercentage);break;
+		case EThrottleStage::Slow: SlowSpeed(ThrottlePercentage); break;
+		case EThrottleStage::Normal: NormalSpeed(ThrottlePercentage); break;
+		case EThrottleStage::Afterburner: AfterburnerSpeed(ThrottlePercentage);break;
 	}
 
-	if (prevStage != currentStage)
-	{
-		switchingPhase = true;
-	}
+	if (prevStage != currentStage) switchingPhase = true;
 
 	AdjustSpringArm(DeltaSeconds, ThrottlePercentage);
-
-	// TODO: Finterpto Acceleration
 
 	float drag = 0;
 	float trueAcceleration = Acceleration;
 
 	// Target speed for better acceleration until a certain point feeling
-	// drag calculation is behaving a bit wonky after safety checks
 
-	float totalFlightPercent = currentSpeed / targetSpeed;
-	if (totalFlightPercent >= 0.8)
+	float totalFlightPercent = (targetSpeed != 0) ? (currentSpeed / targetSpeed) : 0.f;
+
+	if (totalFlightPercent >= 0.8 && totalFlightPercent <= 1.05)
 	{
-		drag = Acceleration * (1.f + FMath::Pow(2.f, -0.03f * (currentSpeed - targetSpeed)));
+		drag = Acceleration / (1.05f + FMath::Pow(2.f, -0.01f * (currentSpeed - targetSpeed)));
 	} 
-	if (totalFlightPercent > 1.05 && switchingPhase) 
+	else if (totalFlightPercent > 1.05 && switchingPhase) 
 	{
 		drag = Acceleration * 4 / (1.f + FMath::Pow(2.f, -0.01f * (currentSpeed - targetSpeed)));
 	}
-	else 
+	else if (switchingPhase)
 	{
 		switchingPhase = false;
 	}
@@ -96,20 +89,33 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 	trueAcceleration -= t + pitchDrag;
 	trueAcceleration = FMath::Abs(trueAcceleration) < 0.01 ? 0 : trueAcceleration;
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
 
 	currentSpeed += trueAcceleration;
-	currentSpeed = FMath::FInterpTo(currentSpeed, Velocity.Size(), DeltaSeconds, 20.f);
+	currentSpeed = FMath::FInterpTo(currentSpeed, Velocity.Size(), DeltaSeconds, 5.f);
 
 	if (!FMath::IsFinite(currentSpeed) || FMath::IsNaN(currentSpeed)) currentSpeed = 0;
 
 	currentSpeed = FMath::Clamp(currentSpeed, 0, 1000000);
+
+	PreviousVelocity = Velocity;
 
 	Velocity = Controlled->GetActorForwardVector() * currentSpeed;
 
 	if (Velocity.ContainsNaN() || !FMath::IsFinite(Velocity.X) || Velocity.Size() > 1e6f) return;
 
 	Controlled->AddActorWorldOffset(Velocity * DeltaSeconds, true);
+
+	FVector vectorAccel = (Velocity - PreviousVelocity) / DeltaSeconds;
+	
+	vectorAccel += FVector(0.f, 0.f, -9.81f);
+
+	FVector LocalAccel = Controlled->Airframe->GetComponentTransform().InverseTransformVector(vectorAccel);
+	FVector Gs = LocalAccel / 9.81f;
+
+	float TotalG = Gs.Size();
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), TotalG));
 
 	// ====================================
 	// Draw AOA lines
@@ -130,17 +136,17 @@ void UFlightComponent::SlowSpeed(float ThrottlePercentage)
 	float negation = 1 - ThrottlePercentage;
 	if (ThrottlePercentage <= 0.1)
 	{
-		Acceleration = -(AircraftStats->Thrust * negation * 5);
+		Acceleration = -(AircraftStats->Acceleration * negation * 5);
 		targetSpeed = 0;
 		return;
 	}
-	Acceleration = -(AircraftStats->Thrust * negation * 2);
+	Acceleration = -(AircraftStats->Acceleration * negation * 2);
 	targetSpeed = 0;
 }
 
 void UFlightComponent::NormalSpeed(float ThrottlePercentage)
 {
-	Acceleration = AircraftStats->Thrust * ThrottlePercentage;
+	Acceleration = AircraftStats->Acceleration * ThrottlePercentage;
 	targetSpeed = AircraftStats->MaxSpeed * 0.5;
 }
 
@@ -148,11 +154,11 @@ void UFlightComponent::AfterburnerSpeed(float ThrottlePercentage)
 {
 	if (ThrottlePercentage >= 0.9)
 	{
-		Acceleration = AircraftStats->Thrust * ThrottlePercentage * 5;
+		Acceleration = AircraftStats->Acceleration * ThrottlePercentage * 5;
 		targetSpeed = AircraftStats->MaxSpeed;
 		return;
 	}
-	Acceleration = AircraftStats->Thrust * ThrottlePercentage * 2;
+	Acceleration = AircraftStats->Acceleration * ThrottlePercentage * 2;
 	targetSpeed = AircraftStats->MaxSpeed * 0.9;
 }
 

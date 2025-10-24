@@ -31,18 +31,13 @@ void AAircraftBullet::BeginPlay()
 	Super::BeginPlay();
 	Collision->OnComponentHit.AddDynamic(this, &AAircraftBullet::OnHit);
 	damage = BulletStat->Damage;
-	if (GetOwner()) {
-		Owner = Cast<ABaseAircraft>(GetOwner());
-	}
+	if (GetOwner()) Owner = Cast<ABaseAircraft>(GetOwner());
 }
 
 // Called every frame
 void AAircraftBullet::Tick(float DeltaTime)
 {
-	if (currentTime >= LifeTime) 
-	{
-		Destroy();
-	}
+	if (currentTime >= LifeTime) Destroy();
 	currentTime += DeltaTime;
 
 	Super::Tick(DeltaTime);
@@ -66,7 +61,8 @@ void AAircraftBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 	}
 }
 
-void AAircraftBullet::DestroyBullet(AActor* OtherActor) {
+void AAircraftBullet::DestroyBullet(AActor* OtherActor)
+{
 	if (!OtherActor || OtherActor == this || OtherActor == GetOwner()) return;
 
 	if (OtherActor->Implements<UTeamInterface>())

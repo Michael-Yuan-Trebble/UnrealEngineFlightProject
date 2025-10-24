@@ -62,3 +62,5 @@ Some of my future goals are:
 - Missile Tracking and Fooling via flares and chaff
 - Increase the effect that roll has on Angle of Attack
 - Implement a more robust HUD and display more necessary values to the user
+- I do have ideas of a story to make this project more into a releasable product, as of now this is only an idea
+- Another idea is to implement co-op, either through two separate screens or one shared screen on something like a TV, I will play around with the idea and see if it's too much out of the scope of this project to do

@@ -21,7 +21,7 @@ class MYPROJECT2_API ABaseIRMissile : public ABaseWeapon
 public:	
 	ABaseIRMissile();
 
-	bool isAir;
+	bool isAir = false;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	UNiagaraSystem* SmokeTrailSystem;

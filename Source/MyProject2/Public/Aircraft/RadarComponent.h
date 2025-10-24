@@ -28,7 +28,7 @@ public:
 
 	void SetTarget(AActor* NewTarget);
 
-	TArray<FDetectedAircraftInfo> Detected;
+	TArray<FDetectedAircraftInfo> Enemies;
 
 	ABaseAircraft* Controlled;
 

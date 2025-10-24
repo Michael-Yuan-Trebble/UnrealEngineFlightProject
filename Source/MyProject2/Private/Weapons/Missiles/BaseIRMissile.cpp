@@ -10,8 +10,6 @@
 ABaseIRMissile::ABaseIRMissile()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	timeTilDelt = 0;
-	isAir = false;
 	canLock = true;
 	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Missile Collision"));
 	RootComponent = Collision;

@@ -28,7 +28,7 @@ public:
 
 	float cooldownTime;
 
-	float timeTilDelt;
+	float timeTilDelt = 0;
 
 	bool canLock;
 

@@ -8,6 +8,9 @@
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "WeaponSystemComponent.generated.h"
 
+// TODO: For now cone angle is like this, maybe change it in the future
+#define CONE_ANGLE 30.f
+
 class APlayerHUD;
 class ABaseAircraft;
 

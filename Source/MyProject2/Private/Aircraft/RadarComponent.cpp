@@ -40,14 +40,17 @@ void URadarComponent::ScanTargets()
 {
 	// Gather aircraft from cached registry
 
-	Detected.Empty();
+	Enemies.Empty();
 	if (!GetWorld()) return;
 	AAircraftRegistry* Registry = AAircraftRegistry::Get(GetWorld());
 	if (!Registry) return;
 
+	// Only try to find enemies right now, later find allies and put a different reticle over them
+
 	for (ABaseAircraft* RegisteredPawn : Registry->RegisteredAircraft) 
 	{
 		if (!IsValid(RegisteredPawn) || RegisteredPawn == Controlled) continue;
+
 		if (RegisteredPawn->Faction == Controlled->Faction) continue;
 		FDetectedAircraftInfo TempInfo;
 		TempInfo.Location = RegisteredPawn->GetActorLocation();
@@ -57,7 +60,7 @@ void URadarComponent::ScanTargets()
 
 
 		if (TempInfo.threatLevel <= 0) continue;
-		Detected.Add(TempInfo);
+		Enemies.Add(TempInfo);
 		if (!Controlled) continue;
 		if (!Controlled->GetController()->IsPlayerController()) continue;
 		if (!Selected)
@@ -79,7 +82,7 @@ void URadarComponent::ScanTargets()
 
 void URadarComponent::CycleTarget() 
 {
-	if (Detected.Num() == 0) return;
+	if (Enemies.Num() == 0) return;
 
 	FVector CameraLoc;
 	FRotator CameraRot;
@@ -89,7 +92,7 @@ void URadarComponent::CycleTarget()
 	float BestDot = -1.0f;
 	AActor* ClosestTarget = nullptr;
 
-	for (const FDetectedAircraftInfo Target : Detected)
+	for (const FDetectedAircraftInfo Target : Enemies)
 	{;
 		if (!IsValid(Target.CurrentPawn)) continue;
 
@@ -116,7 +119,7 @@ void URadarComponent::CycleTarget()
 
 void URadarComponent::CycleToNextTarget() 
 {
-	if (Detected.Num() <= 1) return;
+	if (Enemies.Num() <= 1) return;
 
 	FVector CameraLoc;
 	FRotator CameraRot;
@@ -126,7 +129,7 @@ void URadarComponent::CycleToNextTarget()
 	float BestAngleDiff = FLT_MAX;
 	AActor* BestTarget = nullptr;
 
-	for (const FDetectedAircraftInfo Target : Detected)
+	for (const FDetectedAircraftInfo Target : Enemies)
 	{
 		if (!IsValid(Target.CurrentPawn) || Target.CurrentPawn == Selected) continue;
 		AActor* temp = Cast<AActor>(Target.CurrentPawn);

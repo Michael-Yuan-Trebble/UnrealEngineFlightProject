@@ -21,11 +21,11 @@ class MYPROJECT2_API ABaseAHRMissile : public ABaseWeapon
 public:
 	ABaseAHRMissile();
 
-	bool isDropPhase;
+	bool isDropPhase = false;
 
 	float DropTimer = 0;
 
-	bool isAir;
+	bool isAir = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UNiagaraSystem* SmokeTrailSystem;
