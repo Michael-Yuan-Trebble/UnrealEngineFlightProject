@@ -14,7 +14,6 @@ AAircraftBullet::AAircraftBullet()
 	PrimaryActorTick.bCanEverTick = true;
 
 	BulletMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BulletMesh"));
-
 	BulletMesh->SetWorldScale3D(FVector(5.f));
 
 	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));

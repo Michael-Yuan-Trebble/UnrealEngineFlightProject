@@ -173,5 +173,3 @@ void ABaseIRMissile::DestroyMissile()
 	if (MissileRocket) MissileRocket->Deactivate();
 	Destroy();
 }
-
-float ABaseIRMissile::ReturnCooldownTime() {return cooldownTime;}

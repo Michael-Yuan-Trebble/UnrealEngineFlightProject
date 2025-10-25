@@ -18,10 +18,6 @@ class MYPROJECT2_API APlayerAircraft : public ABaseAircraft
 public:
 	APlayerAircraft();
 
-	USpringArmComponent* GetSpringArm() const;
-
-	UCameraComponent* GetCamera() const;
-
 	virtual void PossessedBy(AController* Controller) override;
 
 	AAircraftPlayerController* Controlled;
@@ -34,7 +30,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCameraComponent* Camera;
 
-	float ReturnSpringArmLength() const;
+	USpringArmComponent* GetSpringArm() const { return SpringArm; };
+
+	UCameraComponent* GetCamera() const { return Camera; };
+
+	float ReturnSpringArmLength() const { return springArmLength; };
 
 protected:
 	virtual void BeginPlay() override;

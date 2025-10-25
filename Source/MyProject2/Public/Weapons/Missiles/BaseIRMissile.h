@@ -54,7 +54,7 @@ public:
 
 	void LaunchSequence(float Speed);
 
-	float ReturnCooldownTime();
+	float ReturnCooldownTime() { return cooldownTime; };
 
 	void activateSmoke();
 

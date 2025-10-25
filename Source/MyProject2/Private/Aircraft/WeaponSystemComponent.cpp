@@ -143,10 +143,7 @@ void UWeaponSystemComponent::BuildWeaponGroups()
 		WeaponGroups[WeaponClass].Add(&CW);
 	}
 
-	if (WeaponGroups.Num() > 0) 
-	{
-		SelectWeapon(1);
-	}
+	if (WeaponGroups.Num() > 0) SelectWeapon(1);
 }
 
 void UWeaponSystemComponent::FireWeaponSelected(TSubclassOf<ABaseWeapon> WeaponClass, AActor* Target, float Speed)

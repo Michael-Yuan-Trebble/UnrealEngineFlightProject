@@ -384,11 +384,3 @@ void UFlightComponent::ApplyRoll(float DeltaSeconds)
 		 Controlled->Airframe->SetRelativeRotation(CurrentRot);
 	}
 }
-
-void UFlightComponent::SetPitch(float PitchValue) {UserPitch = PitchValue;}
-
-void UFlightComponent::SetYaw(float YawValue) {UserYaw = YawValue;}
-
-void UFlightComponent::SetRoll(float RollValue) {UserRoll = RollValue;}
-
-void UFlightComponent::SetThrust(float Thrust) {CurrentThrust = Thrust;}

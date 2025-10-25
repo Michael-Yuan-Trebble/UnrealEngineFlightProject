@@ -218,5 +218,3 @@ void ABaseAHRMissile::DestroyMissile()
 	if (MissileRocket) MissileRocket->Deactivate();
 	Destroy();
 }
-
-float ABaseAHRMissile::ReturnCooldownTime() { return cooldownTime; }

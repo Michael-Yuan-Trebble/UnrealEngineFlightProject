@@ -7,11 +7,7 @@
 #include "InputActionValue.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "Camera/CameraComponent.h"
-#include "Weapons/Missiles/BaseIRMissile.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "Structs and Data/MenuState.h"
-#include "Structs and Data/FDetectedAircraftInfo.h"
 #include "Gamemodes/CurrentPlayerState.h"
 #include "Structs and Data/ControlModeTypes.h"
 #include "AircraftPlayerController.generated.h"
@@ -123,11 +119,6 @@ public:
 	bool isFlying = false;
 
 	FTimerHandle RepeatTimerHandle;
-
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	APlayerAircraft* Controlled;
-
-	TArray<FDetectedAircraftInfo> Detected;
 
 	AActor* Selected;
 

@@ -48,9 +48,3 @@ void APlayerAircraft::PossessedBy(AController* NewController)
 	Controlled->RadarComp = RadarComponent;
 	Controlled->ManagerComp = ManagerComp;
 }
-
-USpringArmComponent* APlayerAircraft::GetSpringArm() const {return SpringArm;}
-
-UCameraComponent* APlayerAircraft::GetCamera() const {return Camera;}
-
-float APlayerAircraft::ReturnSpringArmLength() const {return springArmLength;}

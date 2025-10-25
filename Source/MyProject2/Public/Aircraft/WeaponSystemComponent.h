@@ -44,15 +44,15 @@ public:
 
 	void AddPylons();
 
-	bool bLocked;
+	bool bLocked = false;
 
 	float LockTime = 5.f;
 
 	UPROPERTY(BlueprintReadOnly)
-	float MaxWeaponCountSelected;
+	float MaxWeaponCountSelected = 0;
 
 	UPROPERTY(BlueprintReadOnly)
-	float CurrentWeaponCount;
+	float CurrentWeaponCount = 0;
 
 	ABaseAircraft* Controlled;
 

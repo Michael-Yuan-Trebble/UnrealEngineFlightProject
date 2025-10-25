@@ -82,8 +82,6 @@ void ABaseAircraft::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ABaseAircraft::PossessedBy(AController* NewController) 
 {
 	Super::PossessedBy(NewController);
-
-
 }
 
 void ABaseAircraft::Tick(float DeltaTime)
@@ -99,16 +97,3 @@ void ABaseAircraft::OnHitByMissile_Implementation(AActor* Missile, float Damage)
 		Destroy();
 	}
 }
-
-EFaction ABaseAircraft::GetFaction_Implementation() const 
-{
-	return Faction;
-}
-
-FVector ABaseAircraft::GetTargetLocation() const {return this->GetActorLocation();}
-
-bool ABaseAircraft::IsLockable() const {return isAlive;}
-
-float ABaseAircraft::ReturnTakeoffSpeed() const {return TakeoffSpeed;}
-
-USkeletalMeshComponent* ABaseAircraft::GetMesh() const {return Airframe;}

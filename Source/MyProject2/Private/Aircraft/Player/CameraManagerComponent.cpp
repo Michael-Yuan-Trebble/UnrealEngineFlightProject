@@ -10,13 +10,11 @@ UCameraManagerComponent::UCameraManagerComponent()
 void UCameraManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void UCameraManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 }
 
 void UCameraManagerComponent::LookHor(float lookX) 

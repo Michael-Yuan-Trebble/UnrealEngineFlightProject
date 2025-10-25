@@ -86,21 +86,21 @@ public:
 
 	//Return Functions for UObjects
 
-	virtual USkeletalMeshComponent* GetMesh() const;
+	virtual USkeletalMeshComponent* GetMesh() const { return Airframe; };
 
-	virtual FVector GetTargetLocation() const override;
+	virtual FVector GetTargetLocation() const override { return this->GetActorLocation(); };
 
-	virtual bool IsLockable() const override;
+	virtual bool IsLockable() const override { return isAlive; };
 
 	//Return Functions for Vars
 
-	virtual float ReturnTakeoffSpeed() const;
+	virtual float ReturnTakeoffSpeed() const { return TakeoffSpeed; };
 
 	virtual void PossessedBy(AController* Controller) override;
 
 	virtual void OnHitByMissile_Implementation(AActor* Missile, float Damage) override;
 
-	virtual EFaction GetFaction_Implementation() const override;
+	virtual EFaction GetFaction_Implementation() const override { return Faction; };
 
 protected:
 

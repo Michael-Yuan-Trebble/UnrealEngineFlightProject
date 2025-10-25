@@ -73,13 +73,13 @@ public:
 
 	void ApplyRot(float DletaSeconds);
 
-	void SetPitch(float PitchValue);
+	void SetPitch(float PitchValue) { UserPitch = PitchValue; };
 
-	void SetYaw(float YawValue);
+	void SetYaw(float YawValue) { UserYaw = YawValue; };
 
-	void SetRoll(float RollValue);
+	void SetRoll(float RollValue) { UserRoll = RollValue; };
 
-	void SetThrust(float Thrust);
+	void SetThrust(float Thrust) { CurrentThrust = Thrust; };
 
 	void ApplyPitch(float DeltaSeconds);
 
