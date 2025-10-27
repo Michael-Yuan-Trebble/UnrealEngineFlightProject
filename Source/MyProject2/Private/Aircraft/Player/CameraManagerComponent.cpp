@@ -27,15 +27,15 @@ void UCameraManagerComponent::LookHor(float lookX)
 
 	// Lock the camera at 180 degrees horizontally
 
-	if (currentX >= 180)
+	currentX = FMath::Clamp(currentX, -180, 180);
+
+	if (currentX == 180)
 	{
 		lookX = 180 - prevX;
-		currentX = 180;
 	}
-	if (currentX <= -180)
+	if (currentX == -180)
 	{
 		lookX = 180 - prevX;
-		currentX = -180;
 	}
 
 	SpringArm->AddRelativeRotation(FRotator(0.f, lookX, 0.f));
@@ -50,16 +50,15 @@ void UCameraManagerComponent::LookVer(float lookY)
 	currentY += lookY;
 
 	// Lock the camera at 85 degrees vertically
+	currentY = FMath::Clamp(currentY, -85, 85);
 
-	if (currentY >= 85)
+	if (currentY == 85)
 	{
 		lookY = 85 - prevY;
-		currentY = 85;
 	}
-	if (currentY <= -85)
+	if (currentY == -85)
 	{
 		lookY = 85 + prevY;
-		currentY = -85;
 	}
 	SpringArm->AddRelativeRotation(FRotator(lookY, 0.f, 0.f));
 }

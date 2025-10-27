@@ -93,7 +93,7 @@ void URadarComponent::CycleTarget()
 	AActor* ClosestTarget = nullptr;
 
 	for (const FDetectedAircraftInfo Target : Enemies)
-	{;
+	{
 		if (!IsValid(Target.CurrentPawn)) continue;
 
 		// Find the distance between target and where the player's camera is pointing

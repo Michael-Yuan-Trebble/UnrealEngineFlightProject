@@ -40,7 +40,7 @@ void AAircraftPlayerController::BeginPlay()
 	Super::BeginPlay();
 	ACurrentPlayerState* PS = Cast<ACurrentPlayerState>(this->PlayerState);
 	MenuManager->InitializePC(this, PS);
-	APlayerHUD* HUD = Cast<APlayerHUD>(GetHUD());
+	HUD = Cast<APlayerHUD>(GetHUD());
 	if (HUD) HUD->PC = this;
 }
 
@@ -380,7 +380,6 @@ void AAircraftPlayerController::Tick(float DeltaSeconds)
 	
 	if (RadarComp) 
 	{
-		APlayerHUD* HUD = Cast<APlayerHUD>(GetHUD());
 		if (HUD)
 		{
 			ABaseAircraft* Temp = Cast<ABaseAircraft>(RadarComp->Selected);

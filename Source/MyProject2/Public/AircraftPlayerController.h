@@ -21,6 +21,7 @@ class UFlightComponent;
 class URadarComponent;
 class UWeaponSystemComponent;
 class UCameraManagerComponent;
+class APlayerHUD;
 
 UCLASS()
 class MYPROJECT2_API AAircraftPlayerController : public APlayerController
@@ -108,6 +109,8 @@ public:
 	URadarComponent* RadarComp;
 
 	UCameraManagerComponent* ManagerComp;
+
+	APlayerHUD* HUD;
 
 	TSubclassOf<ABaseWeapon> CurrentWeaponClass;
 
