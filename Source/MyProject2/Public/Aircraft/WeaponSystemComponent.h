@@ -13,6 +13,9 @@
 
 class APlayerHUD;
 class ABaseAircraft;
+class AAircraftPlayerController;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponCountUpdated, int32, CurrentCount, int32, MaxCount);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UWeaponSystemComponent : public UActorComponent
@@ -44,17 +47,24 @@ public:
 
 	void AddPylons();
 
+	void GetCount();
+
 	bool bLocked = false;
 
 	float LockTime = 5.f;
 
 	UPROPERTY(BlueprintReadOnly)
-	float MaxWeaponCountSelected = 0;
+	float MaxWeaponCountSelected;
 
 	UPROPERTY(BlueprintReadOnly)
-	float CurrentWeaponCount = 0;
+	float CurrentWeaponCount;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnWeaponCountUpdated OnWeaponCountUpdated;
 
 	ABaseAircraft* Controlled;
+
+	AAircraftPlayerController* PC;
 
 	APlayerHUD* HUD;
 
@@ -72,7 +82,4 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AAircraftBullet> Bullet;
-
-private:
-	void GetCount();
 };

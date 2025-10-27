@@ -128,7 +128,14 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 
 	ABaseAircraft* SpawnedIn = PlayerSpawnedIn;
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
-	for (int i = 0; i < AircraftSelected->AircraftStat->NumOfPylons; i++) {
+
+	for (int i = 0; i < 2; i++) {
+		FString PylonName = FString::Printf(TEXT("Pylon%d"), i);
+		FName Pylon(*PylonName);
+		Loadout.Add(Pylon, Bomb);
+	}
+
+	for (int i = 2; i < AircraftSelected->AircraftStat->NumOfPylons; i++) {
 		FString PylonName = FString::Printf(TEXT("Pylon%d"), i);
 		FName Pylon(*PylonName);
 		Loadout.Add(Pylon, Aim9);

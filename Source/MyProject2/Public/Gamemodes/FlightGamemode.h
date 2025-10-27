@@ -57,5 +57,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AF16AI> AIAircraftClass;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ABaseWeapon> Bomb;
+
 	virtual void BeginPlay() override;
 };

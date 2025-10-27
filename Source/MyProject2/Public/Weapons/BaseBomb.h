@@ -28,10 +28,16 @@ public:
 
 	ABaseAircraft* Owner;
 
+	bool isAir = false;
+	
+	float bombSpeed;
+
 protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void FireStatic(float launchSpeed);
 
 private:
 	UFUNCTION()
@@ -53,7 +59,5 @@ private:
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	void CheckAndDelete(AActor* OtherActor);
-
-	void DestroyBomb();
+	void CheckAndDelete();
 };

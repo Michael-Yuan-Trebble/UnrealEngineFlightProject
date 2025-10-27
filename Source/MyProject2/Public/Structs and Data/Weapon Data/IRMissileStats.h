@@ -24,7 +24,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float LockOnRange;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName InGameName;
 };

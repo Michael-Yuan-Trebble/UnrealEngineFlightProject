@@ -32,4 +32,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EWeaponType WeaponType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName InGameName;
 };

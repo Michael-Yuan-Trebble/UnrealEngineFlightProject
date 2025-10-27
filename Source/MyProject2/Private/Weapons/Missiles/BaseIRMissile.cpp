@@ -161,7 +161,7 @@ void ABaseIRMissile::CheckAndDelete(AActor* OtherActor)
 
 	if (OtherActor->Implements<UDamageableInterface>())
 	{
-		IDamageableInterface::Execute_OnHitByMissile(OtherActor, this, MissileStats->Damage);
+		IDamageableInterface::Execute_OnDamage(OtherActor, this, MissileStats->Damage);
 	}
 
 	DestroyMissile();

@@ -98,7 +98,7 @@ public:
 
 	virtual void PossessedBy(AController* Controller) override;
 
-	virtual void OnHitByMissile_Implementation(AActor* Missile, float Damage) override;
+	virtual void OnDamage_Implementation(AActor* Missile, float Damage) override;
 
 	virtual EFaction GetFaction_Implementation() const override { return Faction; };
 

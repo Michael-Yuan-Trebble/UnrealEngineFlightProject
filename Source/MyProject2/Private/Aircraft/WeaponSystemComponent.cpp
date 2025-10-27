@@ -6,6 +6,7 @@
 #include "UI/PlayerHUD.h"
 #include "Weapons/AircraftBullet.h"
 #include "Kismet/GameplayStatics.h"
+#include "AircraftPlayerController.h"
 #include "DrawDebugHelpers.h"
 
 UWeaponSystemComponent::UWeaponSystemComponent()
@@ -17,7 +18,7 @@ void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStat
 {
 	Controlled = InBase;
 	AirStats = InStats;
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	PC = Cast<AAircraftPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (PC) HUD = Cast<APlayerHUD>(PC->GetHUD());
 }
 
@@ -142,8 +143,7 @@ void UWeaponSystemComponent::BuildWeaponGroups()
 		}
 		WeaponGroups[WeaponClass].Add(&CW);
 	}
-
-	if (WeaponGroups.Num() > 0) SelectWeapon(1);
+	if (WeaponGroups.Num() > 0) SelectWeapon(0);
 }
 
 void UWeaponSystemComponent::FireWeaponSelected(TSubclassOf<ABaseWeapon> WeaponClass, AActor* Target, float Speed)
@@ -169,8 +169,20 @@ void UWeaponSystemComponent::FireWeaponSelected(TSubclassOf<ABaseWeapon> WeaponC
 
 void UWeaponSystemComponent::SelectWeapon(int WeaponIndex)
 {
-	if (!AvailableWeapons.IsValidIndex(WeaponIndex - 1)) return;
-	CurrentWeapon = AvailableWeapons[WeaponIndex - 1].WeaponInstance;
+	TArray<TSubclassOf<ABaseWeapon>> Keys;
+	WeaponGroups.GetKeys(Keys);
+
+	if (!Keys.IsValidIndex(WeaponIndex)) return;
+
+	TSubclassOf<ABaseWeapon> SelectedClass = Keys[WeaponIndex];
+
+	if (PC) PC->CurrentWeaponClass = SelectedClass;
+
+	const TArray<FCooldownWeapon*>* WeaponArray = WeaponGroups.Find(SelectedClass);
+	if (!WeaponArray || WeaponArray->Num() == 0) return;
+
+	CurrentWeapon = (*WeaponArray)[0]->WeaponInstance;
+
 	GetCount();
 }
 
@@ -195,6 +207,7 @@ void UWeaponSystemComponent::GetCount()
 			CurrentWeaponCount++;
 		}
 	}
+	OnWeaponCountUpdated.Broadcast(CurrentWeaponCount, MaxWeaponCountSelected);
 }
 
 void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target) 

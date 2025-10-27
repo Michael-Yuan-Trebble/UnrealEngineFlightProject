@@ -92,6 +92,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* IA_Zoom;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* IA_NextWeapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* IA_PrevWeapon;
+
 	int32 AircraftMappingPriority = 0;
 
 	int32 MenuMappingPriority = 1;
@@ -133,6 +139,7 @@ private:
 
 	void BindAircraftInputs(UEnhancedInputComponent* EnhancedInputComp);
 	void BindMenuInputs(UEnhancedInputComponent* EnhancedInputComp);
+	void BindWeaponInputs(UEnhancedInputComponent* EnhancedInputComp);
 
 	//Movment, will move most calculations to the pawn
 	void Thrust(const FInputActionValue& Value);

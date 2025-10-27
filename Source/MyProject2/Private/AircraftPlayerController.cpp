@@ -47,6 +47,9 @@ void AAircraftPlayerController::BeginPlay()
 void AAircraftPlayerController::OnPossess(APawn* InPawn) 
 {
 	Super::OnPossess(InPawn);
+	if (!HUD || !InPawn) return;
+	HUD->Controlled = InPawn;
+	HUD->Init();
 }
 
 // Setting controls
@@ -93,21 +96,6 @@ void AAircraftPlayerController::BindAircraftInputs(UEnhancedInputComponent* Enha
 	{
 		EnhancedInputComp->BindAction(IA_Special, ETriggerEvent::Started, this, &AAircraftPlayerController::Special);
 	}
-	FSoftObjectPath ShootPath(TEXT("/Game/Controls/Inputs/IA_Shoot.IA_Shoot"));
-	TSoftObjectPtr<UInputAction> SoftShoot(ShootPath);
-	IA_Shoot = SoftShoot.LoadSynchronous();
-	if (IA_Shoot)
-	{
-		EnhancedInputComp->BindAction(IA_Shoot, ETriggerEvent::Started, this, &AAircraftPlayerController::ShootStart);
-		EnhancedInputComp->BindAction(IA_Shoot, ETriggerEvent::Completed, this, &AAircraftPlayerController::ShootEnd);
-	}
-	FSoftObjectPath WeaponsPath(TEXT("/Game/Controls/Inputs/IA_Weapons.IA_Weapons"));
-	TSoftObjectPtr<UInputAction> SoftWeapons(WeaponsPath);
-	IA_Weapons = SoftWeapons.LoadSynchronous();
-	if (IA_Weapons)
-	{
-		EnhancedInputComp->BindAction(IA_Weapons, ETriggerEvent::Started, this, &AAircraftPlayerController::Weapons);
-	}
 	FSoftObjectPath LookXPath(TEXT("/Game/Controls/Inputs/IA_LookX.IA_LookX"));
 	TSoftObjectPtr<UInputAction> SoftLookX(LookXPath);
 	IA_LookX = SoftLookX.LoadSynchronous();
@@ -151,6 +139,40 @@ void AAircraftPlayerController::BindAircraftInputs(UEnhancedInputComponent* Enha
 	}
 }
 
+void AAircraftPlayerController::BindWeaponInputs(UEnhancedInputComponent* EnhancedInputComp) 
+{
+	if (!EnhancedInputComp) return;
+	FSoftObjectPath ShootPath(TEXT("/Game/Controls/Inputs/IA_Shoot.IA_Shoot"));
+	TSoftObjectPtr<UInputAction> SoftShoot(ShootPath);
+	IA_Shoot = SoftShoot.LoadSynchronous();
+	if (IA_Shoot)
+	{
+		EnhancedInputComp->BindAction(IA_Shoot, ETriggerEvent::Started, this, &AAircraftPlayerController::ShootStart);
+		EnhancedInputComp->BindAction(IA_Shoot, ETriggerEvent::Completed, this, &AAircraftPlayerController::ShootEnd);
+	}
+	FSoftObjectPath WeaponsPath(TEXT("/Game/Controls/Inputs/IA_Weapons.IA_Weapons"));
+	TSoftObjectPtr<UInputAction> SoftWeapons(WeaponsPath);
+	IA_Weapons = SoftWeapons.LoadSynchronous();
+	if (IA_Weapons)
+	{
+		EnhancedInputComp->BindAction(IA_Weapons, ETriggerEvent::Started, this, &AAircraftPlayerController::Weapons);
+	}
+	FSoftObjectPath NextWeaponPath(TEXT("/Game/Controls/Inputs/IA_NextWeapon.IA_NextWeapon"));
+	TSoftObjectPtr<UInputAction> SoftNext(NextWeaponPath);
+	IA_NextWeapon = SoftNext.LoadSynchronous();
+	if (IA_NextWeapon) 
+	{
+		EnhancedInputComp->BindAction(IA_NextWeapon, ETriggerEvent::Started, this, &AAircraftPlayerController::NextWeapon);
+	}
+	FSoftObjectPath PrevWeaponPath(TEXT("/Game/Controls/Inputs/IA_PrevWeapon.IA_PrevWeapon"));
+	TSoftObjectPtr<UInputAction> SoftPrev(PrevWeaponPath);
+	IA_PrevWeapon = SoftPrev.LoadSynchronous();
+	if (IA_PrevWeapon) 
+	{
+		EnhancedInputComp->BindAction(IA_PrevWeapon, ETriggerEvent::Started, this, &AAircraftPlayerController::PreviousWeapon);
+	}
+}
+
 void AAircraftPlayerController::BindMenuInputs(UEnhancedInputComponent* EnhancedInputComp) 
 {
 	if (!EnhancedInputComp) return;
@@ -185,6 +207,7 @@ void AAircraftPlayerController::SetupInputComponent()
 	if (UEnhancedInputComponent* EnhancedInputComp = Cast<UEnhancedInputComponent>(InputComponent)) 
 	{
 		BindAircraftInputs(EnhancedInputComp);
+		BindWeaponInputs(EnhancedInputComp);
 		BindMenuInputs(EnhancedInputComp);
 	}
 }
@@ -263,7 +286,7 @@ void AAircraftPlayerController::Rudder(const FInputActionValue& Value)
 void AAircraftPlayerController::Weapons()
 {
 	if (!RadarComp || !WeaponComp) return;
-	if (WeaponComp->WeaponGroups.Num() > 0)
+	if (WeaponComp->WeaponGroups.Num() > 0 && !CurrentWeaponClass)
 	{
 		TArray<TSubclassOf<ABaseWeapon>> Keys;
 		WeaponComp->WeaponGroups.GetKeys(Keys);
@@ -282,6 +305,8 @@ void AAircraftPlayerController::NextWeapon()
 
 	int32 CurrentIndex = Keys.IndexOfByKey(CurrentWeaponClass);
 	CurrentIndex = (CurrentIndex + 1) % Keys.Num();
+	//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%d"),CurrentIndex));
+	WeaponComp->SelectWeapon(CurrentIndex);
 	CurrentWeaponClass = Keys[CurrentIndex];
 }
 
@@ -295,6 +320,8 @@ void AAircraftPlayerController::PreviousWeapon()
 
 	int32 CurrentIndex = Keys.IndexOfByKey(CurrentWeaponClass);
 	CurrentIndex = (CurrentIndex - 1 + Keys.Num()) % Keys.Num();
+	//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%d"), CurrentIndex));
+	WeaponComp->SelectWeapon(CurrentIndex);
 	CurrentWeaponClass = Keys[CurrentIndex];
 }
 

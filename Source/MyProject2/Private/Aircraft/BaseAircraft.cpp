@@ -89,7 +89,7 @@ void ABaseAircraft::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ABaseAircraft::OnHitByMissile_Implementation(AActor* Missile, float Damage)
+void ABaseAircraft::OnDamage_Implementation(AActor* Missile, float Damage)
 {
 	health -= Damage;
 	if (health <= 0.f) 

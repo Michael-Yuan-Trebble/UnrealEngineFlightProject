@@ -6,6 +6,8 @@
 #include "DrawDebugHelpers.h"
 #include "Aircraft/BaseAircraft.h"
 #include "UI/LockBoxWidget.h"
+#include "Aircraft/WeaponSystemComponent.h"
+#include "Aircraft/Player/PlayerAircraft.h"
 
 APlayerHUD::APlayerHUD() 
 {
@@ -21,6 +23,22 @@ void APlayerHUD::BeginPlay()
     PC = Cast<AAircraftPlayerController>(GetOwningPlayerController());
     UpdateTargetWidgets();
     Super::BeginPlay();
+}
+
+void APlayerHUD::Init() 
+{
+    APlayerAircraft* Player = Cast<APlayerAircraft>(PC->GetPawn());
+    if (!Player) return;
+    UWeaponSystemComponent* WeaponSys = Player->WeaponComponent;
+    if (!WeaponSys) return;
+    WeaponSys->OnWeaponCountUpdated.AddDynamic(this, &APlayerHUD::OnWeaponCountChanged);
+    WeaponSys->GetCount();
+}
+
+void APlayerHUD::OnWeaponCountChanged(int32 Current, int32 Max) 
+{
+    CurrentNum = Current;
+    MaxNum = Max;
 }
 
 void APlayerHUD::Tick(float DeltaSeconds) 
