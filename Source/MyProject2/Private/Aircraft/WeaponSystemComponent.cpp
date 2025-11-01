@@ -131,6 +131,7 @@ void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace)
 void UWeaponSystemComponent::BuildWeaponGroups() 
 {
 	WeaponGroups.Empty();
+	EquippedWeaponNames.Empty();
 	for (FCooldownWeapon& CW : AvailableWeapons)
 	{
 		if (!CW.WeaponInstance) continue;
@@ -140,6 +141,7 @@ void UWeaponSystemComponent::BuildWeaponGroups()
 		if (!WeaponGroups.Contains(WeaponClass)) 
 		{
 			WeaponGroups.Add(WeaponClass, TArray<FCooldownWeapon*>());
+			EquippedWeaponNames.Add(CW.WeaponInstance->WeaponName);
 		}
 		WeaponGroups[WeaponClass].Add(&CW);
 	}
@@ -207,7 +209,7 @@ void UWeaponSystemComponent::GetCount()
 			CurrentWeaponCount++;
 		}
 	}
-	OnWeaponCountUpdated.Broadcast(CurrentWeaponCount, MaxWeaponCountSelected);
+	OnWeaponCountUpdated.Broadcast(CurrentWeapon->WeaponName, CurrentWeaponCount, MaxWeaponCountSelected);
 }
 
 void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target) 

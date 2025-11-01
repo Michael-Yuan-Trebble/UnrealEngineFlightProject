@@ -8,6 +8,7 @@
 #include "AircraftPlayerController.h"
 #include "PlayerHUD.generated.h"
 
+class APlayerAircraft;
 class ABaseAircraft;
 
 UCLASS()
@@ -33,7 +34,7 @@ public:
 	UPROPERTY()
 	ULockBoxWidget* SelectedAircraftWidget = nullptr;
 
-	APawn* Controlled;
+	APlayerAircraft* Controlled;
 
 	UPROPERTY()
 	TMap<ABaseAircraft*, ULockBoxWidget*> ActiveWidgets;
@@ -43,7 +44,7 @@ public:
 	void UpdateSelected(ABaseAircraft* In);
 
 	UFUNCTION()
-	void OnWeaponCountChanged(int32 Current, int32 Max);
+	void OnWeaponChanged(FName WeaponName, int32 Current, int32 Max);
 
 	void Init();
 
@@ -53,6 +54,11 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	int MaxNum = 0;
 
+	UPROPERTY(BlueprintReadWrite)
+	FName CurrentName;
+
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FName> EquippedWeaponNames;
 private:
 
 	void UpdateTargetWidgets();

@@ -15,7 +15,7 @@ class APlayerHUD;
 class ABaseAircraft;
 class AAircraftPlayerController;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponCountUpdated, int32, CurrentCount, int32, MaxCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWeaponCountUpdated,FName, WeaponName, int32, CurrentCount, int32, MaxCount);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UWeaponSystemComponent : public UActorComponent
@@ -77,6 +77,8 @@ public:
 	TMap<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon*>> WeaponGroups;
 
 	TMap<FName, UStaticMeshComponent*> PylonSockets;
+
+	TArray<FName> EquippedWeaponNames;
 
 	TArray<FCooldownWeapon> AvailableWeapons;
 

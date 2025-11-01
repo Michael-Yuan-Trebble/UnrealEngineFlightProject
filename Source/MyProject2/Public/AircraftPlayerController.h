@@ -98,6 +98,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* IA_PrevWeapon;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* IA_Menu;
+
+	bool bIsPaused = false;
+
 	int32 AircraftMappingPriority = 0;
 
 	int32 MenuMappingPriority = 1;
@@ -168,6 +173,7 @@ private:
 	void StopMapZoom();
 
 	void MenuBack();
+	void TogglePauseMenu();
 
 	//Variables
 

@@ -27,16 +27,18 @@ void APlayerHUD::BeginPlay()
 
 void APlayerHUD::Init() 
 {
-    APlayerAircraft* Player = Cast<APlayerAircraft>(PC->GetPawn());
-    if (!Player) return;
-    UWeaponSystemComponent* WeaponSys = Player->WeaponComponent;
+    Controlled = Cast<APlayerAircraft>(PC->GetPawn());
+    if (!Controlled) return;
+    UWeaponSystemComponent* WeaponSys = Controlled->WeaponComponent;
     if (!WeaponSys) return;
-    WeaponSys->OnWeaponCountUpdated.AddDynamic(this, &APlayerHUD::OnWeaponCountChanged);
+    WeaponSys->OnWeaponCountUpdated.AddDynamic(this, &APlayerHUD::OnWeaponChanged);
     WeaponSys->GetCount();
+    EquippedWeaponNames = WeaponSys->EquippedWeaponNames;
 }
 
-void APlayerHUD::OnWeaponCountChanged(int32 Current, int32 Max) 
+void APlayerHUD::OnWeaponChanged(FName WeaponName, int32 Current, int32 Max) 
 {
+    CurrentName = WeaponName;
     CurrentNum = Current;
     MaxNum = Max;
 }

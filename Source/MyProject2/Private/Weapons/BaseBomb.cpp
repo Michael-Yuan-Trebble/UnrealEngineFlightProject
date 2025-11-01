@@ -6,7 +6,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
-ABaseBomb::ABaseBomb() {
+ABaseBomb::ABaseBomb() 
+{
 	PrimaryActorTick.bCanEverTick = true;
 	canLock = false;
 	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Bomb Collision"));
@@ -44,11 +45,9 @@ void ABaseBomb::Tick(float DeltaSeconds)
 
 	if (!isAir) return;
 	
-	FVector ForwardVector = GetActorForwardVector();
-	FVector DownwardVector = FVector(0.f, 0.f, -2.f);
-	FVector MoveDir = (ForwardVector + DownwardVector * 0.1f).GetSafeNormal();
-	FVector Movement = MoveDir * bombSpeed * DeltaSeconds;
-	AddActorWorldOffset(Movement);
+	Velocity += FVector(0.f, 0.f, GetWorld()->GetGravityZ()) * DeltaSeconds;
+	Velocity.Z = -FMath::Clamp(FMath::Abs(Velocity.Z), 0, BombStats->MaxSpeed);
+	AddActorWorldOffset(Velocity, true);
 }
 
 void ABaseBomb::FireStatic(float launchSpeed)
@@ -56,8 +55,8 @@ void ABaseBomb::FireStatic(float launchSpeed)
 	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	isAir = true;
 
-	bombSpeed = launchSpeed;
-
+	// Currently to force it to be the same speed as the aircraft, try and find a work around later
+	Velocity = GetActorForwardVector() * (launchSpeed / 75);
 }
 
 void ABaseBomb::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
@@ -89,7 +88,7 @@ bool bDestroyed = false;
 
 void ABaseBomb::CheckAndDelete() 
 {
-	print(text)
+	//print(text)
 	TArray<AActor*> OverlappedActors;
 
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;

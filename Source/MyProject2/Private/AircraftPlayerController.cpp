@@ -48,7 +48,6 @@ void AAircraftPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	if (!HUD || !InPawn) return;
-	HUD->Controlled = InPawn;
 	HUD->Init();
 }
 
@@ -212,6 +211,10 @@ void AAircraftPlayerController::SetupInputComponent()
 	}
 }
 
+void AAircraftPlayerController::TogglePauseMenu() {
+	
+}
+
 // TODO: Change between two control modes mid game based on options and active gameplay
 
 void AAircraftPlayerController::SetControlMode(EControlMode NewMode) 
@@ -285,7 +288,7 @@ void AAircraftPlayerController::Rudder(const FInputActionValue& Value)
 
 void AAircraftPlayerController::Weapons()
 {
-	if (!RadarComp || !WeaponComp) return;
+	if (!RadarComp || !WeaponComp || !FlightComp) return;
 	if (WeaponComp->WeaponGroups.Num() > 0 && !CurrentWeaponClass)
 	{
 		TArray<TSubclassOf<ABaseWeapon>> Keys;

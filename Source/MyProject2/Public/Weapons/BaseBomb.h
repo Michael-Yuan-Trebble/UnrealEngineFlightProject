@@ -24,7 +24,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	UBombStats* BombStats;
 
-	FVector CurrentDirection;
+	FVector Velocity;
 
 	ABaseAircraft* Owner;
 
