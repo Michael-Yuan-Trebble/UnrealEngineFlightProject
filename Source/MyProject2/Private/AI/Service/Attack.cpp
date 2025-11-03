@@ -34,99 +34,51 @@ void UBTServiceAttack::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 
 void UBTServiceAttack::CalculateAngle(float DeltaSeconds)
 {
-	float PitchErrorDeg = CalculatePitchDegrees();
-	if (FMath::Abs(PitchErrorDeg) < 2) {
-		PitchErrorDeg = 0.f;
-	}
-	float YawErrorDeg = CalculateYawDegrees();
+	FVector ToTargetWorld = (Selected->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
+	if (ToTargetWorld.IsNearlyZero()) return;
 
-	float pitchInput = PitchErrorDeg / 45.f;
-	pitchInput = FMath::Clamp(pitchInput, -1, 1);
-	if (FMath::Abs(pitchInput) < 0.05f) {
-		pitchInput = 0.f;
-	}
+	FTransform AirframeTransform = Controlled->Airframe->GetComponentTransform();
+	FVector LocalDir = AirframeTransform.InverseTransformVectorNoScale(ToTargetWorld);
 
-	BlackboardComp->SetValueAsFloat(PitchKey.SelectedKeyName, pitchInput);
-	float neededRoll = CalculateRollDegrees(PitchErrorDeg, YawErrorDeg);
+	float YawErrorRad = FMath::Atan2(LocalDir.Y, LocalDir.X);
+	float PitchErrorRad = FMath::Atan2(LocalDir.Z, LocalDir.X);
 
-	neededRoll = FMath::Clamp(neededRoll, -1, 1);
-	if (FMath::Abs(neededRoll) < 0.1) 
+	float YawErrorDeg = FMath::RadiansToDegrees(YawErrorRad);
+	float PitchErrorDeg = FMath::RadiansToDegrees(PitchErrorRad);
+
+	float DesiredPitchInput = FMath::Clamp(PitchErrorDeg * PitchGain, -1.f, 1.f);
+	float DesiredYawInput = FMath::Clamp(YawErrorDeg * YawGain, -1.f, 1.f);
+
+	float DesiredRollInput = FMath::Clamp(-YawErrorDeg * RollGain, -1.f, 1.f);
+
+	const float ErrorDeadzoneDeg = 1.0f;
+	if (FMath::Abs(PitchErrorDeg) < ErrorDeadzoneDeg) DesiredPitchInput = 0.f;
+	if (FMath::Abs(YawErrorDeg) < ErrorDeadzoneDeg) DesiredYawInput = 0.f;
+	if (FMath::Abs(YawErrorDeg) < 0.5f)             DesiredRollInput = 0.f;
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan,
+		FString::Printf(TEXT("YawErr: %.2f PitchErr: %.2f"), DesiredPitchInput, DesiredRollInput));
+
+	if (Controlled->FlightComponent)
 	{
-		BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, 0);
-	}
-	else
-	{
-		BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, neededRoll);
-	}
-
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow,
-			FString::Printf(TEXT("Roll Input: %f"),neededRoll));
+		BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, -DesiredRollInput);
+		BlackboardComp->SetValueAsFloat(PitchKey.SelectedKeyName, DesiredPitchInput);
+		BlackboardComp->SetValueAsFloat(YawKey.SelectedKeyName, DesiredYawInput);
 	}
 }
 
 // 180 to -180 degrees
 float UBTServiceAttack::CalculateRollDegrees(float CurrentPitchErrorDeg, float CurrentYawErrorDeg)
 {
-	if (FMath::Abs(CurrentPitchErrorDeg) > 60.f)
-		return 0.f;
-
-	float rollInput = CurrentYawErrorDeg / 45.f; 
-	rollInput = FMath::Clamp(rollInput, -1.f, 1.f);
-
-	if (FMath::Abs(rollInput) < 0.05f)
-		rollInput = 0.f;
-
-	return rollInput;
+	return 0;
 }
 
 float UBTServiceAttack::CalculatePitchDegrees() 
 {
-	FVector ToTarget = (Selected->GetActorLocation() - Controlled->GetActorLocation());
-	if (ToTarget.IsNearlyZero()) return 0.f;
-	ToTarget.Normalize();
-
-	FVector Forward = Controlled->Airframe->GetForwardVector();
-	FVector Up = Controlled->Airframe->GetUpVector();
-
-	FVector ToTargetPlane = ToTarget - FVector::DotProduct(ToTarget, Controlled->Airframe->GetRightVector()) * Controlled->Airframe->GetRightVector();
-	if (ToTargetPlane.IsNearlyZero()) return 0.f;
-	ToTargetPlane.Normalize();
-
-	float PitchRad = FMath::Atan2(
-		FVector::DotProduct(ToTargetPlane, Up),
-		FVector::DotProduct(ToTargetPlane, Forward)
-	);
-
-	if (GEngine)
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green,
-		//	FString::Printf(TEXT("Pitch: %f"), PitchRad));
-	}
-
-	return FMath::RadiansToDegrees(PitchRad);
+	return 0;
 }
 
 float UBTServiceAttack::CalculateYawDegrees()
 {
-	FVector ToTarget = (Selected->GetActorLocation() - Controlled->GetActorLocation());
-	if (ToTarget.IsNearlyZero()) return 0.f;
-	ToTarget.Normalize();
-
-	FVector Forward = Controlled->Airframe->GetForwardVector();
-	FVector Right = Controlled->Airframe->GetRightVector();
-
-	FVector FlatForward = FVector(Forward.X, Forward.Y, 0.f).GetSafeNormal();
-	FVector FlatToTarget = FVector(ToTarget.X, ToTarget.Y, 0.f).GetSafeNormal();
-
-	if (FlatForward.IsNearlyZero() || FlatToTarget.IsNearlyZero())
-		return 0.f;
-
-	float YawRad = FMath::Atan2(
-		FVector::DotProduct(FlatToTarget, Right),
-		FVector::DotProduct(FlatToTarget, FlatForward)
-	);
-
-	return FMath::RadiansToDegrees(YawRad);
+	return 0;
 }

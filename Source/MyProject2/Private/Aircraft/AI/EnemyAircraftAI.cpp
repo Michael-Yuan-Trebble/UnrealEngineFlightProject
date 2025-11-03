@@ -32,7 +32,6 @@ void AEnemyAircraftAI::BeginPlay()
 void AEnemyAircraftAI::OnPossess(APawn* PawnPossess) 
 {
 	Super::OnPossess(PawnPossess);
-
 	if (BehaviorTreeAsset) 
 	{
 		if (UseBlackboard(BehaviorTreeAsset->BlackboardAsset, BlackboardComp)) 

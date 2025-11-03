@@ -49,6 +49,12 @@ protected:
 
 	float LastRoll = 0.f;
 
+	const float PitchGain = 0.02f;
+
+	const float YawGain = 0.02f;
+
+	const float RollGain = 0.015f;
+
 private:
 	void CalculateAngle(float DeltaSeconds);
 

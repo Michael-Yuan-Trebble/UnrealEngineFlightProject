@@ -22,7 +22,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds);
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<ULockBoxWidget> LockBoxWidgetClass;
 
 	UPROPERTY()
