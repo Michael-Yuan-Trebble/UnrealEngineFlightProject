@@ -10,6 +10,14 @@
 class AEnemyAircraftAI;
 class AEnemyAircraft;
 
+UENUM(BlueprintType)
+enum class EAIThrottleMode : uint8 
+{
+	FarAway UMETA(DisplayName = "Far Away"),
+	MidRange UMETA(DisplayName = "Mid Range"),
+	Close UMETA(DisplayName = "Close")
+};
+
 UCLASS(Blueprintable, BlueprintType, meta = (DisplayName="Attack Service"))
 class MYPROJECT2_API UBTServiceAttack : public UBTService
 {
@@ -56,6 +64,8 @@ protected:
 	const float RollGain = 0.015f;
 
 private:
+	EAIThrottleMode GetThrottleMode(float distance);
+
 	void CalculateAngle(float DeltaSeconds);
 
 	float CalculateRollDegrees(FVector LocalDir);
@@ -65,4 +75,6 @@ private:
 	float CalculateYawDegrees(FVector LocalDir);
 
 	void CalculateThrust(float DeltaSeconds);
+
+	float PursuitThrottle(ABaseAircraft* Target);
 };

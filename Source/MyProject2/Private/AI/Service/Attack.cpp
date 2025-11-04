@@ -6,6 +6,15 @@
 #include "Aircraft/FlightComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Aircraft/AI/EnemyAircraftAI.h"
+#include "Aircraft/FlightComponent.h"
+
+EAIThrottleMode UBTServiceAttack::GetThrottleMode(float distance) 
+{
+	distance = distance * 0.034;
+	if (distance >= 10000) return EAIThrottleMode::FarAway;
+	else if (distance >= 5000 && distance < 10000) return EAIThrottleMode::MidRange;
+	else return EAIThrottleMode::Close;
+}
 
 UBTServiceAttack::UBTServiceAttack()
 {
@@ -93,5 +102,69 @@ float UBTServiceAttack::CalculateYawDegrees(FVector LocalDir)
 
 void UBTServiceAttack::CalculateThrust(float DeltaSeconds) 
 {
-	
+	ABaseAircraft* Target = Cast<ABaseAircraft>(Selected);
+	if (Target) 
+	{
+		// Make Speed dependent on how many aircraft are in a radius, keep speed high when there are more enemies
+		// For now its single target
+		float Distance = FVector::Dist(Controlled->GetActorLocation(), Selected->GetActorLocation());
+		//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan, FString::Printf(TEXT("Distance: %.2f"), Distance));
+
+		// Maybe make this a throttle range in the future instead of just these hard values
+		float throttle;
+		EAIThrottleMode throttleMode = GetThrottleMode(Distance);
+		switch (throttleMode) 
+		{
+			case EAIThrottleMode::FarAway: throttle = 1;
+			case EAIThrottleMode::MidRange: throttle = 0.5;
+			case EAIThrottleMode::Close: throttle = PursuitThrottle(Target);
+		}
+
+		BlackboardComp->SetValueAsFloat(ThrottleKey.SelectedKeyName, throttle);
+	}
+	else
+	{
+		// For anything that isn't an aircraft, maintain some relative speed, it shouldn't really change its speed that much
+		float Distance = FVector::Dist(Controlled->GetActorLocation(), Selected->GetActorLocation());
+		float throttle;
+		EAIThrottleMode throttleMode = GetThrottleMode(Distance);
+		switch (throttleMode) 
+		{
+			case EAIThrottleMode::FarAway: throttle = 0.8;
+			case EAIThrottleMode::MidRange: throttle = 0.5;
+			case EAIThrottleMode::Close: throttle = 0.5;
+		}
+		BlackboardComp->SetValueAsFloat(ThrottleKey.SelectedKeyName, throttle);
+	}
+}
+
+float UBTServiceAttack::PursuitThrottle(ABaseAircraft* Target)
+{
+	float targetSpeed = Target->FlightComponent->currentSpeed;
+	float currentSpeed = Controlled->FlightComponent->currentSpeed;
+	float speedDif = targetSpeed - currentSpeed;
+	float absSpeedDif = FMath::Abs(speedDif);
+
+	// Maybe make these ranges dependent based on pilot skill
+	if (absSpeedDif <= 100) 
+	{
+		return 0.5;
+	}
+	// These are temporary setting speeds, plan is to make it more dynamic use more ranges of throttle percentages.
+	if (speedDif < 0)
+	{
+		if (absSpeedDif >= 400) 
+		{
+			return 0.1f;
+		}
+		return 0.3f;
+	}
+	if (speedDif > 0)
+	{
+		if (absSpeedDif >= 400) 
+		{
+			return 0.8f;
+		}
+		return 0.6f;
+	}
 }

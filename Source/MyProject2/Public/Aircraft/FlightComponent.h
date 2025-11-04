@@ -106,4 +106,6 @@ public:
 	void RollAOA(float DeltaSeconds);
 
 	float PitchDrag();
+
+	EThrottleStage getThrottleStage(float throttle);
 };

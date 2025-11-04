@@ -3,7 +3,7 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Flight Component!"));
 #include "Aircraft/FlightComponent.h"
 
-EThrottleStage getThrottleStage(float throttle)
+EThrottleStage UFlightComponent::getThrottleStage(float throttle)
 {
 	// Throttle Stages for pronounced acceleration differences
 	throttle *= 100.f;
