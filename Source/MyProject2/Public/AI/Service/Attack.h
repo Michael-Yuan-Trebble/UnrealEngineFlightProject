@@ -58,9 +58,11 @@ protected:
 private:
 	void CalculateAngle(float DeltaSeconds);
 
-	float CalculateRollDegrees(float CurrentPitchErrorDeg, float CurrentYawErrorDeg);
+	float CalculateRollDegrees(FVector LocalDir);
 
-	float CalculatePitchDegrees();
+	float CalculatePitchDegrees(FVector LocalDir);
 
-	float CalculateYawDegrees();
+	float CalculateYawDegrees(FVector LocalDir);
+
+	void CalculateThrust(float DeltaSeconds);
 };

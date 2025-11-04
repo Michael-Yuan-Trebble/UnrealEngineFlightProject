@@ -41,38 +41,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FDetectedAircraftInfo Tracking;
 	
-
-protected:
-
-	float targetPitch;
-
-	float targetYaw;
-
-	float targetRoll;
-
-	float currentPitch;
-
-	float currentYaw;
-
-	float currentRoll;
-
 private:
-
-	void Retrieve();
-
-	float maxSpeed;
-
-	float thrust;
-
-	float turnRate;
-
-	float yawRate;
-
-	float rollRate;
-
-	float prevSpeed;
-
-	float power;
 
 	void Weapons();
 
@@ -89,10 +58,6 @@ private:
 	void ShootEnd();
 
 	void Bullets();
-
-	void TurnSpeedLoss();
-
-	void ShouldYaw();
 
 	bool bUseYaw;
 };

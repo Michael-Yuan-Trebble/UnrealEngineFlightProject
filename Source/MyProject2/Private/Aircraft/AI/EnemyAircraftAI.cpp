@@ -23,10 +23,6 @@ AEnemyAircraftAI::AEnemyAircraftAI()
 void AEnemyAircraftAI::BeginPlay() 
 {
 	Super::BeginPlay();
-	targetPitch = 0.f;
-	targetYaw = 0.f;
-	targetRoll = 0.f;
-
 }
 
 void AEnemyAircraftAI::OnPossess(APawn* PawnPossess) 
@@ -41,6 +37,7 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 			BlackboardComp->SetValueAsFloat(TEXT("PitchAmount"), 0.f);
 			BlackboardComp->SetValueAsFloat(TEXT("RollAmount"), 0.f);
 			BlackboardComp->SetValueAsFloat(TEXT("YawAmount"), 0.f);
+			BlackboardComp->SetValueAsFloat(TEXT("ThrottleAmount"), 0.f);
 		}
 	}
 
@@ -52,34 +49,6 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 void AEnemyAircraftAI::Tick(float DeltaTime) 
 {
 	Super::Tick(DeltaTime);
-}
-
-void AEnemyAircraftAI::ShouldYaw() 
-{
-	// Find the angle and distance between target and self to see if yaw is needed
-
-	//FVector TargetDistance = TrackingLocation - Controlled->GetActorLocation();
-	//float LengthDistance = TargetDistance.Length();
-	//TargetDistance.Normalize();
-
-	//float DotProduct = FVector::DotProduct(Controlled->GetActorForwardVector(), TargetDistance);
-
-	//float ConeAngleCosine = FMath::Acos(DotProduct) * (180.f/PI);
-
-	// TODO: Make angle variable between aircraft
-	//if ((ConeAngleCosine <= 30.f) && (LengthDistance <= 100.f)) 
-	//{
-	//	bUseYaw = true;
-	//}
-	//else 
-	//{
-	//	bUseYaw = false;
-	//}
-}
-
-void AEnemyAircraftAI::Retrieve() 
-{
-	//Tracking = Controlled->ReturnTargeting();
 }
 
 void AEnemyAircraftAI::Rudder() 
@@ -112,9 +81,5 @@ void AEnemyAircraftAI::ShootEnd() {
 }
 
 void AEnemyAircraftAI::Bullets() {
-
-}
-
-void AEnemyAircraftAI::TurnSpeedLoss() {
 
 }

@@ -19,10 +19,7 @@ void UBTServiceAttack::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8
 	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
 	BlackboardComp = OwnerComp.GetBlackboardComponent();
 	Controller = Cast<AEnemyAircraftAI>(OwnerComp.GetAIOwner());
-	if (Controller)
-	{
-		Controlled = Cast<AEnemyAircraft>(Controller->Controlled);
-	}
+	if (Controller) Controlled = Cast<AEnemyAircraft>(Controller->Controlled);
 	Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
 }
 
@@ -30,34 +27,21 @@ void UBTServiceAttack::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 {
 	if (!Controlled || !BlackboardComp || !Selected) return;
 	CalculateAngle(DeltaSeconds);
+	CalculateThrust(DeltaSeconds);
 }
 
 void UBTServiceAttack::CalculateAngle(float DeltaSeconds)
 {
 	FVector ToTargetWorld = (Selected->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
 	if (ToTargetWorld.IsNearlyZero()) return;
-
 	FTransform AirframeTransform = Controlled->Airframe->GetComponentTransform();
 	FVector LocalDir = AirframeTransform.InverseTransformVectorNoScale(ToTargetWorld);
 
-	float YawErrorRad = FMath::Atan2(LocalDir.Y, LocalDir.X);
-	float PitchErrorRad = FMath::Atan2(LocalDir.Z, LocalDir.X);
+	float DesiredPitchInput = CalculatePitchDegrees(LocalDir);
+	float DesiredYawInput = CalculateYawDegrees(LocalDir);
+	float DesiredRollInput = CalculateRollDegrees(LocalDir);
 
-	float YawErrorDeg = FMath::RadiansToDegrees(YawErrorRad);
-	float PitchErrorDeg = FMath::RadiansToDegrees(PitchErrorRad);
-
-	float DesiredPitchInput = FMath::Clamp(PitchErrorDeg * PitchGain, -1.f, 1.f);
-	float DesiredYawInput = FMath::Clamp(YawErrorDeg * YawGain, -1.f, 1.f);
-
-	float DesiredRollInput = FMath::Clamp(-YawErrorDeg * RollGain, -1.f, 1.f);
-
-	const float ErrorDeadzoneDeg = 1.0f;
-	if (FMath::Abs(PitchErrorDeg) < ErrorDeadzoneDeg) DesiredPitchInput = 0.f;
-	if (FMath::Abs(YawErrorDeg) < ErrorDeadzoneDeg) DesiredYawInput = 0.f;
-	if (FMath::Abs(YawErrorDeg) < 0.5f)             DesiredRollInput = 0.f;
-
-	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan,
-		FString::Printf(TEXT("YawErr: %.2f PitchErr: %.2f"), DesiredPitchInput, DesiredRollInput));
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan,FString::Printf(TEXT("YawErr: %.2f PitchErr: %.2f"), DesiredPitchInput, DesiredRollInput));
 
 	if (Controlled->FlightComponent)
 	{
@@ -67,18 +51,47 @@ void UBTServiceAttack::CalculateAngle(float DeltaSeconds)
 	}
 }
 
-// 180 to -180 degrees
-float UBTServiceAttack::CalculateRollDegrees(float CurrentPitchErrorDeg, float CurrentYawErrorDeg)
+float UBTServiceAttack::CalculateRollDegrees(FVector LocalDir)
 {
-	return 0;
+	float YawErrorRad = FMath::Atan2(LocalDir.Y, LocalDir.X);
+
+	float YawErrorDeg = FMath::RadiansToDegrees(YawErrorRad);
+
+	float DesiredRollInput = FMath::Clamp(-YawErrorDeg * RollGain, -1.f, 1.f);
+
+	if (FMath::Abs(YawErrorDeg) < 0.5f) DesiredRollInput = 0.f;
+	return DesiredRollInput;
 }
 
-float UBTServiceAttack::CalculatePitchDegrees() 
+float UBTServiceAttack::CalculatePitchDegrees(FVector LocalDir)
 {
-	return 0;
+	float PitchErrorRad = FMath::Atan2(LocalDir.Z, LocalDir.X);
+
+	float PitchErrorDeg = FMath::RadiansToDegrees(PitchErrorRad);
+
+	float DesiredPitchInput = FMath::Clamp(PitchErrorDeg * PitchGain, -1.f, 1.f);
+
+	const float ErrorDeadzoneDeg = 1.0f;
+	if (FMath::Abs(PitchErrorDeg) < ErrorDeadzoneDeg) DesiredPitchInput = 0.f;
+
+	return DesiredPitchInput;
 }
 
-float UBTServiceAttack::CalculateYawDegrees()
+float UBTServiceAttack::CalculateYawDegrees(FVector LocalDir)
 {
-	return 0;
+	float YawErrorRad = FMath::Atan2(LocalDir.Y, LocalDir.X);
+
+	float YawErrorDeg = FMath::RadiansToDegrees(YawErrorRad);
+
+	float DesiredYawInput = FMath::Clamp(YawErrorDeg * YawGain, -1.f, 1.f);
+
+	const float ErrorDeadzoneDeg = 1.0f;
+	if (FMath::Abs(YawErrorDeg) < ErrorDeadzoneDeg) DesiredYawInput = 0.f;
+
+	return DesiredYawInput;
+}
+
+void UBTServiceAttack::CalculateThrust(float DeltaSeconds) 
+{
+	
 }
