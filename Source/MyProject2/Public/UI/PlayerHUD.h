@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "LockBoxWidget.h"
+#include "MinimapWidget.h"
 #include "AircraftPlayerController.h"
 #include "PlayerHUD.generated.h"
 
@@ -24,6 +25,11 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ULockBoxWidget> LockBoxWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UMinimapWidget> MiniMapClass;
+
+	UMinimapWidget* MiniMap;
 
 	UPROPERTY()
 	AAircraftPlayerController* PC;

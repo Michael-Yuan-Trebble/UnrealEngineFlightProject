@@ -7,6 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Structs and Data/Weapon Data/BaseWeaponStats.h"
+#include "Structs and Data/LockableTarget.h"
 #include "BaseWeapon.generated.h"
 
 UCLASS()
@@ -23,6 +24,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* Collision;
+
+	TArray<ETargetType> SupportedTargetTypes;
+
+	bool CanLockTarget(ETargetType TargetType) const { return SupportedTargetTypes.Contains(TargetType); }
 
 	FName WeaponName;
 

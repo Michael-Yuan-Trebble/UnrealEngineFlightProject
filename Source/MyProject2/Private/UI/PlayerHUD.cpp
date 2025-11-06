@@ -23,6 +23,14 @@ void APlayerHUD::BeginPlay()
     PC = Cast<AAircraftPlayerController>(GetOwningPlayerController());
     UpdateTargetWidgets();
     Super::BeginPlay();
+    MiniMap = CreateWidget<UMinimapWidget>(GetWorld(), MiniMapClass);
+    if (!MiniMap) return;
+    MiniMap->AddToViewport();
+    
+    MiniMap->InitializeBounds(
+        FVector2D(-20000.f, -20000.f),
+        FVector2D(20000.f, 20000.f)
+    );
 }
 
 void APlayerHUD::Init() 

@@ -48,6 +48,7 @@ void ABaseIRMissile::BeginPlay()
 	range = MissileStats->LockOnRange;
 	turnRate = MissileStats->TurnRate;
 	ProjectileMovement->MaxSpeed = MissileStats->MaxSpeed;
+	SupportedTargetTypes = MissileStats->SupportedTargetTypes;
 }
 
 void ABaseIRMissile::Tick(float DeltaTime)

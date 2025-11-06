@@ -36,6 +36,7 @@ void ABaseBomb::BeginPlay()
 	if (!BombStats) return;
 	WeaponName = BombStats->InGameName;
 	cooldownTime = BombStats->Cooldown;
+	SupportedTargetTypes = BombStats->SupportedTargetTypes;
 }
 
 void ABaseBomb::Tick(float DeltaSeconds) 

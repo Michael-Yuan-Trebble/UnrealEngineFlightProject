@@ -6,6 +6,7 @@
 #include "UI/PlayerHUD.h"
 #include "Weapons/AircraftBullet.h"
 #include "Kismet/GameplayStatics.h"
+#include "Structs and Data/LockableTarget.h"
 #include "AircraftPlayerController.h"
 #include "DrawDebugHelpers.h"
 
@@ -215,6 +216,17 @@ void UWeaponSystemComponent::GetCount()
 void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target) 
 {
 	if (!CurrentWeapon || !CurrentWeapon->canLock) return;
+
+	if (!Target->Implements<ULockableTarget>()) return;
+
+	ILockableTarget* LockTarget = Cast<ILockableTarget>(Target);
+	if (!LockTarget) return;
+
+	ETargetType TargetType = LockTarget->GetTargetType();
+	
+
+	if (!CurrentWeapon->CanLockTarget(TargetType)) return;
+
 	if (!Target) 
 	{
 		bLocked = false;
@@ -238,6 +250,8 @@ void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target)
 	if (bInCone)
 	{
 		LockTime += DeltaSeconds;
+
+		// TODO: Make it variable
 		bLocked = LockTime >= 1;
 	}
 	else

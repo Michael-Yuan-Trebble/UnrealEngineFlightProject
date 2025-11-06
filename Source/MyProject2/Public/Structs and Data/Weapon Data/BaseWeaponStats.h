@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Structs and Data/TargetTypes.h"
 #include "BaseWeaponStats.generated.h"
 
 UENUM(BlueprintType)
@@ -32,6 +33,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EWeaponType WeaponType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<ETargetType> SupportedTargetTypes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName InGameName;

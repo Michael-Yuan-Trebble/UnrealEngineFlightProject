@@ -29,6 +29,9 @@ public:
 	EFaction Faction;
 
 	UPROPERTY(EditAnywhere)
+	ETargetType UnitType = ETargetType::Air;
+
+	UPROPERTY(EditAnywhere)
 	UAircraftStats* AirStats;
 
 	UPROPERTY(EditAnywhere)
@@ -91,6 +94,8 @@ public:
 	virtual FVector GetTargetLocation() const override { return this->GetActorLocation(); };
 
 	virtual bool IsLockable() const override { return isAlive; };
+
+	virtual ETargetType GetTargetType() const override { return UnitType; };
 
 	//Return Functions for Vars
 
