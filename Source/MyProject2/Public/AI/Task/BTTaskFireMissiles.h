@@ -4,33 +4,38 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
+#include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/FlightComponent.h"
-#include "FlightTaskNode.generated.h"
+#include "BTTaskFireMissiles.generated.h"
 
 UCLASS(Blueprintable)
-class MYPROJECT2_API UBTTaskFlightTaskNode : public UBTTaskNode
+class MYPROJECT2_API UBTTaskFireMissiles : public UBTTaskNode
 {
 	GENERATED_BODY()
 public:
-	UBTTaskFlightTaskNode();
+	UBTTaskFireMissiles();
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds);
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	FBlackboardKeySelector YawKey;
+	FBlackboardKeySelector TargetActorKey;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	FBlackboardKeySelector PitchKey;
+	FBlackboardKeySelector bFireMissile;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	FBlackboardKeySelector RollKey;
-
-	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	FBlackboardKeySelector ThrottleKey;
+	FBlackboardKeySelector MissileClass;
 
 	UBlackboardComponent* BlackboardComp;
 
 	UFlightComponent* FlightComp;
+
+	UWeaponSystemComponent* WeaponComp;
+
+	AActor* Selected;
+
+private:
+	void EquipAppropriateWeapon();
 };

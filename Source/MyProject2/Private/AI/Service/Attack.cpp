@@ -6,13 +6,12 @@
 #include "Aircraft/FlightComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Aircraft/AI/EnemyAircraftAI.h"
-#include "Aircraft/FlightComponent.h"
 
 EAIThrottleMode UBTServiceAttack::GetThrottleMode(float distance) 
 {
 	distance = distance * 0.034;
-	if (distance >= 10000) return EAIThrottleMode::FarAway;
-	else if (distance >= 5000 && distance < 10000) return EAIThrottleMode::MidRange;
+	if (distance >= 7000) return EAIThrottleMode::FarAway;
+	else if (distance >= 3000 && distance < 7000) return EAIThrottleMode::MidRange;
 	else return EAIThrottleMode::Close;
 }
 
@@ -34,7 +33,7 @@ void UBTServiceAttack::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8
 
 void UBTServiceAttack::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
-	if (!Controlled || !BlackboardComp || !Selected) return;
+	if (!Controlled || !Controlled->FlightComponent ||!BlackboardComp || !Selected) return;
 	CalculateAngle(DeltaSeconds);
 	CalculateThrust(DeltaSeconds);
 }
@@ -43,6 +42,7 @@ void UBTServiceAttack::CalculateAngle(float DeltaSeconds)
 {
 	FVector ToTargetWorld = (Selected->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
 	if (ToTargetWorld.IsNearlyZero()) return;
+
 	FTransform AirframeTransform = Controlled->Airframe->GetComponentTransform();
 	FVector LocalDir = AirframeTransform.InverseTransformVectorNoScale(ToTargetWorld);
 
@@ -52,12 +52,9 @@ void UBTServiceAttack::CalculateAngle(float DeltaSeconds)
 
 	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan,FString::Printf(TEXT("YawErr: %.2f PitchErr: %.2f"), DesiredPitchInput, DesiredRollInput));
 
-	if (Controlled->FlightComponent)
-	{
-		BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, -DesiredRollInput);
-		BlackboardComp->SetValueAsFloat(PitchKey.SelectedKeyName, DesiredPitchInput);
-		BlackboardComp->SetValueAsFloat(YawKey.SelectedKeyName, DesiredYawInput);
-	}
+	BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, -DesiredRollInput);
+	BlackboardComp->SetValueAsFloat(PitchKey.SelectedKeyName, DesiredPitchInput);
+	BlackboardComp->SetValueAsFloat(YawKey.SelectedKeyName, DesiredYawInput);
 }
 
 float UBTServiceAttack::CalculateRollDegrees(FVector LocalDir)
@@ -111,7 +108,7 @@ void UBTServiceAttack::CalculateThrust(float DeltaSeconds)
 		//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan, FString::Printf(TEXT("Distance: %.2f"), Distance));
 
 		// Maybe make this a throttle range in the future instead of just these hard values
-		float throttle;
+		float throttle = 0.f;
 		EAIThrottleMode throttleMode = GetThrottleMode(Distance);
 		switch (throttleMode) 
 		{
@@ -126,7 +123,7 @@ void UBTServiceAttack::CalculateThrust(float DeltaSeconds)
 	{
 		// For anything that isn't an aircraft, maintain some relative speed, it shouldn't really change its speed that much
 		float Distance = FVector::Dist(Controlled->GetActorLocation(), Selected->GetActorLocation());
-		float throttle;
+		float throttle = 0.f;
 		EAIThrottleMode throttleMode = GetThrottleMode(Distance);
 		switch (throttleMode) 
 		{
@@ -167,4 +164,5 @@ float UBTServiceAttack::PursuitThrottle(ABaseAircraft* Target)
 		}
 		return 0.6f;
 	}
+	return 0.f;
 }

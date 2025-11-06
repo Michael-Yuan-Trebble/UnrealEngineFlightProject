@@ -22,6 +22,7 @@ EBTNodeResult::Type UBTTaskFlightTaskNode::ExecuteTask(UBehaviorTreeComponent& O
 	if (!Controller) return EBTNodeResult::Aborted;
 
 	AEnemyAircraft* Controlled = Cast<AEnemyAircraft>(Controller->Controlled);
+	if (!Controlled) return EBTNodeResult::Aborted;
 
 	FlightComp = Controlled->FlightComponent;
 	FlightComp->isFlying = true;

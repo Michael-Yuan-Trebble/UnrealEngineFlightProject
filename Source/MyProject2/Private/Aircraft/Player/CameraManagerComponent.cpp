@@ -29,14 +29,7 @@ void UCameraManagerComponent::LookHor(float lookX)
 
 	currentX = FMath::Clamp(currentX, -180, 180);
 
-	if (currentX == 180)
-	{
-		lookX = 180 - prevX;
-	}
-	if (currentX == -180)
-	{
-		lookX = 180 - prevX;
-	}
+	if (currentX == -180 || currentX == 180) lookX = 180 - prevX;
 
 	SpringArm->AddRelativeRotation(FRotator(0.f, lookX, 0.f));
 }
