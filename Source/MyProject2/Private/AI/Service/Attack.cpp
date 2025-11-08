@@ -9,6 +9,7 @@
 
 EAIThrottleMode UBTServiceAttack::GetThrottleMode(float distance) 
 {
+	// Makes the distance into meters
 	distance = distance * 0.034;
 	if (distance >= 7000) return EAIThrottleMode::FarAway;
 	else if (distance >= 3000 && distance < 7000) return EAIThrottleMode::MidRange;

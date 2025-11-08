@@ -7,6 +7,7 @@
 UENUM(BlueprintType)
 enum class ETargetType : uint8 
 {
+	Unknown UMETA(DisplayName = "Unknown"),
 	Air UMETA(DisplayName = "Air"),
 	Ground UMETA(DisplayName = "Ground"),
 	Naval UMETA(DisplayName = "Naval")

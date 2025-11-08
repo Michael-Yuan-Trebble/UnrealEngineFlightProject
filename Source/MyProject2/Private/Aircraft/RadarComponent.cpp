@@ -47,17 +47,18 @@ void URadarComponent::ScanTargets()
 
 	// Only try to find enemies right now, later find allies and put a different reticle over them
 
-	for (ABaseAircraft* RegisteredPawn : Registry->RegisteredAircraft) 
+	for (ABaseUnit* RegisteredPawn : Registry->RegisteredAircraft)
 	{
 		if (!IsValid(RegisteredPawn) || RegisteredPawn == Controlled) continue;
 
 		if (RegisteredPawn->Faction == Controlled->Faction) continue;
+		if (!RegisteredPawn->IsLockable()) continue;
+
 		FDetectedAircraftInfo TempInfo;
 		TempInfo.Location = RegisteredPawn->GetActorLocation();
 		TempInfo.Rotation = RegisteredPawn->GetActorRotation();
 		TempInfo.CurrentPawn = RegisteredPawn;
 		TempInfo.threatLevel = TempInfo.CalculateThreat();
-
 
 		if (TempInfo.threatLevel <= 0) continue;
 		Enemies.Add(TempInfo);

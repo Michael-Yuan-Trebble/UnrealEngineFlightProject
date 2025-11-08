@@ -215,9 +215,9 @@ void UWeaponSystemComponent::GetCount()
 
 void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target) 
 {
-	if (!CurrentWeapon || !CurrentWeapon->canLock) return;
+	if (!CurrentWeapon || !CurrentWeapon->canLock || !IsValid(Target)) return;
 
-	if (!Target->Implements<ULockableTarget>()) return;
+	if (!Target->Implements<ULockableTarget>()) return; // Breakpoint error
 
 	ILockableTarget* LockTarget = Cast<ILockableTarget>(Target);
 	if (!LockTarget) return;

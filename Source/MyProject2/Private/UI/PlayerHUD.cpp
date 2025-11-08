@@ -68,7 +68,7 @@ void APlayerHUD::UpdateTargetWidgets()
 {
     for (auto It = ActiveWidgets.CreateIterator(); It; ++It)
     {
-        ABaseAircraft* Target = It.Key();
+        ABaseUnit* Target = It.Key();
         if (!IsValid(Target) || !Targets.Contains(Target))
         {
             if (ULockBoxWidget* Reticle = It.Value())
@@ -79,7 +79,7 @@ void APlayerHUD::UpdateTargetWidgets()
         }
     }
 
-    for (ABaseAircraft* Target : Targets)
+    for (ABaseUnit* Target : Targets)
     {
         if (!IsValid(Target)) continue;
 
@@ -95,9 +95,9 @@ void APlayerHUD::UpdateTargetWidgets()
         }
 
         FVector WorldLocation;
-        if (Target->BodyCollision) 
+        if (Target->Collision) 
         {
-            WorldLocation = Target->BodyCollision->GetComponentLocation();
+            WorldLocation = Target->Collision->GetComponentLocation();
         } 
         else
         {
@@ -130,7 +130,7 @@ void APlayerHUD::UpdateTargetWidgets()
     }
 }
 
-void APlayerHUD::UpdateSelected(ABaseAircraft* In) 
+void APlayerHUD::UpdateSelected(ABaseUnit* In)
 {
     if (ULockBoxWidget** FoundWidget = ActiveWidgets.Find(In))
     {

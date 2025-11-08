@@ -10,7 +10,7 @@
 #include "PlayerHUD.generated.h"
 
 class APlayerAircraft;
-class ABaseAircraft;
+class ABaseUnit;
 
 UCLASS()
 class MYPROJECT2_API APlayerHUD : public AHUD
@@ -35,7 +35,7 @@ public:
 	AAircraftPlayerController* PC;
 
 	UPROPERTY()
-	TArray<ABaseAircraft*> Targets;
+	TArray<ABaseUnit*> Targets;
 
 	UPROPERTY()
 	ULockBoxWidget* SelectedAircraftWidget = nullptr;
@@ -43,11 +43,11 @@ public:
 	APlayerAircraft* Controlled;
 
 	UPROPERTY()
-	TMap<ABaseAircraft*, ULockBoxWidget*> ActiveWidgets;
+	TMap<ABaseUnit*, ULockBoxWidget*> ActiveWidgets;
 
 	void UpdateLocked(bool Locked);
 
-	void UpdateSelected(ABaseAircraft* In);
+	void UpdateSelected(ABaseUnit* In);
 
 	UFUNCTION()
 	void OnWeaponChanged(FName WeaponName, int32 Current, int32 Max);

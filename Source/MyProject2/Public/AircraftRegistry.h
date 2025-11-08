@@ -6,7 +6,7 @@
 #include "GameFramework/Info.h"
 #include "AircraftRegistry.generated.h"
 
-class ABaseAircraft;
+class ABaseUnit;
 
 UCLASS()
 class MYPROJECT2_API AAircraftRegistry : public AInfo
@@ -17,10 +17,10 @@ public:
 	AAircraftRegistry();
 
 	UPROPERTY(BlueprintReadOnly)
-	TArray<ABaseAircraft*> RegisteredAircraft;
+	TArray<ABaseUnit*> RegisteredAircraft;
 
-	void Register(ABaseAircraft* Aircraft);
-	void Unregister(ABaseAircraft* Aircraft);
+	void Register(ABaseUnit* Aircraft);
+	void Unregister(ABaseUnit* Aircraft);
 
 	static AAircraftRegistry* Get(UWorld* World);
 };

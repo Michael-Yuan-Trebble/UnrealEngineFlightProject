@@ -10,7 +10,7 @@ AAircraftRegistry::AAircraftRegistry()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-void AAircraftRegistry::Register(ABaseAircraft* Aircraft) 
+void AAircraftRegistry::Register(ABaseUnit* Aircraft)
 {
 	if (Aircraft && !RegisteredAircraft.Contains(Aircraft))
 	{
@@ -18,7 +18,7 @@ void AAircraftRegistry::Register(ABaseAircraft* Aircraft)
 	}
 }
 
-void AAircraftRegistry::Unregister(ABaseAircraft* Aircraft) 
+void AAircraftRegistry::Unregister(ABaseUnit* Aircraft)
 {
 	RegisteredAircraft.Remove(Aircraft);
 }
