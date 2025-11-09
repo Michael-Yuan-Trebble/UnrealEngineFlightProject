@@ -55,7 +55,7 @@ void AAircraftBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 	{
 		if (OtherActor && OtherComp->GetCollisionObjectType() == ECC_WorldStatic) 
 		{
-			Destroy();
+			DestroyBullet(OtherActor);
 		}
 	}
 }

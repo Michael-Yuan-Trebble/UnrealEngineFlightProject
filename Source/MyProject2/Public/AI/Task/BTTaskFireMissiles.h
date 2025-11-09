@@ -8,6 +8,8 @@
 #include "Aircraft/FlightComponent.h"
 #include "BTTaskFireMissiles.generated.h"
 
+class AEnemyAircraftAI;
+
 UCLASS(Blueprintable)
 class MYPROJECT2_API UBTTaskFireMissiles : public UBTTaskNode
 {
@@ -29,6 +31,8 @@ protected:
 	FBlackboardKeySelector MissileClass;
 
 	UBlackboardComponent* BlackboardComp;
+
+	AEnemyAircraftAI* Controller;
 
 	UFlightComponent* FlightComp;
 

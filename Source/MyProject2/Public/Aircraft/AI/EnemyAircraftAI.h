@@ -11,6 +11,8 @@
 #include "EnemyAircraftAI.generated.h"
 
 class ABaseAircraft;
+class ABaseWeapon;
+class UWeaponSystemComponent;
 
 UCLASS()
 class MYPROJECT2_API AEnemyAircraftAI : public AAIController
@@ -40,24 +42,19 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FDetectedAircraftInfo Tracking;
+
+	UWeaponSystemComponent* WeaponComp;
 	
+	void Weapons(TSubclassOf<ABaseWeapon> WeaponClass, AActor* Selected, float Speed);
+
 private:
-
-	void Weapons();
-
-	void WeaponsCooldown();
-
 	void Special();
 
 	void SpecialCooldown();
-
-	void Rudder();
 
 	void ShootStart();
 
 	void ShootEnd();
 
 	void Bullets();
-
-	bool bUseYaw;
 };

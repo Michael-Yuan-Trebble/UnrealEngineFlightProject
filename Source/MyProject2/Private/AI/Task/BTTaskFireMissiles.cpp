@@ -16,13 +16,12 @@ EBTNodeResult::Type UBTTaskFireMissiles::ExecuteTask(UBehaviorTreeComponent& Own
 	BlackboardComp = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComp) return EBTNodeResult::Aborted;
 
-	AEnemyAircraftAI* Controller = Cast<AEnemyAircraftAI>(OwnerComp.GetAIOwner());
+	Controller = Cast<AEnemyAircraftAI>(OwnerComp.GetAIOwner());
 	if (!Controller) return EBTNodeResult::Aborted;
 
 	AEnemyAircraft* Controlled = Cast<AEnemyAircraft>(Controller->Controlled);
 	if (!Controlled) return EBTNodeResult::Aborted;
 
-	WeaponComp = Controlled->WeaponComponent;
 	FlightComp = Controlled->FlightComponent;
 
 	Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
@@ -36,5 +35,5 @@ void UBTTaskFireMissiles::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Nod
 	TSubclassOf<ABaseWeapon> Class = BlackboardComp->GetValueAsClass(MissileClass.SelectedKeyName);
 
 	if (!Class) return;
-	WeaponComp->FireWeaponSelected(Class, Selected, FlightComp->currentSpeed);
+	Controller->Weapons(Class, Selected, FlightComp->currentSpeed);
 }

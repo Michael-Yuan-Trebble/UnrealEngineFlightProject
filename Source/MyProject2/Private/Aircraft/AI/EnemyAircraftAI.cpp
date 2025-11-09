@@ -2,16 +2,14 @@
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("AI CONTROL!"));
 #include "Aircraft/AI/EnemyAircraftAI.h"
-#include "Aircraft/AI/F16AI.h"
 #include "Engine/World.h"
-#include "AircraftPlayerController.h"
+#include "Aircraft/AI/EnemyAircraft.h"
 #include "GameFramework/PlayerController.h"
-#include "GameFramework/Pawn.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
-#include "GameFramework/Actor.h"
 #include "Aircraft/BaseAircraft.h"
+#include "Aircraft/WeaponSystemComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "AircraftRegistry.h"
+#include "Weapons/BaseWeapon.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 
@@ -44,6 +42,7 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 	Controlled = Cast<AEnemyAircraft>(GetPawn());
 	if (!Controlled) return;
 
+	WeaponComp = Controlled->WeaponComponent;
 }
 
 void AEnemyAircraftAI::Tick(float DeltaTime) 
@@ -51,16 +50,14 @@ void AEnemyAircraftAI::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AEnemyAircraftAI::Rudder() 
+void AEnemyAircraftAI::Weapons(TSubclassOf<ABaseWeapon> WeaponClass, AActor* Selected, float Speed)
 {
-
+	if (!WeaponClass || !Selected || !WeaponComp) return;
+	WeaponComp->FireWeaponSelected(WeaponClass, Selected, Speed);
 }
 
-void AEnemyAircraftAI::Weapons() {
-
-}
-
-void AEnemyAircraftAI::WeaponsCooldown() {
+void AEnemyAircraftAI::WeaponsCooldown() 
+{
 
 }
 
