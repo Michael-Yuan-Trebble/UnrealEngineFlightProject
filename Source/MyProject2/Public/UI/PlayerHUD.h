@@ -29,6 +29,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UMinimapWidget> MiniMapClass;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> AimReticleClass;
+
+	UUserWidget* AimReticleWidget;
+
 	UMinimapWidget* MiniMap;
 
 	UPROPERTY()

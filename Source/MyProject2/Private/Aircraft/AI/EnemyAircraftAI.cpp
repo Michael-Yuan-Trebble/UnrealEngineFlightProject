@@ -56,11 +56,6 @@ void AEnemyAircraftAI::Weapons(TSubclassOf<ABaseWeapon> WeaponClass, AActor* Sel
 	WeaponComp->FireWeaponSelected(WeaponClass, Selected, Speed);
 }
 
-void AEnemyAircraftAI::WeaponsCooldown() 
-{
-
-}
-
 void AEnemyAircraftAI::Special() {
 
 }

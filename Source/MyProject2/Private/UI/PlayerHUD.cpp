@@ -6,11 +6,14 @@
 #include "DrawDebugHelpers.h"
 #include "Aircraft/BaseAircraft.h"
 #include "UI/LockBoxWidget.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/Player/PlayerAircraft.h"
 
 APlayerHUD::APlayerHUD() 
 {
+    PrimaryActorTick.bCanEverTick = true;
 	static ConstructorHelpers::FClassFinder<ULockBoxWidget> WidgetBPClass(TEXT("/Game/UI/LockBoxBP"));
 	if (WidgetBPClass.Succeeded()) 
 	{
@@ -42,6 +45,10 @@ void APlayerHUD::Init()
     WeaponSys->OnWeaponCountUpdated.AddDynamic(this, &APlayerHUD::OnWeaponChanged);
     WeaponSys->GetCount();
     EquippedWeaponNames = WeaponSys->EquippedWeaponNames;
+    if (!AimReticleClass) return;
+    AimReticleWidget = CreateWidget<UUserWidget>(PC, AimReticleClass);
+    AimReticleWidget->AddToViewport();
+    AimReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
 }
 
 void APlayerHUD::OnWeaponChanged(FName WeaponName, int32 Current, int32 Max) 
@@ -56,6 +63,22 @@ void APlayerHUD::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
     if (!LockBoxWidgetClass || !PC) return;
 	UpdateTargetWidgets();
+
+    if (!Controlled) return;
+    FVector CamLoc;
+    FRotator CamRot;
+    PC->GetPlayerViewPoint(CamLoc, CamRot);
+
+    FVector NoseDir = Controlled->Airframe->GetForwardVector();
+
+    FVector AimWorldPos = CamLoc + NoseDir * 10000.f;
+
+    FVector2D ScreenPos;
+    if (PC->ProjectWorldLocationToScreen(AimWorldPos, ScreenPos, true))
+    {
+        AimReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+        AimReticleWidget->SetPositionInViewport(ScreenPos, true);
+    }
 }
 
 void APlayerHUD::UpdateLocked(bool Locked)
