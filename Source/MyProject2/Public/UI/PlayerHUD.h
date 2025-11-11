@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "LockBoxWidget.h"
 #include "MinimapWidget.h"
+#include "PitchLadder.h"
 #include "AircraftPlayerController.h"
 #include "PlayerHUD.generated.h"
 
@@ -34,6 +35,16 @@ public:
 
 	UUserWidget* AimReticleWidget;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> AOAReticleClass;
+
+	UUserWidget* AOAReticleWidget;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UPitchLadder> PitchLadderClass;
+
+	UPitchLadder* PitchLadderWidget;
+
 	UMinimapWidget* MiniMap;
 
 	UPROPERTY()
@@ -58,6 +69,8 @@ public:
 	void OnWeaponChanged(FName WeaponName, int32 Current, int32 Max);
 
 	void Init();
+
+	void PitchLadderCalculations();
 
 	UPROPERTY(BlueprintReadWrite)
 	int CurrentNum = 0;

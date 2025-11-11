@@ -7,6 +7,7 @@
 #include "Aircraft/BaseAircraft.h"
 #include "UI/LockBoxWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
+#include "Aircraft/FlightComponent.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/Player/PlayerAircraft.h"
@@ -45,10 +46,21 @@ void APlayerHUD::Init()
     WeaponSys->OnWeaponCountUpdated.AddDynamic(this, &APlayerHUD::OnWeaponChanged);
     WeaponSys->GetCount();
     EquippedWeaponNames = WeaponSys->EquippedWeaponNames;
+
     if (!AimReticleClass) return;
     AimReticleWidget = CreateWidget<UUserWidget>(PC, AimReticleClass);
     AimReticleWidget->AddToViewport();
     AimReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+
+    if (!AOAReticleClass) return;
+    AOAReticleWidget = CreateWidget<UUserWidget>(PC, AOAReticleClass);
+    AOAReticleWidget->AddToViewport();
+    AOAReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+
+    if (!PitchLadderClass) return;
+    PitchLadderWidget = CreateWidget<UPitchLadder>(PC, PitchLadderClass);
+    PitchLadderWidget->AddToViewport();
+    PitchLadderWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
 }
 
 void APlayerHUD::OnWeaponChanged(FName WeaponName, int32 Current, int32 Max) 
@@ -64,21 +76,50 @@ void APlayerHUD::Tick(float DeltaSeconds)
     if (!LockBoxWidgetClass || !PC) return;
 	UpdateTargetWidgets();
 
-    if (!Controlled) return;
+    if (!Controlled || !AimReticleWidget || !AOAReticleWidget) return;
     FVector CamLoc;
     FRotator CamRot;
     PC->GetPlayerViewPoint(CamLoc, CamRot);
 
     FVector NoseDir = Controlled->Airframe->GetForwardVector();
+    FVector ForwardDir = Controlled->GetActorForwardVector();
 
     FVector AimWorldPos = CamLoc + NoseDir * 10000.f;
 
+    FVector AOAWorldPos = CamLoc + ForwardDir * 10000.f;
+
     FVector2D ScreenPos;
-    if (PC->ProjectWorldLocationToScreen(AimWorldPos, ScreenPos, true))
+    bool Project = PC->ProjectWorldLocationToScreen(AimWorldPos, ScreenPos, true);
+    if (Project)
     {
         AimReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
         AimReticleWidget->SetPositionInViewport(ScreenPos, true);
     }
+    bool AOAProject = PC->ProjectWorldLocationToScreen(AOAWorldPos, ScreenPos, true);
+    if (AOAProject)
+    {
+        AOAReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+        AOAReticleWidget->SetPositionInViewport(ScreenPos, true);
+    }
+    if (!PitchLadderWidget) return;
+
+    FVector LadderWorldPos = CamLoc + NoseDir * 10000.f;
+    FVector2D LadderScreenPos;
+
+    bool Projected = PC->ProjectWorldLocationToScreen(LadderWorldPos, LadderScreenPos, true);
+    if (Projected) {
+        //PitchLadderWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+        PitchLadderWidget->SetPositionInViewport(LadderScreenPos, true);
+    }
+
+    float Pitch = FMath::RadiansToDegrees(FMath::Asin(Controlled->Airframe->GetForwardVector().Z));
+    PitchLadderWidget->Update(Pitch, NoseDir, CamLoc, Project);
+}
+
+void APlayerHUD::PitchLadderCalculations() 
+{
+    if (!PitchLadderWidget) return;
+    float Pitch = FMath::RadiansToDegrees(FMath::Asin(Controlled->Airframe->GetForwardVector().Z));
 }
 
 void APlayerHUD::UpdateLocked(bool Locked)
