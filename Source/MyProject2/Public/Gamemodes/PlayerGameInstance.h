@@ -9,6 +9,8 @@
 #include "Structs and Data/Aircraft Data/AircraftData.h"
 #include "PlayerGameInstance.generated.h"
 
+class UMainMenuManager;
+
 UCLASS()
 class MYPROJECT2_API UPlayerGameInstance : public UGameInstance
 {
@@ -24,6 +26,7 @@ public:
 	TMap<FName, TSubclassOf<ABaseWeapon>> SelectedWeapons;
 
 	TSubclassOf<UBaseSpecial> SelectedSpecial;
+
 protected:
 	void Init() override;
 

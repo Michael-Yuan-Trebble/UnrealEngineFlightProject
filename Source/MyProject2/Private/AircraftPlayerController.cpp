@@ -7,6 +7,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "Aircraft/MenuManagerComponent.h"
+#include "Gamemodes/MainMenuManager.h"
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/Player/CameraManagerComponent.h"
 #include "Aircraft/RadarComponent.h"
@@ -39,6 +40,7 @@ void AAircraftPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	ACurrentPlayerState* PS = Cast<ACurrentPlayerState>(this->PlayerState);
+	if (!PS) return;
 	MenuManager->InitializePC(this, PS);
 	HUD = Cast<APlayerHUD>(GetHUD());
 	if (HUD) HUD->PC = this;

@@ -4,7 +4,8 @@
 #include "UI/PitchLadder.h"
 #include "Components/CanvasPanelSlot.h"
 
-void UPitchLadder::NativeConstruct() {
+void UPitchLadder::NativeConstruct() 
+{
 	Super::NativeConstruct();
 
 	if (!LadderCanvas || !LineTexture) return;
@@ -14,7 +15,7 @@ void UPitchLadder::NativeConstruct() {
 		UImage* Line = NewObject<UImage>(this, UImage::StaticClass());
         //Line->SetBrushFromTexture(LineTexture);
         Line->SetBrushFromMaterial(LineTexture);
-        Line->SetBrushSize(FVector2D(3.f,130.f));
+        Line->SetDesiredSizeOverride(FVector2D(3.f,130.f));
         Line->SetVisibility(ESlateVisibility::Visible);
 
         UCanvasPanelSlot* CanvasSlot = LadderCanvas->AddChildToCanvas(Line);
@@ -36,13 +37,13 @@ void UPitchLadder::NativeConstruct() {
 	}
 }
 
-void UPitchLadder::Update(float InPitch, FVector NoseDir, FVector CameraLoc, bool Project) 
+void UPitchLadder::Update(float InPitch) 
 {
-    LadderCanvas->SetRenderTransformAngle(0.f);
-    CurrentPitch = InPitch;
+    if (!LadderCanvas || !IsVisible()) return;
 
-    if (!LadderCanvas)
-        return;
+    LadderCanvas->SetRenderTransformAngle(0.f);
+
+    CurrentPitch = InPitch;
 
     FVector2D CanvasSize = LadderCanvas->GetCachedGeometry().GetLocalSize();
     float LadderHeight = CanvasSize.Y;
@@ -50,56 +51,33 @@ void UPitchLadder::Update(float InPitch, FVector NoseDir, FVector CameraLoc, boo
 
     float VisibleRange = 30.f;
     float PixelsPerDegree = LadderHeight / VisibleRange;
+    bool bFlip = FMath::Abs(CurrentPitch) > 90.f;
 
     for (int32 i = 0; i < LadderLines.Num(); ++i)
     {
         float LineAngle = MinPitch + i * PitchStep;
-
-        bool bFlip = FMath::Abs(CurrentPitch) > 90.f;
-
-        // Adjust label number when inverted
-        float DisplayAngle = bFlip ? -LineAngle : LineAngle;
-        LadderLabels[i]->SetText(FText::AsNumber(DisplayAngle));
-
         float PitchDiff = LineAngle - CurrentPitch;
-        float Y = CenterY - (PitchDiff * PixelsPerDegree);
 
-        if (bFlip)
-        {
-            if (UCanvasPanelSlot* LineSlot = Cast<UCanvasPanelSlot>(LadderLines[i]->Slot))
-            {
-                float X = LineSlot->GetPosition().X;
-                LineSlot->SetPosition(FVector2D(-X, Y));
-            }
-
-            if (UCanvasPanelSlot* LabelSlot = Cast<UCanvasPanelSlot>(LadderLabels[i]->Slot))
-            {
-                float X = LabelSlot->GetPosition().X;
-                LabelSlot->SetPosition(FVector2D(-X, Y));
-            }
-        }
-        else
-        {
-            if (UCanvasPanelSlot* LineSlot = Cast<UCanvasPanelSlot>(LadderLines[i]->Slot))
-            {
-                LineSlot->SetPosition(FVector2D(LineSlot->GetPosition().X, Y));
-            }
-            if (UCanvasPanelSlot* LabelSlot = Cast<UCanvasPanelSlot>(LadderLabels[i]->Slot))
-            {
-                LabelSlot->SetPosition(FVector2D(LabelSlot->GetPosition().X, Y));
-            }
-        }
         bool bVisible = FMath::Abs(PitchDiff) <= (30.f / 2.f);
         LadderLines[i]->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
         LadderLabels[i]->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 
+        if (!bVisible) continue;
+
+        float DisplayAngle = bFlip ? -LineAngle : LineAngle;
+        LadderLabels[i]->SetText(FText::AsNumber(DisplayAngle));
+        float Y = CenterY - (PitchDiff * PixelsPerDegree);
+
         if (UCanvasPanelSlot* LineSlot = Cast<UCanvasPanelSlot>(LadderLines[i]->Slot))
         {
-            LineSlot->SetPosition(FVector2D(LineSlot->GetPosition().X, Y));
+           float X = LineSlot->GetPosition().X;
+           LineSlot->SetPosition(bFlip ? FVector2D(-X, Y) : FVector2D(X,Y));
         }
+
         if (UCanvasPanelSlot* LabelSlot = Cast<UCanvasPanelSlot>(LadderLabels[i]->Slot))
         {
-            LabelSlot->SetPosition(FVector2D(LabelSlot->GetPosition().X, Y));
+           float X = LabelSlot->GetPosition().X;
+           LabelSlot->SetPosition(bFlip ? FVector2D(-X, Y) : FVector2D(X, Y));
         }
     }
 }

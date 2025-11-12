@@ -61,6 +61,9 @@ void APlayerHUD::Init()
     PitchLadderWidget = CreateWidget<UPitchLadder>(PC, PitchLadderClass);
     PitchLadderWidget->AddToViewport();
     PitchLadderWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+
+    // TODO: Pitch Ladder Visibility is true for now in testing, remove later because its only meant for certain modes, not always at start
+    isPitchLadderVisible = true;
 }
 
 void APlayerHUD::OnWeaponChanged(FName WeaponName, int32 Current, int32 Max) 
@@ -89,14 +92,12 @@ void APlayerHUD::Tick(float DeltaSeconds)
     FVector AOAWorldPos = CamLoc + ForwardDir * 10000.f;
 
     FVector2D ScreenPos;
-    bool Project = PC->ProjectWorldLocationToScreen(AimWorldPos, ScreenPos, true);
-    if (Project)
+    if (PC->ProjectWorldLocationToScreen(AimWorldPos, ScreenPos, true))
     {
         AimReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
         AimReticleWidget->SetPositionInViewport(ScreenPos, true);
     }
-    bool AOAProject = PC->ProjectWorldLocationToScreen(AOAWorldPos, ScreenPos, true);
-    if (AOAProject)
+    if (PC->ProjectWorldLocationToScreen(AOAWorldPos, ScreenPos, true))
     {
         AOAReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
         AOAReticleWidget->SetPositionInViewport(ScreenPos, true);
@@ -106,20 +107,28 @@ void APlayerHUD::Tick(float DeltaSeconds)
     FVector LadderWorldPos = CamLoc + NoseDir * 10000.f;
     FVector2D LadderScreenPos;
 
-    bool Projected = PC->ProjectWorldLocationToScreen(LadderWorldPos, LadderScreenPos, true);
-    if (Projected) {
-        //PitchLadderWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+    if (PC->ProjectWorldLocationToScreen(LadderWorldPos, LadderScreenPos, true))
+    {
         PitchLadderWidget->SetPositionInViewport(LadderScreenPos, true);
     }
 
     float Pitch = FMath::RadiansToDegrees(FMath::Asin(Controlled->Airframe->GetForwardVector().Z));
-    PitchLadderWidget->Update(Pitch, NoseDir, CamLoc, Project);
+    PitchLadderWidget->Update(Pitch);
 }
 
-void APlayerHUD::PitchLadderCalculations() 
+void APlayerHUD::PitchLadderUpdate() 
 {
-    if (!PitchLadderWidget) return;
+    if (!isPitchLadderVisible) return;
     float Pitch = FMath::RadiansToDegrees(FMath::Asin(Controlled->Airframe->GetForwardVector().Z));
+    PitchLadderWidget->Update(Pitch);
+}
+
+void APlayerHUD::SetPitchLadderVisibility(bool isVisible) 
+{
+    isPitchLadderVisible = isVisible;
+    PitchLadderWidget->SetVisibility(
+        isPitchLadderVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden
+    );
 }
 
 void APlayerHUD::UpdateLocked(bool Locked)

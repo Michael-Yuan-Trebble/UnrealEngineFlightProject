@@ -70,8 +70,6 @@ public:
 
 	void Init();
 
-	void PitchLadderCalculations();
-
 	UPROPERTY(BlueprintReadWrite)
 	int CurrentNum = 0;
 
@@ -83,8 +81,15 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	TArray<FName> EquippedWeaponNames;
+
+	bool isPitchLadderVisible;
+
+	void SetPitchLadderVisibility(bool isVisible);
+
 private:
 
 	void UpdateTargetWidgets();
+
+	void PitchLadderUpdate();
 
 };

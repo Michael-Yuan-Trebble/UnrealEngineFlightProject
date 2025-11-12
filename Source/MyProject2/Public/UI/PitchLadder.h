@@ -15,7 +15,7 @@ class MYPROJECT2_API UPitchLadder : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void Update(float InPitch, FVector NoseDir, FVector CameraLoc, bool Project);
+	void Update(float InPitch);
 
 protected:
 	virtual void NativeConstruct() override;
