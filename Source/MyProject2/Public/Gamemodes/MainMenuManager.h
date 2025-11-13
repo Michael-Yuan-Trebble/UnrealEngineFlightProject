@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Structs and Data/LevelListData.h"
 #include "MainMenuManager.generated.h"
 
 class UMainMenuWidget;
+class UFreeFlightWidget;
 class AAircraftPlayerController;
 
 UCLASS()
@@ -23,9 +25,12 @@ public:
 
 	// All Menus Are Here
 	void ShowMainMenu();
-	void ShowSettings();
-	void ShowFreeFlight();
 
+	UFUNCTION()
+	void ShowSettings();
+
+	UFUNCTION()
+	void ShowFreeFlight();
 
 	// Other Menu Functions
 
@@ -35,13 +40,21 @@ public:
 
 	void Init(AAircraftPlayerController* InAPC);
 
+	UFUNCTION()
+	void OnLevelPicked(FName LevelName);
+
 	AAircraftPlayerController* APC;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UMainMenuWidget> MainMenuClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UFreeFlightWidget> FreeFlightClass;
 
 private:
 	UMainMenuWidget* MainMenuWidget;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UMainMenuWidget> MainMenuClass;
+	UFreeFlightWidget* FreeFlightWidget;
 
 	TArray<UUserWidget*> MenuStack;
 

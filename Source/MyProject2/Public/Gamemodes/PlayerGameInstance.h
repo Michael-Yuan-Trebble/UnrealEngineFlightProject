@@ -27,6 +27,10 @@ public:
 
 	TSubclassOf<UBaseSpecial> SelectedSpecial;
 
+	UMainMenuManager* MainMenuManager;
+
+	UMainMenuManager* GetMainMenuManager() const { return MainMenuManager; };
+
 protected:
 	void Init() override;
 

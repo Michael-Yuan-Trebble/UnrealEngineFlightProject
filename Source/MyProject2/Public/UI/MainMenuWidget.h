@@ -31,6 +31,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* FreeFlightbtn;
 
+	UPROPERTY(meta = (BindWidget))
+	UButton* Exitbtn;
+
 	UPROPERTY()
 	UMainMenuManager* MenuManager;
 
@@ -41,7 +44,9 @@ protected:
 	}
 
 private:
+	UFUNCTION()
 	void HandleSettingsbtnClicked();
 
+	UFUNCTION()
 	void HandleFreeFlightbtnClicked();
 };

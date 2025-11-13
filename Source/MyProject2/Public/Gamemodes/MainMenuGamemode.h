@@ -8,6 +8,7 @@
 #include "MainMenuGamemode.generated.h"
 
 class AAircraftPlayerController;
+class UMainMenuWidget;
 
 UCLASS()
 class MYPROJECT2_API AMainMenuGamemode : public AGameModeBase
@@ -24,4 +25,7 @@ private:
 	AAircraftPlayerController* APC;
 
 	ACurrentPlayerState* PS;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UMainMenuWidget> MainMenuClass;
 };

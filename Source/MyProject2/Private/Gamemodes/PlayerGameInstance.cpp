@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Instance!"));
 #include "Gamemodes/PlayerGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Gamemodes/MainMenuManager.h"
@@ -11,11 +12,7 @@ void UPlayerGameInstance::Init()
 	SaveManager = NewObject<USaveGameManager>(this, USaveGameManager::StaticClass());
 	SaveManager->LoadGame();
 
-	UMainMenuManager* MainMenuManager = GetSubsystem<UMainMenuManager>();
-
-	if (MainMenuManager) {
-		UE_LOG(LogTemp, Log, TEXT("Main Menu Subsystem init"));
-	}
+	MainMenuManager = GetSubsystem<UMainMenuManager>();
 }
 
 void UPlayerGameInstance::SetLoadout(UAircraftData* InData, TMap<FName, TSubclassOf<ABaseWeapon>> InWeapons, TSubclassOf<UBaseSpecial> InSpecial) {

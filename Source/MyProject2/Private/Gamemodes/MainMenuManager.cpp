@@ -1,8 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Main Menu Manager!"));
 #include "Gamemodes/MainMenuManager.h"
 #include "Blueprint/UserWidget.h"
+#include "UI/FreeFlightWidget.h"
 #include "UI/MainMenuWidget.h"
 
 UMainMenuManager::UMainMenuManager() 
@@ -28,10 +29,15 @@ void UMainMenuManager::Init(AAircraftPlayerController* InAPC)
 
 void UMainMenuManager::ShowMainMenu() 
 {
-	HideAll(false);
+	if (!MainMenuClass) return;
+	if (!MainMenuClass->IsChildOf(UMainMenuWidget::StaticClass())) return;
+	//HideAll(false);
 	if (!MainMenuWidget) 
 	{
 		MainMenuWidget = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuClass);
+		if (!MainMenuWidget) return;
+		if (!MainMenuWidget->IsA(UMainMenuWidget::StaticClass())) return;
+		MainMenuWidget->CreateButtons();
 		MainMenuWidget->OnSettingsPicked.AddDynamic(this, &UMainMenuManager::ShowSettings);
 		MainMenuWidget->OnFreeFlightPicked.AddDynamic(this, &UMainMenuManager::ShowFreeFlight);
 	}
@@ -43,7 +49,38 @@ void UMainMenuManager::ShowMainMenu()
 
 void UMainMenuManager::ShowFreeFlight() 
 {
+	if (!FreeFlightClass) return;
+	//HideAll(false);
 
+	if (CurrentMenu && CurrentMenu->IsInViewport()) 
+	{
+		CurrentMenu->SetVisibility(ESlateVisibility::Collapsed);
+		CurrentMenu->RemoveFromParent();
+	}
+
+	if (!FreeFlightWidget) 
+	{
+		FreeFlightWidget = CreateWidget<UFreeFlightWidget>(GetWorld(), FreeFlightClass);
+		if (!FreeFlightWidget) return;
+		if (!FreeFlightWidget->IsA(UFreeFlightWidget::StaticClass())) return;
+		FreeFlightWidget->InitLevels();
+		FreeFlightWidget->OnLevelSelected.AddDynamic(this, &UMainMenuManager::OnLevelPicked);
+	}
+	FreeFlightWidget->AddToViewport(0);
+	CurrentMenu = FreeFlightWidget;
+
+	if (MenuStack.Num() > 0) 
+	{
+		MenuStack.Pop();
+	}
+
+	MenuStack.Push(FreeFlightWidget);
+
+}
+
+void UMainMenuManager::OnLevelPicked(FName LevelName) 
+{
+	print(text)
 }
 
 void UMainMenuManager::ShowSettings() 
@@ -70,14 +107,16 @@ void UMainMenuManager::GoBack()
 
 void UMainMenuManager::HideAll(bool bClear)
 {
-	for (auto* Menu : MenuStack) {
-		if (Menu && Menu->IsInViewport()) {
+	for (UUserWidget* Menu : MenuStack) 
+	{
+		if (Menu && Menu->IsInViewport()) 
+		{
 			Menu->RemoveFromParent();
 		}
 	}
 	if (bClear) 
 	{
 		MenuStack.Empty();
-		CurrentMenu = nullptr;
 	}
+	CurrentMenu = nullptr;
 }
