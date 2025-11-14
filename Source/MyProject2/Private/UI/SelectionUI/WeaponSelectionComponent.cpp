@@ -24,7 +24,6 @@ void UWeaponSelectionComponent::Setup(AAircraftPlayerController* InPlayer, AAirc
 	GM = InGM;
 	PS = InPS;
 	MenuManager = InMenu;
-	CurrentPylonIndex = 0;
 }
 
 void UWeaponSelectionComponent::AddAircraft(UAircraftData* Data)
@@ -42,6 +41,8 @@ void UWeaponSelectionComponent::WeaponSelectionMenu()
 	FInputModeGameAndUI InputMode;
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	InputMode.SetHideCursorDuringCapture(true);
+
+	// TODO: Make it so the structs contain how many pylons are in a group, like 2, and then just loop twice for the pylons
 
 	WeaponSelectUI->CurrentLoadout = &(Aircraft->PylonLoadouts[CurrentPylonIndex]);
 	WeaponSelectUI->WeaponUI = this;
@@ -71,7 +72,7 @@ void UWeaponSelectionComponent::AddWeapon(TSubclassOf<ABaseWeapon> Weapon)
 
 void UWeaponSelectionComponent::CheckWeaponLoop() 
 {
-	if (CurrentPylonIndex + 1 >= Aircraft->NumOfPylons)
+	if (CurrentPylonIndex > Aircraft->NumOfPylons)
 	{
 		MenuManager->ChooseSpecialUI();
 	}

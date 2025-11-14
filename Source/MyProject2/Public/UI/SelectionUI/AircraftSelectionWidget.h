@@ -33,7 +33,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GetAllAircraft();
 
-	void Setup(UAircraftDatabase* Database, TArray<FName> InOwn, UMenuManagerComponent* InMenu, UAircraftSelectionComponent* InSelect);
+	void Setup(UAircraftDatabase* Database, 
+		TArray<FName> InOwn, 
+		UMenuManagerComponent* InMenu, 
+		UAircraftSelectionComponent* InSelect);
 
 	UPROPERTY()
 	UMenuManagerComponent* MenuManager;

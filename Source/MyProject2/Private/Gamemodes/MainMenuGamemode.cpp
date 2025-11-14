@@ -4,6 +4,8 @@
 #include "Gamemodes/MainMenuGamemode.h"
 #include "Kismet/GameplayStatics.h"
 #include "AircraftPlayerController.h"
+#include "UI/MainMenuUI/MainMenuWidget.h"
+#include "UI/MainMenuUI/FreeFlightWidget.h"
 #include "Gamemodes/MainMenuManager.h"
 
 AMainMenuGamemode::AMainMenuGamemode() 
@@ -27,7 +29,10 @@ void AMainMenuGamemode::BeginPlay()
 	UMainMenuManager* MenuManager = GetWorld()->GetGameInstance()->GetSubsystem<UMainMenuManager>();
 	if (!MenuManager) return;
 
+	if (!MainMenuClass || !FreeFlightClass) return;
+
 	MenuManager->MainMenuClass = MainMenuClass;
+	MenuManager->FreeFlightClass = FreeFlightClass;
 	MenuManager->ShowMainMenu();
 
 }

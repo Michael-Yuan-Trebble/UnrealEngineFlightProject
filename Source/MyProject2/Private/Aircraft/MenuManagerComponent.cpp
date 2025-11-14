@@ -30,7 +30,7 @@ void UMenuManagerComponent::InitializePC(AAircraftPlayerController* InPC, ACurre
 	InputMode.SetHideCursorDuringCapture(true);
 
 	AircraftSelectionUI = NewObject<UAircraftSelectionComponent>(this);
-	AircraftSelectionUI->Setup(PC, GM, PS, this);
+	AircraftSelectionUI->Setup(PC, GM, PS, this,AircraftSelectClass);
 
 	WeaponSelectionUI = NewObject<UWeaponSelectionComponent>(this);
 	WeaponSelectionUI->Setup(PC, GM, PS, this);
@@ -40,6 +40,22 @@ void UMenuManagerComponent::InitializePC(AAircraftPlayerController* InPC, ACurre
 
 	SpecialSelectionUI = NewObject<USpecialSelectionComponent>(this);
 	SpecialSelectionUI->Setup(PC, PS, this);
+}
+
+void UMenuManagerComponent::SetupClasses(TSubclassOf<UUserWidget> InAircraftClass,
+	TSubclassOf<UUserWidget> InWeaponClass,
+	TSubclassOf<UUserWidget> InBuyClass,
+	TSubclassOf<UUserWidget> InSpecialClass) 
+{
+	AircraftSelectClass = InAircraftClass;
+	WeaponSelectClass = InWeaponClass;
+	BuySelectionClass = InBuyClass;
+	SpecialSelectionClass = InSpecialClass;
+
+	AircraftSelectionUI->SelectionWidget = InAircraftClass;
+	WeaponSelectionUI->SelectionWidget = InWeaponClass;
+	BuySelectionUI->BuyPopupClass = InBuyClass;
+	SpecialSelectionClass = InSpecialClass;
 }
 
 void UMenuManagerComponent::GoBack(EMenuState Current)
@@ -89,6 +105,7 @@ void UMenuManagerComponent::GetWidgetClassForState(EMenuState State)
 		if (SelectedAircraft) {
 			SpecialSelectionUI->SetAir(SelectedAircraft);
 			SpecialSelectionUI->SpecialSelectionMenu();
+			//CurrentWidget = SpecialSelectionUI->SpecialSelectUI;
 		}
 		break;
 	case EMenuState::BuyPopup:
@@ -102,6 +119,7 @@ void UMenuManagerComponent::GetWidgetClassForState(EMenuState State)
 
 void UMenuManagerComponent::ChooseAircraftUI() 
 {
+	AircraftSelectionUI->Setup(PC, GM, PS, this, AircraftSelectClass);
 	PC->ManageMenuSetting(EMenuState::AircraftSelect);
 }
 

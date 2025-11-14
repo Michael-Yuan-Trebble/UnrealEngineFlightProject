@@ -9,6 +9,7 @@
 
 class AAircraftPlayerController;
 class UMainMenuWidget;
+class UFreeFlightWidget;
 
 UCLASS()
 class MYPROJECT2_API AMainMenuGamemode : public AGameModeBase
@@ -28,4 +29,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UMainMenuWidget> MainMenuClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UFreeFlightWidget> FreeFlightClass;
 };

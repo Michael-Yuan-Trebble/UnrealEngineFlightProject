@@ -25,7 +25,11 @@ public:
 
 	void AircraftSelectionMenu();
 
-	void Setup(AAircraftPlayerController* InPlayer, AAircraftSelectionGamemode* InGM, ACurrentPlayerState* InPS, UMenuManagerComponent* InMenu);
+	void Setup(AAircraftPlayerController* InPlayer, 
+		AAircraftSelectionGamemode* InGM, 
+		ACurrentPlayerState* InPS, 
+		UMenuManagerComponent* InMenu,
+		TSubclassOf<UUserWidget> InClass);
 
 	UFUNCTION()
 	void HandleAircraftPicked(UAircraftData* Aircraft);
@@ -35,7 +39,6 @@ public:
 	UFUNCTION()
 	void SetAircraft(UAircraftData* Aircraft);
 
-	UPROPERTY()
 	TSubclassOf<UUserWidget> SelectionWidget;
 
 	UPROPERTY()

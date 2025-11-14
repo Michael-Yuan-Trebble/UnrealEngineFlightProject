@@ -10,7 +10,7 @@
 #include "Structs and Data/ControlModeTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Structs and Data/MenuState.h"
-#include "Kismet/GameplayStatics.h"
+#include "Gamemodes/PlayerGameInstance.h"
 #include "Aircraft/BaseAircraft.h"
 
 FActorSpawnParameters SpawnParams;
@@ -37,10 +37,15 @@ void AAircraftSelectionGamemode::BeginPlay()
 
 	if (!APC || !PS) return; 
 	APC->SetControlMode(EControlMode::Menu);
-	GetWorld()->GetTimerManager().SetTimerForNextTick([this]() 
-	{
+	TWeakObjectPtr<AAircraftPlayerController> WeakAPC = APC;
 
-		APC->MenuManager->ChooseAircraftUI();
+	GetWorld()->GetTimerManager().SetTimerForNextTick([this, WeakAPC]() 
+	{
+		if (!WeakAPC.IsValid()) return;
+		AAircraftPlayerController* PC = WeakAPC.Get();
+		if (!IsValid(PC) || !IsValid(PC->MenuManager)) return;
+		PC->MenuManager->SetupClasses(AircraftSelectClass, WeaponSelectClass, BuySelectionClass, SpecialSelectionClass);
+		PC->MenuManager->ChooseAircraftUI();
 	});
 }
 
@@ -100,11 +105,21 @@ void AAircraftSelectionGamemode::EndSelection(AAircraftPlayerController* Control
 	}
 }
 
-//Try to make it so it advances to a "Buffer" screen
+// TODO: Try to make it so it advances to a "Buffer" screen
 void AAircraftSelectionGamemode::TryAdvanceToNextStage() 
 {
-	if (ReadyPlayers.Num() >= PlayersRequired) 
-	{
-		UGameplayStatics::OpenLevel(this, MapSelected);
-	}
+	if (ReadyPlayers.Num() < PlayersRequired) return;
+
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
+	if (!GI) return;
+
+	if (GI->LevelName.IsNone()) return;
+
+	const FString MapPath = FString::Printf(TEXT("/Game/Maps/%s"), *GI->LevelName.ToString());
+	if (!FPackageName::DoesPackageExist(MapPath)) return;
+
+	UGameplayStatics::OpenLevel(World, GI->LevelName);
 }

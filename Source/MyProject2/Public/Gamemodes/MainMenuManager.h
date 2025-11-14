@@ -10,6 +10,7 @@
 class UMainMenuWidget;
 class UFreeFlightWidget;
 class AAircraftPlayerController;
+class UPlayerGameInstance;
 
 UCLASS()
 class MYPROJECT2_API UMainMenuManager : public UGameInstanceSubsystem
@@ -43,18 +44,24 @@ public:
 	UFUNCTION()
 	void OnLevelPicked(FName LevelName);
 
+	bool OpenLevel(FName LevelName);
+
 	AAircraftPlayerController* APC;
 
-	UPROPERTY(EditAnywhere)
 	TSubclassOf<UMainMenuWidget> MainMenuClass;
 
-	UPROPERTY(EditAnywhere)
 	TSubclassOf<UFreeFlightWidget> FreeFlightClass;
+
+	TSubclassOf<UUserWidget> TransitionScreenClass;
+
+	UPlayerGameInstance* PlayerInstance;
 
 private:
 	UMainMenuWidget* MainMenuWidget;
 
 	UFreeFlightWidget* FreeFlightWidget;
+
+	UUserWidget* TransitionScreenWidget;
 
 	TArray<UUserWidget*> MenuStack;
 

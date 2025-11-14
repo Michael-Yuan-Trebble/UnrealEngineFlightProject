@@ -47,7 +47,7 @@ public:
 	UPROPERTY()
 	TSubclassOf<UUserWidget> SelectionWidget;
 
-	int32 CurrentPylonIndex;
+	int32 CurrentPylonIndex = 0;
 
 	TMap<FName, TSubclassOf<ABaseWeapon>> WeaponSelection;
 

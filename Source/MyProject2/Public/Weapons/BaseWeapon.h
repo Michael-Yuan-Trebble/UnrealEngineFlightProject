@@ -29,6 +29,7 @@ public:
 
 	bool CanLockTarget(ETargetType TargetType) const { return SupportedTargetTypes.Contains(TargetType); }
 
+	UPROPERTY(EditAnywhere)
 	FName WeaponName;
 
 	float cooldownTime;

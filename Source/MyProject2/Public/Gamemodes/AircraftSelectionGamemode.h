@@ -12,6 +12,7 @@ class UAircraftSelectionWidget;
 class ACurrentPlayerState;
 class AAircraftPlayerController;
 class UMenuManagerComponent;
+class UAircraftSelectionWidget;
 
 UCLASS()
 class MYPROJECT2_API AAircraftSelectionGamemode : public AGameModeBase
@@ -22,7 +23,19 @@ public:
 
 	AAircraftSelectionGamemode();
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> AircraftSelectClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> WeaponSelectClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> BuySelectionClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> SpecialSelectionClass;
+
+	UPROPERTY()
 	UAircraftData* ChosenAircraft;
 
 	UPROPERTY()
@@ -39,9 +52,6 @@ public:
 	APawn* AircraftDisplayed;
 
 	void SpawnInWeapon(TSubclassOf<ABaseWeapon> Weapon, FName Pylon);
-
-	UPROPERTY()
-	FName MapSelected;
 
 	TMap<FName, AActor*> EquippedWeapons;
 

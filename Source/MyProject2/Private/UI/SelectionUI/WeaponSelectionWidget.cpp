@@ -39,6 +39,18 @@ void UWeaponSelectionWidget::CreateButtons(TArray<TSubclassOf<ABaseWeapon>> Arra
         UWeaponButtonWidget* Card = CreateWidget<UWeaponButtonWidget>(GetWorld(), WeaponButtonClass);
         if (!Card) return;
 
+        FString WeaponName = SingleWeapon->GetName();
+
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(
+                -1,
+                15.0f,
+                FColor::Yellow,
+                FString::Printf(TEXT("Weapon: %s"), *WeaponName)
+            );
+        }
+
         Card->SetupWeapons(SingleWeapon);
         Card->OnWeaponSelected.AddDynamic(this, &UWeaponSelectionWidget::HandleWeaponSelected);
         Card->OnWeaponPicked.AddDynamic(WeaponUI, &UWeaponSelectionComponent::AddWeapon);

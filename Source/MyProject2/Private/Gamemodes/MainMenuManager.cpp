@@ -3,8 +3,10 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Main Menu Manager!"));
 #include "Gamemodes/MainMenuManager.h"
 #include "Blueprint/UserWidget.h"
-#include "UI/FreeFlightWidget.h"
-#include "UI/MainMenuWidget.h"
+#include "Kismet/GameplayStatics.h"
+#include "UI/MainMenuUI/FreeFlightWidget.h"
+#include "Gamemodes/PlayerGameInstance.h"
+#include "UI/MainMenuUI/MainMenuWidget.h"
 
 UMainMenuManager::UMainMenuManager() 
 {
@@ -31,7 +33,7 @@ void UMainMenuManager::ShowMainMenu()
 {
 	if (!MainMenuClass) return;
 	if (!MainMenuClass->IsChildOf(UMainMenuWidget::StaticClass())) return;
-	//HideAll(false);
+
 	if (!MainMenuWidget) 
 	{
 		MainMenuWidget = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuClass);
@@ -40,8 +42,12 @@ void UMainMenuManager::ShowMainMenu()
 		MainMenuWidget->CreateButtons();
 		MainMenuWidget->OnSettingsPicked.AddDynamic(this, &UMainMenuManager::ShowSettings);
 		MainMenuWidget->OnFreeFlightPicked.AddDynamic(this, &UMainMenuManager::ShowFreeFlight);
+		MainMenuWidget->AddToViewport(0);
 	}
-	MainMenuWidget->AddToViewport();
+
+	if (CurrentMenu) CurrentMenu->SetVisibility(ESlateVisibility::Hidden);
+
+	MainMenuWidget->SetVisibility(ESlateVisibility::Visible);
 	CurrentMenu = MainMenuWidget;
 
 	MenuStack.Push(CurrentMenu);
@@ -50,13 +56,7 @@ void UMainMenuManager::ShowMainMenu()
 void UMainMenuManager::ShowFreeFlight() 
 {
 	if (!FreeFlightClass) return;
-	//HideAll(false);
-
-	if (CurrentMenu && CurrentMenu->IsInViewport()) 
-	{
-		CurrentMenu->SetVisibility(ESlateVisibility::Collapsed);
-		CurrentMenu->RemoveFromParent();
-	}
+	if (!FreeFlightClass->IsChildOf(UFreeFlightWidget::StaticClass())) return;
 
 	if (!FreeFlightWidget) 
 	{
@@ -65,23 +65,54 @@ void UMainMenuManager::ShowFreeFlight()
 		if (!FreeFlightWidget->IsA(UFreeFlightWidget::StaticClass())) return;
 		FreeFlightWidget->InitLevels();
 		FreeFlightWidget->OnLevelSelected.AddDynamic(this, &UMainMenuManager::OnLevelPicked);
+		FreeFlightWidget->AddToViewport(1);
 	}
-	FreeFlightWidget->AddToViewport(0);
+
+	if (CurrentMenu) CurrentMenu->SetVisibility(ESlateVisibility::Hidden);
+
 	CurrentMenu = FreeFlightWidget;
 
-	if (MenuStack.Num() > 0) 
-	{
-		MenuStack.Pop();
-	}
-
 	MenuStack.Push(FreeFlightWidget);
-
 }
 
 void UMainMenuManager::OnLevelPicked(FName LevelName) 
 {
-	print(text)
+	PlayerInstance->SetLevel(LevelName);
+	if (TransitionScreenClass)
+	{
+		TransitionScreenWidget = CreateWidget<UUserWidget>(GetWorld(), TransitionScreenClass);
+		if (TransitionScreenWidget) 
+		{
+			TransitionScreenWidget->AddToViewport(1000);
+		}
+	}
+
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	FTimerHandle TimerHandle;
+	FName AircraftSelect = "AircraftSelect";
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, AircraftSelect]() 
+	{
+		OpenLevel(AircraftSelect);
+	}, 0.5f, false);
 }
+
+bool UMainMenuManager::OpenLevel(FName LevelName)
+{
+	UWorld* World = GetWorld();
+	if (!World) return false;
+
+	if (LevelName.IsNone()) return false;
+
+	FString MapPath = FString::Printf(TEXT("/Game/Maps/%s"), *LevelName.ToString());
+	if (!FPackageName::DoesPackageExist(MapPath)) return false;
+
+	UGameplayStatics::OpenLevel(World, LevelName);
+	return true;
+}
+
 
 void UMainMenuManager::ShowSettings() 
 {

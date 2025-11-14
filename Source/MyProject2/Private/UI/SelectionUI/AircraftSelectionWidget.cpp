@@ -21,7 +21,10 @@ UAircraftSelectionWidget::UAircraftSelectionWidget(const FObjectInitializer & Ob
     }
 }
 
-void UAircraftSelectionWidget::Setup(UAircraftDatabase* Database, TArray<FName> InOwn, UMenuManagerComponent* InMenu, UAircraftSelectionComponent* InSelect)
+void UAircraftSelectionWidget::Setup(UAircraftDatabase* Database, 
+    TArray<FName> InOwn, 
+    UMenuManagerComponent* InMenu, 
+    UAircraftSelectionComponent* InSelect)
 {
     Owned = InOwn;
     AircraftDatabase = Database;
@@ -31,7 +34,7 @@ void UAircraftSelectionWidget::Setup(UAircraftDatabase* Database, TArray<FName> 
 
 void UAircraftSelectionWidget::GetAllAircraft() 
 {
-	if (!AircraftButtonClass || !AircraftScrollBox || AircraftDatabase->AllAircraft.Num() <= 0) return;
+	if (!AircraftButtonClass || !AircraftScrollBox || !AircraftDatabase || AircraftDatabase->AllAircraft.Num() <= 0) return;
 
     AircraftScrollBox->ClearChildren();
 
@@ -42,13 +45,15 @@ void UAircraftSelectionWidget::GetAllAircraft()
 
     for (UAircraftData* Data : AircraftDatabase->AllAircraft)
     {
-        if (!Data) continue;
+        if (!IsValid(Data)) continue;
 
         UAircraftButtonWidget* Card = CreateWidget<UAircraftButtonWidget>(GetWorld(), AircraftButtonClass);
         if (!Card) continue;
 
         Card->Setup(Data, Owned);
         Card->OnAircraftSelected.AddDynamic(this, &UAircraftSelectionWidget::HandleAircraftSelected);
+
+        if (!Data->AircraftStat) continue;
 
         if (Owned.Contains(Data->AircraftStat->AircraftName))
         {
@@ -62,7 +67,10 @@ void UAircraftSelectionWidget::GetAllAircraft()
         AircraftScrollBox->AddChild(Card);
         ButtonArray.Add(Data->AircraftStat->AircraftName, Card);
     }
-    Gamemode->SpawnInAircraft(AircraftDatabase->AllAircraft[0]->AircraftClass);
+    if (AircraftDatabase->AllAircraft.Num() > 0 && IsValid(AircraftDatabase->AllAircraft[0])) 
+    {
+        Gamemode->SpawnInAircraft(AircraftDatabase->AllAircraft[0]->AircraftClass);
+    }
 }
 
 void UAircraftSelectionWidget::UpdateAircraft(FName AircraftChange) 
@@ -72,8 +80,8 @@ void UAircraftSelectionWidget::UpdateAircraft(FName AircraftChange)
         UAircraftButtonWidget* Card = *ButtonArray.Find(AircraftChange);
 
         Card->AdjustButtons();
-        Card->OnBuyCreate.RemoveDynamic(MenuManager, &UMenuManagerComponent::SpawnBuy);
-        Card->OnAircraftPicked.AddDynamic(AircraftUI, &UAircraftSelectionComponent::SetAircraft);
+        if (IsValid(MenuManager)) Card->OnBuyCreate.RemoveDynamic(MenuManager, &UMenuManagerComponent::SpawnBuy);
+        if (IsValid(AircraftUI)) Card->OnAircraftPicked.AddDynamic(AircraftUI, &UAircraftSelectionComponent::SetAircraft);
     }
 }
 

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "UI/LevelButton.h"
+#include "UI/MainMenuUI/LevelButton.h"
 #include "Components/ScrollBox.h"
 #include "Structs and Data/LevelListData.h"
 #include "FreeFlightWidget.generated.h"

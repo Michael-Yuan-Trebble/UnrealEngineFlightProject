@@ -51,6 +51,14 @@ public:
 
 	TSubclassOf<UBaseSpecial> SelectedSpecial;
 
+	TSubclassOf<UUserWidget> AircraftSelectClass;
+
+	TSubclassOf<UUserWidget> WeaponSelectClass;
+
+	TSubclassOf<UUserWidget> BuySelectionClass;
+
+	TSubclassOf<UUserWidget> SpecialSelectionClass;
+
 	UPROPERTY()
 	UUserWidget* CurrentWidget;
 
@@ -73,6 +81,11 @@ public:
 	void ChooseSpecialUI();
 
 	void EndSelection();
+
+	void SetupClasses(TSubclassOf<UUserWidget> InAircraftClass,
+		TSubclassOf<UUserWidget> InWeaponClass,
+		TSubclassOf<UUserWidget> InBuyClass,
+		TSubclassOf<UUserWidget> InSpecialClass);
 
 	UFUNCTION()
 	void SpawnBuy(UAircraftData* AircraftData, int Cost);

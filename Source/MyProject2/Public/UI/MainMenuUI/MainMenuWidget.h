@@ -34,13 +34,10 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* Exitbtn;
 
-	UPROPERTY()
-	UMainMenuManager* MenuManager;
 
 protected:
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		Super::ReleaseSlateResources(bReleaseChildren);
-		MenuManager = nullptr;
 	}
 
 private:

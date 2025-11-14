@@ -13,6 +13,7 @@ void UPlayerGameInstance::Init()
 	SaveManager->LoadGame();
 
 	MainMenuManager = GetSubsystem<UMainMenuManager>();
+	MainMenuManager->PlayerInstance = this;
 }
 
 void UPlayerGameInstance::SetLoadout(UAircraftData* InData, TMap<FName, TSubclassOf<ABaseWeapon>> InWeapons, TSubclassOf<UBaseSpecial> InSpecial) {

@@ -10,21 +10,22 @@
 
 UAircraftSelectionComponent::UAircraftSelectionComponent()
 { 
-	static ConstructorHelpers::FClassFinder<UUserWidget> WidgetBPClass(TEXT("/Game/UI/BPAircraftSelectionWidget"));
-	if (WidgetBPClass.Succeeded())
-	{
-		SelectionWidget = WidgetBPClass.Class;
-	}
 }
 
-void UAircraftSelectionComponent::Setup(AAircraftPlayerController* InPlayer, AAircraftSelectionGamemode* InGM, ACurrentPlayerState* InPS, UMenuManagerComponent* InMenu) 
+void UAircraftSelectionComponent::Setup(AAircraftPlayerController* InPlayer,
+	AAircraftSelectionGamemode* InGM,
+	ACurrentPlayerState* InPS,
+	UMenuManagerComponent* InMenu,
+	TSubclassOf<UUserWidget> InClass)
 {
 	PC = InPlayer;
 	GM = InGM;
 	PS = InPS;
 	MenuManager = InMenu;
+	SelectionWidget = InClass;
 	GameInstance = Cast<UPlayerGameInstance>(GetWorld()->GetGameInstance());
 	
+	if (!PC) return;
 	AircraftDatabase = NewObject<UAircraftDatabase>(PC->GetGameInstance());
 	if (!AircraftDatabase) return;
 
@@ -34,7 +35,7 @@ void UAircraftSelectionComponent::Setup(AAircraftPlayerController* InPlayer, AAi
 
 void UAircraftSelectionComponent::AircraftSelectionMenu() 
 {
-	if (PC == nullptr) return;
+	if (!PC || !SelectionWidget) return;
 
 	AircraftSelectUI = CreateWidget<UAircraftSelectionWidget>(PC, SelectionWidget);
 

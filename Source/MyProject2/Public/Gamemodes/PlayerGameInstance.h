@@ -31,6 +31,10 @@ public:
 
 	UMainMenuManager* GetMainMenuManager() const { return MainMenuManager; };
 
+	FName LevelName;
+
+	void SetLevel(const FName InLevel) { LevelName = InLevel; };
+
 protected:
 	void Init() override;
 

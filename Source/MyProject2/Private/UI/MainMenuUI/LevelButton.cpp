@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/LevelButton.h"
+#include "UI/MainMenuUI/LevelButton.h"
 
 void ULevelButton::SetupLevel(FName InLevel) 
 {
