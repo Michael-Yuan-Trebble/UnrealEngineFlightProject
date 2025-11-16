@@ -17,7 +17,6 @@ void UCountermeasures::ActivateSpecial() {
 	if (!Mesh->DoesSocketExist(FlareSocket)) return;
 
 	FTransform SocketTransform = Mesh->GetSocketTransform(FlareSocket);
-	
 
 	FVector FlareLocation = SocketTransform.GetLocation();
 	FQuat FlareRotation = SocketTransform.GetRotation();

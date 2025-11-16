@@ -53,6 +53,8 @@ public:
 
 	void SpawnInWeapon(TSubclassOf<ABaseWeapon> Weapon, FName Pylon);
 
+	void ClearWeapons(FName Pylon);
+
 	TMap<FName, AActor*> EquippedWeapons;
 
 	void EndSelection(AAircraftPlayerController* Controller);

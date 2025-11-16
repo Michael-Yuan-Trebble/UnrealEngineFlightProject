@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "Specials/BaseSpecial.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
+#include "Components/Button.h"
+#include "Components/TextBlock.h"
 #include "Components/ScrollBox.h"
 #include "SpecialSelectionWidget.generated.h"
 
@@ -13,6 +15,7 @@ class UMenuManagerComponent;
 class USpecialSelectionComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSpecialSelectedSignature, TSubclassOf<UBaseSpecial>, SelectedSpecial);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAdvanceWidget);
 
 UCLASS()
 class MYPROJECT2_API USpecialSelectionWidget : public UUserWidget
@@ -24,6 +27,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FSpecialSelectedSignature OnWidgetSelected;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnAdvanceWidget OnAdvance;
 
 	UPROPERTY()
 	UAircraftData* AircraftSelected;
@@ -38,6 +44,12 @@ public:
 
 	UPROPERTY()
 	USpecialSelectionComponent* SpecialUI;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* Advancebtn;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* AdvanceText;
 
 protected:
 	UFUNCTION()
@@ -54,4 +66,14 @@ protected:
 		MenuManager = nullptr;
 		SpecialUI = nullptr;
 	}
+
+	virtual void NativeDestruct() override {
+		OnWidgetSelected.Clear();
+		OnAdvance.Clear();
+		Super::NativeDestruct();
+	}
+
+private:
+	UFUNCTION()
+	void OnAdvancePicked();
 };

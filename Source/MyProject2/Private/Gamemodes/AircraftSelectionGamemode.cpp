@@ -72,28 +72,39 @@ void AAircraftSelectionGamemode::SpawnInWeapon(TSubclassOf<ABaseWeapon> Weapon, 
 	if (!BaseAircraft) return;
 
 	USkeletalMeshComponent* Mesh = BaseAircraft->Airframe;
+	if (!IsValid(Mesh) || !Mesh->DoesSocketExist(Pylon)) return;
 
-	FTransform SocketTransform = Mesh->GetSocketTransform(Pylon);
 	AActor* WeaponDisplayed;
+	FTransform SocketTransform = Mesh->GetSocketTransform(Pylon);
 	if (AActor** WeaponPtr = EquippedWeapons.Find(Pylon)) 
 	{
 		WeaponDisplayed = *WeaponPtr;
-		if (WeaponDisplayed && WeaponDisplayed->IsValidLowLevel())
+		if (IsValid(WeaponDisplayed))
 		{
 			WeaponDisplayed->Destroy();
-			WeaponDisplayed = nullptr;
 		}
+	}
 
-		WeaponDisplayed = GetWorld()->SpawnActor<AActor>(Weapon, SocketTransform, SpawnParams);
-		WeaponDisplayed->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, Pylon);
-		EquippedWeapons[Pylon] = WeaponDisplayed;
-	}
-	else 
+	WeaponDisplayed = GetWorld()->SpawnActor<AActor>(Weapon, SocketTransform, SpawnParams);
+	if (!IsValid(WeaponDisplayed)) return;
+	WeaponDisplayed->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, Pylon);
+	EquippedWeapons.Add(Pylon, WeaponDisplayed);
+}
+
+void AAircraftSelectionGamemode::ClearWeapons(FName Pylon) 
+{
+	if (!IsValid(AircraftDisplayed)) return;
+
+	AActor** WeaponPtr = EquippedWeapons.Find(Pylon);
+	if (!WeaponPtr) return;
+
+	AActor* WeaponDisplayed = *WeaponPtr;
+	if (IsValid(WeaponDisplayed)) 
 	{
-		WeaponDisplayed = GetWorld()->SpawnActor<AActor>(Weapon, SocketTransform, SpawnParams);
-		WeaponDisplayed->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, Pylon);
-		EquippedWeapons.Add(Pylon, WeaponDisplayed);
+		WeaponDisplayed->Destroy();
 	}
+
+	EquippedWeapons.Remove(Pylon);
 }
 
 void AAircraftSelectionGamemode::EndSelection(AAircraftPlayerController* Controller)
@@ -108,18 +119,62 @@ void AAircraftSelectionGamemode::EndSelection(AAircraftPlayerController* Control
 // TODO: Try to make it so it advances to a "Buffer" screen
 void AAircraftSelectionGamemode::TryAdvanceToNextStage() 
 {
-	if (ReadyPlayers.Num() < PlayersRequired) return;
-
+	//if (ReadyPlayers.Num() < PlayersRequired) return;
 	UWorld* World = GetWorld();
 	if (!World) return;
 
 	UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
 	if (!GI) return;
 
-	if (GI->LevelName.IsNone()) return;
+	//if (GI->LevelName.IsNone()) return;
 
-	const FString MapPath = FString::Printf(TEXT("/Game/Maps/%s"), *GI->LevelName.ToString());
-	if (!FPackageName::DoesPackageExist(MapPath)) return;
+	FString LevelNameString = GI->LevelName.ToString();
 
-	UGameplayStatics::OpenLevel(World, GI->LevelName);
+	if (GI->LevelName.IsNone() || LevelNameString.IsEmpty())
+	{
+		LevelNameString = TEXT("TestHeightmap");
+	}
+	FString MapPath = FString::Printf(TEXT("/Game/Maps/%s"), *LevelNameString);
+
+	if (!FPackageName::DoesPackageExist(MapPath)) {
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red,
+			FString::Printf(TEXT("LevelName = %s"), *LevelNameString));
+		return;
+	}
+
+	APlayerController* PC = World->GetFirstPlayerController();
+	if (IsValid(PC))
+	{
+		PC->DisableInput(Cast<APlayerController>(PC));
+	}
+
+	AAircraftPlayerController* LocalAPC = IsValid(APC) ? APC : Cast<AAircraftPlayerController>(PC);
+
+	if (IsValid(LocalAPC) && IsValid(LocalAPC->MenuManager)) {
+		LocalAPC->MenuManager->CloseAll();
+	}
+
+	for (auto& Pair : EquippedWeapons)
+	{
+		if (IsValid(Pair.Value))
+		{
+			Pair.Value->Destroy();
+		}
+	}
+	EquippedWeapons.Empty();
+
+	if (IsValid(AircraftDisplayed))
+	{
+		AircraftDisplayed->Destroy();
+		AircraftDisplayed = nullptr;
+	}
+
+	World->GetTimerManager().ClearAllTimersForObject(this);
+	World->GetTimerManager().ClearAllTimersForObject(APC);
+	if (IsValid(APC->MenuManager)) {
+		World->GetTimerManager().ClearAllTimersForObject(APC->MenuManager);
+	}
+
+	FName LevelToOpen(*LevelNameString);
+	UGameplayStatics::OpenLevel(World, LevelToOpen);
 }

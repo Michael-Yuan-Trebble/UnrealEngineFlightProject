@@ -48,6 +48,11 @@ protected:
 		WeaponScrollBox = nullptr;
 	}
 
+	virtual void NativeDestruct() override {
+		OnWeaponSelected.Clear();
+		Super::NativeDestruct();
+	}
+
 private:
 	void CreateButtons(TArray<TSubclassOf<ABaseWeapon>> Array);
 };

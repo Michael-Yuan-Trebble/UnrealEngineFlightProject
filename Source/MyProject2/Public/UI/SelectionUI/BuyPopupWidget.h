@@ -41,7 +41,7 @@ protected:
 	USizeBox* SizeBox;
 
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
-		Super::ReleaseSlateResources(bReleaseChildren);
 		BuyUI = nullptr;
+		Super::ReleaseSlateResources(bReleaseChildren);
 	}
 };

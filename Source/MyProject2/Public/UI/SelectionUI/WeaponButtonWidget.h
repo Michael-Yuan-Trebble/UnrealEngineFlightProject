@@ -45,4 +45,10 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* WeaponNameText;
+
+	virtual void NativeDestruct() override {
+		OnWeaponSelected.Clear();
+		OnWeaponPicked.Clear();
+		Super::NativeDestruct();
+	}
 };

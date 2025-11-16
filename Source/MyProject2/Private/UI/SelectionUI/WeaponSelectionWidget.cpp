@@ -25,6 +25,13 @@ void UWeaponSelectionWidget::GetAllAircraft()
 
     WeaponScrollBox->ClearChildren();
 
+    // Create a button for no equip
+    UWeaponButtonWidget* NoneButton = CreateWidget<UWeaponButtonWidget>(GetWorld(), WeaponButtonClass);
+    NoneButton->SetupWeapons(nullptr);
+    NoneButton->OnWeaponSelected.AddDynamic(this, &UWeaponSelectionWidget::HandleWeaponSelected);
+    NoneButton->OnWeaponPicked.AddDynamic(WeaponUI, &UWeaponSelectionComponent::AddWeapon);
+    WeaponScrollBox->AddChild(NoneButton);
+
     CreateButtons(CurrentLoadout->AllowedMissiles);
     CreateButtons(CurrentLoadout->AllowedBombs);
     CreateButtons(CurrentLoadout->AllowedMisc);
@@ -41,16 +48,6 @@ void UWeaponSelectionWidget::CreateButtons(TArray<TSubclassOf<ABaseWeapon>> Arra
 
         FString WeaponName = SingleWeapon->GetName();
 
-        if (GEngine)
-        {
-            GEngine->AddOnScreenDebugMessage(
-                -1,
-                15.0f,
-                FColor::Yellow,
-                FString::Printf(TEXT("Weapon: %s"), *WeaponName)
-            );
-        }
-
         Card->SetupWeapons(SingleWeapon);
         Card->OnWeaponSelected.AddDynamic(this, &UWeaponSelectionWidget::HandleWeaponSelected);
         Card->OnWeaponPicked.AddDynamic(WeaponUI, &UWeaponSelectionComponent::AddWeapon);
@@ -60,6 +57,5 @@ void UWeaponSelectionWidget::CreateButtons(TArray<TSubclassOf<ABaseWeapon>> Arra
 
 void UWeaponSelectionWidget::HandleWeaponSelected(TSubclassOf<ABaseWeapon> Weapon)
 {
-    if (!Weapon) return; 
     OnWeaponSelected.Broadcast(Weapon);
 }

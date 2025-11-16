@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "Specials/BaseSpecial.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
+#include "Components/Button.h"
+#include "Components/TextBlock.h"
 #include "SpecialSelectionComponent.generated.h"
 
 class AAircraftPlayerController;
@@ -14,7 +16,6 @@ class ACurrentPlayerState;
 class UPlayerGameInstance;
 class UMenuManagerComponent;
 class USpecialSelectionWidget;
-
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API USpecialSelectionComponent : public UActorComponent
@@ -30,6 +31,9 @@ public:
 
 	UFUNCTION()
 	void SetSpecial(TSubclassOf<UBaseSpecial> InSpecial);
+
+	UFUNCTION()
+	void AdvanceLevel();
 
 	void SetAir(UAircraftData* InAir);
 
@@ -54,10 +58,12 @@ public:
 	UPROPERTY()
 	UAircraftData* SelectedAircraft;
 
+
 	void CloseAll();
 protected:
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override {
-		Super::EndPlay(EndPlayReason);
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override 
+	{
 		CloseAll();
+		Super::EndPlay(EndPlayReason);
 	}
 };

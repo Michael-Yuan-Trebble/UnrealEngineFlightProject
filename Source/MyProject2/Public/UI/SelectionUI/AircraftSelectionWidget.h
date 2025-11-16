@@ -64,9 +64,14 @@ protected:
 	UScrollBox* AircraftScrollBox;
 
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
-		Super::ReleaseSlateResources(bReleaseChildren);
 		MenuManager = nullptr;
 		AircraftUI = nullptr;
 		AircraftScrollBox = nullptr;
+		Super::ReleaseSlateResources(bReleaseChildren);
+	}
+
+	virtual void NativeDestruct() override {
+		OnWidgetSelected.Clear();
+		Super::NativeDestruct();
 	}
 };

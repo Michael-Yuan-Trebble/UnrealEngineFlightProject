@@ -9,11 +9,6 @@
 
 USpecialSelectionComponent::USpecialSelectionComponent()
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> WidgetBPClass(TEXT("/Game/UI/BPSpecialSelectionWidget"));
-	if (WidgetBPClass.Succeeded())
-	{
-		SelectionWidget = WidgetBPClass.Class;
-	}
 }
 
 void USpecialSelectionComponent::Setup(AAircraftPlayerController* InPlayer, ACurrentPlayerState* InPS, UMenuManagerComponent* InMenu)
@@ -50,6 +45,8 @@ void USpecialSelectionComponent::SpecialSelectionMenu()
 	PC->bShowMouseCursor = true;
 	MenuManager->CurrentWidget = SpecialSelectUI;
 	SpecialSelectUI->OnWidgetSelected.AddDynamic(this, &USpecialSelectionComponent::SetSpecial);
+
+	SpecialSelectUI->OnAdvance.AddDynamic(this, &USpecialSelectionComponent::AdvanceLevel);
 }
 
 void USpecialSelectionComponent::SetSpecial(TSubclassOf<UBaseSpecial> Special)
@@ -59,10 +56,17 @@ void USpecialSelectionComponent::SetSpecial(TSubclassOf<UBaseSpecial> Special)
 	PS->SetSpecial(Special);
 }
 
+void USpecialSelectionComponent::AdvanceLevel() 
+{
+	MenuManager->AdvanceToLevel();
+}
+
 void USpecialSelectionComponent::CloseAll() 
 {
 	if (IsValid(SpecialSelectUI))
 	{
+		SpecialSelectUI->OnWidgetSelected.RemoveAll(this);
+		SpecialSelectUI->OnAdvance.RemoveAll(this);
 		if (SpecialSelectUI->IsInViewport()) 
 		{
 			SpecialSelectUI->RemoveFromParent();

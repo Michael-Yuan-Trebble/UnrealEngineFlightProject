@@ -42,6 +42,13 @@ void USpecialSelectionWidget::GetAllSpecials()
 		Card->OnSpecialPicked.AddDynamic(SpecialUI, &USpecialSelectionComponent::SetSpecial);
 		SpecialScrollBox->AddChild(Card);
 	}
+	if (!Advancebtn) return;
+	Advancebtn->OnClicked.AddDynamic(this, &USpecialSelectionWidget::OnAdvancePicked);
+}
+
+void USpecialSelectionWidget::OnAdvancePicked() 
+{
+	OnAdvance.Broadcast();
 }
 
 void USpecialSelectionWidget::HandleSpecialSelected(TSubclassOf<UBaseSpecial> Special)

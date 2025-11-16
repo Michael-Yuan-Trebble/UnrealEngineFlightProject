@@ -41,4 +41,10 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* SpecialNameText;
+
+	virtual void NativeDestruct() override {
+		OnSpecialSelected.Clear();
+		OnSpecialPicked.Clear();
+		Super::NativeDestruct();
+	}
 };

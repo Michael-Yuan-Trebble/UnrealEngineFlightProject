@@ -80,6 +80,7 @@ void UAircraftSelectionComponent::CloseAll()
 {
 	if (IsValid(AircraftSelectUI))
 	{
+		AircraftSelectUI->OnWidgetSelected.RemoveAll(this);
 		if (AircraftSelectUI->IsInViewport())
 		{
 			AircraftSelectUI->RemoveFromParent();

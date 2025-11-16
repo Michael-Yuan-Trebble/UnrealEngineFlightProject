@@ -89,4 +89,14 @@ public:
 
 	UFUNCTION()
 	void SpawnBuy(UAircraftData* AircraftData, int Cost);
+
+	UFUNCTION()
+	void AdvanceToLevel();
+
+	void CloseAll();
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override {
+		CloseAll();
+		Super::EndPlay(EndPlayReason);
+	}
 };

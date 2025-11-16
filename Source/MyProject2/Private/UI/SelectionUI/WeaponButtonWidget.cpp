@@ -9,7 +9,11 @@
 void UWeaponButtonWidget::SetupWeapons(TSubclassOf<ABaseWeapon> WeaponData)
 {
 	ButtonWeapon = WeaponData;
-	if (!WeaponData) return;
+	if (!WeaponData) 
+	{
+		WeaponNameText->SetText(FText::FromString("None"));
+		return;
+	}
 
 	const ABaseWeapon* DefaultWeapon = WeaponData->GetDefaultObject<ABaseWeapon>();
 	FName WeaponName = DefaultWeapon->WeaponName;
@@ -27,13 +31,10 @@ void UWeaponButtonWidget::NativeConstruct()
 
 void UWeaponButtonWidget::HandleButtonClick() 
 {
-	if (!ButtonWeapon) return;
-	
 	OnWeaponPicked.Broadcast(ButtonWeapon);
 }
 
 void UWeaponButtonWidget::HandleButtonHover() 
 {
-	if (!ButtonWeapon) return;
 	OnWeaponSelected.Broadcast(ButtonWeapon);
 }

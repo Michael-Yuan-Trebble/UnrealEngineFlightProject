@@ -10,8 +10,10 @@
 #include "UI/SelectionUI/WeaponSelectionWidget.h"
 #include "UI/SelectionUI/WeaponSelectionComponent.h"
 #include "UI/SelectionUI/SpecialSelectionComponent.h"
+#include "UI/SelectionUI/SpecialSelectionWidget.h"
 #include "AircraftPlayerController.h"
 #include "UI/SelectionUI/BuySelectionComponent.h"
+#include "UI/SelectionUI/BuyPopupWidget.h"
 
 FInputModeGameAndUI InputMode;
 
@@ -55,7 +57,7 @@ void UMenuManagerComponent::SetupClasses(TSubclassOf<UUserWidget> InAircraftClas
 	AircraftSelectionUI->SelectionWidget = InAircraftClass;
 	WeaponSelectionUI->SelectionWidget = InWeaponClass;
 	BuySelectionUI->BuyPopupClass = InBuyClass;
-	SpecialSelectionClass = InSpecialClass;
+	SpecialSelectionUI->SelectionWidget = InSpecialClass;
 }
 
 void UMenuManagerComponent::GoBack(EMenuState Current)
@@ -105,7 +107,7 @@ void UMenuManagerComponent::GetWidgetClassForState(EMenuState State)
 		if (SelectedAircraft) {
 			SpecialSelectionUI->SetAir(SelectedAircraft);
 			SpecialSelectionUI->SpecialSelectionMenu();
-			//CurrentWidget = SpecialSelectionUI->SpecialSelectUI;
+			CurrentWidget = SpecialSelectionUI->SpecialSelectUI;
 		}
 		break;
 	case EMenuState::BuyPopup:
@@ -119,7 +121,6 @@ void UMenuManagerComponent::GetWidgetClassForState(EMenuState State)
 
 void UMenuManagerComponent::ChooseAircraftUI() 
 {
-	AircraftSelectionUI->Setup(PC, GM, PS, this, AircraftSelectClass);
 	PC->ManageMenuSetting(EMenuState::AircraftSelect);
 }
 
@@ -143,4 +144,46 @@ void UMenuManagerComponent::SpawnBuy(UAircraftData* AircraftData, int Cost)
 void UMenuManagerComponent::EndSelection() 
 {
 	GM->EndSelection(PC);
+}
+
+void UMenuManagerComponent::AdvanceToLevel() 
+{
+	GM->TryAdvanceToNextStage();
+}
+
+void UMenuManagerComponent::CloseAll() {
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearAllTimersForObject(this);
+	}
+
+	if (IsValid(AircraftSelectionUI))
+	{
+		AircraftSelectionUI->CloseAll();
+		AircraftSelectionUI = nullptr;
+	}
+
+	if (IsValid(WeaponSelectionUI))
+	{
+		WeaponSelectionUI->CloseAll();
+		WeaponSelectionUI = nullptr;
+	}
+
+	if (IsValid(BuySelectionUI))
+	{
+		BuySelectionUI->CloseAll();
+		BuySelectionUI = nullptr;
+	}
+
+	if (IsValid(SpecialSelectionUI))
+	{
+		SpecialSelectionUI->CloseAll();
+		SpecialSelectionUI = nullptr;
+	}
+
+	if (APlayerController* TempPC = Cast<APlayerController>(GetOwner()))
+	{
+		TempPC->SetInputMode(FInputModeGameOnly());
+		TempPC->bShowMouseCursor = false;
+	}
 }

@@ -47,4 +47,10 @@ protected:
 	UButton* CancelBuyButton;
 
 	virtual void NativeConstruct() override;
+
+	virtual void NativeDestruct() override {
+		OnBuyPicked.Clear();
+		OnCancelPicked.Clear();
+		Super::NativeDestruct();
+	}
 };

@@ -56,10 +56,17 @@ void UWeaponSelectionComponent::WeaponSelectionMenu()
 
 void UWeaponSelectionComponent::HandleWeaponPicked(TSubclassOf<ABaseWeapon> Weapon)
 {
-	if (!Weapon || !PC) return;
+	if (!PC || !GM) return;
 	FString PylonString = FString::Printf(TEXT("Pylon%d"), CurrentPylonIndex);
 	FName PylonName = FName(*PylonString);
-	GM->SpawnInWeapon(Weapon, PylonName);
+	if (!Weapon)
+	{
+		GM->ClearWeapons(PylonName);
+	}
+	else 
+	{
+		GM->SpawnInWeapon(Weapon, PylonName);
+	}
 }
 
 void UWeaponSelectionComponent::AddWeapon(TSubclassOf<ABaseWeapon> Weapon) 
@@ -72,13 +79,13 @@ void UWeaponSelectionComponent::AddWeapon(TSubclassOf<ABaseWeapon> Weapon)
 
 void UWeaponSelectionComponent::CheckWeaponLoop() 
 {
-	if (CurrentPylonIndex > Aircraft->NumOfPylons)
+	CurrentPylonIndex++;
+	if (CurrentPylonIndex >= Aircraft->NumOfPylons)
 	{
 		MenuManager->ChooseSpecialUI();
 	}
 	else
 	{
-		CurrentPylonIndex++;
 		PC->ManageMenuSetting(EMenuState::WeaponSelect);
 	}
 }
@@ -87,6 +94,7 @@ void UWeaponSelectionComponent::CloseAll()
 {
 	if (IsValid(WeaponSelectUI))
 	{
+		WeaponSelectUI->OnWeaponSelected.RemoveAll(this);
 		if (WeaponSelectUI->IsInViewport())
 		{
 			WeaponSelectUI->RemoveFromParent();
