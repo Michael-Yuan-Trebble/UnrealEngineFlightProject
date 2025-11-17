@@ -10,14 +10,7 @@ void USpecialButtonWidget::Setup(TSubclassOf<UBaseSpecial> SpecialData)
 	const UBaseSpecial* DefaultSpecial = ContainedData->GetDefaultObject<UBaseSpecial>();
 	SpecialNameText->SetText(FText::FromName(DefaultSpecial->SpecialName));
 	if (!SpecialSelectButton) return;
-
-	SpecialSelectButton->OnHovered.AddDynamic(this, &USpecialButtonWidget::HandleButtonHover);
 	SpecialSelectButton->OnClicked.AddDynamic(this, &USpecialButtonWidget::HandleButtonClick);
-}
-
-void USpecialButtonWidget::HandleButtonHover() 
-{
-
 }
 
 void USpecialButtonWidget::HandleButtonClick() 

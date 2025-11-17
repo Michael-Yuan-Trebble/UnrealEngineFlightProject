@@ -51,14 +51,19 @@ protected:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSubclassOf<APlayerAircraft> Player;
 
-	UPROPERTY(EditAnywhere,BlueprintReadOnly)
-	TSubclassOf<ABaseWeapon> Aim9;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AF16AI> AIAircraftClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ABaseWeapon> Missile;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ABaseWeapon> Bomb;
 
 	virtual void BeginPlay() override;
+
+private:
+	void FallBackAircraft();
+
+	TMap<FName,TSubclassOf<ABaseWeapon>> TemporaryLoadout();
 };

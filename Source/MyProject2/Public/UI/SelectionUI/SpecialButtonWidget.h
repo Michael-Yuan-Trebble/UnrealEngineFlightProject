@@ -18,8 +18,6 @@ class MYPROJECT2_API USpecialButtonWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnSpecialSelected OnSpecialSelected;
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnSpecialPicked OnSpecialPicked;
@@ -31,9 +29,6 @@ public:
 
 protected:
 	UFUNCTION()
-	void HandleButtonHover();
-
-	UFUNCTION()
 	void HandleButtonClick();
 
 	UPROPERTY(meta = (BindWidget))
@@ -43,7 +38,6 @@ protected:
 	UTextBlock* SpecialNameText;
 
 	virtual void NativeDestruct() override {
-		OnSpecialSelected.Clear();
 		OnSpecialPicked.Clear();
 		Super::NativeDestruct();
 	}

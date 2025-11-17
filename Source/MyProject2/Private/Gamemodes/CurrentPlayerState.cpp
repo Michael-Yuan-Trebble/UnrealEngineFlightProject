@@ -7,18 +7,3 @@ ACurrentPlayerState::ACurrentPlayerState()
 {
 
 }
-
-void ACurrentPlayerState::SetCurrentAircraft(UAircraftData* Aircraft) 
-{
-	SelectedAircraft = Aircraft;
-}
-
-void ACurrentPlayerState::AddWeapon(FName Pylon, TSubclassOf<ABaseWeapon> Weapon) 
-{
-	SelectedWeapons.Add(Pylon, *Weapon);
-}
-
-void ACurrentPlayerState::SetSpecial(TSubclassOf<UBaseSpecial> Special)
-{
-	SelectedSpecial = Special;
-}

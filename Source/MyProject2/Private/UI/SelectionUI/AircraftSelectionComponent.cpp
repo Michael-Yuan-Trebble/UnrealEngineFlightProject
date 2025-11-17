@@ -67,7 +67,6 @@ void UAircraftSelectionComponent::SetAircraft(UAircraftData* Aircraft)
 {
 	if (!Aircraft) return;
 	MenuManager->SelectedAircraft = Aircraft;
-	PS->SetCurrentAircraft(Aircraft);
 	MenuManager->ChooseWeaponUI();
 }
 

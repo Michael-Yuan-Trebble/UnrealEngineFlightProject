@@ -151,35 +151,22 @@ void UMenuManagerComponent::AdvanceToLevel()
 	GM->TryAdvanceToNextStage();
 }
 
-void UMenuManagerComponent::CloseAll() {
+void UMenuManagerComponent::CloseAll() 
+{
 	if (UWorld* World = GetWorld())
 	{
 		World->GetTimerManager().ClearAllTimersForObject(this);
 	}
 
-	if (IsValid(AircraftSelectionUI))
-	{
-		AircraftSelectionUI->CloseAll();
-		AircraftSelectionUI = nullptr;
-	}
+	if (IsValid(AircraftSelectionUI)) AircraftSelectionUI->CloseAll();
+	if (IsValid(WeaponSelectionUI)) WeaponSelectionUI->CloseAll();
+	if (IsValid(BuySelectionUI)) BuySelectionUI->CloseAll();
+	if (IsValid(SpecialSelectionUI)) SpecialSelectionUI->CloseAll();
 
-	if (IsValid(WeaponSelectionUI))
-	{
-		WeaponSelectionUI->CloseAll();
-		WeaponSelectionUI = nullptr;
-	}
-
-	if (IsValid(BuySelectionUI))
-	{
-		BuySelectionUI->CloseAll();
-		BuySelectionUI = nullptr;
-	}
-
-	if (IsValid(SpecialSelectionUI))
-	{
-		SpecialSelectionUI->CloseAll();
-		SpecialSelectionUI = nullptr;
-	}
+	AircraftSelectionUI = nullptr;
+	WeaponSelectionUI = nullptr;
+	BuySelectionUI = nullptr;
+	SpecialSelectionUI = nullptr;
 
 	if (APlayerController* TempPC = Cast<APlayerController>(GetOwner()))
 	{

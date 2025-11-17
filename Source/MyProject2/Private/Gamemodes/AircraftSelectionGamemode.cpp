@@ -119,17 +119,18 @@ void AAircraftSelectionGamemode::EndSelection(AAircraftPlayerController* Control
 // TODO: Try to make it so it advances to a "Buffer" screen
 void AAircraftSelectionGamemode::TryAdvanceToNextStage() 
 {
+	// TODO: Make Co-Op be able to work if implemented
 	//if (ReadyPlayers.Num() < PlayersRequired) return;
+
 	UWorld* World = GetWorld();
 	if (!World) return;
 
 	UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
 	if (!GI) return;
 
-	//if (GI->LevelName.IsNone()) return;
-
 	FString LevelNameString = GI->LevelName.ToString();
 
+	// Default to TestHeightmap, might change this later?
 	if (GI->LevelName.IsNone() || LevelNameString.IsEmpty())
 	{
 		LevelNameString = TEXT("TestHeightmap");
@@ -154,9 +155,18 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 		LocalAPC->MenuManager->CloseAll();
 	}
 
+	APlayerAircraft* AircraftSel = Cast<APlayerAircraft>(AircraftDisplayed);
+	if (!AircraftSel) return;
+
+	// TODO: Change funtions so that they suit this
+
+	GI->SelectedAircraft;
+	GI->SelectedWeapons;
+	GI->SelectedSpecial;
+
 	for (auto& Pair : EquippedWeapons)
 	{
-		if (IsValid(Pair.Value))
+		if (Pair.Value && Pair.Value->IsValidLowLevel())
 		{
 			Pair.Value->Destroy();
 		}
@@ -171,9 +181,7 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 
 	World->GetTimerManager().ClearAllTimersForObject(this);
 	World->GetTimerManager().ClearAllTimersForObject(APC);
-	if (IsValid(APC->MenuManager)) {
-		World->GetTimerManager().ClearAllTimersForObject(APC->MenuManager);
-	}
+	if (IsValid(APC->MenuManager)) World->GetTimerManager().ClearAllTimersForObject(APC->MenuManager);
 
 	FName LevelToOpen(*LevelNameString);
 	UGameplayStatics::OpenLevel(World, LevelToOpen);

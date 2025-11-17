@@ -45,7 +45,6 @@ void USpecialSelectionComponent::SpecialSelectionMenu()
 	PC->bShowMouseCursor = true;
 	MenuManager->CurrentWidget = SpecialSelectUI;
 	SpecialSelectUI->OnWidgetSelected.AddDynamic(this, &USpecialSelectionComponent::SetSpecial);
-
 	SpecialSelectUI->OnAdvance.AddDynamic(this, &USpecialSelectionComponent::AdvanceLevel);
 }
 
@@ -53,7 +52,6 @@ void USpecialSelectionComponent::SetSpecial(TSubclassOf<UBaseSpecial> Special)
 {
 	if (!Special) return;
 	MenuManager->SelectedSpecial = Special;
-	PS->SetSpecial(Special);
 }
 
 void USpecialSelectionComponent::AdvanceLevel() 

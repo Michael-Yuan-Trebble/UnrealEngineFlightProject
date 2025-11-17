@@ -16,16 +16,4 @@ class MYPROJECT2_API ACurrentPlayerState : public APlayerState
 	
 public:
 	ACurrentPlayerState();
-
-	UAircraftData* SelectedAircraft;
-
-	TMap<FName, TSubclassOf<ABaseWeapon>> SelectedWeapons;
-
-	TSubclassOf<UBaseSpecial> SelectedSpecial;
-
-	void SetCurrentAircraft(UAircraftData* Aircraft);
-
-	void AddWeapon(FName Pylon, TSubclassOf<ABaseWeapon> Weapon);
-
-	void SetSpecial(TSubclassOf<UBaseSpecial> Special);
 };

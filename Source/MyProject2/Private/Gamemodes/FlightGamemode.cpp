@@ -8,43 +8,26 @@
 #include "Gamemodes/CurrentPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Aircraft/AI/F16AI.h"
-#include "Aircraft/Player/Su27Pawn.h"
+#include "Gamemodes/PlayerGameInstance.h"
 #include "UI/PlayerHUD.h"
 #include "Aircraft/AI/EnemyAircraftAI.h"
 #include "EngineUtils.h"
 #include "AircraftRegistry.h"
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Weapons/BaseWeapon.h"
-#include "Aircraft/Player/T38Pawn.h"
 
 AFlightGamemode::AFlightGamemode() 
 {
-	// ====================================
-	// Temporary Fill In classes for testing
-	// ====================================
-	static ConstructorHelpers::FClassFinder<ASu27Pawn> T38PawnBPClass(TEXT("/Game/Aircraft/Su27/Su27BP.Su27BP"));
-	if (T38PawnBPClass.Succeeded())
-	{
-		Player = T38PawnBPClass.Class;
-	}
-
-	static ConstructorHelpers::FClassFinder<AF16AI> F16AIBPClass(TEXT("/Game/AI/F16DefaultAI"));
-	if (F16AIBPClass.Succeeded()) 
-	{
-		AIAircraftClass = F16AIBPClass.Class;
-	}
-	static ConstructorHelpers::FClassFinder<ABaseWeapon> Aim9BPClass(TEXT("/Game/Weapons/R-77/R-77BP"));
-	if (Aim9BPClass.Succeeded()) 
-	{
-		Aim9 = Aim9BPClass.Class;
-	}
 }
 
 void AFlightGamemode::BeginPlay() 
 {
+	if (!GetWorld()) return;
+
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	if (!AAircraftRegistry::Get(GetWorld())) {
+	if (!AAircraftRegistry::Get(GetWorld())) 
+	{
 		GetWorld()->SpawnActor<AAircraftRegistry>(AAircraftRegistry::StaticClass(), FVector::ZeroVector,FRotator::ZeroRotator,Params);
 	}
 
@@ -67,9 +50,11 @@ void AFlightGamemode::BeginPlay()
 		PC->SetControlMode(EControlMode::Aircraft);
 	}
 
-	Super::BeginPlay();
 	//SpawnAIAircraft();
+	Super::BeginPlay();
 }
+
+// TODO: Move this logic into actual AI spawn points and just move them around in the editor
 
 void AFlightGamemode::SpawnAIAircraft() 
 {
@@ -98,9 +83,48 @@ void AFlightGamemode::SpawnAIAircraft()
 	}
 }
 
-// TODO: Make Playerstate actually set the aircraft and other necessities
-
 void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl) 
+{
+	APlayerStart* PlayerStart = nullptr;
+
+	UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
+
+	if (!GI) return;
+
+	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It) 
+	{
+		PlayerStart = *It;
+		break;
+	}
+
+	if (!PlayerStart || !HasAuthority()) return;
+
+	if (!GI->SelectedAircraft) 
+	{
+		FallBackAircraft();
+	}
+	else 
+	{
+		PlayerSpawnedIn = GetWorld()->SpawnActor<APlayerAircraft>(GI->SelectedAircraft->AircraftClass, PlayerStart->GetActorTransform());
+	}
+
+	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
+
+	Loadout = GI->SelectedWeapons;
+
+	GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
+		{
+			PlayerSpawnedIn->SetOwner(PC);
+			PC->Possess(PlayerSpawnedIn);
+			PlayerSpawnedIn->PossessedBy(PC);
+		});
+
+	PlayerSpawnedIn->WeaponComponent->SetWeapons(Loadout);
+}
+
+// TODO: Might remove later, might keep in for default, unsure for now, maybe leave it in for a fun easter egg
+
+void AFlightGamemode::FallBackAircraft() 
 {
 	if (Database->AllAircraft.Num() == 0) return;
 	for (UAircraftData* Data : Database->AllAircraft)
@@ -111,13 +135,12 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 			break;
 		}
 	}
-	//if (!HasAuthority()) return;
-	if (!AircraftSelected) return;
 
-	if (!AircraftSelected->AircraftClass) return;
+	if (!AircraftSelected || !HasAuthority() || !AircraftSelected->AircraftClass) return;
+
 	APlayerStart* PlayerStart = nullptr;
 
-	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It) 
+	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It)
 	{
 		PlayerStart = *It;
 		break;
@@ -125,28 +148,31 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 
 	if (!PlayerStart) return;
 	PlayerSpawnedIn = GetWorld()->SpawnActor<APlayerAircraft>(AircraftSelected->AircraftClass, PlayerStart->GetActorTransform());
+}
 
-	ABaseAircraft* SpawnedIn = PlayerSpawnedIn;
+// TODO: Remove this later, this is only to set different weapons for testing
+
+TMap<FName, TSubclassOf<ABaseWeapon>> AFlightGamemode::TemporaryLoadout()
+{
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
 
-	for (int i = 0; i < 2; i++) {
+	if (!AircraftSelected->AircraftStat) return Loadout;
+
+	if (AircraftSelected->AircraftStat->NumOfPylons < 2) return Loadout;
+
+	for (int i = 0; i < 2; i++) 
+	{
 		FString PylonName = FString::Printf(TEXT("Pylon%d"), i);
 		FName Pylon(*PylonName);
 		Loadout.Add(Pylon, Bomb);
 	}
 
-	for (int i = 2; i < AircraftSelected->AircraftStat->NumOfPylons; i++) {
+	for (int i = 2; i < AircraftSelected->AircraftStat->NumOfPylons; i++) 
+	{
 		FString PylonName = FString::Printf(TEXT("Pylon%d"), i);
 		FName Pylon(*PylonName);
-		Loadout.Add(Pylon, Aim9);
+		Loadout.Add(Pylon, Missile);
 	}
 
-	GetWorld()->GetTimerManager().SetTimerForNextTick([this, SpawnedIn]()
-		{
-			SpawnedIn->SetOwner(PC);
-			PC->Possess(SpawnedIn);
-			SpawnedIn->PossessedBy(PC);
-		});
-
-	PlayerSpawnedIn->WeaponComponent->SetWeapons(Loadout);
+	return Loadout;
 }
