@@ -42,4 +42,20 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMesh* Pylon;
+
+	// TODO: Flesh this out, plan is to have two types of planes, one-circle and two-circle performers aka rate vs instant turn
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int MaxAOA;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int DragCoefficient;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int MinSpeedRangeTurn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int MaxSpeedRangeTurn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int CompressionCoefficient;
 };

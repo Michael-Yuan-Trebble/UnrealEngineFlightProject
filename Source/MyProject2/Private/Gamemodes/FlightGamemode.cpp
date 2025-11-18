@@ -7,6 +7,7 @@
 #include "AircraftPlayerController.h"
 #include "Gamemodes/CurrentPlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Aircraft/Player/PlayerAircraft.h"
 #include "Aircraft/AI/F16AI.h"
 #include "Gamemodes/PlayerGameInstance.h"
 #include "UI/PlayerHUD.h"

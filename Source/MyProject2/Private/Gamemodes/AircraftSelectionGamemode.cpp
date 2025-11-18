@@ -6,6 +6,7 @@
 #include "UI/SelectionUI/AircraftSelectionWidget.h"
 #include "AircraftPlayerController.h"
 #include "Gamemodes/CurrentPlayerState.h"
+#include "Aircraft/Player/PlayerAircraft.h"
 #include "Aircraft/MenuManagerComponent.h"
 #include "Structs and Data/ControlModeTypes.h"
 #include "Kismet/GameplayStatics.h"

@@ -73,14 +73,6 @@ public:
 
 	void ApplyRot(float DletaSeconds);
 
-	void SetPitch(float PitchValue) { UserPitch = PitchValue; };
-
-	void SetYaw(float YawValue) { UserYaw = YawValue; };
-
-	void SetRoll(float RollValue) { UserRoll = RollValue; };
-
-	void SetThrust(float Thrust) { CurrentThrust = Thrust; };
-
 	void ApplyPitch(float DeltaSeconds);
 
 	void ApplyYaw(float DeltaSeconds);
@@ -108,4 +100,12 @@ public:
 	float PitchDrag();
 
 	EThrottleStage getThrottleStage(float throttle);
+
+	void SetPitch(float PitchValue) { UserPitch = PitchValue; };
+
+	void SetYaw(float YawValue) { UserYaw = YawValue; };
+
+	void SetRoll(float RollValue) { UserRoll = RollValue; };
+
+	void SetThrust(float Thrust) { CurrentThrust = Thrust; };
 };
