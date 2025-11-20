@@ -156,13 +156,26 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 		LocalAPC->MenuManager->CloseAll();
 	}
 
-	APlayerAircraft* AircraftSel = Cast<APlayerAircraft>(AircraftDisplayed);
+	ABaseAircraft* BaseAir = Cast<ABaseAircraft>(AircraftDisplayed);
+	if (!BaseAir) return;
+
+	APlayerAircraft* AircraftSel = Cast<APlayerAircraft>(BaseAir);
 	if (!AircraftSel) return;
 
 	// TODO: Change funtions so that they suit this
 
+	for (auto& Pair : EquippedWeapons)
+	{
+		AActor* Actor = Pair.Value;
+		if (!IsValid(Actor)) continue;
+
+		ABaseWeapon* Weapon = Cast<ABaseWeapon>(Actor);
+		if (!Weapon) continue;
+
+		GI->SelectedWeapons.Add(Pair.Key, Weapon->GetClass());
+	}
+
 	GI->SelectedAircraft;
-	GI->SelectedWeapons;
 	GI->SelectedSpecial;
 
 	for (auto& Pair : EquippedWeapons)

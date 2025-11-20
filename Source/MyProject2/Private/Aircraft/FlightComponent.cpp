@@ -224,7 +224,15 @@ float UFlightComponent::DragAOA()
 	float AOARadians = FMath::DegreesToRadians(AOA);
 	float drag = 15 * FMath::Pow(AOARadians, 2);
 	//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%f"), drag));
-	return drag;
+
+	// TEMPORARY: TESTING A DIFFERENT DRAG SYSTEM
+	float dragCo = Controlled->AirStats->DragCoefficient;
+
+	float tempdrag = FMath::Abs(AOARadians) * dragCo * ((currentSpeed * 0.036) / 4);
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), tempdrag));
+
+	return tempdrag;
 }
 
 void UFlightComponent::RollAOA(float DeltaSeconds)
@@ -266,12 +274,11 @@ float UFlightComponent::PitchDrag()
 		FMath::Atan2(Forward.Z, FVector(Forward.X, Forward.Y, 0.f).Size())
 	);
 
+	float RadAngle = FMath::DegreesToRadians(PitchAngle);
+
 	float UpDot = FVector::DotProduct(Up, FVector::UpVector);
 
 	return PitchAngle / 50;
-
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), PitchAngle));
-	
 }
 
 // ====================================

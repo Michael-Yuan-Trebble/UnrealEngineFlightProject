@@ -45,10 +45,10 @@ public:
 
 	// TODO: Flesh this out, plan is to have two types of planes, one-circle and two-circle performers aka rate vs instant turn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int MaxAOA;
+	float MaxAOA;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int DragCoefficient;
+	float DragCoefficient;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int MinSpeedRangeTurn;
@@ -57,5 +57,5 @@ public:
 	int MaxSpeedRangeTurn;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int CompressionCoefficient;
+	float CompressionCoefficient;
 };
