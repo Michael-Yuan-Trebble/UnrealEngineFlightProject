@@ -49,44 +49,18 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 		case EThrottleStage::Afterburner: AfterburnerSpeed(ThrottlePercentage);break;
 	}
 
-	if (prevStage != currentStage) {
+	if (prevStage != currentStage)
+	{
 		switchingPhase = true;
-		if (prevStage == EThrottleStage::Afterburner)
-		{
-			OnAfterburnerEngaged.Broadcast(false);
-		}
-		else if (currentStage == EThrottleStage::Afterburner) {
-			OnAfterburnerEngaged.Broadcast(true);
-		}
+		if (prevStage == EThrottleStage::Afterburner) OnAfterburnerEngaged.Broadcast(false);
+		else if (currentStage == EThrottleStage::Afterburner) OnAfterburnerEngaged.Broadcast(true);
 	}
 
 	AdjustSpringArm(DeltaSeconds, ThrottlePercentage);
 
-	float drag = 0;
-	float trueAcceleration = Acceleration;
-
-	// Target speed for better acceleration until a certain point feeling
-
-	float totalFlightPercent = (targetSpeed != 0) ? (currentSpeed / targetSpeed) : 0.f;
-
-	if (totalFlightPercent >= 0.8 && totalFlightPercent <= 1.05)
-	{
-		drag = Acceleration / (1.05f + FMath::Pow(2.f, -0.01f * (currentSpeed - targetSpeed)));
-	} 
-	else if (totalFlightPercent > 1.05 && switchingPhase) 
-	{
-		drag = Acceleration * 4 / (1.f + FMath::Pow(2.f, -0.01f * (currentSpeed - targetSpeed)));
-	}
-	else if (switchingPhase)
-	{
-		switchingPhase = false;
-	}
+	float drag = CalculateSpeedDrag();
 
 	prevStage = currentStage;
-
-	// Safety check
-	drag = FMath::Clamp(drag, 0, Acceleration * 10.f);
-	trueAcceleration -= drag;
 
 	float AOADrag = DragAOA();
 	if (!FMath::IsFinite(AOADrag)) AOADrag = 0;
@@ -94,7 +68,9 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 	float pitchDrag = PitchDrag();
 	if (!FMath::IsFinite(pitchDrag)) pitchDrag = 0;
 
-	trueAcceleration -= AOADrag + pitchDrag;
+	float totalDrag = drag + AOADrag + pitchDrag;
+
+	float trueAcceleration = Acceleration - totalDrag;
 	trueAcceleration = FMath::Abs(trueAcceleration) < 0.01 ? 0 : trueAcceleration;
 
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
@@ -121,9 +97,48 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 	// Red = Mesh Forward
 	// ====================================
 
-	DrawDebugLine(GetWorld(), Controlled->GetActorLocation(), Controlled->GetActorLocation() + Controlled->GetActorForwardVector() * 300, FColor::Blue, false, 0.f, 0, 2.f);
-	DrawDebugLine(GetWorld(), Controlled->GetActorLocation(), Controlled->GetActorLocation() + Controlled->Airframe->GetForwardVector() * 300, FColor::Green, false, 0.f, 0, 2.f);
+	DrawDebugLine(
+		GetWorld(), 
+		Controlled->GetActorLocation(), 
+		Controlled->GetActorLocation() + Controlled->GetActorForwardVector() * 300, 
+		FColor::Blue, 
+		false, 
+		0.f, 
+		0, 
+		2.f
+	);
+
+	DrawDebugLine(
+		GetWorld(), 
+		Controlled->GetActorLocation(), 
+		Controlled->GetActorLocation() + Controlled->Airframe->GetForwardVector() * 300,
+		FColor::Green, 
+		false, 
+		0.f, 
+		0, 
+		2.f
+	);
 }
+
+float UFlightComponent::CalculateSpeedDrag() 
+{
+	float drag = 0;
+	float totalFlightPercent = (targetSpeed != 0) ? (currentSpeed / targetSpeed) : 0.f;
+
+	if (totalFlightPercent >= 0.8 && totalFlightPercent <= 1.05)
+	{
+		drag = Acceleration / (1.05f + FMath::Pow(2.f, -0.01f * (currentSpeed - targetSpeed)));
+	}
+	else if (totalFlightPercent > 1.05 && switchingPhase)
+	{
+		drag = Acceleration * 4 / (1.f + FMath::Pow(2.f, -0.01f * (currentSpeed - targetSpeed)));
+	}
+	else if (switchingPhase) switchingPhase = false;
+
+	return FMath::Clamp(drag, 0, Acceleration * 10.f);
+}
+
+// TODO: Make this do something with wing vapor
 
 void UFlightComponent::CalculateGForce(float DeltaSeconds) 
 {
@@ -211,24 +226,28 @@ void UFlightComponent::AdjustSpringArm(float DeltaSeconds, float ThrottlePercent
 	//Controlled->SpringArm->TargetArmLength = FMath::FInterpTo(Controlled->SpringArm->TargetArmLength, AircraftStats->SpringArmLength + (50 * (0.5 - ThrottlePercentage)), DeltaSeconds, 2.f);
 }
 
-float UFlightComponent::DragAOA()
+float UFlightComponent::GetAOA() 
 {
 	FVector Forward = Controlled->Airframe->GetForwardVector().GetSafeNormal();
 	FVector VelocityDir = Velocity.GetSafeNormal();
 	if (Velocity.IsNearlyZero()) VelocityDir = Forward;
-
 	float CosTheta = FVector::DotProduct(Forward, VelocityDir);
-	CosTheta = FMath::Clamp(CosTheta, -1.0f, 1.0f);
-
+	CosTheta = FMath::Clamp(CosTheta, -1.f, 1.f);
 	float AOA = FMath::RadiansToDegrees(FMath::Acos(CosTheta));
-	FVector Cross = FVector::CrossProduct(Forward, VelocityDir);
 
-	// Might use this later for displaying aoa
+	// TODO: Might integrate this part later, used to determine +- of AOA
+	// FVector Cross = FVector::CrossProduct(Forward, VelocityDir);
 	//float Sign = (Cross.Z >= 0.f) ? 1.f : -1.f;
 	//AOA *= Sign;
 
 	AOA = FMath::Abs(AOA);
 	float AOARadians = FMath::DegreesToRadians(AOA);
+	return AOARadians;
+}
+
+float UFlightComponent::DragAOA()
+{
+	float AOARadians = GetAOA();
 	//float drag = 15 * FMath::Pow(AOARadians, 2);
 	//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%f"), drag));
 
@@ -296,6 +315,7 @@ void UFlightComponent::ApplyPitch(float DeltaSeconds)
 {
 	float InterpSpeed = 0;
 	float CurveTurn = Controlled->AirStats->DragCurve->GetFloatValue(currentSpeed * 0.034);
+	float CompressionTurn = Controlled->AirStats->CompressionCurve->GetFloatValue(currentSpeed * 0.034);
 	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Curve: %.2f"), CurveTurn));
 	if (Controlled->GetController() && Controlled->GetController()->IsPlayerController())
 	{
@@ -307,8 +327,8 @@ void UFlightComponent::ApplyPitch(float DeltaSeconds)
 			return;
 		}
 		
-		float scale = UserPitch < 0 ? 20 : 50;
-		InterpSpeed = AircraftStats->TurnRate * scale * CurveTurn;
+		InterpSpeed = AircraftStats->TurnRate * CurveTurn * CompressionTurn;
+		InterpSpeed = UserPitch < 0 ? InterpSpeed * 0.5 : InterpSpeed;
 
 		float TargetPitchRate = UserPitch * InterpSpeed;
 		NextPitch = FMath::FInterpTo(NextPitch, TargetPitchRate, DeltaSeconds, 5.f);
@@ -318,7 +338,7 @@ void UFlightComponent::ApplyPitch(float DeltaSeconds)
 	}
 	else
 	{
-		InterpSpeed = AircraftStats->TurnRate * 10;
+		InterpSpeed = AircraftStats->TurnRate * CurveTurn * CompressionTurn;
 		float TargetPitchAngle = UserPitch * InterpSpeed;
 		FRotator CurrentRot = Controlled->Airframe->GetRelativeRotation();
 		float NewPitch = FMath::FInterpTo(CurrentRot.Pitch, TargetPitchAngle, DeltaSeconds, InterpSpeed);

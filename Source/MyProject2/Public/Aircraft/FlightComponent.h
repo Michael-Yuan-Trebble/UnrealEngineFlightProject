@@ -11,7 +11,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAfterburnerEngaged, bool, isActive);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class MYPROJECT2_API UFlightComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -31,36 +31,36 @@ public:
 	bool isFlying = false;
 
 	UPROPERTY(BlueprintReadOnly)
-	float currentSpeed;
+	float currentSpeed = 0.f;
 
-	float UserPitch;
+	float UserPitch = 0.f;
 
-	float UserYaw;
+	float UserYaw = 0.f;
 
-	float UserRoll;
+	float UserRoll = 0.f;
 
-	float NextPitch;
+	float NextPitch = 0.f;
 
-	float NextYaw;
+	float NextYaw = 0.f;
 
-	float NextRoll;
+	float NextRoll = 0.f;
 
-	float CurrentThrust;
+	float CurrentThrust = 0.f;
 
-	float targetSpeed;
+	float targetSpeed = 0.f;
 
-	float Acceleration;
+	float Acceleration = 0.f;
 	
-	float DownPitch;
+	float DownPitch = 0.f;
 
 	UPROPERTY(BlueprintReadOnly)
 	int displayG = 1;
 
-	FVector Velocity;
+	FVector Velocity = FVector::ZeroVector;
 
-	FVector PreviousVelocity;
+	FVector PreviousVelocity = FVector::ZeroVector;
 	
-	float gForce;
+	float gForce = 0.f;
 
 	EThrottleStage prevStage = EThrottleStage::Slow;
 
@@ -72,12 +72,6 @@ public:
 
 	void ApplyRot(float DletaSeconds);
 
-	void ApplyPitch(float DeltaSeconds);
-
-	void ApplyYaw(float DeltaSeconds);
-
-	void ApplyRoll(float DeltaSeconds);
-
 	void SlowSpeed(float ThrottlePercentage);
 
 	void NormalSpeed(float ThrottlePercentage);
@@ -87,16 +81,6 @@ public:
 	void ReturnAOA(float DeltaSeconds);
 
 	void Setup(ABaseAircraft* InControl, UAircraftStats* InStats);
-
-	void AdjustSpringArm(float DeltaSeconds, float ThrottlePercentage);
-
-	void CalculateGForce(float DeltaSeconds);
-
-	float DragAOA();
-
-	void RollAOA(float DeltaSeconds);
-
-	float PitchDrag();
 
 	EThrottleStage getThrottleStage(float throttle);
 
@@ -111,4 +95,25 @@ public:
 	EThrottleStage ReturnThrottleStage() { return currentStage; };
 
 	EThrottleStage ReturnPrevThrottleStage() { return prevStage; };
+
+private:
+	float CalculateSpeedDrag();
+
+	void CalculateGForce(float DeltaSeconds);
+
+	float DragAOA();
+
+	void RollAOA(float DeltaSeconds);
+
+	float GetAOA();
+
+	float PitchDrag();
+
+	void AdjustSpringArm(float DeltaSeconds, float ThrottlePercentage);
+
+	void ApplyPitch(float DeltaSeconds);
+
+	void ApplyYaw(float DeltaSeconds);
+
+	void ApplyRoll(float DeltaSeconds);
 };

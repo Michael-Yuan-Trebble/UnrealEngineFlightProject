@@ -56,9 +56,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int MaxSpeedRangeTurn;
 
+	// TODO: Might just make this one curve and call it like turn curve or something
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveFloat* DragCurve;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float CompressionCoefficient;
+	UCurveFloat* CompressionCurve;
 };

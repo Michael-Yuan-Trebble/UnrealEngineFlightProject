@@ -78,15 +78,6 @@ void ABaseAircraft::PossessedBy(AController* NewController)
 void ABaseAircraft::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (FlightComponent->ReturnThrottleStage() == EThrottleStage::Afterburner) 
-	{
-		ActivateAfterburnerFX();
-	} 
-	else if (FlightComponent->ReturnThrottleStage() != EThrottleStage::Afterburner) 
-	{
-		DeactivateAfterburnerFX();
-	}
 }
 
 void ABaseAircraft::HandleAfterburnerFX(bool isActive) 

@@ -100,5 +100,7 @@ protected:
 	void DeactivateAfterburnerFX();
 
 private:
+
+	UFUNCTION()
 	void HandleAfterburnerFX(bool isActive);
 };
