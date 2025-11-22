@@ -57,5 +57,8 @@ public:
 	int MaxSpeedRangeTurn;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCurveFloat* DragCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CompressionCoefficient;
 };

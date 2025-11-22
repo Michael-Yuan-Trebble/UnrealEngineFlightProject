@@ -12,7 +12,6 @@ EThrottleStage UFlightComponent::getThrottleStage(float throttle)
 	else return EThrottleStage::Afterburner;
 }
 
-
 UFlightComponent::UFlightComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -42,7 +41,7 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 {
-	EThrottleStage currentStage = getThrottleStage(ThrottlePercentage);
+	currentStage = getThrottleStage(ThrottlePercentage);
 	switch (currentStage)
 	{
 		case EThrottleStage::Slow: SlowSpeed(ThrottlePercentage); break;
@@ -50,7 +49,16 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 		case EThrottleStage::Afterburner: AfterburnerSpeed(ThrottlePercentage);break;
 	}
 
-	if (prevStage != currentStage) switchingPhase = true;
+	if (prevStage != currentStage) {
+		switchingPhase = true;
+		if (prevStage == EThrottleStage::Afterburner)
+		{
+			OnAfterburnerEngaged.Broadcast(false);
+		}
+		else if (currentStage == EThrottleStage::Afterburner) {
+			OnAfterburnerEngaged.Broadcast(true);
+		}
+	}
 
 	AdjustSpringArm(DeltaSeconds, ThrottlePercentage);
 
@@ -80,13 +88,13 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 	drag = FMath::Clamp(drag, 0, Acceleration * 10.f);
 	trueAcceleration -= drag;
 
-	float t = DragAOA();
-	if (!FMath::IsFinite(t)) t = 0;
+	float AOADrag = DragAOA();
+	if (!FMath::IsFinite(AOADrag)) AOADrag = 0;
 
 	float pitchDrag = PitchDrag();
 	if (!FMath::IsFinite(pitchDrag)) pitchDrag = 0;
 
-	trueAcceleration -= t + pitchDrag;
+	trueAcceleration -= AOADrag + pitchDrag;
 	trueAcceleration = FMath::Abs(trueAcceleration) < 0.01 ? 0 : trueAcceleration;
 
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
@@ -95,7 +103,6 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 	currentSpeed = FMath::FInterpTo(currentSpeed, Velocity.Size(), DeltaSeconds, 5.f);
 
 	if (!FMath::IsFinite(currentSpeed) || FMath::IsNaN(currentSpeed)) currentSpeed = 0;
-
 	currentSpeed = FMath::Clamp(currentSpeed, 0, 1000000);
 
 	PreviousVelocity = Velocity;
@@ -139,14 +146,10 @@ void UFlightComponent::CalculateGForce(float DeltaSeconds)
 void UFlightComponent::SlowSpeed(float ThrottlePercentage)
 {
 	float negation = 1 - ThrottlePercentage;
-	if (ThrottlePercentage <= 0.1)
-	{
-		Acceleration = -(AircraftStats->Acceleration * negation * 5);
-		targetSpeed = 0;
-		return;
-	}
-	Acceleration = -(AircraftStats->Acceleration * negation * 2);
 	targetSpeed = 0;
+
+	float scale = (ThrottlePercentage <= 0.1) ? 5.f : 2.f;
+	Acceleration = -(AircraftStats->Acceleration * negation * scale);
 }
 
 void UFlightComponent::NormalSpeed(float ThrottlePercentage)
@@ -210,29 +213,33 @@ void UFlightComponent::AdjustSpringArm(float DeltaSeconds, float ThrottlePercent
 
 float UFlightComponent::DragAOA()
 {
-	FVector F = Controlled->Airframe->GetForwardVector().GetSafeNormal();
+	FVector Forward = Controlled->Airframe->GetForwardVector().GetSafeNormal();
 	FVector VelocityDir = Velocity.GetSafeNormal();
-	if (Velocity.IsNearlyZero()) VelocityDir = F;
-	float CosTheta = FVector::DotProduct(F, VelocityDir);
+	if (Velocity.IsNearlyZero()) VelocityDir = Forward;
+
+	float CosTheta = FVector::DotProduct(Forward, VelocityDir);
 	CosTheta = FMath::Clamp(CosTheta, -1.0f, 1.0f);
+
 	float AOA = FMath::RadiansToDegrees(FMath::Acos(CosTheta));
-	FVector Cross = FVector::CrossProduct(F, VelocityDir);
-	float Sign = (Cross.Z >= 0.f) ? 1.f : -1.f;
-	AOA *= Sign;
+	FVector Cross = FVector::CrossProduct(Forward, VelocityDir);
+
+	// Might use this later for displaying aoa
+	//float Sign = (Cross.Z >= 0.f) ? 1.f : -1.f;
+	//AOA *= Sign;
 
 	AOA = FMath::Abs(AOA);
 	float AOARadians = FMath::DegreesToRadians(AOA);
-	float drag = 15 * FMath::Pow(AOARadians, 2);
+	//float drag = 15 * FMath::Pow(AOARadians, 2);
 	//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%f"), drag));
 
 	// TEMPORARY: TESTING A DIFFERENT DRAG SYSTEM
 	float dragCo = Controlled->AirStats->DragCoefficient;
 
-	float tempdrag = FMath::Abs(AOARadians) * dragCo * ((currentSpeed * 0.036) / 4);
+	float drag = FMath::Abs(AOARadians) * dragCo * ((currentSpeed * 0.036) / 4);
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), tempdrag));
+	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
 
-	return tempdrag;
+	return drag;
 }
 
 void UFlightComponent::RollAOA(float DeltaSeconds)
@@ -288,6 +295,8 @@ float UFlightComponent::PitchDrag()
 void UFlightComponent::ApplyPitch(float DeltaSeconds)
 {
 	float InterpSpeed = 0;
+	float CurveTurn = Controlled->AirStats->DragCurve->GetFloatValue(currentSpeed * 0.034);
+	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Curve: %.2f"), CurveTurn));
 	if (Controlled->GetController() && Controlled->GetController()->IsPlayerController())
 	{
 		if (UserPitch == 0)
@@ -297,12 +306,10 @@ void UFlightComponent::ApplyPitch(float DeltaSeconds)
 			Controlled->Airframe->AddLocalRotation(DeltaRot);
 			return;
 		}
+		
+		float scale = UserPitch < 0 ? 20 : 50;
+		InterpSpeed = AircraftStats->TurnRate * scale * CurveTurn;
 
-		InterpSpeed = AircraftStats->TurnRate * 50;
-		if (UserPitch < 0) 
-		{
-			InterpSpeed = AircraftStats->TurnRate * 20;
-		}
 		float TargetPitchRate = UserPitch * InterpSpeed;
 		NextPitch = FMath::FInterpTo(NextPitch, TargetPitchRate, DeltaSeconds, 5.f);
 
@@ -316,10 +323,8 @@ void UFlightComponent::ApplyPitch(float DeltaSeconds)
 		FRotator CurrentRot = Controlled->Airframe->GetRelativeRotation();
 		float NewPitch = FMath::FInterpTo(CurrentRot.Pitch, TargetPitchAngle, DeltaSeconds, InterpSpeed);
 
-		if (FMath::IsNearlyZero(NewPitch, 0.01f) && FMath::IsNearlyZero(UserPitch, 0.01f))
-		{
-			NewPitch = 0.f;
-		}
+		if (FMath::IsNearlyZero(NewPitch, 0.01f) && FMath::IsNearlyZero(UserPitch, 0.01f)) NewPitch = 0.f;
+
 		CurrentRot.Pitch = NewPitch;
 		Controlled->Airframe->SetRelativeRotation(CurrentRot);
 	}

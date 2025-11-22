@@ -13,11 +13,9 @@
 #include "AircraftPlayerController.generated.h"
 
 class APlayerAircraft;
-class ASu25Pawn;
 class UInputMappingContext;
 class UEnhancedInputComponent;
 class UMenuManagerComponent;
-class UMainMenuManager;
 class UFlightComponent;
 class URadarComponent;
 class UWeaponSystemComponent;

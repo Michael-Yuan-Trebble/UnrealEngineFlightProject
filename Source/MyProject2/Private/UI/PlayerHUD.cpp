@@ -15,11 +15,6 @@
 APlayerHUD::APlayerHUD() 
 {
     PrimaryActorTick.bCanEverTick = true;
-	static ConstructorHelpers::FClassFinder<ULockBoxWidget> WidgetBPClass(TEXT("/Game/UI/LockBoxBP"));
-	if (WidgetBPClass.Succeeded()) 
-	{
-		LockBoxWidgetClass = WidgetBPClass.Class;
-	}
 }
 
 void APlayerHUD::BeginPlay()
@@ -76,8 +71,11 @@ void APlayerHUD::OnWeaponChanged(FName WeaponName, int32 Current, int32 Max)
 void APlayerHUD::Tick(float DeltaSeconds) 
 {
 	Super::Tick(DeltaSeconds);
-    if (!LockBoxWidgetClass || !PC) return;
-	UpdateTargetWidgets();
+    if (!PC) return;
+    if (LockBoxWidgetClass) 
+    {
+        UpdateTargetWidgets();
+    }
 
     if (!Controlled || !AimReticleWidget || !AOAReticleWidget) return;
     FVector CamLoc;
@@ -139,6 +137,8 @@ void APlayerHUD::UpdateLocked(bool Locked)
 
 void APlayerHUD::UpdateTargetWidgets() 
 {
+    if (!LockBoxWidgetClass) return;
+
     for (auto It = ActiveWidgets.CreateIterator(); It; ++It)
     {
         ABaseUnit* Target = It.Key();

@@ -136,33 +136,37 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 	{
 		LevelNameString = TEXT("TestHeightmap");
 	}
+
 	FString MapPath = FString::Printf(TEXT("/Game/Maps/%s"), *LevelNameString);
 
-	if (!FPackageName::DoesPackageExist(MapPath)) {
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red,
-			FString::Printf(TEXT("LevelName = %s"), *LevelNameString));
-		return;
-	}
+	if (!FPackageName::DoesPackageExist(MapPath)) return;
 
 	APlayerController* PC = World->GetFirstPlayerController();
-	if (IsValid(PC))
-	{
-		PC->DisableInput(Cast<APlayerController>(PC));
-	}
+	if (!PC) return;
 
 	AAircraftPlayerController* LocalAPC = IsValid(APC) ? APC : Cast<AAircraftPlayerController>(PC);
 
-	if (IsValid(LocalAPC) && IsValid(LocalAPC->MenuManager)) {
-		LocalAPC->MenuManager->CloseAll();
+	if (IsValid(LocalAPC) && IsValid(LocalAPC->MenuManager)) 
+	{ 
+		LocalAPC->DisableInput(Cast<APlayerController>(PC));
+		if (IsValid(LocalAPC->MenuManager)) LocalAPC->MenuManager->CloseAll();
 	}
 
 	ABaseAircraft* BaseAir = Cast<ABaseAircraft>(AircraftDisplayed);
-	if (!BaseAir) return;
+	
+	// TODO: See what would work better, returning if there is no aircraft displayed or letting it ride and just using the fallback
 
-	APlayerAircraft* AircraftSel = Cast<APlayerAircraft>(BaseAir);
-	if (!AircraftSel) return;
+	if (BaseAir) 
+	{
+		GI->SetClass(BaseAir->GetClass());
+
+		// TODO: Maybe get rid of this as once aircraft spawns no need for a dedicated airstats in GI
+		GI->SelectedAircraftStats = BaseAir->AirStats;
+	}
 
 	// TODO: Change funtions so that they suit this
+
+	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
 
 	for (auto& Pair : EquippedWeapons)
 	{
@@ -172,11 +176,12 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 		ABaseWeapon* Weapon = Cast<ABaseWeapon>(Actor);
 		if (!Weapon) continue;
 
-		GI->SelectedWeapons.Add(Pair.Key, Weapon->GetClass());
+		Loadout.Add(Pair.Key, Weapon->GetClass());
 	}
 
-	GI->SelectedAircraft;
-	GI->SelectedSpecial;
+	GI->SetWeapons(Loadout);
+
+	// TODO: Set Specials HERE
 
 	for (auto& Pair : EquippedWeapons)
 	{

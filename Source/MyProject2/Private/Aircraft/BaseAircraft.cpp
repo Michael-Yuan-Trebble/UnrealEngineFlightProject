@@ -45,6 +45,29 @@ void ABaseAircraft::BeginPlay()
 	RadarComponent->Setup(this);
 	FlightComponent->Setup(this, AirStats);
 
+	if (!AfterburnerSystem) return;
+	for (int i = 0; i < NumOfAfterburners; i++)
+	{
+		FName SocketName = FName(*FString::Printf(TEXT("AfterburnerSocket%d"), i));
+		if (!Airframe->DoesSocketExist(SocketName)) continue;
+
+		UNiagaraComponent* tempAfterburner = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			AfterburnerSystem,
+			Airframe,
+			SocketName,
+			FVector::ZeroVector,
+			FRotator::ZeroRotator,
+			EAttachLocation::SnapToTarget,
+			false
+		);
+		if (tempAfterburner) 
+		{
+			tempAfterburner->Deactivate();
+			AllAfterburners.Add(tempAfterburner);
+		}
+	}
+
+	FlightComponent->OnAfterburnerEngaged.AddDynamic(this, &ABaseAircraft::HandleAfterburnerFX);
 }
 
 void ABaseAircraft::PossessedBy(AController* NewController) 
@@ -55,4 +78,37 @@ void ABaseAircraft::PossessedBy(AController* NewController)
 void ABaseAircraft::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (FlightComponent->ReturnThrottleStage() == EThrottleStage::Afterburner) 
+	{
+		ActivateAfterburnerFX();
+	} 
+	else if (FlightComponent->ReturnThrottleStage() != EThrottleStage::Afterburner) 
+	{
+		DeactivateAfterburnerFX();
+	}
+}
+
+void ABaseAircraft::HandleAfterburnerFX(bool isActive) 
+{
+	if (isActive) ActivateAfterburnerFX();
+	else DeactivateAfterburnerFX();
+}
+
+void ABaseAircraft::ActivateAfterburnerFX() 
+{
+	for (UNiagaraComponent* FX : AllAfterburners) 
+	{
+		if (!IsValid(FX)) continue;
+		FX->Activate();
+	}
+}
+
+void ABaseAircraft::DeactivateAfterburnerFX() 
+{
+	for (UNiagaraComponent* FX : AllAfterburners)
+	{
+		if (!IsValid(FX)) continue;
+		FX->Deactivate();
+	}
 }

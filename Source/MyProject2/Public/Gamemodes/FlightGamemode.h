@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Aircraft/AI/F16AI.h"
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
 #include "FlightGamemode.generated.h"
@@ -49,9 +48,6 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSubclassOf<APlayerAircraft> Player;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AF16AI> AIAircraftClass;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ABaseWeapon> Missile;

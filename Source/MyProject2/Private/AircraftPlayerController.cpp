@@ -7,7 +7,6 @@
 #include "Math/UnrealMathUtility.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "Aircraft/MenuManagerComponent.h"
-#include "Gamemodes/MainMenuManager.h"
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/Player/CameraManagerComponent.h"
 #include "Aircraft/RadarComponent.h"
@@ -213,7 +212,8 @@ void AAircraftPlayerController::SetupInputComponent()
 	}
 }
 
-void AAircraftPlayerController::TogglePauseMenu() {
+void AAircraftPlayerController::TogglePauseMenu() 
+{
 	
 }
 
@@ -364,7 +364,7 @@ void AAircraftPlayerController::Switch()
 	if (RadarComp) RadarComp->CycleTarget();
 	if (Selected)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %s"), *Selected->GetName()));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %s"), *Selected->GetName()));
 	}
 }
 
@@ -407,18 +407,14 @@ void AAircraftPlayerController::Tick(float DeltaSeconds)
 {
 	if (CurrentMode == EControlMode::Menu) return;
 	if (!isThrust) thrustPercentage = FMath::FInterpTo(thrustPercentage, 0.5, DeltaSeconds, 2.f);
-
-	if(FlightComp) FlightComp->SetThrust(thrustPercentage);
+	if (FlightComp) FlightComp->SetThrust(thrustPercentage);
 	
-	if (RadarComp) 
+	if (RadarComp && HUD) 
 	{
-		if (HUD)
+		ABaseAircraft* Temp = Cast<ABaseAircraft>(RadarComp->Selected);
+		if (Temp) 
 		{
-			ABaseAircraft* Temp = Cast<ABaseAircraft>(RadarComp->Selected);
-			if (Temp) 
-			{
-				HUD->Targets.Add(Temp);
-			}
+			HUD->Targets.Add(Temp);
 		}
 	}
 	Super::Tick(DeltaSeconds);

@@ -6,9 +6,6 @@
 #include "AI/BaseSpawnPoint.h"
 #include "AircraftSpawnPoint.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MYPROJECT2_API AAircraftSpawnPoint : public ABaseSpawnPoint
 {

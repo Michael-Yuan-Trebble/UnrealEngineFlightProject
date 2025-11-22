@@ -6,16 +6,10 @@
 #include "Components/ActorComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Aircraft/BaseAircraft.h"
+#include "Structs and Data/ThrottleStage.h"
 #include "FlightComponent.generated.h"
 
-UENUM(BlueprintType)
-enum class EThrottleStage : uint8
-{
-	Slow UMETA(DisplayName = "Slow"),
-	Normal UMETA(DisplayName = "Normal"),
-	Afterburner UMETA(DisplayName = "Afterburner")
-};
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAfterburnerEngaged, bool, isActive);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UFlightComponent : public UActorComponent
@@ -23,6 +17,9 @@ class MYPROJECT2_API UFlightComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
+
+	FOnAfterburnerEngaged OnAfterburnerEngaged;
+
 	UFlightComponent();
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -67,6 +64,8 @@ public:
 
 	EThrottleStage prevStage = EThrottleStage::Slow;
 
+	EThrottleStage currentStage = EThrottleStage::Normal;
+
 	bool switchingPhase = false;
 
 	void ApplySpeed(float ThrottlePercentage, float DeltaSeconds);
@@ -108,4 +107,8 @@ public:
 	void SetRoll(float RollValue) { UserRoll = RollValue; };
 
 	void SetThrust(float Thrust) { CurrentThrust = Thrust; };
+
+	EThrottleStage ReturnThrottleStage() { return currentStage; };
+
+	EThrottleStage ReturnPrevThrottleStage() { return prevStage; };
 };

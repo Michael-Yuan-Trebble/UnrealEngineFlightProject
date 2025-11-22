@@ -8,10 +8,8 @@
 #include "Gamemodes/CurrentPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Aircraft/Player/PlayerAircraft.h"
-#include "Aircraft/AI/F16AI.h"
 #include "Gamemodes/PlayerGameInstance.h"
 #include "UI/PlayerHUD.h"
-#include "Aircraft/AI/EnemyAircraftAI.h"
 #include "EngineUtils.h"
 #include "AircraftRegistry.h"
 #include "Aircraft/WeaponSystemComponent.h"
@@ -29,7 +27,11 @@ void AFlightGamemode::BeginPlay()
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	if (!AAircraftRegistry::Get(GetWorld())) 
 	{
-		GetWorld()->SpawnActor<AAircraftRegistry>(AAircraftRegistry::StaticClass(), FVector::ZeroVector,FRotator::ZeroRotator,Params);
+		GetWorld()->SpawnActor<AAircraftRegistry>(
+			AAircraftRegistry::StaticClass(), 
+			FVector::ZeroVector,
+			FRotator::ZeroRotator,Params
+		);
 	}
 
 	PC = Cast<AAircraftPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
@@ -59,32 +61,9 @@ void AFlightGamemode::BeginPlay()
 
 void AFlightGamemode::SpawnAIAircraft() 
 {
-	APlayerStart* PlayerStart = nullptr;
-	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It) 
-	{
-		PlayerStart = *It;
-		break;
-	}
-	if (PlayerStart) 
-	{
-		FVector OffSet(10, 10, 0);
-		FVector SpawnLocation = PlayerStart->GetActorLocation() + OffSet;
-		FRotator SpawnRotation = PlayerStart->GetActorRotation();
-		FActorSpawnParameters SpawnParameters;
-		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		AF16AI* AIAir = GetWorld()->SpawnActor<AF16AI>(AIAircraftClass, SpawnLocation, SpawnRotation, SpawnParameters);
-		if (AIAir)
-		{
-			AEnemyAircraftAI* AIControl = GetWorld()->SpawnActor<AEnemyAircraftAI>(AEnemyAircraftAI::StaticClass());
-			if (AIControl)
-			{
-				AIControl->Possess(AIAir);
-			}
-		}
-	}
 }
 
-void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl) 
+void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl)
 {
 	APlayerStart* PlayerStart = nullptr;
 
@@ -92,7 +71,7 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 
 	if (!GI) return;
 
-	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It) 
+	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It)
 	{
 		PlayerStart = *It;
 		break;
@@ -100,18 +79,27 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 
 	if (!PlayerStart || !HasAuthority()) return;
 
-	if (!GI->SelectedAircraft) 
+	if (!GI->AircraftClass)
 	{
 		FallBackAircraft();
 	}
-	else 
+	else
 	{
-		PlayerSpawnedIn = GetWorld()->SpawnActor<APlayerAircraft>(GI->SelectedAircraft->AircraftClass, PlayerStart->GetActorTransform());
+		PlayerSpawnedIn = GetWorld()->SpawnActor<APlayerAircraft>(GI->AircraftClass, PlayerStart->GetActorTransform());
 	}
 
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
+	
+	// TODO: Change later, its fine if the weapon is empty the user can choose that, just easier for testing for now
 
-	Loadout = GI->SelectedWeapons;
+	if (GI->SelectedWeapons.IsEmpty()) 
+	{
+		Loadout = TemporaryLoadout();
+	}
+	else 
+	{
+		Loadout = GI->SelectedWeapons;
+	}
 
 	GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
 		{

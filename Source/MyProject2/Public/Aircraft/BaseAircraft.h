@@ -6,6 +6,9 @@
 #include "Components/BoxComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Structs and Data/Weapon Data/BulletStats.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "BaseUnit.h"
 #include "BaseAircraft.generated.h"
@@ -52,6 +55,9 @@ public:
 
 	bool bLocked;
 
+	UPROPERTY(EditAnywhere)
+	int32 NumOfAfterburners;
+
 	AActor* Tracking;
 
 	//UObjects
@@ -71,6 +77,11 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	UBoxComponent* RudderCollision;
 
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* AfterburnerSystem;
+
+	TArray<UNiagaraComponent*> AllAfterburners;
+
 	//Return Functions for UObjects
 
 	virtual USkeletalMeshComponent* GetMesh() const { return Airframe; };
@@ -85,5 +96,9 @@ protected:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+	void ActivateAfterburnerFX();
+	void DeactivateAfterburnerFX();
 
+private:
+	void HandleAfterburnerFX(bool isActive);
 };

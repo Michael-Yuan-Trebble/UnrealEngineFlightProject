@@ -6,10 +6,11 @@
 #include "Engine/GameInstance.h"
 #include "Weapons/BaseWeapon.h"
 #include "Specials/BaseSpecial.h"
-#include "Structs and Data/Aircraft Data/AircraftData.h"
+#include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "PlayerGameInstance.generated.h"
 
 class UMainMenuManager;
+class ABaseAircraft;
 
 UCLASS()
 class MYPROJECT2_API UPlayerGameInstance : public UGameInstance
@@ -21,7 +22,9 @@ public:
 	UPROPERTY()
 	class USaveGameManager* SaveManager;
 
-	UAircraftData* SelectedAircraft;
+	TSubclassOf<ABaseAircraft> AircraftClass;
+
+	UAircraftStats* SelectedAircraftStats;
 
 	TMap<FName, TSubclassOf<ABaseWeapon>> SelectedWeapons;
 
@@ -35,8 +38,13 @@ public:
 
 	void SetLevel(const FName InLevel) { LevelName = InLevel; };
 
+	void SetClass(TSubclassOf<ABaseAircraft> InClass) { AircraftClass = InClass; };
+
+	void SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> InWeapons) { SelectedWeapons = InWeapons; };
+
+	void SetSpecial(TSubclassOf<UBaseSpecial> InSpecial) { SelectedSpecial = InSpecial; };
+
 protected:
 	void Init() override;
 
-	void SetLoadout(UAircraftData* InData, TMap<FName, TSubclassOf<ABaseWeapon>> InWeapons,TSubclassOf<UBaseSpecial> InSpecial);
 };

@@ -9,12 +9,14 @@ public class MyProject2 : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[] { 
-			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG" , "Slate", "SlateCore", "Niagara" 
+			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG" , "Slate", "SlateCore", "Niagara" , "AIModule"
 		});
 
 		PublicIncludePaths.AddRange(new string[] { "EnhancedInput/Public" });
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		PrivateDependencyModuleNames.AddRange(new string[] { 
+			"AIModule"
+		});
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
