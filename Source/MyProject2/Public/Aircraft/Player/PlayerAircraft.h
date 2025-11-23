@@ -28,11 +28,16 @@ public:
 	USpringArmComponent* SpringArm;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCameraComponent* Camera;
+	UCameraComponent* ThirdPersonCamera;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCameraComponent* FirstPersonCamera;
 
 	USpringArmComponent* GetSpringArm() const { return SpringArm; };
 
-	UCameraComponent* GetCamera() const { return Camera; };
+	UCameraComponent* GetThirdPersonCamera() const { return ThirdPersonCamera; };
+
+	UCameraComponent* GetFirstPersonCamera() const{ return FirstPersonCamera; };
 
 	float ReturnSpringArmLength() const { return springArmLength; };
 

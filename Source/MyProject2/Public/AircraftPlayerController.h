@@ -100,6 +100,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* IA_Menu;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* IA_TogglePerspective;
+
 	bool bIsPaused = false;
 
 	int32 AircraftMappingPriority = 0;
@@ -166,6 +169,7 @@ private:
 	void Focus();
 	void FocusStop();
 	void Switch();
+	void TogglePerspective();
 
 	//Map
 	void MapZoom();

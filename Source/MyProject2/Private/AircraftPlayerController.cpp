@@ -137,6 +137,14 @@ void AAircraftPlayerController::BindAircraftInputs(UEnhancedInputComponent* Enha
 		EnhancedInputComp->BindAction(IA_Zoom, ETriggerEvent::Ongoing, this, &AAircraftPlayerController::MapZoom);
 		EnhancedInputComp->BindAction(IA_Zoom, ETriggerEvent::Completed, this, &AAircraftPlayerController::StopMapZoom);
 	}
+	FSoftObjectPath PerspectivePath(TEXT("/Game/Controls/Inputs/IA_Perspective.IA_Perspective"));
+	TSoftObjectPtr<UInputAction> SoftPerspective(PerspectivePath);
+	IA_TogglePerspective = SoftPerspective.LoadSynchronous();
+	if (IA_TogglePerspective) 
+	{
+		print(text)
+		EnhancedInputComp->BindAction(IA_TogglePerspective, ETriggerEvent::Started, this, &AAircraftPlayerController::TogglePerspective);
+	}
 }
 
 void AAircraftPlayerController::BindWeaponInputs(UEnhancedInputComponent* EnhancedInputComp) 
@@ -366,6 +374,12 @@ void AAircraftPlayerController::Switch()
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %s"), *Selected->GetName()));
 	}
+}
+
+void AAircraftPlayerController::TogglePerspective() 
+{
+	print(text)
+	ManagerComp->SwitchCamera();
 }
 
 void AAircraftPlayerController::Focus()
