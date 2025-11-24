@@ -10,6 +10,7 @@
 #include "FlightComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAfterburnerEngaged, bool, isActive);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVortexActivate, bool, isVortex);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class MYPROJECT2_API UFlightComponent : public UActorComponent
@@ -19,6 +20,8 @@ class MYPROJECT2_API UFlightComponent : public UActorComponent
 public:	
 
 	FOnAfterburnerEngaged OnAfterburnerEngaged;
+
+	FOnVortexActivate OnVortexActivate;
 
 	UFlightComponent();
 
@@ -59,8 +62,8 @@ public:
 	FVector Velocity = FVector::ZeroVector;
 
 	FVector PreviousVelocity = FVector::ZeroVector;
-	
-	float gForce = 0.f;
+
+	float previousGForce = 0.f;
 
 	EThrottleStage prevStage = EThrottleStage::Slow;
 

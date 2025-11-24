@@ -151,7 +151,18 @@ void UFlightComponent::CalculateGForce(float DeltaSeconds)
 	FVector Gs = LocalAccel / 9.81f;
 
 	float VerticalG = Gs.Z + 1;
+	previousGForce = displayG;
+
 	displayG = FMath::RoundToInt(VerticalG);
+	
+	if (displayG >= 7 && previousGForce < 7) 
+	{
+		OnVortexActivate.Broadcast(true);
+	}
+	if (displayG < 7 && previousGForce >= 7) 
+	{
+		OnVortexActivate.Broadcast(false);
+	}
 }
 
 // ====================================
@@ -163,26 +174,26 @@ void UFlightComponent::SlowSpeed(float ThrottlePercentage)
 	float negation = 1 - ThrottlePercentage;
 	targetSpeed = 0;
 
-	float scale = (ThrottlePercentage <= 0.1) ? 5.f : 2.f;
+	float scale = (ThrottlePercentage <= 0.1) ? 3.f : 1.25f;
 	Acceleration = -(AircraftStats->Acceleration * negation * scale);
 }
 
 void UFlightComponent::NormalSpeed(float ThrottlePercentage)
 {
 	Acceleration = AircraftStats->Acceleration * ThrottlePercentage;
-	targetSpeed = AircraftStats->MaxSpeed * 0.5;
+	targetSpeed = AircraftStats->MaxSpeed * 0.5f;
 }
 
 void UFlightComponent::AfterburnerSpeed(float ThrottlePercentage)
 {
-	if (ThrottlePercentage >= 0.9)
+	if (ThrottlePercentage >= 0.9f)
 	{
-		Acceleration = AircraftStats->Acceleration * ThrottlePercentage * 5;
+		Acceleration = AircraftStats->Acceleration * ThrottlePercentage * 3.f;
 		targetSpeed = AircraftStats->MaxSpeed;
 		return;
 	}
-	Acceleration = AircraftStats->Acceleration * ThrottlePercentage * 2;
-	targetSpeed = AircraftStats->MaxSpeed * 0.9;
+	Acceleration = AircraftStats->Acceleration * ThrottlePercentage * 1.25f;
+	targetSpeed = AircraftStats->MaxSpeed * 0.9f;
 }
 
 // ====================================

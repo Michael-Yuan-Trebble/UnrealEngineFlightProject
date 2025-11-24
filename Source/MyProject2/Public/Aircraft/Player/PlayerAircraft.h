@@ -33,6 +33,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCameraComponent* FirstPersonCamera;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USpringArmComponent* FirstPersonSpringArm;
+
 	USpringArmComponent* GetSpringArm() const { return SpringArm; };
 
 	UCameraComponent* GetThirdPersonCamera() const { return ThirdPersonCamera; };

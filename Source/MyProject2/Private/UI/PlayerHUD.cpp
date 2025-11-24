@@ -19,28 +19,23 @@ APlayerHUD::APlayerHUD()
 
 void APlayerHUD::BeginPlay()
 {
-    PC = Cast<AAircraftPlayerController>(GetOwningPlayerController());
-    UpdateTargetWidgets();
     Super::BeginPlay();
+
+    //GetWorld()->GetTimerManager().SetTimerForNextTick(this, &APlayerHUD::Init);
+}
+
+void APlayerHUD::Init(AAircraftPlayerController* InPC) 
+{
+    PC = InPC;
+    //UpdateTargetWidgets();
     MiniMap = CreateWidget<UMinimapWidget>(GetWorld(), MiniMapClass);
     if (!MiniMap) return;
     MiniMap->AddToViewport();
-    
+
     MiniMap->InitializeBounds(
         FVector2D(-20000.f, -20000.f),
         FVector2D(20000.f, 20000.f)
     );
-}
-
-void APlayerHUD::Init() 
-{
-    Controlled = Cast<APlayerAircraft>(PC->GetPawn());
-    if (!Controlled) return;
-    UWeaponSystemComponent* WeaponSys = Controlled->WeaponComponent;
-    if (!WeaponSys) return;
-    WeaponSys->OnWeaponCountUpdated.AddDynamic(this, &APlayerHUD::OnWeaponChanged);
-    WeaponSys->GetCount();
-    EquippedWeaponNames = WeaponSys->EquippedWeaponNames;
 
     if (!AimReticleClass) return;
     AimReticleWidget = CreateWidget<UUserWidget>(PC, AimReticleClass);
@@ -56,6 +51,14 @@ void APlayerHUD::Init()
     PitchLadderWidget = CreateWidget<UPitchLadder>(PC, PitchLadderClass);
     PitchLadderWidget->AddToViewport();
     PitchLadderWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+
+    Controlled = Cast<APlayerAircraft>(PC->GetPawn());
+    if (!Controlled) return;
+    UWeaponSystemComponent* WeaponSys = Controlled->WeaponComponent;
+    if (!WeaponSys) return;
+    WeaponSys->OnWeaponCountUpdated.AddDynamic(this, &APlayerHUD::OnWeaponChanged);
+    WeaponSys->GetCount();
+    EquippedWeaponNames = WeaponSys->EquippedWeaponNames;
 
     // TODO: Pitch Ladder Visibility is true for now in testing, remove later because its only meant for certain modes, not always at start
     isPitchLadderVisible = true;
@@ -112,6 +115,16 @@ void APlayerHUD::Tick(float DeltaSeconds)
 
     float Pitch = FMath::RadiansToDegrees(FMath::Asin(Controlled->Airframe->GetForwardVector().Z));
     PitchLadderWidget->Update(Pitch);
+}
+
+void APlayerHUD::TogglePitchLadder(bool Toggle) {
+    if (!IsValid(PitchLadderWidget) || !PitchLadderWidget) return;
+
+    if (Toggle) {
+        PitchLadderWidget->SetVisibility(ESlateVisibility::Hidden);
+        return;
+    }
+    PitchLadderWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 void APlayerHUD::PitchLadderUpdate() 

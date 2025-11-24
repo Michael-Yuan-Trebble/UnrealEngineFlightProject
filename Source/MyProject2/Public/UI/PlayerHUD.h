@@ -43,6 +43,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UPitchLadder> PitchLadderClass;
 
+	UPROPERTY()
 	UPitchLadder* PitchLadderWidget;
 
 	UMinimapWidget* MiniMap;
@@ -65,10 +66,12 @@ public:
 
 	void UpdateSelected(ABaseUnit* In);
 
+	void TogglePitchLadder(bool Toggle);
+
 	UFUNCTION()
 	void OnWeaponChanged(FName WeaponName, int32 Current, int32 Max);
 
-	void Init();
+	void Init(AAircraftPlayerController* InPC);
 
 	UPROPERTY(BlueprintReadWrite)
 	int CurrentNum = 0;

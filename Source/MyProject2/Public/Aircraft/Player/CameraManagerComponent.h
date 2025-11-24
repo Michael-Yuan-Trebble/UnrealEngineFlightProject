@@ -8,6 +8,7 @@
 #include "CameraManagerComponent.generated.h"
 
 class APlayerAircraft;
+class APlayerHUD;
 
 enum class ECameraMode {
 	FirstPerson,
@@ -40,14 +41,20 @@ public:
 
 	void SetControlled(APlayerAircraft* InControl) { Controlled = InControl; };
 
+	void SetHUD(APlayerHUD* InHUD) { HUD = InHUD; };
+
 	void SwitchCamera();
 
 	ECameraMode CurrentMode = ECameraMode::ThirdPerson;
 
 	APlayerAircraft* Controlled;
 
+	APlayerHUD* HUD;
+
 	float LookXLock = 0.f;
 	float LookYLock = 0.f;
+
+	void SetThirdPerson();
 
 protected:
 	virtual void BeginPlay() override;
@@ -60,11 +67,13 @@ private:
 	float FirstPersonX = 0.f;
 	float FirstPersonY = 0.f;
 
+	float FirstPersonPrevX = 0.f;
+	float FirstPersonPrevY = 0.f;
+
 	float prevX = 0.f;
 
 	float prevY = 0.f;
 
 	void SetFirstPerson();
 
-	void SetThirdPerson();
 };

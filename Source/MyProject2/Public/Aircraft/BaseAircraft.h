@@ -58,6 +58,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 NumOfAfterburners;
 
+	UPROPERTY(EditAnywhere)
+	int32 NumOfVortices;
+
 	AActor* Tracking;
 
 	//UObjects
@@ -82,6 +85,11 @@ public:
 
 	TArray<UNiagaraComponent*> AllAfterburners;
 
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* WingVortexSystem;
+
+	TArray<UNiagaraComponent*> AllVortices;
+
 	//Return Functions for UObjects
 
 	virtual USkeletalMeshComponent* GetMesh() const { return Airframe; };
@@ -99,8 +107,14 @@ protected:
 	void ActivateAfterburnerFX();
 	void DeactivateAfterburnerFX();
 
+	void ActivateVortexFX();
+	void DeactivateVortexFX();
+
 private:
 
 	UFUNCTION()
 	void HandleAfterburnerFX(bool isActive);
+
+	UFUNCTION()
+	void HandleVortexFX(bool isActive);
 };

@@ -45,29 +45,56 @@ void ABaseAircraft::BeginPlay()
 	RadarComponent->Setup(this);
 	FlightComponent->Setup(this, AirStats);
 
-	if (!AfterburnerSystem) return;
-	for (int i = 0; i < NumOfAfterburners; i++)
+	if (AfterburnerSystem) 
 	{
-		FName SocketName = FName(*FString::Printf(TEXT("AfterburnerSocket%d"), i));
-		if (!Airframe->DoesSocketExist(SocketName)) continue;
-
-		UNiagaraComponent* tempAfterburner = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			AfterburnerSystem,
-			Airframe,
-			SocketName,
-			FVector::ZeroVector,
-			FRotator::ZeroRotator,
-			EAttachLocation::SnapToTarget,
-			false
-		);
-		if (tempAfterburner) 
+		for (int i = 0; i < NumOfAfterburners; i++)
 		{
-			tempAfterburner->Deactivate();
-			AllAfterburners.Add(tempAfterburner);
+			FName SocketName = FName(*FString::Printf(TEXT("AfterburnerSocket%d"), i));
+			if (!Airframe->DoesSocketExist(SocketName)) continue;
+
+			UNiagaraComponent* tempAfterburner = UNiagaraFunctionLibrary::SpawnSystemAttached(
+				AfterburnerSystem,
+				Airframe,
+				SocketName,
+				FVector::ZeroVector,
+				FRotator::ZeroRotator,
+				EAttachLocation::SnapToTarget,
+				false
+			);
+			if (tempAfterburner)
+			{
+				tempAfterburner->Deactivate();
+				AllAfterburners.Add(tempAfterburner);
+			}
+		}
+	}
+
+	if (WingVortexSystem) 
+	{
+		for (int i = 0; i < NumOfVortices; i++)
+		{
+			FName SocketName = FName(*FString::Printf(TEXT("WingVortexSocket%d"), i));
+			if (!Airframe->DoesSocketExist(SocketName)) continue;
+
+			UNiagaraComponent* tempVortex = UNiagaraFunctionLibrary::SpawnSystemAttached(
+				WingVortexSystem,
+				Airframe,
+				SocketName,
+				FVector::ZeroVector,
+				FRotator::ZeroRotator,
+				EAttachLocation::SnapToTarget,
+				false
+			);
+			if (tempVortex)
+			{
+				tempVortex->Deactivate();
+				AllVortices.Add(tempVortex);
+			}
 		}
 	}
 
 	FlightComponent->OnAfterburnerEngaged.AddDynamic(this, &ABaseAircraft::HandleAfterburnerFX);
+	FlightComponent->OnVortexActivate.AddDynamic(this, &ABaseAircraft::HandleVortexFX);
 }
 
 void ABaseAircraft::PossessedBy(AController* NewController) 
@@ -98,6 +125,30 @@ void ABaseAircraft::ActivateAfterburnerFX()
 void ABaseAircraft::DeactivateAfterburnerFX() 
 {
 	for (UNiagaraComponent* FX : AllAfterburners)
+	{
+		if (!IsValid(FX)) continue;
+		FX->Deactivate();
+	}
+}
+
+void ABaseAircraft::HandleVortexFX(bool isActive) 
+{
+	if (isActive) ActivateVortexFX();
+	else DeactivateVortexFX();
+}
+
+void ABaseAircraft::ActivateVortexFX() 
+{
+	for (UNiagaraComponent* FX : AllVortices) 
+	{
+		if (!IsValid(FX)) continue;
+		FX->Activate();
+	}
+}
+
+void ABaseAircraft::DeactivateVortexFX() 
+{
+	for (UNiagaraComponent* FX : AllVortices) 
 	{
 		if (!IsValid(FX)) continue;
 		FX->Deactivate();

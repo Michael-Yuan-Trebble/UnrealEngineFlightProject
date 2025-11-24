@@ -85,7 +85,7 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 	}
 	else
 	{
-		PlayerSpawnedIn = GetWorld()->SpawnActor<APlayerAircraft>(GI->AircraftClass, PlayerStart->GetActorTransform());
+		PlayerSpawnedIn = GetWorld()->SpawnActorDeferred<APlayerAircraft>(GI->AircraftClass, PlayerStart->GetActorTransform());
 	}
 
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
@@ -101,14 +101,19 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 		Loadout = GI->SelectedWeapons;
 	}
 
-	GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
-		{
-			PlayerSpawnedIn->SetOwner(PC);
-			PC->Possess(PlayerSpawnedIn);
-			PlayerSpawnedIn->PossessedBy(PC);
-		});
+	if (!PlayerSpawnedIn) return;
+
+	UGameplayStatics::FinishSpawningActor(PlayerSpawnedIn, PlayerStart->GetActorTransform());
 
 	PlayerSpawnedIn->WeaponComponent->SetWeapons(Loadout);
+
+	if (IsValid(PC))
+	{
+		PC->Possess(PlayerSpawnedIn);
+		//PlayerSpawnedIn->PossessedBy(PC);
+	}
+
+	//PlayerSpawnedIn->WeaponComponent->SetWeapons(Loadout);
 }
 
 // TODO: Might remove later, might keep in for default, unsure for now, maybe leave it in for a fun easter egg
@@ -136,7 +141,7 @@ void AFlightGamemode::FallBackAircraft()
 	}
 
 	if (!PlayerStart) return;
-	PlayerSpawnedIn = GetWorld()->SpawnActor<APlayerAircraft>(AircraftSelected->AircraftClass, PlayerStart->GetActorTransform());
+	PlayerSpawnedIn = GetWorld()->SpawnActorDeferred<APlayerAircraft>(AircraftSelected->AircraftClass, PlayerStart->GetActorTransform());
 }
 
 // TODO: Remove this later, this is only to set different weapons for testing

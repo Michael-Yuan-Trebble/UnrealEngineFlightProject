@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Camera Manager!"));
 #include "Aircraft/Player/CameraManagerComponent.h"
 #include "Aircraft/Player/PlayerAircraft.h"
+#include "UI/PlayerHUD.h"
 #include "Kismet/GameplayStatics.h"
 
 UCameraManagerComponent::UCameraManagerComponent()
@@ -12,6 +14,7 @@ UCameraManagerComponent::UCameraManagerComponent()
 void UCameraManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	
 }
 
 void UCameraManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -51,10 +54,13 @@ void UCameraManagerComponent::SetFirstPerson()
 
 	LookXLock = 120.f;
 	LookYLock = 60.f;
-	currentX = 0.f;
-	currentY = 0.f;
+	FirstPersonPrevX = 0.f;
+	FirstPersonPrevY = 0.f;
 
 	Controlled->FirstPersonCamera->SetRelativeRotation(FRotator::ZeroRotator);
+
+	if (!HUD) return;
+	HUD->TogglePitchLadder(false);
 }
 
 void UCameraManagerComponent::SetThirdPerson() 
@@ -76,6 +82,8 @@ void UCameraManagerComponent::SetThirdPerson()
 	if (!SpringArm) return;
 
 	SpringArm->SetRelativeRotation(FRotator::ZeroRotator);
+
+	HUD->TogglePitchLadder(true);
 }
 
 void UCameraManagerComponent::LookHor(float lookX) 
@@ -90,6 +98,7 @@ void UCameraManagerComponent::LookHor(float lookX)
 		break;
 	default:
 		ThirdPersonHorizontal(lookX);
+		break;
 	}
 }
 
@@ -105,26 +114,45 @@ void UCameraManagerComponent::LookVer(float lookY)
 			break;
 		default:
 			ThirdPersonVertical(lookY);
+			break;
 	}
 }
 
 void UCameraManagerComponent::FirstPersonHorizontal(float X) 
 {
 	if (!Controlled || !Controlled->FirstPersonCamera) return;
+	X = FMath::Abs(X) == 0 ? 0 : X;
 
+	FirstPersonPrevX = FirstPersonX;
 	FirstPersonX += X;
+
 	FirstPersonX = FMath::Clamp(FirstPersonX, -LookXLock, LookXLock);
-	FRotator NewRot = FRotator(0.f, FirstPersonX, 0.f);
-	Controlled->FirstPersonCamera->SetRelativeRotation(NewRot);
+
+	if (FirstPersonX == -LookXLock || FirstPersonX == LookXLock) X = LookXLock - FirstPersonPrevX;
+
+	Controlled->FirstPersonCamera->AddRelativeRotation(FRotator(0.f, X, 0.f));
 }
 
-void UCameraManagerComponent::FirstPersonVertical(float Y) {
+void UCameraManagerComponent::FirstPersonVertical(float Y) 
+{
 	if (!Controlled || !Controlled->FirstPersonCamera) return;
 
+	Y = FMath::Abs(Y) == 0 ? 0 : Y;
+
+	FirstPersonPrevY = FirstPersonY;
 	FirstPersonY += Y;
+
 	FirstPersonY = FMath::Clamp(FirstPersonY, -LookYLock, LookYLock);
-	FRotator NewRot = FRotator(FirstPersonY,0.f, 0.f);
-	Controlled->FirstPersonCamera->SetRelativeRotation(NewRot);
+
+	if (FirstPersonY == LookYLock)
+	{
+		Y = LookYLock - FirstPersonPrevY;
+	}
+	else if (FirstPersonY == -LookYLock)
+	{
+		Y = LookYLock + FirstPersonPrevY;
+	}
+	Controlled->FirstPersonCamera->AddRelativeRotation(FRotator(Y, 0.f, 0.f));
 }
 
 void UCameraManagerComponent::ThirdPersonHorizontal(float X) 
@@ -134,8 +162,6 @@ void UCameraManagerComponent::ThirdPersonHorizontal(float X)
 
 	prevX = currentX;
 	currentX += X;
-
-	// Lock the camera at 180 degrees horizontally
 
 	currentX = FMath::Clamp(currentX, -LookXLock, LookXLock);
 
@@ -152,14 +178,13 @@ void UCameraManagerComponent::ThirdPersonVertical(float Y)
 	prevY = currentY;
 	currentY += Y;
 
-	// Lock the camera at 85 degrees vertically
 	currentY = FMath::Clamp(currentY, -LookYLock, LookYLock);
 
 	if (currentY == LookYLock)
 	{
 		Y = LookYLock - prevY;
 	}
-	if (currentY == -85)
+	else if (currentY == -LookYLock)
 	{
 		Y = LookYLock + prevY;
 	}

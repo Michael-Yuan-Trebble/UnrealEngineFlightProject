@@ -129,6 +129,18 @@ public:
 
 	void ManageMenuSetting(EMenuState NewState);
 
+	void SetComponents(
+		UFlightComponent* InFlight,
+		UWeaponSystemComponent* InWeapon,
+		URadarComponent* InRadar,
+		UCameraManagerComponent* InManager
+		) {
+		FlightComp = InFlight;
+		WeaponComp = InWeapon;
+		RadarComp = InRadar;
+		ManagerComp = InManager;
+	};
+
 	//UVariables
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

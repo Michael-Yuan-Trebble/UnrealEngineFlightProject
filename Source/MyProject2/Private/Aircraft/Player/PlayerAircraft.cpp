@@ -18,8 +18,11 @@ APlayerAircraft::APlayerAircraft()
 	ThirdPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
 	ThirdPersonCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 
+	FirstPersonSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("FirstPersonPivot"));
+	FirstPersonSpringArm->SetupAttachment(Airframe, USpringArmComponent::SocketName);
+
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FirstPersonCamera->SetupAttachment(RootComponent);
+	FirstPersonCamera->SetupAttachment(FirstPersonSpringArm);
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponSystemComponent>(TEXT("WeaponComponent"));
 	ManagerComp = CreateDefaultSubobject<UCameraManagerComponent>(TEXT("CameraManagerComponent"));
@@ -34,9 +37,6 @@ void APlayerAircraft::BeginPlay()
 	WeaponComponent->Setup(this, AirStats);
 	ManagerComp->SetSpringArm(SpringArm);
 	ManagerComp->SetControlled(this);
-
-	FirstPersonCamera->SetActive(false);
-	ThirdPersonCamera->SetActive(true);
 }
 
 void APlayerAircraft::Tick(float DeltaSeconds) 
@@ -50,9 +50,5 @@ void APlayerAircraft::PossessedBy(AController* NewController)
 
 	Controlled = Cast<AAircraftPlayerController>(NewController);
 	if (!Controlled) return;
-	Controlled->FlightComp = FlightComponent;
-	Controlled->WeaponComp = WeaponComponent;
-	Controlled->RadarComp = RadarComponent;
-	Controlled->ManagerComp = ManagerComp;
-	Controlled->SetViewTargetWithBlend(this, 0.3f, VTBlend_Cubic);
+	Controlled->SetComponents(FlightComponent, WeaponComponent, RadarComponent, ManagerComp);
 }

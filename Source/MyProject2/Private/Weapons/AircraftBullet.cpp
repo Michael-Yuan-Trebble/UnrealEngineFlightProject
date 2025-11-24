@@ -45,7 +45,7 @@ void AAircraftBullet::Tick(float DeltaTime)
 
 void AAircraftBullet::FireInDirection(const FVector& ShootDirection) 
 {
-	FVector Impulse = ShootDirection * BulletSpeed;
+	FVector Impulse = ShootDirection * BulletSpeed * 2;
 	Collision->AddImpulse(Impulse, NAME_None, true);
 }
 

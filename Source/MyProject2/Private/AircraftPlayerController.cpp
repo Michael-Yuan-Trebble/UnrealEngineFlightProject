@@ -41,15 +41,16 @@ void AAircraftPlayerController::BeginPlay()
 	ACurrentPlayerState* PS = Cast<ACurrentPlayerState>(this->PlayerState);
 	if (!PS) return;
 	MenuManager->InitializePC(this, PS);
-	HUD = Cast<APlayerHUD>(GetHUD());
-	if (HUD) HUD->PC = this;
 }
 
 void AAircraftPlayerController::OnPossess(APawn* InPawn) 
 {
 	Super::OnPossess(InPawn);
-	if (!HUD || !InPawn) return;
-	HUD->Init();
+	HUD = Cast<APlayerHUD>(GetHUD());
+	if (!ManagerComp || !HUD) return;
+	HUD->Init(this);
+	ManagerComp->SetHUD(HUD);
+	ManagerComp->SetThirdPerson();
 }
 
 // Setting controls
@@ -378,7 +379,7 @@ void AAircraftPlayerController::Switch()
 
 void AAircraftPlayerController::TogglePerspective() 
 {
-	print(text)
+	if (!ManagerComp) return;
 	ManagerComp->SwitchCamera();
 }
 
