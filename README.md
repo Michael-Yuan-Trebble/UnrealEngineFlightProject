@@ -36,12 +36,12 @@ Another Angle of Attack variable is the current orientation of the aircraft, as 
 ### G-Forces
 The G-Force is calculated every tick for aircraft, which is displayed on the HUD currently and I hope to add more visual events tied to this force. I am going to change the G-Force HUD to only display in first person, which will have a more "realistic" HUD like in modern jet fighters as I don't think displaying this in Third Person would help the user much. Currently the G-Force affects when the wing vortices are created, which is currently 8Gs, but I also hope to tie wing vapors to be created when high Gs are experienced.
 
-![Contrails](Contrails.gif)
+![Contrails](Gifs/Contrails.gif)
 
 ### First and Third Person
 There is a first and third person mode which have keybinds set up to switch between the two. First person has an additional pitch ladder added to the UI which isn't present in third. currently there isn't anything in the interior, which I will change later and add a small map in the cockpit to make it a bit more immersive. Below is some footage of the implementation:
 
-![PerspectiveChange](ChangePerspective.gif)
+![PerspectiveChange](Gifs/ChangePerspective.gif)
 
 ### Levels
 As of right now there is a Main Menu which has a free flight button, which shows all the maps (1 test map currently), which then leads to the aircraft selection menus, which then loads the actual map. I plan for the Main Menu to have more, including settings, the actual campaign button, and maybe some sort of presets for certain controllers to make it more convenient for controller and HOTAS players. The aircraft selection menu has aircraft selection, which also bring up a buy pop up for certain aircraft, weapon picking, and special picking. I plan for the weapon picking to change drastically, as I hope to group weapons to certain pylons so that the user isn't manually selecting a weapon for each pylon. There are currently no specials so that screen just has the start mission button. The Mission is just a test height map I have currently.
@@ -63,7 +63,7 @@ Aircraft can shoot now and these bullets deal damage, destroy upon impact, and u
 
 ### Visual Examples
 
-![Afterburner](Afterburner.gif)
+![Afterburner](Gifs/Afterburner.gif)
 
 ### Basic AI
 Very primative AI as of now, it calculates the roll needed to pitch up into its given target and can move, however it doesn't implement ideas such as lag pursuit or changes state from attack.
