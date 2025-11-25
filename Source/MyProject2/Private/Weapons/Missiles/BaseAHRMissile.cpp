@@ -11,36 +11,11 @@ ABaseAHRMissile::ABaseAHRMissile()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	canLock = true;
-	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Missile Collision"));
-	RootComponent = Collision;
-
-	Collision->SetCollisionProfileName(TEXT("Projectile"));
-	Collision->SetNotifyRigidBodyCollision(true);
-	Collision->SetGenerateOverlapEvents(false);
-
-	Collision->OnComponentBeginOverlap.AddDynamic(this, &ABaseAHRMissile::OnOverlapBegin);
-	Collision->OnComponentEndOverlap.AddDynamic(this, &ABaseAHRMissile::OnEndOverlap);
-	Collision->OnComponentHit.AddDynamic(this, &ABaseAHRMissile::OnHit);
-
-	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
-	ProjectileMovement->InitialSpeed = 0;
-	ProjectileMovement->bRotationFollowsVelocity = true;
-	ProjectileMovement->bShouldBounce = false;
-	ProjectileMovement->ProjectileGravityScale = 0.f;
-
-	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Missile"));
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WeaponMesh->SetupAttachment(RootComponent);
 }
 
 void ABaseAHRMissile::BeginPlay() 
 {
 	Super::BeginPlay();
-	if (GetOwner()) 
-	{
-		Collision->IgnoreActorWhenMoving(GetOwner(), true);
-		Owner = Cast<ABaseAircraft>(GetOwner());
-	}
 	if (!MissileStats) return;
 	WeaponName = MissileStats->InGameName;
 	missileAcceleration = MissileStats->Acceleration;
@@ -52,13 +27,15 @@ void ABaseAHRMissile::BeginPlay()
 	SupportedTargetTypes = MissileStats->SupportedTargetTypes;
 }
 
+#define DROPTIME 0.2f
+
 void ABaseAHRMissile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	if (!Owner || !Owner->IsValidLowLevelFast()) return;
 
-	if (!isAir) return;
+	if (!bAir) return;
 	if (isDropPhase)
 	{
 		DropTimer += DeltaTime;
@@ -70,12 +47,11 @@ void ABaseAHRMissile::Tick(float DeltaTime)
 		FVector TotalMove = DropMove + Forward;
 
 		AddActorWorldOffset(TotalMove, true);
-		isDropPhase = DropTimer < 0.2;
+		isDropPhase = DropTimer < DROPTIME;
 		return;
 	}
 
 	if (!SmokeTrail || !MissileRocket) activateSmoke();
-	
 
 	ProjectileMovement->Velocity += GetActorForwardVector() * missileAcceleration * DeltaTime;
 	ProjectileMovement->Velocity = ProjectileMovement->Velocity.GetClampedToMaxSize(ProjectileMovement->MaxSpeed);
@@ -97,7 +73,7 @@ void ABaseAHRMissile::Tick(float DeltaTime)
 	// Missile explodes at range
 
 	if (!(timeTilDelt >= MissileStats->LifeTime)) return;
-
+	OnWeaponResult.Broadcast(false);
 	DestroyMissile();
 }
 
@@ -124,73 +100,17 @@ void ABaseAHRMissile::LaunchSequence(float Speed)
 
 	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	missileVelocity = Speed;
-	isAir = true;
+	bAir = true;
 	isDropPhase = true;
 
-	ProjectileMovement->StopMovementImmediately();
 	ProjectileMovement->SetUpdatedComponent(Collision);
 	ProjectileMovement->InitialSpeed = FMath::Max(1.f,missileVelocity);
 	ProjectileMovement->Activate(true);
 }
 
-void ABaseAHRMissile::activateSmoke() 
-{
-	if (!WeaponMesh || !WeaponMesh->DoesSocketExist(TEXT("ExhaustSocket"))) return;
-
-	if (SmokeTrail != nullptr && !SmokeTrailSystem) return;
-	if (MissileRocket != nullptr && !MissileRocketSystem) return;
-
-	SmokeTrail = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-		GetWorld(),
-		SmokeTrailSystem,
-		WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")),
-		WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")),
-		FVector(1.f),
-		true,
-		true
-	);
-
-	MissileRocket = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-		GetWorld(),
-		MissileRocketSystem,
-		WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")),
-		WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")),
-		FVector(1.f),
-		true,
-		true
-	);
-
-	ProjectileMovement->Velocity = GetActorForwardVector() * ProjectileMovement->InitialSpeed;
-}
-
-void ABaseAHRMissile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex,
-	bool bFromSweep,
-	const FHitResult& SweepResult) 
-{
-	CheckAndDelete(OtherActor);
-}
-
-void ABaseAHRMissile::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) 
-{
-	return;
-}
-
-void ABaseAHRMissile::OnHit(UPrimitiveComponent* HitComp,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	FVector NormalImpulse,
-	const FHitResult& Hit) 
-{
-	CheckAndDelete(OtherActor);
-}
-
 void ABaseAHRMissile::CheckAndDelete(AActor* OtherActor) 
 {
-	if (!OtherActor || OtherActor == this || OtherActor == GetOwner() || !isAir) return;
+	if (!OtherActor || OtherActor == this || OtherActor == Owner || !bAir) return;
 	if (!Owner || !Owner->IsValidLowLevelFast()) return;
 
 	if (OtherActor->Implements<UTeamInterface>())
@@ -203,19 +123,9 @@ void ABaseAHRMissile::CheckAndDelete(AActor* OtherActor)
 	if (OtherActor->Implements<UDamageableInterface>())
 	{
 		IDamageableInterface::Execute_OnDamage(OtherActor, this, MissileStats->Damage);
+		OnWeaponResult.Broadcast(true);
 	}
+	else OnWeaponResult.Broadcast(false);
 
 	DestroyMissile();
-}
-
-bool bDestroyed = false;
-
-void ABaseAHRMissile::DestroyMissile() 
-{
-	if (bDestroyed) return;
-	bDestroyed = true;
-
-	if (SmokeTrail) SmokeTrail->Deactivate();
-	if (MissileRocket) MissileRocket->Deactivate();
-	Destroy();
 }

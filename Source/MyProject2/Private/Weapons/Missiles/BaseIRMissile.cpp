@@ -11,35 +11,11 @@ ABaseIRMissile::ABaseIRMissile()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	canLock = true;
-	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Missile Collision"));
-	RootComponent = Collision;
-
-	Collision->SetCollisionProfileName(TEXT("Projectile"));
-	Collision->SetNotifyRigidBodyCollision(true);
-	Collision->SetGenerateOverlapEvents(false);
-
-	Collision->OnComponentBeginOverlap.AddDynamic(this, &ABaseIRMissile::OnOverlapBegin);
-	Collision->OnComponentHit.AddDynamic(this, &ABaseIRMissile::OnHit);
-
-	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
-	ProjectileMovement->InitialSpeed = 0;
-	ProjectileMovement->bRotationFollowsVelocity = true;
-	ProjectileMovement->bShouldBounce = false;
-	ProjectileMovement->ProjectileGravityScale = 0.f;
-
-	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Missile"));
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WeaponMesh->SetupAttachment(RootComponent);
 }
 
 void ABaseIRMissile::BeginPlay()
 {
 	Super::BeginPlay();
-	if (GetOwner())
-	{
-		Collision->IgnoreActorWhenMoving(GetOwner(), true);
-		Owner = Cast<ABaseAircraft>(GetOwner());
-	}
 	if (!MissileStats) return;
 	WeaponName = MissileStats->InGameName;
 	missileAcceleration = MissileStats->Acceleration;
@@ -54,8 +30,9 @@ void ABaseIRMissile::BeginPlay()
 void ABaseIRMissile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (!isAir) return;
+	if (!Owner || !Owner->IsValidLowLevel()) return;
 
+	if (!bAir) return;
 	if (!SmokeTrail || !MissileRocket) activateSmoke();
 
 	ProjectileMovement->Velocity += GetActorForwardVector() * missileAcceleration * DeltaTime;
@@ -76,7 +53,7 @@ void ABaseIRMissile::Tick(float DeltaTime)
 	timeTilDelt += DeltaTime;
 
 	if (!(timeTilDelt >= MissileStats->LifeTime)) return;
-
+	OnWeaponResult.Broadcast(false);
 	DestroyMissile();
 }
 
@@ -101,57 +78,16 @@ void ABaseIRMissile::LaunchSequence(float Speed)
 {
 	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	missileVelocity = Speed;
-	isAir = true;
-}
+	bAir = true;
 
-void ABaseIRMissile::activateSmoke()
-{
-	SmokeTrail = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-		GetWorld(),
-		SmokeTrailSystem,
-		WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")),
-		WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")),
-		FVector(1.f),
-		false,
-		true
-	);
-
-	MissileRocket = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-		GetWorld(),
-		MissileRocketSystem,
-		WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")),
-		WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")),
-		FVector(1.f),
-		false,
-		true
-	);
-
-	ProjectileMovement->InitialSpeed = missileVelocity <= 0 ? 1 : missileVelocity;
-	ProjectileMovement->Activate();
-}
-
-void ABaseIRMissile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex,
-	bool bFromSweep,
-	const FHitResult& SweepResult)
-{
-	CheckAndDelete(OtherActor);
-}
-
-void ABaseIRMissile::OnHit(UPrimitiveComponent* HitComp,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	FVector NormalImpulse,
-	const FHitResult& Hit)
-{
-	CheckAndDelete(OtherActor);
+	ProjectileMovement->SetUpdatedComponent(Collision);
+	ProjectileMovement->InitialSpeed = FMath::Max(1.f, missileVelocity);
+	ProjectileMovement->Activate(true);
 }
 
 void ABaseIRMissile::CheckAndDelete(AActor* OtherActor)
 {
-	if (!OtherActor || OtherActor == this || OtherActor == GetOwner() || !isAir) return;
+	if (!OtherActor || OtherActor == this || OtherActor == Owner || !bAir) return;
 
 	if (OtherActor->Implements<UTeamInterface>())
 	{
@@ -163,14 +99,9 @@ void ABaseIRMissile::CheckAndDelete(AActor* OtherActor)
 	if (OtherActor->Implements<UDamageableInterface>())
 	{
 		IDamageableInterface::Execute_OnDamage(OtherActor, this, MissileStats->Damage);
+		OnWeaponResult.Broadcast(true);
 	}
+	else OnWeaponResult.Broadcast(false);
 
 	DestroyMissile();
-}
-
-void ABaseIRMissile::DestroyMissile()
-{
-	if (SmokeTrail) SmokeTrail->Deactivate();
-	if (MissileRocket) MissileRocket->Deactivate();
-	Destroy();
 }

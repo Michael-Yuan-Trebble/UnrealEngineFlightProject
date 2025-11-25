@@ -5,10 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
+#include "NiagaraSystem.h"
 #include "Components/StaticMeshComponent.h"
 #include "Structs and Data/Weapon Data/BaseWeaponStats.h"
 #include "Structs and Data/LockableTarget.h"
 #include "BaseWeapon.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponResult, bool, bHit);
 
 UCLASS()
 class MYPROJECT2_API ABaseWeapon : public AActor
@@ -17,6 +20,9 @@ class MYPROJECT2_API ABaseWeapon : public AActor
 	
 public:	
 	
+	UPROPERTY()
+	FOnWeaponResult OnWeaponResult;
+
 	ABaseWeapon();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

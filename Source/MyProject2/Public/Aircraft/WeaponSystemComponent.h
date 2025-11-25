@@ -11,11 +11,12 @@
 // TODO: For now cone angle is like this, maybe change it in the future
 #define CONE_ANGLE 30.f
 
-class APlayerHUD;
 class ABaseAircraft;
 class AAircraftPlayerController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWeaponCountUpdated,FName, WeaponName, int32, CurrentCount, int32, MaxCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHUDLockedOn, bool, bLocked);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponSystemWeaponHitResult, bool, bHit);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UWeaponSystemComponent : public UActorComponent
@@ -23,6 +24,11 @@ class MYPROJECT2_API UWeaponSystemComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
+
+	FWeaponSystemWeaponHitResult OnWeaponHit;
+
+	FOnHUDLockedOn OnHUDLockedOn;
+
 	UWeaponSystemComponent();
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -49,6 +55,9 @@ public:
 
 	void GetCount();
 
+	UFUNCTION()
+	void OnWeaponResult(bool bHit);
+
 	bool bLocked = false;
 
 	float LockTime = 5.f;
@@ -65,8 +74,6 @@ public:
 	ABaseAircraft* Controlled;
 
 	AAircraftPlayerController* PC;
-
-	APlayerHUD* HUD;
 
 	UAircraftStats* AirStats;
 

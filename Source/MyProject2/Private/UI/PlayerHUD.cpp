@@ -54,11 +54,6 @@ void APlayerHUD::Init(AAircraftPlayerController* InPC)
 
     Controlled = Cast<APlayerAircraft>(PC->GetPawn());
     if (!Controlled) return;
-    UWeaponSystemComponent* WeaponSys = Controlled->WeaponComponent;
-    if (!WeaponSys) return;
-    WeaponSys->OnWeaponCountUpdated.AddDynamic(this, &APlayerHUD::OnWeaponChanged);
-    WeaponSys->GetCount();
-    EquippedWeaponNames = WeaponSys->EquippedWeaponNames;
 
     // TODO: Pitch Ladder Visibility is true for now in testing, remove later because its only meant for certain modes, not always at start
     isPitchLadderVisible = true;
@@ -69,6 +64,13 @@ void APlayerHUD::OnWeaponChanged(FName WeaponName, int32 Current, int32 Max)
     CurrentName = WeaponName;
     CurrentNum = Current;
     MaxNum = Max;
+}
+
+void APlayerHUD::HandleWeaponResult(bool bHit) {
+    if (bHit) 
+    {
+        return;
+    } 
 }
 
 void APlayerHUD::Tick(float DeltaSeconds) 

@@ -82,12 +82,11 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	FName CurrentName;
 
-	UPROPERTY(BlueprintReadWrite)
-	TArray<FName> EquippedWeaponNames;
-
 	bool isPitchLadderVisible;
 
 	void SetPitchLadderVisibility(bool isVisible);
+
+	void HandleWeaponResult(bool bhit);
 
 private:
 

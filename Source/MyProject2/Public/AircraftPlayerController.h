@@ -134,12 +134,7 @@ public:
 		UWeaponSystemComponent* InWeapon,
 		URadarComponent* InRadar,
 		UCameraManagerComponent* InManager
-		) {
-		FlightComp = InFlight;
-		WeaponComp = InWeapon;
-		RadarComp = InRadar;
-		ManagerComp = InManager;
-	};
+	);
 
 	//UVariables
 
@@ -189,6 +184,15 @@ private:
 
 	void MenuBack();
 	void TogglePauseMenu();
+
+	UFUNCTION()
+	void HandleWeaponHit(bool bHit);
+
+	UFUNCTION()
+	void HandleHUDLockedOn(bool bLocked);
+
+	UFUNCTION()
+	void HandleWeaponCount(FName WeaponName, int32 CurrentCount, int32 MaxCount);
 
 	//Variables
 

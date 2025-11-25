@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Weapons/BaseWeapon.h"
+#include "Weapons/Missiles/BaseMissile.h"
 #include "NiagaraFunctionLibrary.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Structs and Data/Weapon Data/IRMissileStats.h"
@@ -14,51 +14,17 @@
 class ABaseAircraft;
 
 UCLASS()
-class MYPROJECT2_API ABaseIRMissile : public ABaseWeapon
+class MYPROJECT2_API ABaseIRMissile : public ABaseMissile
 {
 	GENERATED_BODY()
 	
 public:	
 	ABaseIRMissile();
 
-	bool isAir = false;
-
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	UNiagaraSystem* SmokeTrailSystem;
-
-	UPROPERTY(EditAnywhere,BlueprintReadOnly)
-	UNiagaraComponent* SmokeTrail;
-
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	UNiagaraSystem* MissileRocketSystem;
-
-	UPROPERTY(EditAnywhere)
-	UNiagaraComponent* MissileRocket;
-
 	UPROPERTY(EditAnywhere)
 	UIRMissileStats* MissileStats;
 
-	UProjectileMovementComponent* ProjectileMovement;
-
-	FVector CurrentDirection;
-
-	AActor* Tracking;
-
-	float missileAcceleration;
-
-	float missileMaxSpeed;
-
-	float missileVelocity;
-
-	float turnRate;
-
-	void LaunchSequence(float Speed);
-
-	float ReturnCooldownTime() { return cooldownTime; };
-
-	void activateSmoke();
-
-	ABaseAircraft* Owner;
+	virtual void LaunchSequence(float Speed) override;
 
 protected:
 
@@ -71,23 +37,5 @@ protected:
 	virtual void FireStatic(float launchSpeed);
 
 private:
-	UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult);
-
-	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComp,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		FVector NormalImpulse,
-		const FHitResult& Hit);
-
-	void CheckAndDelete(AActor* OtherActor);
-
-	void DestroyMissile();
-
+	virtual void CheckAndDelete(AActor* OtherActor) override;
 };

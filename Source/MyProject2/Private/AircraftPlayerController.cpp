@@ -53,6 +53,50 @@ void AAircraftPlayerController::OnPossess(APawn* InPawn)
 	ManagerComp->SetThirdPerson();
 }
 
+void AAircraftPlayerController::SetComponents(
+	UFlightComponent* InFlight,
+	UWeaponSystemComponent* InWeapon,
+	URadarComponent* InRadar,
+	UCameraManagerComponent* InManager
+) 
+{
+	FlightComp = InFlight;
+
+	WeaponComp = InWeapon;
+	WeaponComp->OnWeaponHit.AddDynamic(this, &AAircraftPlayerController::HandleWeaponHit);
+	WeaponComp->OnHUDLockedOn.AddDynamic(this, &AAircraftPlayerController::HandleHUDLockedOn);
+	WeaponComp->OnWeaponCountUpdated.AddDynamic(this, &AAircraftPlayerController::HandleWeaponCount);
+	WeaponComp->GetCount();
+
+	RadarComp = InRadar;
+
+	ManagerComp = InManager;
+}
+
+void AAircraftPlayerController::HandleWeaponHit(bool bHit)
+{
+	if (HUD)
+	{
+		HUD->HandleWeaponResult(bHit);
+	}
+}
+
+void AAircraftPlayerController::HandleHUDLockedOn(bool bLocked)
+{
+	if (HUD)
+	{
+		HUD->UpdateLocked(bLocked);
+	}
+}
+
+void AAircraftPlayerController::HandleWeaponCount(FName WeaponName, int32 CurrentCount, int32 MaxCount) 
+{
+	if (HUD)
+	{
+		HUD->OnWeaponChanged(WeaponName, CurrentCount, MaxCount);
+	}
+}
+
 // Setting controls
 
 void AAircraftPlayerController::BindAircraftInputs(UEnhancedInputComponent* EnhancedInputComp) 

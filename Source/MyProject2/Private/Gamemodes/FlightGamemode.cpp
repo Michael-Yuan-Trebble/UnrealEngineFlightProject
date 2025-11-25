@@ -110,10 +110,7 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 	if (IsValid(PC))
 	{
 		PC->Possess(PlayerSpawnedIn);
-		//PlayerSpawnedIn->PossessedBy(PC);
 	}
-
-	//PlayerSpawnedIn->WeaponComponent->SetWeapons(Loadout);
 }
 
 // TODO: Might remove later, might keep in for default, unsure for now, maybe leave it in for a fun easter egg

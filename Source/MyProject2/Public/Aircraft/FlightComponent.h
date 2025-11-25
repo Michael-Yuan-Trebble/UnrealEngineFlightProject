@@ -9,6 +9,9 @@
 #include "Structs and Data/ThrottleStage.h"
 #include "FlightComponent.generated.h"
 
+#define VORTEXG 9.f
+#define TAKEOFFSPEED 10.f
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAfterburnerEngaged, bool, isActive);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVortexActivate, bool, isVortex);
 
@@ -95,9 +98,9 @@ public:
 
 	void SetThrust(float Thrust) { CurrentThrust = Thrust; };
 
-	EThrottleStage ReturnThrottleStage() { return currentStage; };
+	EThrottleStage ReturnThrottleStage() const { return currentStage; };
 
-	EThrottleStage ReturnPrevThrottleStage() { return prevStage; };
+	EThrottleStage ReturnPrevThrottleStage() const { return prevStage; };
 
 private:
 	float CalculateSpeedDrag();
@@ -119,4 +122,8 @@ private:
 	void ApplyYaw(float DeltaSeconds);
 
 	void ApplyRoll(float DeltaSeconds);
+
+	void CalculateVortex();
+
+	float GetCurrentSpeedKMH() const { return FMath::Max((currentSpeed * 0.036f),0); };
 };

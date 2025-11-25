@@ -3,7 +3,6 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Weapon Component!"));
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/BaseAircraft.h"
-#include "UI/PlayerHUD.h"
 #include "Weapons/AircraftBullet.h"
 #include "Kismet/GameplayStatics.h"
 #include "Structs and Data/LockableTarget.h"
@@ -20,7 +19,6 @@ void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStat
 	Controlled = InBase;
 	AirStats = InStats;
 	PC = Cast<AAircraftPlayerController>(GetWorld()->GetFirstPlayerController());
-	if (PC) HUD = Cast<APlayerHUD>(PC->GetHUD());
 }
 
 void UWeaponSystemComponent::FireBullets()
@@ -156,6 +154,8 @@ void UWeaponSystemComponent::FireWeaponSelected(TSubclassOf<ABaseWeapon> WeaponC
 	{
 		if (!Weapon->WeaponInstance || !Weapon->CanFire()) continue;
 
+		Weapon->WeaponInstance->OnWeaponResult.AddDynamic(this, &UWeaponSystemComponent::OnWeaponResult);
+
 		if (Target && bLocked)
 		{
 			Weapon->WeaponInstance->FireTracking(Speed, Target);
@@ -168,6 +168,11 @@ void UWeaponSystemComponent::FireWeaponSelected(TSubclassOf<ABaseWeapon> WeaponC
 		GetCount();
 		return;
 	}
+}
+
+void UWeaponSystemComponent::OnWeaponResult(bool bHit) 
+{
+	OnWeaponHit.Broadcast(bHit);
 }
 
 void UWeaponSystemComponent::SelectWeapon(int WeaponIndex)
@@ -240,7 +245,7 @@ void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target)
 	if (Distance > CurrentWeapon->range) 
 	{
 		bLocked = false;
-		HUD->UpdateLocked(bLocked);
+		OnHUDLockedOn.Broadcast(bLocked);
 		LockTime = 0.f;
 		return;
 	}
@@ -259,5 +264,5 @@ void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target)
 		bLocked = false;
 		LockTime = 0.f;
 	}
-	HUD->UpdateLocked(bLocked);
+	OnHUDLockedOn.Broadcast(bLocked);
 }

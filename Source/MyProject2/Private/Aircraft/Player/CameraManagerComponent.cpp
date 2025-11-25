@@ -54,8 +54,8 @@ void UCameraManagerComponent::SetFirstPerson()
 
 	LookXLock = 120.f;
 	LookYLock = 60.f;
-	FirstPersonPrevX = 0.f;
-	FirstPersonPrevY = 0.f;
+	FirstPersonX = 0.f;
+	FirstPersonY = 0.f;
 
 	Controlled->FirstPersonCamera->SetRelativeRotation(FRotator::ZeroRotator);
 
@@ -83,6 +83,7 @@ void UCameraManagerComponent::SetThirdPerson()
 
 	SpringArm->SetRelativeRotation(FRotator::ZeroRotator);
 
+	if (!HUD) return;
 	HUD->TogglePitchLadder(true);
 }
 
@@ -120,22 +121,22 @@ void UCameraManagerComponent::LookVer(float lookY)
 
 void UCameraManagerComponent::FirstPersonHorizontal(float X) 
 {
-	if (!Controlled || !Controlled->FirstPersonCamera) return;
-	X = FMath::Abs(X) == 0 ? 0 : X;
+	if (!Controlled || !Controlled->FirstPersonSpringArm) return;
 
 	FirstPersonPrevX = FirstPersonX;
+
 	FirstPersonX += X;
 
 	FirstPersonX = FMath::Clamp(FirstPersonX, -LookXLock, LookXLock);
 
-	if (FirstPersonX == -LookXLock || FirstPersonX == LookXLock) X = LookXLock - FirstPersonPrevX;
-
-	Controlled->FirstPersonCamera->AddRelativeRotation(FRotator(0.f, X, 0.f));
+	FRotator NewRot = Controlled->FirstPersonSpringArm->GetRelativeRotation();
+	NewRot.Yaw = FirstPersonX;
+	Controlled->FirstPersonSpringArm->SetRelativeRotation(NewRot);
 }
 
 void UCameraManagerComponent::FirstPersonVertical(float Y) 
 {
-	if (!Controlled || !Controlled->FirstPersonCamera) return;
+	if (!Controlled || !Controlled->FirstPersonSpringArm) return;
 
 	Y = FMath::Abs(Y) == 0 ? 0 : Y;
 
@@ -152,7 +153,7 @@ void UCameraManagerComponent::FirstPersonVertical(float Y)
 	{
 		Y = LookYLock + FirstPersonPrevY;
 	}
-	Controlled->FirstPersonCamera->AddRelativeRotation(FRotator(Y, 0.f, 0.f));
+	Controlled->FirstPersonSpringArm->AddRelativeRotation(FRotator(Y, 0.f, 0.f));
 }
 
 void UCameraManagerComponent::ThirdPersonHorizontal(float X) 
