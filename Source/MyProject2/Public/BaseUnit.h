@@ -11,6 +11,8 @@
 #include "AircraftRegistry.h"
 #include "BaseUnit.generated.h"
 
+class UHealthComponent;
+
 UCLASS()
 class MYPROJECT2_API ABaseUnit : public APawn, public ILockableTarget, public IDamageableInterface, public ITeamInterface
 {
@@ -37,9 +39,11 @@ public:
 	UPROPERTY()
 	AAircraftRegistry* Registry = nullptr;
 
-	bool isAlive;
+	bool isAlive = true;
 
 	float health;
+
+	UHealthComponent* HealthComp;
 
 	virtual FVector GetTargetLocation() const override { return this->GetActorLocation(); };
 
@@ -49,13 +53,19 @@ public:
 
 	virtual EFaction GetFaction_Implementation() const override{ return Faction; };
 
-	virtual void OnDamage_Implementation(AActor* Weapon, float Damage) override;
+	virtual void OnDamage_Implementation(AActor* Weapon, AActor* Launcher, AActor* Target, float Damage) override;
 
 	virtual void PossessedBy(AController* Controller) override;
 
 	void ActivateTarget();
 
 	void DeactivateTarget();
+
+	UFUNCTION()
+	virtual void HandleDestroyed(AActor* Weapon, AActor* Launcher, AActor* Target);
+
+	UFUNCTION()
+	void HandleHit();
 
 protected:
 	virtual void BeginPlay() override;

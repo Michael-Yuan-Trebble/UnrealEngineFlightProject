@@ -122,7 +122,7 @@ void ABaseBomb::CheckAndDelete()
 
 			if (Actor->Implements<UDamageableInterface>()) 
 			{
-				IDamageableInterface::Execute_OnDamage(Actor, this, BombStats->Damage);
+				IDamageableInterface::Execute_OnDamage(Actor, this, Owner, Actor, BombStats->Damage);
 			}
 		}
 	}

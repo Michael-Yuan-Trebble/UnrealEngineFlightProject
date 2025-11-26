@@ -27,4 +27,6 @@ public:
 	void PickTarget();
 
 protected:
+
+	virtual void HandleDestroyed() override;
 };

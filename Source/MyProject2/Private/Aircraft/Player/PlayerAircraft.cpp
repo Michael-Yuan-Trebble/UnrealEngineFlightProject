@@ -52,3 +52,7 @@ void APlayerAircraft::PossessedBy(AController* NewController)
 	if (!Controlled) return;
 	Controlled->SetComponents(FlightComponent, WeaponComponent, RadarComponent, ManagerComp);
 }
+
+void APlayerAircraft::HandleDestroyed() {
+	Destroy();
+}

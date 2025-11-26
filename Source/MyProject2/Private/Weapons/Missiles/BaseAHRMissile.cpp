@@ -122,7 +122,7 @@ void ABaseAHRMissile::CheckAndDelete(AActor* OtherActor)
 
 	if (OtherActor->Implements<UDamageableInterface>())
 	{
-		IDamageableInterface::Execute_OnDamage(OtherActor, this, MissileStats->Damage);
+		IDamageableInterface::Execute_OnDamage(OtherActor, this, Owner, OtherActor, MissileStats->Damage);
 		OnWeaponResult.Broadcast(true);
 	}
 	else OnWeaponResult.Broadcast(false);

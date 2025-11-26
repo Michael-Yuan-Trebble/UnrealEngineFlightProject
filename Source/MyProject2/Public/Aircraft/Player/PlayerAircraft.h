@@ -48,4 +48,6 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaSeconds) override;
+
+	virtual void HandleDestroyed() override;
 };

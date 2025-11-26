@@ -12,6 +12,10 @@ class MYPROJECT2_API AAircraftSpawnPoint : public ABaseSpawnPoint
 	GENERATED_BODY()
 	
 public:
+
+	// TEMPORARY, just to test things easier spawn points should be triggered by gamemode not just automatically on its own
+	virtual void BeginPlay() override;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<APawn> AircraftClass;
 

@@ -73,6 +73,6 @@ void AAircraftBullet::DestroyBullet(AActor* OtherActor)
 
 	if (OtherActor->Implements<UDamageableInterface>())
 	{
-		IDamageableInterface::Execute_OnDamage(OtherActor, this, damage);
+		IDamageableInterface::Execute_OnDamage(OtherActor, this, Owner, OtherActor, damage);
 	}
 }
