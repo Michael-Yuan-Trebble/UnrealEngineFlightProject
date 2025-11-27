@@ -5,6 +5,7 @@
 #include "AircraftPlayerController.h"
 #include "Aircraft/FlightComponent.h"
 #include "Aircraft/RadarComponent.h"
+#include "HealthComponent.h"
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/Player/CameraManagerComponent.h"
 
@@ -53,6 +54,7 @@ void APlayerAircraft::PossessedBy(AController* NewController)
 	Controlled->SetComponents(FlightComponent, WeaponComponent, RadarComponent, ManagerComp);
 }
 
-void APlayerAircraft::HandleDestroyed() {
-	Destroy();
+void APlayerAircraft::HandleHit() 
+{
+
 }

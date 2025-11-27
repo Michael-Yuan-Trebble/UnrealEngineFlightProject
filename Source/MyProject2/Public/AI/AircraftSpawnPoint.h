@@ -27,4 +27,6 @@ public:
 	float FormationSpacing = 600.f;
 
 	virtual void ActivateSpawn() override;
+
+	bool bSpawned = false;
 };

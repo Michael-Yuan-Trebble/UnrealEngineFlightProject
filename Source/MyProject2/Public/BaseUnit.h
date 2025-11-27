@@ -64,9 +64,6 @@ public:
 	UFUNCTION()
 	virtual void HandleDestroyed(AActor* Weapon, AActor* Launcher, AActor* Target);
 
-	UFUNCTION()
-	void HandleHit();
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;

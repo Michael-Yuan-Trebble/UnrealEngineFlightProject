@@ -21,7 +21,6 @@ ABaseUnit::ABaseUnit()
 	if (HealthComp) 
 	{
 		HealthComp->OnDeath.AddDynamic(this, &ABaseUnit::HandleDestroyed);
-		HealthComp->OnDamage.AddDynamic(this, &ABaseUnit::HandleHit);
 	}
 }
 
@@ -53,6 +52,7 @@ void ABaseUnit::PossessedBy(AController* NewController)
 
 void ABaseUnit::OnDamage_Implementation(AActor* Weapon, AActor* Launcher, AActor* Target, float Damage)
 {
+	if (!HealthComp) return;
 	HealthComp->ApplyDamage(Damage, Weapon, Launcher, Target);
 }
 
@@ -64,10 +64,7 @@ void ABaseUnit::HandleDestroyed(AActor* Weapon, AActor* Launcher, AActor* Target
 		GS->RegisterKill(Launcher, Target, Weapon->GetClass());
 	}
 	DeactivateTarget();
-}
-
-void ABaseUnit::HandleHit() {
-
+	Destroy();
 }
 
 void ABaseUnit::ActivateTarget() 

@@ -24,9 +24,5 @@ public:
 
 	virtual void PossessedBy(AController* Controller) override;
 
-	void PickTarget();
-
 protected:
-
-	virtual void HandleDestroyed() override;
 };

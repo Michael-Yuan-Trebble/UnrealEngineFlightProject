@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "LockBoxWidget.h"
+#include "UI/HitNotificationWidget.h"
 #include "MinimapWidget.h"
 #include "PitchLadder.h"
 #include "AircraftPlayerController.h"
@@ -59,6 +60,11 @@ public:
 
 	APlayerAircraft* Controlled;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UHitNotificationWidget> HitNotiClass;
+
+	UHitNotificationWidget* HitNotiWidget;
+
 	UPROPERTY()
 	TMap<ABaseUnit*, ULockBoxWidget*> ActiveWidgets;
 
@@ -67,6 +73,8 @@ public:
 	void UpdateSelected(ABaseUnit* In);
 
 	void TogglePitchLadder(bool Toggle);
+
+	void UpdateTargetHit(bool bDestroyed);
 
 	UFUNCTION()
 	void OnWeaponChanged(FName WeaponName, int32 Current, int32 Max);
@@ -84,9 +92,7 @@ public:
 
 	bool isPitchLadderVisible;
 
-	void SetPitchLadderVisibility(bool isVisible);
-
-	void HandleWeaponResult(bool bhit);
+	void HandleWeaponMiss();
 
 private:
 

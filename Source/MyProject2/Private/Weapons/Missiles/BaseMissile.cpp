@@ -4,7 +4,8 @@
 #include "Weapons/Missiles/BaseMissile.h"
 #include "Aircraft/BaseAircraft.h"
 
-ABaseMissile::ABaseMissile() {
+ABaseMissile::ABaseMissile() 
+{
 	PrimaryActorTick.bCanEverTick = true;
 	canLock = true;
 	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Missile Collision"));

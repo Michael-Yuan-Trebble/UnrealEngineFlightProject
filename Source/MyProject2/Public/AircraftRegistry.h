@@ -8,6 +8,9 @@
 
 class ABaseUnit;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAnyUnitHit, AActor* Launcher);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAnyUnitDeath, AActor* Launcher);
+
 UCLASS()
 class MYPROJECT2_API AAircraftRegistry : public AInfo
 {
@@ -15,6 +18,9 @@ class MYPROJECT2_API AAircraftRegistry : public AInfo
 
 public:
 	AAircraftRegistry();
+
+	FOnAnyUnitHit OnAnyUnitHit;
+	FOnAnyUnitDeath OnAnyUnitDeath;
 
 	UPROPERTY(BlueprintReadOnly)
 	TArray<ABaseUnit*> RegisteredAircraft;

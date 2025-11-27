@@ -49,5 +49,7 @@ protected:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	virtual void HandleDestroyed() override;
+private:
+	UFUNCTION()
+	void HandleHit();
 };

@@ -13,6 +13,7 @@
 #include "UI/PlayerHUD.h"
 #include "Gamemodes/CurrentPlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "HealthComponent.h"
 #include "TimerManager.h"
 #include "Aircraft/Player/PlayerAircraft.h"
 
@@ -41,6 +42,11 @@ void AAircraftPlayerController::BeginPlay()
 	ACurrentPlayerState* PS = Cast<ACurrentPlayerState>(this->PlayerState);
 	if (!PS) return;
 	MenuManager->InitializePC(this, PS);
+	if (AAircraftRegistry* Reg = AAircraftRegistry::Get(GetWorld())) {
+		print(text)
+		Reg->OnAnyUnitHit.AddUObject(this, &AAircraftPlayerController::OnUnitHit);
+		Reg->OnAnyUnitDeath.AddUObject(this, &AAircraftPlayerController::OnUnitDestroyed);
+	}
 }
 
 void AAircraftPlayerController::OnPossess(APawn* InPawn) 
@@ -75,26 +81,38 @@ void AAircraftPlayerController::SetComponents(
 
 void AAircraftPlayerController::HandleWeaponHit(bool bHit)
 {
-	if (HUD)
+	if (bHit || !HUD) return;
+	HUD->HandleWeaponMiss();
+}
+
+void AAircraftPlayerController::OnUnitHit(AActor* Launcher) 
+{
+	if (!HUD) return;
+	if (Launcher == GetPawn()) 
 	{
-		HUD->HandleWeaponResult(bHit);
+		HUD->UpdateTargetHit(false);
+	}
+}
+
+void AAircraftPlayerController::OnUnitDestroyed(AActor* Launcher) 
+{
+	if (!HUD) return;
+	if (Launcher == GetPawn())
+	{
+		HUD->UpdateTargetHit(true);
 	}
 }
 
 void AAircraftPlayerController::HandleHUDLockedOn(bool bLocked)
 {
-	if (HUD)
-	{
-		HUD->UpdateLocked(bLocked);
-	}
+	if (!HUD) return;
+	HUD->UpdateLocked(bLocked);
 }
 
 void AAircraftPlayerController::HandleWeaponCount(FName WeaponName, int32 CurrentCount, int32 MaxCount) 
 {
-	if (HUD)
-	{
-		HUD->OnWeaponChanged(WeaponName, CurrentCount, MaxCount);
-	}
+	if (!HUD) return;
+	HUD->OnWeaponChanged(WeaponName, CurrentCount, MaxCount);
 }
 
 // Setting controls

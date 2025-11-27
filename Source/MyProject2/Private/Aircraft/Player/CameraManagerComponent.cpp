@@ -47,17 +47,17 @@ void UCameraManagerComponent::SetFirstPerson()
 	if (!PC || !Controlled) return;
 
 	CurrentMode = ECameraMode::FirstPerson;
-	Controlled->FirstPersonCamera->SetActive(true);
-	Controlled->ThirdPersonCamera->SetActive(false);
-
-	PC->SetViewTargetWithBlend(Controlled, 0.3f, VTBlend_Cubic);
 
 	LookXLock = 120.f;
 	LookYLock = 60.f;
 	FirstPersonX = 0.f;
 	FirstPersonY = 0.f;
 
-	Controlled->FirstPersonCamera->SetRelativeRotation(FRotator::ZeroRotator);
+	Controlled->FirstPersonSpringArm->SetRelativeRotation(FRotator::ZeroRotator);
+
+	PC->SetViewTargetWithBlend(Controlled, 0.f, VTBlend_Cubic);
+	Controlled->FirstPersonCamera->SetActive(true);
+	Controlled->ThirdPersonCamera->SetActive(false);
 
 	if (!HUD) return;
 	HUD->TogglePitchLadder(false);
@@ -69,10 +69,6 @@ void UCameraManagerComponent::SetThirdPerson()
 	if (!PC || !Controlled) return;
 
 	CurrentMode = ECameraMode::ThirdPerson;
-	Controlled->FirstPersonCamera->SetActive(false);
-	Controlled->ThirdPersonCamera->SetActive(true);
-
-	PC->SetViewTargetWithBlend(Controlled, 0.3f, VTBlend_Cubic);
 
 	LookXLock = 180.f;
 	LookYLock = 85.f;
@@ -82,6 +78,11 @@ void UCameraManagerComponent::SetThirdPerson()
 	if (!SpringArm) return;
 
 	SpringArm->SetRelativeRotation(FRotator::ZeroRotator);
+
+	Controlled->FirstPersonCamera->SetActive(false);
+	Controlled->ThirdPersonCamera->SetActive(true);
+
+	PC->SetViewTargetWithBlend(Controlled, 0.f, VTBlend_Cubic);
 
 	if (!HUD) return;
 	HUD->TogglePitchLadder(true);

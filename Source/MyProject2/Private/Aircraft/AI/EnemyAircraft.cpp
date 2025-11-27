@@ -18,9 +18,3 @@ void AEnemyAircraft::PossessedBy(AController* NewController)
 
 	Controller = Cast<AEnemyAircraftAI>(NewController);
 }
-
-void AEnemyAircraft::HandleDestroyed() 
-{
-	print(text)
-	Destroy();
-}

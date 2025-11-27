@@ -28,9 +28,6 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDamage);
 	FOnDamage OnDamage;
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float);
-	FOnHealthChanged OnHealthChanged;
-
 	ABaseUnit* Controller;
 
 private:
@@ -38,6 +35,8 @@ private:
 
 	// TODO: If there's any differences in all guns, like a flat out 2x damage mode, change it here
 	float GunMultiplier = 1.f;
+
+	float MissileMultiplier = 1.f;
 
 	bool isAlive = true;
 };

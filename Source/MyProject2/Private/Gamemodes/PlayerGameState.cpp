@@ -3,7 +3,8 @@
 
 #include "Gamemodes/PlayerGameState.h"
 
-void APlayerGameState::RegisterKill(AActor* Killer, AActor* Target, TSubclassOf<AActor> WeaponUsed) {
+void APlayerGameState::RegisterKill(AActor* Killer, AActor* Target, TSubclassOf<AActor> WeaponUsed) 
+{
 	if (!Target || !Killer) return;
 	FKillEvent NewEvent;
 	NewEvent.Killer = Killer;

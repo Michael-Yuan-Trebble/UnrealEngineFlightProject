@@ -1,8 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Health Component!"));
 #include "HealthComponent.h"
 #include "BaseUnit.h"
+#include "Aircraft/Player/PlayerAircraft.h"
 
 UHealthComponent::UHealthComponent()
 {
@@ -16,17 +17,19 @@ void UHealthComponent::Setup(float Health)
 
 void UHealthComponent::ApplyDamage(float Damage, AActor* Weapon, AActor* Launcher, AActor* Target)
 {
-	CurrentHealth -= Damage;
-	if (isAlive) 
+	if (!isAlive) return;
+	CurrentHealth -= Damage * GunMultiplier * MissileMultiplier;
+
+	if (CurrentHealth <= 0.f) 
 	{
-		if (CurrentHealth <= 0.f) 
-		{
-			isAlive = false;
-			OnDeath.Broadcast(Weapon, Launcher, Target);
-		}
-		else 
-		{
-			OnDamage.Broadcast();
-		}
+		isAlive = false;
+		OnDeath.Broadcast(Weapon, Launcher, Target);
 	}
+	else OnDamage.Broadcast();
+
+	AAircraftRegistry* Reg = AAircraftRegistry::Get(GetWorld());
+	if (!Reg) return;
+
+	if (isAlive) Reg->OnAnyUnitHit.Broadcast(Launcher);
+	else Reg->OnAnyUnitDeath.Broadcast(Launcher);
 }

@@ -194,6 +194,12 @@ private:
 	UFUNCTION()
 	void HandleWeaponCount(FName WeaponName, int32 CurrentCount, int32 MaxCount);
 
+	UFUNCTION()
+	void OnUnitHit(AActor* Launcher);
+
+	UFUNCTION()
+	void OnUnitDestroyed(AActor* Launcher);
+
 	//Variables
 
 	bool fire = false;

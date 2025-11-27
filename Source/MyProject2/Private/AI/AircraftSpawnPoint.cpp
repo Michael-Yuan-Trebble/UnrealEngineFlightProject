@@ -4,14 +4,15 @@
 #include "AI/AircraftSpawnPoint.h"
 #include "Aircraft/AI/EnemyAircraftAI.h"
 
-void AAircraftSpawnPoint::BeginPlay() {
+void AAircraftSpawnPoint::BeginPlay() 
+{
 	Super::BeginPlay();
 	ActivateSpawn();
 }
 
 void AAircraftSpawnPoint::ActivateSpawn() 
 {
-	print(text)
+	if (bSpawned) return;
 	if (!AircraftClass) return;
 	UWorld* World = GetWorld();
 
@@ -20,7 +21,8 @@ void AAircraftSpawnPoint::ActivateSpawn()
 	FVector BaseLocation = GetActorLocation();
 	FRotator BaseRotation = GetActorRotation();
 
-	for (int32 i = 0; i < Count; i++) {
+	for (int32 i = 0; i < Count; i++) 
+	{
 		FVector Offset = BaseRotation.RotateVector(
 			FVector(i * FormationSpacing, 0.f, 0.f)
 			);
@@ -38,14 +40,12 @@ void AAircraftSpawnPoint::ActivateSpawn()
 
 		if (!SpawnedAircraft) continue;
 
-		if (SpawnedAircraft->AutoPossessAI == EAutoPossessAI::Disabled) {
+		if (SpawnedAircraft->AutoPossessAI == EAutoPossessAI::Disabled) 
+		{
 			AEnemyAircraftAI* AIC = World->SpawnActor<AEnemyAircraftAI>();
-			if (AIC) {
-				AIC->Possess(SpawnedAircraft);
-			}
+			if (!AIC) continue;
+			AIC->Possess(SpawnedAircraft);
 		}
-		UE_LOG(LogTemp, Log, TEXT("Spawned Aircraft %s at %s"),
-			*SpawnedAircraft->GetName(),
-			*SpawnLocation.ToString());
 	}
+	bSpawned = true;
 }

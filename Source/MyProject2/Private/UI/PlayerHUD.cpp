@@ -52,11 +52,14 @@ void APlayerHUD::Init(AAircraftPlayerController* InPC)
     PitchLadderWidget->AddToViewport();
     PitchLadderWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
 
+    if (!HitNotiClass) return;
+    HitNotiWidget = CreateWidget<UHitNotificationWidget>(PC, HitNotiClass);
+    HitNotiWidget->AddToViewport();
+    HitNotiWidget->HideMessage();
+    HitNotiWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+
     Controlled = Cast<APlayerAircraft>(PC->GetPawn());
     if (!Controlled) return;
-
-    // TODO: Pitch Ladder Visibility is true for now in testing, remove later because its only meant for certain modes, not always at start
-    isPitchLadderVisible = true;
 }
 
 void APlayerHUD::OnWeaponChanged(FName WeaponName, int32 Current, int32 Max) 
@@ -66,11 +69,21 @@ void APlayerHUD::OnWeaponChanged(FName WeaponName, int32 Current, int32 Max)
     MaxNum = Max;
 }
 
-void APlayerHUD::HandleWeaponResult(bool bHit) {
-    if (bHit) 
-    {
-        return;
-    } 
+void APlayerHUD::HandleWeaponMiss()
+{
+    if (!HitNotiWidget) return;
+    HitNotiWidget->ShowMessage(FText::FromString("Missed"));
+}
+
+void APlayerHUD::UpdateTargetHit(bool bDestroyed) 
+{
+    if (!HitNotiWidget) return;
+    if (bDestroyed) {
+        HitNotiWidget->ShowMessage(FText::FromString("Destroyed"));
+    }
+    else {
+        HitNotiWidget->ShowMessage(FText::FromString("Hit"));
+    }
 }
 
 void APlayerHUD::Tick(float DeltaSeconds) 
@@ -122,11 +135,8 @@ void APlayerHUD::Tick(float DeltaSeconds)
 void APlayerHUD::TogglePitchLadder(bool Toggle) {
     if (!IsValid(PitchLadderWidget) || !PitchLadderWidget) return;
 
-    if (Toggle) {
-        PitchLadderWidget->SetVisibility(ESlateVisibility::Hidden);
-        return;
-    }
-    PitchLadderWidget->SetVisibility(ESlateVisibility::Visible);
+    PitchLadderWidget->SetVisibility(Toggle ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
+    isPitchLadderVisible = !Toggle;
 }
 
 void APlayerHUD::PitchLadderUpdate() 
@@ -134,14 +144,6 @@ void APlayerHUD::PitchLadderUpdate()
     if (!isPitchLadderVisible) return;
     float Pitch = FMath::RadiansToDegrees(FMath::Asin(Controlled->Airframe->GetForwardVector().Z));
     PitchLadderWidget->Update(Pitch);
-}
-
-void APlayerHUD::SetPitchLadderVisibility(bool isVisible) 
-{
-    isPitchLadderVisible = isVisible;
-    PitchLadderWidget->SetVisibility(
-        isPitchLadderVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden
-    );
 }
 
 void APlayerHUD::UpdateLocked(bool Locked)
@@ -169,7 +171,7 @@ void APlayerHUD::UpdateTargetWidgets()
 
     for (ABaseUnit* Target : Targets)
     {
-        if (!IsValid(Target)) continue;
+        if (!IsValid(Target) || Target->IsPendingKillPending() || Target->IsActorBeingDestroyed()) continue;
 
         ULockBoxWidget* Reticle = ActiveWidgets.FindRef(Target);
         if (!Reticle)
