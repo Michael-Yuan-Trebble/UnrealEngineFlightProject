@@ -7,8 +7,10 @@
 #include "Structs and Data/FDetectedAircraftInfo.h"
 #include "RadarComponent.generated.h"
 
-class ABaseAircraft;
+class ABaseUnit;
 class APlayerHUD;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRadarScanEvent, const TArray<FDetectedAircraftInfo>&, Targets);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API URadarComponent : public UActorComponent
@@ -18,9 +20,11 @@ class MYPROJECT2_API URadarComponent : public UActorComponent
 public:	
 	URadarComponent();
 
+	FRadarScanEvent RadarScanEvent;
+
 	void ScanTargets();
 
-	void Setup(ABaseAircraft* InControl);
+	void Setup(ABaseUnit* InControl);
 
 	void CycleTarget();
 
@@ -28,15 +32,21 @@ public:
 
 	void SetTarget(AActor* NewTarget);
 
+	UFUNCTION()
+	void HandleSelectedDestroyed();
+
 	TArray<FDetectedAircraftInfo> Enemies;
 
-	ABaseAircraft* Controlled;
+	ABaseUnit* Controlled;
 
-	AActor* Selected;
+	UPROPERTY()
+	TWeakObjectPtr<ABaseUnit> Selected;
 
 	APlayerHUD* HUD;
 
 	FTimerHandle RadarScanTimer;
+	
+	ABaseUnit* LastSelected = nullptr;
 
 protected:
 	virtual void BeginPlay() override;

@@ -4,7 +4,9 @@
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/BaseAircraft.h"
 #include "Weapons/AircraftBullet.h"
+#include "Aircraft/RadarComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/PlayerHUD.h"
 #include "Structs and Data/LockableTarget.h"
 #include "AircraftPlayerController.h"
 #include "DrawDebugHelpers.h"
@@ -59,7 +61,7 @@ void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 			}
 		}
 	}
-	UpdateLockedOn(DeltaTime, Controlled->Tracking);
+	UpdateLockedOn(DeltaTime, Controlled->RadarComponent->Selected.Get());
 }
 
 void UWeaponSystemComponent::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) 
@@ -188,9 +190,9 @@ void UWeaponSystemComponent::SelectWeapon(int WeaponIndex)
 
 	const TArray<FCooldownWeapon*>* WeaponArray = WeaponGroups.Find(SelectedClass);
 	if (!WeaponArray || WeaponArray->Num() == 0) return;
+	ResetLockedOn();
 
 	CurrentWeapon = (*WeaponArray)[0]->WeaponInstance;
-
 	GetCount();
 }
 
@@ -216,26 +218,50 @@ void UWeaponSystemComponent::GetCount()
 		}
 	}
 	OnWeaponCountUpdated.Broadcast(CurrentWeapon->WeaponName, CurrentWeaponCount, MaxWeaponCountSelected);
+	if (CurrentWeaponCount <= 0) ResetLockedOn();
 }
 
 void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target) 
 {
-	if (!CurrentWeapon || !CurrentWeapon->canLock || !IsValid(Target)) return;
+	if (!CurrentWeapon || !IsValid(Target)) 
+	{
+		if (bLocked || LockTime > 0.f) 
+		{
+			ResetLockedOn();
+		}
+		else 
+		{
+			OnHUDLockedOn.Broadcast(false);
+		}
+		return;
+	}
 
-	if (!Target->Implements<ULockableTarget>()) return; // Breakpoint error
+	if (!Target->Implements<ULockableTarget>()) 
+	{
+		ResetLockedOn();
+		return;
+	}
+
+	if (!CurrentWeapon->canLock || CurrentWeaponCount <= 0)
+	{
+		if (bLocked || LockTime > 0.f) 
+		{
+			ResetLockedOn();
+		}
+		return;
+	}
 
 	ILockableTarget* LockTarget = Cast<ILockableTarget>(Target);
-	if (!LockTarget) return;
+	if (!LockTarget) 
+	{
+		ResetLockedOn();
+		return;
+	}
 
 	ETargetType TargetType = LockTarget->GetTargetType();
-	
-
-	if (!CurrentWeapon->CanLockTarget(TargetType)) return;
-
-	if (!Target) 
+	if (!CurrentWeapon->CanLockTarget(TargetType)) 
 	{
-		bLocked = false;
-		LockTime = 0.f;
+		ResetLockedOn();
 		return;
 	}
 
@@ -244,9 +270,7 @@ void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target)
 	ToTarget.Normalize();
 	if (Distance > CurrentWeapon->range) 
 	{
-		bLocked = false;
-		OnHUDLockedOn.Broadcast(bLocked);
-		LockTime = 0.f;
+		ResetLockedOn();
 		return;
 	}
 
@@ -264,5 +288,12 @@ void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target)
 		bLocked = false;
 		LockTime = 0.f;
 	}
+	OnHUDLockedOn.Broadcast(bLocked);
+}
+
+void UWeaponSystemComponent::ResetLockedOn() 
+{
+	LockTime = 0.f;
+	bLocked = false;
 	OnHUDLockedOn.Broadcast(bLocked);
 }

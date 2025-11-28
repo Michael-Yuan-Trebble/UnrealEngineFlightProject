@@ -13,6 +13,8 @@
 
 class UHealthComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnThisDeath);
+
 UCLASS()
 class MYPROJECT2_API ABaseUnit : public APawn, public ILockableTarget, public IDamageableInterface, public ITeamInterface
 {
@@ -20,6 +22,8 @@ class MYPROJECT2_API ABaseUnit : public APawn, public ILockableTarget, public ID
 
 public:
 	ABaseUnit();
+
+	FOnThisDeath OnUnitDeath;
 
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* Collision;
@@ -63,6 +67,8 @@ public:
 
 	UFUNCTION()
 	virtual void HandleDestroyed(AActor* Weapon, AActor* Launcher, AActor* Target);
+
+	AActor* Tracked;
 
 protected:
 	virtual void BeginPlay() override;

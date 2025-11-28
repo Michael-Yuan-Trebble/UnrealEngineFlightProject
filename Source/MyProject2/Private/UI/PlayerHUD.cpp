@@ -8,6 +8,7 @@
 #include "UI/LockBoxWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Aircraft/FlightComponent.h"
+#include "Aircraft/RadarComponent.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/Player/PlayerAircraft.h"
@@ -20,8 +21,6 @@ APlayerHUD::APlayerHUD()
 void APlayerHUD::BeginPlay()
 {
     Super::BeginPlay();
-
-    //GetWorld()->GetTimerManager().SetTimerForNextTick(this, &APlayerHUD::Init);
 }
 
 void APlayerHUD::Init(AAircraftPlayerController* InPC) 
@@ -60,6 +59,9 @@ void APlayerHUD::Init(AAircraftPlayerController* InPC)
 
     Controlled = Cast<APlayerAircraft>(PC->GetPawn());
     if (!Controlled) return;
+    URadarComponent* Radar = Controlled->RadarComponent;
+    if (!Radar) return;;
+    Radar->RadarScanEvent.AddDynamic(this, &APlayerHUD::HandleRadarScan);
 }
 
 void APlayerHUD::OnWeaponChanged(FName WeaponName, int32 Current, int32 Max) 
@@ -159,7 +161,7 @@ void APlayerHUD::UpdateTargetWidgets()
     for (auto It = ActiveWidgets.CreateIterator(); It; ++It)
     {
         ABaseUnit* Target = It.Key();
-        if (!IsValid(Target) || !Targets.Contains(Target))
+        if (!IsValid(Target) || Target->IsActorBeingDestroyed() || !Targets.Contains(Target))
         {
             if (ULockBoxWidget* Reticle = It.Value())
             {
@@ -169,9 +171,15 @@ void APlayerHUD::UpdateTargetWidgets()
         }
     }
 
-    for (ABaseUnit* Target : Targets)
+    for (int32 i = Targets.Num() - 1; i >= 0; i--)
     {
-        if (!IsValid(Target) || Target->IsPendingKillPending() || Target->IsActorBeingDestroyed()) continue;
+        ABaseUnit* Target = Targets[i];
+
+        if (!IsValid(Target) || Target->IsActorBeingDestroyed())
+        {
+            Targets.RemoveAt(i);
+            continue;
+        }
 
         ULockBoxWidget* Reticle = ActiveWidgets.FindRef(Target);
         if (!Reticle)
@@ -185,14 +193,12 @@ void APlayerHUD::UpdateTargetWidgets()
         }
 
         FVector WorldLocation;
-        if (Target->Collision) 
-        {
-            WorldLocation = Target->Collision->GetComponentLocation();
-        } 
-        else
-        {
-            WorldLocation = Target->GetActorLocation();
-        }
+        if (!IsValid(Target) || Target->IsActorBeingDestroyed()) continue;
+
+        USceneComponent* Comp = Target->GetRootComponent();
+        if (!IsValid(Comp)) continue;
+
+        WorldLocation = Comp->GetComponentLocation();
 
         if (!Reticle) continue;
 
@@ -203,7 +209,8 @@ void APlayerHUD::UpdateTargetWidgets()
         FRotator CameraRot;
         PC->GetPlayerViewPoint(CameraLoc, CameraRot);
 
-        FVector ToTarget = Target->GetActorLocation() - CameraLoc;
+        FVector Location = Comp->GetComponentLocation();
+        FVector ToTarget = Location - CameraLoc;
         bool bInFront = FVector::DotProduct(CameraRot.Vector(), ToTarget) > 0;
 
         if (bProjected && bInFront)
@@ -220,11 +227,46 @@ void APlayerHUD::UpdateTargetWidgets()
     }
 }
 
+void APlayerHUD::HandleRadarScan(const TArray<FDetectedAircraftInfo>& InEnemies) {
+    TArray<ABaseUnit*> Array;
+    for (FDetectedAircraftInfo T : InEnemies) 
+    {
+        ABaseUnit* Unit = Cast<ABaseUnit>(T.CurrentPawn);
+        if (!Unit) continue;
+        Array.Add(Unit);
+    }
+    Targets = Array;
+}
+
+void APlayerHUD::OnUnitDestroyed(ABaseUnit* Death)
+{
+    Targets.Remove(Death);
+    if (ULockBoxWidget* W = ActiveWidgets.FindRef(Death)) 
+    {
+        W->RemoveFromParent();
+    }
+
+    ActiveWidgets.Remove(Death);
+}
+
 void APlayerHUD::UpdateSelected(ABaseUnit* In)
 {
+    if (!IsValid(In))
+    {
+        SelectedAircraftWidget = nullptr;
+        LastActor = nullptr;
+        return;
+    }
+
+    if (LastActor && LastActor->GetUniqueID() == In->GetUniqueID())
+        return;
+
+    LastActor = In;
+
     if (ULockBoxWidget** FoundWidget = ActiveWidgets.Find(In))
     {
-        SelectedAircraftWidget = *FoundWidget;
+        print(text)
+            SelectedAircraftWidget = *FoundWidget;
     }
     else
     {

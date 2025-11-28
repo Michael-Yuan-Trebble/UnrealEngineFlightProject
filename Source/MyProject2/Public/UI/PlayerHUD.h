@@ -7,6 +7,7 @@
 #include "LockBoxWidget.h"
 #include "UI/HitNotificationWidget.h"
 #include "MinimapWidget.h"
+#include "Structs and Data/FDetectedAircraftInfo.h"
 #include "PitchLadder.h"
 #include "AircraftPlayerController.h"
 #include "PlayerHUD.generated.h"
@@ -60,6 +61,8 @@ public:
 
 	APlayerAircraft* Controlled;
 
+	ABaseUnit* LastActor;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UHitNotificationWidget> HitNotiClass;
 
@@ -93,6 +96,11 @@ public:
 	bool isPitchLadderVisible;
 
 	void HandleWeaponMiss();
+
+	void OnUnitDestroyed(ABaseUnit* Death);
+
+	UFUNCTION()
+	void HandleRadarScan(const TArray<FDetectedAircraftInfo>& InEnemies);
 
 private:
 

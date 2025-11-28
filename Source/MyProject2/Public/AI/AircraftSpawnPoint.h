@@ -28,5 +28,11 @@ public:
 
 	virtual void ActivateSpawn() override;
 
+	UPROPERTY()
 	bool bSpawned = false;
+
+	void StressTest();
+
+	UPROPERTY(EditAnywhere)
+	float DestroyDelay = 10.f;
 };

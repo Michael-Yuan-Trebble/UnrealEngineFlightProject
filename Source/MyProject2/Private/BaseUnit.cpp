@@ -3,6 +3,8 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Unit!"));
 #include "BaseUnit.h"
 #include "Gamemodes/PlayerGameState.h"
+#include "UI/PlayerHUD.h"
+#include "Kismet/GameplayStatics.h"
 #include "HealthComponent.h"
 
 ABaseUnit::ABaseUnit()
@@ -58,10 +60,22 @@ void ABaseUnit::OnDamage_Implementation(AActor* Weapon, AActor* Launcher, AActor
 
 void ABaseUnit::HandleDestroyed(AActor* Weapon, AActor* Launcher, AActor* Target)
 {
+	OnUnitDeath.Broadcast();
 	APlayerGameState* GS = GetWorld()->GetGameState<APlayerGameState>();
 	if (GS)
 	{
 		GS->RegisterKill(Launcher, Target, Weapon->GetClass());
+	}
+	APlayerHUD* HUD = Cast<APlayerHUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+	if (HUD) 
+	{
+		HUD->OnUnitDestroyed(this);
+	}
+	//if (Collision) Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SetActorEnableCollision(false);
+	SetActorTickEnabled(false);
+	for (auto* Comp : GetComponents()) {
+		if (Comp) Comp->SetComponentTickEnabled(false);
 	}
 	DeactivateTarget();
 	Destroy();

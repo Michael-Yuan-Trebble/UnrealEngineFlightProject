@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Radar!"));
 #include "Aircraft/RadarComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Aircraft/BaseAircraft.h"
+#include "BaseUnit.h"
 #include "AircraftRegistry.h"
 #include "Engine/World.h"
 #include "UI/PlayerHUD.h"
@@ -20,10 +20,11 @@ void URadarComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// Radar only triggers 0.5 seconds at a time
-	GetWorld()->GetTimerManager().SetTimer(RadarScanTimer, this, &URadarComponent::ScanTargets, 0.5f, true);
+	const float ScanTime = 1.5f;
+	GetWorld()->GetTimerManager().SetTimer(RadarScanTimer, this, &URadarComponent::ScanTargets, ScanTime, true);
 }
 
-void URadarComponent::Setup(ABaseAircraft* InControl) 
+void URadarComponent::Setup(ABaseUnit* InControl)
 {
 	Controlled = InControl;
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
@@ -36,45 +37,64 @@ void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void URadarComponent::ScanTargets() 
+void URadarComponent::ScanTargets()
 {
-	// Gather aircraft from cached registry
-
 	Enemies.Empty();
 	if (!GetWorld()) return;
+
 	AAircraftRegistry* Registry = AAircraftRegistry::Get(GetWorld());
 	if (!Registry) return;
 
-	// Only try to find enemies right now, later find allies and put a different reticle over them
+	if (!Selected.IsValid())
+	{
+		HandleSelectedDestroyed();
+	}
 
+	ABaseUnit* Previous = Selected.Get();
+
+	ABaseUnit* FirstSelected = nullptr;
 	for (ABaseUnit* RegisteredPawn : Registry->RegisteredAircraft)
 	{
-		if (!IsValid(RegisteredPawn) || RegisteredPawn == Controlled) continue;
-
+		if (!IsValid(RegisteredPawn)) continue;
+		if (RegisteredPawn == Controlled) continue;
 		if (RegisteredPawn->Faction == Controlled->Faction) continue;
 		if (!RegisteredPawn->IsLockable()) continue;
 
-		FDetectedAircraftInfo TempInfo;
-		TempInfo.Location = RegisteredPawn->GetActorLocation();
-		TempInfo.Rotation = RegisteredPawn->GetActorRotation();
-		TempInfo.CurrentPawn = RegisteredPawn;
-		TempInfo.threatLevel = TempInfo.CalculateThreat();
+		FDetectedAircraftInfo Info;
+		Info.CurrentPawn = RegisteredPawn;
+		Info.Location = RegisteredPawn->GetActorLocation();
+		Info.Rotation = RegisteredPawn->GetActorRotation();
+		Info.threatLevel = Info.CalculateThreat();
 
-		if (TempInfo.threatLevel <= 0) continue;
-		Enemies.Add(TempInfo);
-		if (!Controlled) continue;
-		if (!Controlled->GetController()->IsPlayerController()) continue;
-		if (!Selected)
+		if (Info.threatLevel <= 0) continue;
+		Enemies.Add(Info);
+
+		if (!FirstSelected)
 		{
-			Selected = RegisteredPawn;
-			Controlled->Tracking = Selected;
-			FTimerHandle TempHandle;
-		}
-		if (HUD && !IsValid(HUD->SelectedAircraftWidget)) 
-		{
-			HUD->UpdateSelected(RegisteredPawn);
+			FirstSelected = RegisteredPawn;
 		}
 	}
+
+	if ((!Selected.IsValid() || !Selected.Get()->IsValidLowLevel()) && FirstSelected && FirstSelected != Previous)
+	{
+		print(text)
+		SetTarget(FirstSelected);
+	}
+
+	if (HUD)
+	{
+		RadarScanEvent.Broadcast(Enemies);
+	}
+}
+
+void URadarComponent::HandleSelectedDestroyed() 
+{
+	Selected = nullptr;
+
+	if (Controlled) Controlled->Tracked = nullptr;
+	if (HUD) HUD->UpdateSelected(nullptr);
+
+	CycleToNextTarget();
 }
 
 // ====================================
@@ -154,8 +174,26 @@ void URadarComponent::CycleToNextTarget()
 
 void URadarComponent::SetTarget(AActor* NewTarget) 
 {
-	Selected = NewTarget;
-	if (!Controlled) return;
-	Controlled->Tracking = NewTarget;
+	ABaseUnit* Unit = Cast<ABaseUnit>(NewTarget);
+	if (!IsValid(Unit)) return;
+	if (Selected.Get() == Unit) return;
+
+	if (Selected.IsValid())
+	{
+		Selected->OnUnitDeath.RemoveDynamic(this, &URadarComponent::HandleSelectedDestroyed);
+	}
+
+	Selected = Unit;
+	if (!Unit->OnUnitDeath.IsAlreadyBound(this, &URadarComponent::HandleSelectedDestroyed))
+	{
+		Unit->OnUnitDeath.AddDynamic(this, &URadarComponent::HandleSelectedDestroyed);
+	}
+
+	if (HUD && Selected.Get() != LastSelected)
+	{
+		HUD->UpdateSelected(Unit);
+		LastSelected = Unit;
+		if (Controlled) Controlled->Tracked = Unit;
+	}
 	// VFX
 }

@@ -368,7 +368,8 @@ void AAircraftPlayerController::Weapons()
 		WeaponComp->WeaponGroups.GetKeys(Keys);
 		CurrentWeaponClass = Keys[0];
 	}
-	WeaponComp->FireWeaponSelected(CurrentWeaponClass, RadarComp->Selected,FlightComp->currentSpeed);
+	if (!RadarComp->Selected.IsValid()) return;
+	WeaponComp->FireWeaponSelected(CurrentWeaponClass, RadarComp->Selected.Get(), FlightComp->currentSpeed);
 }
 
 void AAircraftPlayerController::NextWeapon() 

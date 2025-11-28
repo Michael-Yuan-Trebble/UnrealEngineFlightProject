@@ -91,4 +91,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AAircraftBullet> Bullet;
+
+private:
+	void ResetLockedOn();
 };
