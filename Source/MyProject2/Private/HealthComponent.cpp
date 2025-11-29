@@ -27,7 +27,7 @@ void UHealthComponent::ApplyDamage(float Damage, AActor* Weapon, AActor* Launche
 	}
 	else OnDamage.Broadcast();
 
-	AAircraftRegistry* Reg = AAircraftRegistry::Get(GetWorld());
+	UAircraftRegistry* Reg = UAircraftRegistry::Get(GetWorld());
 	if (!Reg) return;
 	Reg->Unregister(Controller);
 

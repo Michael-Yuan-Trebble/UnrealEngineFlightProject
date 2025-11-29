@@ -42,7 +42,7 @@ void URadarComponent::ScanTargets()
 	Enemies.Empty();
 	if (!GetWorld()) return;
 
-	AAircraftRegistry* Registry = AAircraftRegistry::Get(GetWorld());
+	UAircraftRegistry* Registry = UAircraftRegistry::Get(GetWorld());
 	if (!Registry) return;
 
 	if (!Selected.IsValid())
@@ -53,15 +53,17 @@ void URadarComponent::ScanTargets()
 	ABaseUnit* Previous = Selected.Get();
 
 	ABaseUnit* FirstSelected = nullptr;
-	for (ABaseUnit* RegisteredPawn : Registry->RegisteredAircraft)
+	for (TWeakObjectPtr<ABaseUnit> RegisteredPawn : Registry->RegisteredUnits)
 	{
-		if (!IsValid(RegisteredPawn)) continue;
+		if (!RegisteredPawn.IsValid()) continue;
 		if (RegisteredPawn == Controlled) continue;
 		if (RegisteredPawn->Faction == Controlled->Faction) continue;
 		if (!RegisteredPawn->IsLockable()) continue;
 
+		ABaseUnit* Unit = RegisteredPawn.Get();
+
 		FDetectedAircraftInfo Info;
-		Info.CurrentPawn = RegisteredPawn;
+		Info.CurrentPawn = Unit;
 		Info.Location = RegisteredPawn->GetActorLocation();
 		Info.Rotation = RegisteredPawn->GetActorRotation();
 		Info.threatLevel = Info.CalculateThreat();
@@ -71,7 +73,7 @@ void URadarComponent::ScanTargets()
 
 		if (!FirstSelected)
 		{
-			FirstSelected = RegisteredPawn;
+			FirstSelected = Unit;
 		}
 	}
 

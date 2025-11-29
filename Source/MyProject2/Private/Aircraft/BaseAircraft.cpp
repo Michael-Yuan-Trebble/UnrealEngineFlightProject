@@ -154,3 +154,19 @@ void ABaseAircraft::DeactivateVortexFX()
 		FX->Deactivate();
 	}
 }
+
+void ABaseAircraft::HandleLOD(FVector CameraLoc) 
+{
+	// Setting distance to KM
+	float Distance = FVector::Dist(CameraLoc, GetActorLocation()) * 0.00001;
+	if (Distance >= 5 && bIsVisible) 
+	{
+		Airframe->SetVisibility(false, true);
+		bIsVisible = false;
+	}
+	else if (!bIsVisible)
+	{
+		Airframe->SetVisibility(true, true);
+		bIsVisible = true;
+	}
+}

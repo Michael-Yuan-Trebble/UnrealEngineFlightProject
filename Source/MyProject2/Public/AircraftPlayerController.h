@@ -200,6 +200,10 @@ private:
 	UFUNCTION()
 	void OnUnitDestroyed(AActor* Launcher);
 
+	void UpdateLODs();
+
+	FTimerHandle MissileVFXHandle;
+
 	//Variables
 
 	bool fire = false;

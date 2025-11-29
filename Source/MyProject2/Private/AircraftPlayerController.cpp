@@ -15,6 +15,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "HealthComponent.h"
 #include "TimerManager.h"
+#include "Weapons/Missiles/BaseMissile.h"
+#include "Structs and Data/MissileManagerSubsystem.h"
 #include "Aircraft/Player/PlayerAircraft.h"
 
 AAircraftPlayerController::AAircraftPlayerController() 
@@ -42,11 +44,19 @@ void AAircraftPlayerController::BeginPlay()
 	ACurrentPlayerState* PS = Cast<ACurrentPlayerState>(this->PlayerState);
 	if (!PS) return;
 	MenuManager->InitializePC(this, PS);
-	if (AAircraftRegistry* Reg = AAircraftRegistry::Get(GetWorld())) {
-		print(text)
+	if (UAircraftRegistry* Reg = UAircraftRegistry::Get(GetWorld()))
+	{
 		Reg->OnAnyUnitHit.AddUObject(this, &AAircraftPlayerController::OnUnitHit);
 		Reg->OnAnyUnitDeath.AddUObject(this, &AAircraftPlayerController::OnUnitDestroyed);
 	}
+	const float ScanTime = 0.15f;
+	GetWorld()->GetTimerManager().SetTimer(
+		MissileVFXHandle,
+		this,
+		&AAircraftPlayerController::UpdateLODs,
+		ScanTime,
+		true
+	);
 }
 
 void AAircraftPlayerController::OnPossess(APawn* InPawn) 
@@ -72,11 +82,34 @@ void AAircraftPlayerController::SetComponents(
 	WeaponComp->OnWeaponHit.AddDynamic(this, &AAircraftPlayerController::HandleWeaponHit);
 	WeaponComp->OnHUDLockedOn.AddDynamic(this, &AAircraftPlayerController::HandleHUDLockedOn);
 	WeaponComp->OnWeaponCountUpdated.AddDynamic(this, &AAircraftPlayerController::HandleWeaponCount);
-	WeaponComp->GetCount();
 
 	RadarComp = InRadar;
 
 	ManagerComp = InManager;
+}
+
+void AAircraftPlayerController::UpdateLODs()
+{
+	// Missile LODs
+	if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>())
+	{
+		FVector CameraLoc = PlayerCameraManager->GetCameraLocation();
+		for (TWeakObjectPtr<ABaseMissile> Missile : Subsystem->ActiveMissiles)
+		{
+			if (!Missile.IsValid()) continue;
+			ABaseMissile* M = Missile.Get();
+			M->ApplyVFXLOD(CameraLoc);
+		}
+	}
+
+	// Airframe LODs
+	if (UAircraftRegistry* Registry = UAircraftRegistry::Get(GetWorld())) {
+		FVector CameraLoc = PlayerCameraManager->GetCameraLocation();
+		for (TWeakObjectPtr<ABaseUnit> Unit : Registry->RegisteredUnits) {
+			if (!Unit.IsValid()) continue;
+			ABaseUnit* U = Unit.Get();
+		}
+	}
 }
 
 void AAircraftPlayerController::HandleWeaponHit(bool bHit)
@@ -112,6 +145,7 @@ void AAircraftPlayerController::HandleHUDLockedOn(bool bLocked)
 void AAircraftPlayerController::HandleWeaponCount(FName WeaponName, int32 CurrentCount, int32 MaxCount) 
 {
 	if (!HUD) return;
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Count: %d"), CurrentCount));
 	HUD->OnWeaponChanged(WeaponName, CurrentCount, MaxCount);
 }
 
@@ -368,7 +402,7 @@ void AAircraftPlayerController::Weapons()
 		WeaponComp->WeaponGroups.GetKeys(Keys);
 		CurrentWeaponClass = Keys[0];
 	}
-	if (!RadarComp->Selected.IsValid()) return;
+	//if (!RadarComp->Selected.IsValid()) return;
 	WeaponComp->FireWeaponSelected(CurrentWeaponClass, RadarComp->Selected.Get(), FlightComp->currentSpeed);
 }
 

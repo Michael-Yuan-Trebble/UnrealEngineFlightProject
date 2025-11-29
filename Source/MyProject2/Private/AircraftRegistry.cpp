@@ -5,32 +5,29 @@
 #include "Aircraft/BaseAircraft.h"
 #include "EngineUtils.h"
 
-AAircraftRegistry::AAircraftRegistry() 
+UAircraftRegistry::UAircraftRegistry()
 {
-	PrimaryActorTick.bCanEverTick = false;
 }
 
-void AAircraftRegistry::Register(ABaseUnit* Aircraft)
+void UAircraftRegistry::Register(ABaseUnit* Aircraft)
 {
-	if (Aircraft && !RegisteredAircraft.Contains(Aircraft))
+	if (Aircraft && !RegisteredUnits.Contains(Aircraft))
 	{
-		RegisteredAircraft.Add(Aircraft);
+		RegisteredUnits.Add(Aircraft);
 	}
 }
 
-void AAircraftRegistry::Unregister(ABaseUnit* Aircraft)
+void UAircraftRegistry::Unregister(ABaseUnit* Aircraft)
 {
-	RegisteredAircraft.Remove(Aircraft);
+	RegisteredUnits.Remove(Aircraft);
 }
 
-AAircraftRegistry* AAircraftRegistry::Get(UWorld* World) 
+UAircraftRegistry* UAircraftRegistry::Get(UWorld* World)
 {
 	if (!World) return nullptr;
 
-	AAircraftRegistry* Found = nullptr;
-	for (TActorIterator<AAircraftRegistry> It(World); It; ++It) 
-	{
-		if (!Found) Found = *It;
-	}
-	return Found;
+	UGameInstance* GI = World->GetGameInstance();
+	if (!GI) return nullptr;
+
+	return GI->GetSubsystem<UAircraftRegistry>();
 }

@@ -30,7 +30,7 @@ void ABaseUnit::BeginPlay()
 {
 	Super::BeginPlay();
 	isAlive = true;
-	if (UWorld* World = GetWorld()) Registry = AAircraftRegistry::Get(World);
+	if (UWorld* World = GetWorld()) Registry = UAircraftRegistry::Get(World);
 	if (bStartsTargetable) ActivateTarget();
 	HealthComp->Setup(health);
 }
@@ -71,15 +71,18 @@ void ABaseUnit::HandleDestroyed(AActor* Weapon, AActor* Launcher, AActor* Target
 	{
 		HUD->OnUnitDestroyed(this);
 	}
-	//if (Collision) Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	SetActorEnableCollision(false);
 	SetActorTickEnabled(false);
-	for (auto* Comp : GetComponents()) {
+	for (auto* Comp : GetComponents()) 
+	{
 		if (Comp) Comp->SetComponentTickEnabled(false);
 	}
 	DeactivateTarget();
 	Destroy();
 }
+
+void ABaseUnit::HandleLOD(FVector CameraLoc) {}
 
 void ABaseUnit::ActivateTarget() 
 {

@@ -41,7 +41,7 @@ public:
 	bool bIsTargetable = false;
 
 	UPROPERTY()
-	AAircraftRegistry* Registry = nullptr;
+	UAircraftRegistry* Registry = nullptr;
 
 	bool isAlive = true;
 
@@ -67,6 +67,8 @@ public:
 
 	UFUNCTION()
 	virtual void HandleDestroyed(AActor* Weapon, AActor* Launcher, AActor* Target);
+
+	virtual void HandleLOD(FVector CameraLoc);
 
 	AActor* Tracked;
 

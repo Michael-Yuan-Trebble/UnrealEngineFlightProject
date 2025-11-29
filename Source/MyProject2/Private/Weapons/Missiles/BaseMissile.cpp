@@ -3,6 +3,7 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Missile!"));
 #include "Weapons/Missiles/BaseMissile.h"
 #include "Aircraft/BaseAircraft.h"
+#include "Structs and Data/MissileManagerSubsystem.h"
 
 ABaseMissile::ABaseMissile() 
 {
@@ -37,6 +38,19 @@ void ABaseMissile::BeginPlay()
 		Collision->IgnoreActorWhenMoving(GetOwner(), true);
 		Owner = Cast<ABaseAircraft>(GetOwner());
 	}
+	if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>()) 
+	{
+		Subsystem->RegisterMissile(this);
+	}
+}
+
+void ABaseMissile::EndPlay(EEndPlayReason::Type EndPlayReason) 
+{
+	if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>())
+	{
+		Subsystem->UnregisterMissile(this);
+	}
+	Super::EndPlay(EndPlayReason);
 }
 
 void ABaseMissile::Tick(float DeltaTime) 
@@ -80,6 +94,26 @@ void ABaseMissile::activateSmoke()
 	ProjectileMovement->Velocity = GetActorForwardVector() * ProjectileMovement->InitialSpeed;
 }
 
+void ABaseMissile::ApplyVFXLOD(FVector CameraLoc) 
+{
+	if (!SmokeTrail || !MissileRocket) return;
+	// Make Distance into KM units
+	float Distance = FVector::Dist(CameraLoc, GetActorLocation()) * 0.00001;
+
+	if (Distance > 5.f && bMissileVFXOn) 
+	{
+		SmokeTrail->Deactivate();
+		MissileRocket->Deactivate();
+		bMissileVFXOn = false;
+	}
+	else if (!bMissileVFXOn)
+	{
+		SmokeTrail->Activate(true);
+		MissileRocket->Activate(true);
+		bMissileVFXOn = true;
+	}
+}
+
 void ABaseMissile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComp,
@@ -120,5 +154,11 @@ void ABaseMissile::DestroyMissile()
 
 	if (SmokeTrail) SmokeTrail->Deactivate();
 	if (MissileRocket) MissileRocket->Deactivate();
+
+	if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>())
+	{
+		Subsystem->UnregisterMissile(this);
+	}
+
 	Destroy();
 }

@@ -112,7 +112,9 @@ void UWeaponSystemComponent::EquipWeapons()
 		tempCool.SocketName = Pair.Key;
 		AvailableWeapons.Add(tempCool);
 	}
-	BuildWeaponGroups();
+	// Defer this, would be 0 otherwise, let BeginPlay go through
+	FTimerHandle TH;
+	GetWorld()->GetTimerManager().SetTimer(TH, this, &UWeaponSystemComponent::BuildWeaponGroups, 0.01f, false);
 }
 
 //Create and Replace Missile in Array
@@ -126,6 +128,8 @@ void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace)
 	if (!Replace.WeaponInstance) return;
 	FTransform SocketTransform = PylonComp->GetSocketTransform(FName("Socket"));
 	Replace.WeaponInstance->AttachToComponent(PylonComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Socket"));
+	Replace.bCanFire = true;
+	Replace.time = 0;
 	GetCount();
 }
 
@@ -157,7 +161,6 @@ void UWeaponSystemComponent::FireWeaponSelected(TSubclassOf<ABaseWeapon> WeaponC
 		if (!Weapon->WeaponInstance || !Weapon->CanFire()) continue;
 
 		Weapon->WeaponInstance->OnWeaponResult.AddDynamic(this, &UWeaponSystemComponent::OnWeaponResult);
-
 		if (Target && bLocked)
 		{
 			Weapon->WeaponInstance->FireTracking(Speed, Target);
@@ -217,6 +220,7 @@ void UWeaponSystemComponent::GetCount()
 			CurrentWeaponCount++;
 		}
 	}
+
 	OnWeaponCountUpdated.Broadcast(CurrentWeapon->WeaponName, CurrentWeaponCount, MaxWeaponCountSelected);
 	if (CurrentWeaponCount <= 0) ResetLockedOn();
 }

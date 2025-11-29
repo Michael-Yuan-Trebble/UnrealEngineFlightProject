@@ -100,6 +100,8 @@ public:
 
 	virtual void PossessedBy(AController* Controller) override;
 
+	virtual void HandleLOD(FVector CameraLoc) override;
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -117,4 +119,6 @@ private:
 
 	UFUNCTION()
 	void HandleVortexFX(bool isActive);
+
+	bool bIsVisible = true;
 };

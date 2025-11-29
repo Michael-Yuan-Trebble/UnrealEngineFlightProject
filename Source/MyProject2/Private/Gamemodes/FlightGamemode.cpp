@@ -25,14 +25,6 @@ void AFlightGamemode::BeginPlay()
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	if (!AAircraftRegistry::Get(GetWorld())) 
-	{
-		GetWorld()->SpawnActor<AAircraftRegistry>(
-			AAircraftRegistry::StaticClass(), 
-			FVector::ZeroVector,
-			FRotator::ZeroRotator,Params
-		);
-	}
 
 	PC = Cast<AAircraftPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	if (!PC) return;
@@ -53,7 +45,6 @@ void AFlightGamemode::BeginPlay()
 		PC->SetControlMode(EControlMode::Aircraft);
 	}
 
-	//SpawnAIAircraft();
 	Super::BeginPlay();
 }
 

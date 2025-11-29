@@ -20,7 +20,7 @@ struct FCooldownWeapon
 	ABaseWeapon* WeaponInstance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanFire;
+	bool bCanFire = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName SocketName;
@@ -35,7 +35,8 @@ struct FCooldownWeapon
 		return bCanFire;
 	}
 
-	void StartCooldown() {
+	void StartCooldown() 
+	{
 		bCanFire = false;
 		time = cooldownTime;
 	}

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Info.h"
+#include "Subsystems/GameInstanceSubsystem.h"
 #include "AircraftRegistry.generated.h"
 
 class ABaseUnit;
@@ -12,21 +12,20 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnAnyUnitHit, AActor* Launcher);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAnyUnitDeath, AActor* Launcher);
 
 UCLASS()
-class MYPROJECT2_API AAircraftRegistry : public AInfo
+class MYPROJECT2_API UAircraftRegistry : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
 public:
-	AAircraftRegistry();
+	UAircraftRegistry();
 
 	FOnAnyUnitHit OnAnyUnitHit;
 	FOnAnyUnitDeath OnAnyUnitDeath;
 
-	UPROPERTY(BlueprintReadOnly)
-	TArray<ABaseUnit*> RegisteredAircraft;
+	TArray<TWeakObjectPtr<ABaseUnit>> RegisteredUnits;
 
 	void Register(ABaseUnit* Aircraft);
 	void Unregister(ABaseUnit* Aircraft);
 
-	static AAircraftRegistry* Get(UWorld* World);
+	static UAircraftRegistry* Get(UWorld* World);
 };
