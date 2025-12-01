@@ -61,7 +61,7 @@ void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 			}
 		}
 	}
-	UpdateLockedOn(DeltaTime, Controlled->RadarComponent->Selected.Get());
+	UpdateLockedOn(DeltaTime, Controlled->RadarComponent->Selected);
 }
 
 void UWeaponSystemComponent::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) 
@@ -285,14 +285,17 @@ void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target)
 		LockTime += DeltaSeconds;
 
 		// TODO: Make it variable
-		bLocked = LockTime >= 1;
+		bLocked = LockTime >= LOCKTIME;
 	}
 	else
 	{
 		bLocked = false;
 		LockTime = 0.f;
 	}
-	OnHUDLockedOn.Broadcast(bLocked);
+	float LockPercent;
+	if (LockTime == 0) LockPercent = 1.f;
+	else LockPercent = FMath::Clamp(LockTime / LOCKTIME, 0.f, 1.f);
+	OnHUDLockedOn.Broadcast(LockPercent);
 }
 
 void UWeaponSystemComponent::ResetLockedOn() 

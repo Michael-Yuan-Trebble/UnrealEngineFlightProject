@@ -10,12 +10,14 @@
 
 // TODO: For now cone angle is like this, maybe change it in the future
 #define CONE_ANGLE 30.f
+// TODO: Make this variable maybe?
+#define LOCKTIME 1.f
 
 class ABaseAircraft;
 class AAircraftPlayerController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWeaponCountUpdated,FName, WeaponName, int32, CurrentCount, int32, MaxCount);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHUDLockedOn, bool, bLocked);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHUDLockedOn, float, LockPercent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponSystemWeaponHitResult, bool, bHit);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )

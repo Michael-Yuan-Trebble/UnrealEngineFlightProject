@@ -136,10 +136,10 @@ void AAircraftPlayerController::OnUnitDestroyed(AActor* Launcher)
 	}
 }
 
-void AAircraftPlayerController::HandleHUDLockedOn(bool bLocked)
+void AAircraftPlayerController::HandleHUDLockedOn(float LockPercent)
 {
 	if (!HUD) return;
-	HUD->UpdateLocked(bLocked);
+	HUD->UpdateLocked(LockPercent);
 }
 
 void AAircraftPlayerController::HandleWeaponCount(FName WeaponName, int32 CurrentCount, int32 MaxCount) 
@@ -403,7 +403,7 @@ void AAircraftPlayerController::Weapons()
 		CurrentWeaponClass = Keys[0];
 	}
 	//if (!RadarComp->Selected.IsValid()) return;
-	WeaponComp->FireWeaponSelected(CurrentWeaponClass, RadarComp->Selected.Get(), FlightComp->currentSpeed);
+	WeaponComp->FireWeaponSelected(CurrentWeaponClass, RadarComp->Selected, FlightComp->currentSpeed);
 }
 
 void AAircraftPlayerController::NextWeapon() 

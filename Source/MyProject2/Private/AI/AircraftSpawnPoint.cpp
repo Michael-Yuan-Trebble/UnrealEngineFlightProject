@@ -8,8 +8,12 @@
 void AAircraftSpawnPoint::BeginPlay() 
 {
 	Super::BeginPlay();
-	//ActivateSpawn();
-	StressTest();
+	if (bStressTest) {
+		StressTest();
+	}
+	else {
+		ActivateSpawn();
+	}
 }
 
 void AAircraftSpawnPoint::ActivateSpawn() 

@@ -148,60 +148,58 @@ void APlayerHUD::PitchLadderUpdate()
     PitchLadderWidget->Update(Pitch);
 }
 
-void APlayerHUD::UpdateLocked(bool Locked)
+void APlayerHUD::UpdateLocked(float LockPercent)
 {
-    if (!IsValid(SelectedAircraftWidget)) return;
-    SelectedAircraftWidget->SetLockedOn(Locked);
+    if (!IsValid(Target)) return;
+    ULockBoxWidget** FoundWidget = ActiveWidgets.Find(Target);
+    if (FoundWidget && IsValid(*FoundWidget))
+    {
+        ULockBoxWidget* Widget = *FoundWidget;
+        if (Widget) {
+            Widget->UpdateLockProgress(LockPercent);
+        }
+    }
 }
 
-void APlayerHUD::UpdateTargetWidgets() 
+void APlayerHUD::UpdateTargetWidgets()
 {
     if (!LockBoxWidgetClass) return;
 
     for (auto It = ActiveWidgets.CreateIterator(); It; ++It)
     {
-        ABaseUnit* Target = It.Key();
-        if (!IsValid(Target) || Target->IsActorBeingDestroyed() || !Targets.Contains(Target))
+        ABaseUnit* Actor = It.Key();
+        ULockBoxWidget* Widget = It.Value();
+
+        if (!IsValid(Actor) || !Targets.Contains(Actor))
         {
-            if (ULockBoxWidget* Reticle = It.Value())
-            {
-                Reticle->RemoveFromParent();
-            }
+            if (Widget) Widget->RemoveFromParent();
             It.RemoveCurrent();
         }
     }
 
-    for (int32 i = Targets.Num() - 1; i >= 0; i--)
+    for (ABaseUnit* TargetActor : Targets)
     {
-        ABaseUnit* Target = Targets[i];
+        if (!IsValid(TargetActor)) continue;
 
-        if (!IsValid(Target) || Target->IsActorBeingDestroyed())
-        {
-            Targets.RemoveAt(i);
-            continue;
-        }
-
-        ULockBoxWidget* Reticle = ActiveWidgets.FindRef(Target);
+        ULockBoxWidget* Reticle = ActiveWidgets.FindRef(TargetActor);
         if (!Reticle)
         {
-            Reticle = CreateWidget<ULockBoxWidget>(GetWorld(), LockBoxWidgetClass);
+            Reticle = CreateWidget<ULockBoxWidget>(PC, LockBoxWidgetClass);
             if (Reticle)
             {
                 Reticle->AddToViewport();
-                ActiveWidgets.Add(Target, Reticle);
+                ActiveWidgets.Add(TargetActor, Reticle);
             }
         }
+    }
 
-        FVector WorldLocation;
-        if (!IsValid(Target) || Target->IsActorBeingDestroyed()) continue;
+    for (auto& Pair : ActiveWidgets)
+    {
+        ABaseUnit* Actor = Pair.Key;
+        ULockBoxWidget* Reticle = Pair.Value;
+        if (!IsValid(Actor) || !Reticle) continue;
 
-        USceneComponent* Comp = Target->GetRootComponent();
-        if (!IsValid(Comp)) continue;
-
-        WorldLocation = Comp->GetComponentLocation();
-
-        if (!Reticle) continue;
-
+        FVector WorldLocation = Actor->GetActorLocation();
         FVector2D ScreenPos;
         bool bProjected = PC->ProjectWorldLocationToScreen(WorldLocation, ScreenPos);
 
@@ -209,30 +207,30 @@ void APlayerHUD::UpdateTargetWidgets()
         FRotator CameraRot;
         PC->GetPlayerViewPoint(CameraLoc, CameraRot);
 
-        FVector Location = Comp->GetComponentLocation();
-        FVector ToTarget = Location - CameraLoc;
-        bool bInFront = FVector::DotProduct(CameraRot.Vector(), ToTarget) > 0;
+        bool bInFront = FVector::DotProduct((WorldLocation - CameraLoc), CameraRot.Vector()) > 0;
+        bool bVisible = bProjected && bInFront;
 
-        if (bProjected && bInFront)
+        Reticle->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+
+        if (bVisible)
         {
             FVector2D WidgetSize = Reticle->GetDesiredSize();
-            FVector2D CenteredPos = ScreenPos - (WidgetSize * 0.5f);
-            Reticle->SetPositionInViewport(CenteredPos, true);
-            Reticle->SetVisibility(ESlateVisibility::Visible);
+            Reticle->SetPositionInViewport(ScreenPos - WidgetSize * 0.5f, true);
         }
-        else
-        {
-            Reticle->SetVisibility(ESlateVisibility::Hidden);
-        }
+
     }
+
+    UpdateSelected();
 }
 
 void APlayerHUD::HandleRadarScan(const TArray<FDetectedAircraftInfo>& InEnemies) {
     TArray<ABaseUnit*> Array;
+    if (!Controlled) return;
     for (FDetectedAircraftInfo T : InEnemies) 
     {
         ABaseUnit* Unit = Cast<ABaseUnit>(T.CurrentPawn);
         if (!Unit) continue;
+        if (Unit->Faction == Controlled->Faction) continue;
         Array.Add(Unit);
     }
     Targets = Array;
@@ -249,27 +247,38 @@ void APlayerHUD::OnUnitDestroyed(ABaseUnit* Death)
     ActiveWidgets.Remove(Death);
 }
 
-void APlayerHUD::UpdateSelected(ABaseUnit* In)
+void APlayerHUD::UpdateSelected()
 {
-    if (!IsValid(In))
+    if (!IsValid(Target))
     {
         SelectedAircraftWidget = nullptr;
         LastActor = nullptr;
         return;
     }
 
-    if (LastActor && LastActor->GetUniqueID() == In->GetUniqueID())
-        return;
+    if (LastActor == Target) return;
 
-    LastActor = In;
+    LastActor = Target;
 
-    if (ULockBoxWidget** FoundWidget = ActiveWidgets.Find(In))
+    ULockBoxWidget** FoundWidget = ActiveWidgets.Find(Target);
+
+    if (FoundWidget && IsValid(*FoundWidget))
     {
-        print(text)
-            SelectedAircraftWidget = *FoundWidget;
+        SelectedAircraftWidget = *FoundWidget;
     }
     else
     {
         SelectedAircraftWidget = nullptr;
     }
+}
+
+void APlayerHUD::SetTarget(TWeakObjectPtr<ABaseUnit> InTarget) 
+{
+    if (!InTarget.IsValid()) return;
+    APlayerAircraft* IfControl = Cast<APlayerAircraft>(InTarget.Get());
+    if (IfControl) return;
+
+    Target = InTarget.Get(); 
+    if (!Targets.Contains(Target)) Targets.Add(Target); 
+    UpdateTargetWidgets();
 }

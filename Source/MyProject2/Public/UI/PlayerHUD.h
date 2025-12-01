@@ -61,7 +61,7 @@ public:
 
 	APlayerAircraft* Controlled;
 
-	ABaseUnit* LastActor;
+	TWeakObjectPtr<ABaseUnit> LastActor;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UHitNotificationWidget> HitNotiClass;
@@ -71,9 +71,11 @@ public:
 	UPROPERTY()
 	TMap<ABaseUnit*, ULockBoxWidget*> ActiveWidgets;
 
-	void UpdateLocked(bool Locked);
+	ABaseUnit* Target;
 
-	void UpdateSelected(ABaseUnit* In);
+	void UpdateLocked(float LockPercent);
+
+	void UpdateSelected();
 
 	void TogglePitchLadder(bool Toggle);
 
@@ -83,6 +85,8 @@ public:
 	void OnWeaponChanged(FName WeaponName, int32 Current, int32 Max);
 
 	void Init(AAircraftPlayerController* InPC);
+
+	void SetTarget(TWeakObjectPtr<ABaseUnit> InTarget);
 
 	UPROPERTY(BlueprintReadWrite)
 	int CurrentNum = 0;

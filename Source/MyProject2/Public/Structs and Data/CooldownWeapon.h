@@ -25,21 +25,16 @@ struct FCooldownWeapon
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName SocketName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float time;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float cooldownTime;
 
-	bool CanFire() {
-		return bCanFire;
-	}
+	bool CanFire() const { return bCanFire; }
 
-	void StartCooldown() 
-	{
-		bCanFire = false;
-		time = cooldownTime;
-	}
+	float ReturnCooldownTime() const { return time; };
+
+	void StartCooldown() { bCanFire = false; time = cooldownTime; }
 
 	void UpdateCooldown(float DeltaTime);
 };

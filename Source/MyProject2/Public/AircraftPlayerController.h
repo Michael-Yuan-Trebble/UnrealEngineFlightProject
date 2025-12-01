@@ -189,7 +189,7 @@ private:
 	void HandleWeaponHit(bool bHit);
 
 	UFUNCTION()
-	void HandleHUDLockedOn(bool bLocked);
+	void HandleHUDLockedOn(float LockPercent);
 
 	UFUNCTION()
 	void HandleWeaponCount(FName WeaponName, int32 CurrentCount, int32 MaxCount);

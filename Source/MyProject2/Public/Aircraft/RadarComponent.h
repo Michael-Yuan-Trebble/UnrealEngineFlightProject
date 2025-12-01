@@ -40,7 +40,7 @@ public:
 	ABaseUnit* Controlled;
 
 	UPROPERTY()
-	TWeakObjectPtr<ABaseUnit> Selected;
+	ABaseUnit* Selected;
 
 	APlayerHUD* HUD;
 

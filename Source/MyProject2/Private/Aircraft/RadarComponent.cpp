@@ -19,8 +19,7 @@ void URadarComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Radar only triggers 0.5 seconds at a time
-	const float ScanTime = 1.5f;
+	const float ScanTime = 1.f;
 	GetWorld()->GetTimerManager().SetTimer(RadarScanTimer, this, &URadarComponent::ScanTargets, ScanTime, true);
 }
 
@@ -39,18 +38,19 @@ void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 void URadarComponent::ScanTargets()
 {
+	if (!Controlled) return;
 	Enemies.Empty();
 	if (!GetWorld()) return;
 
 	UAircraftRegistry* Registry = UAircraftRegistry::Get(GetWorld());
 	if (!Registry) return;
 
-	if (!Selected.IsValid())
+	if (!Selected)
 	{
 		HandleSelectedDestroyed();
 	}
 
-	ABaseUnit* Previous = Selected.Get();
+	ABaseUnit* Previous = Selected;
 
 	ABaseUnit* FirstSelected = nullptr;
 	for (TWeakObjectPtr<ABaseUnit> RegisteredPawn : Registry->RegisteredUnits)
@@ -77,9 +77,8 @@ void URadarComponent::ScanTargets()
 		}
 	}
 
-	if ((!Selected.IsValid() || !Selected.Get()->IsValidLowLevel()) && FirstSelected && FirstSelected != Previous)
+	if ((!Selected || !Selected->IsValidLowLevel()) && FirstSelected && FirstSelected != Previous)
 	{
-		print(text)
 		SetTarget(FirstSelected);
 	}
 
@@ -94,7 +93,7 @@ void URadarComponent::HandleSelectedDestroyed()
 	Selected = nullptr;
 
 	if (Controlled) Controlled->Tracked = nullptr;
-	if (HUD) HUD->UpdateSelected(nullptr);
+	if (HUD) HUD->SetTarget(nullptr);
 
 	CycleToNextTarget();
 }
@@ -178,9 +177,18 @@ void URadarComponent::SetTarget(AActor* NewTarget)
 {
 	ABaseUnit* Unit = Cast<ABaseUnit>(NewTarget);
 	if (!IsValid(Unit)) return;
-	if (Selected.Get() == Unit) return;
 
-	if (Selected.IsValid())
+	if (Selected == Unit) return;
+
+	if (IsValid(LastSelected)) 
+	{
+		if (Unit->GetActorGuid() == LastSelected->GetActorGuid()) 
+		{
+			return;
+		}
+	}
+
+	if (IsValid(Selected))
 	{
 		Selected->OnUnitDeath.RemoveDynamic(this, &URadarComponent::HandleSelectedDestroyed);
 	}
@@ -191,11 +199,10 @@ void URadarComponent::SetTarget(AActor* NewTarget)
 		Unit->OnUnitDeath.AddDynamic(this, &URadarComponent::HandleSelectedDestroyed);
 	}
 
-	if (HUD && Selected.Get() != LastSelected)
-	{
-		HUD->UpdateSelected(Unit);
-		LastSelected = Unit;
-		if (Controlled) Controlled->Tracked = Unit;
-	}
+	if (!HUD) return;
+
+	HUD->SetTarget(Unit);
+	LastSelected = Unit;
+	if (Controlled) Controlled->Tracked = Unit;
 	// VFX
 }

@@ -20,6 +20,9 @@ public:
 	TSubclassOf<APawn> AircraftClass;
 
 	UPROPERTY(EditAnywhere)
+	bool bStressTest = false;
+
+	UPROPERTY(EditAnywhere)
 	int32 Count = 1;
 
 	// TODO: Do formations later, for now they just spawn in a line
