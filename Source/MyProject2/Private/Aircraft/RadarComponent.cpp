@@ -38,17 +38,17 @@ void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 void URadarComponent::ScanTargets()
 {
-	if (!Controlled) return;
-	Enemies.Empty();
-	if (!GetWorld()) return;
+	if (!Controlled || !GetWorld()) return;
 
 	UAircraftRegistry* Registry = UAircraftRegistry::Get(GetWorld());
 	if (!Registry) return;
 
-	if (!Selected)
+	if (!IsValid(Selected) || Selected->IsPendingKillPending())
 	{
 		HandleSelectedDestroyed();
 	}
+
+	Enemies.Empty();
 
 	ABaseUnit* Previous = Selected;
 
@@ -71,13 +71,13 @@ void URadarComponent::ScanTargets()
 		if (Info.threatLevel <= 0) continue;
 		Enemies.Add(Info);
 
-		if (!FirstSelected)
+		if (!IsValid(FirstSelected))
 		{
 			FirstSelected = Unit;
 		}
 	}
 
-	if ((!Selected || !Selected->IsValidLowLevel()) && FirstSelected && FirstSelected != Previous)
+	if ((!IsValid(Selected) || !Selected->IsValidLowLevel()) && IsValid(FirstSelected) && FirstSelected != Previous)
 	{
 		SetTarget(FirstSelected);
 	}

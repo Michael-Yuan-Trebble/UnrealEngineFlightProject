@@ -20,13 +20,14 @@ public:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION(BlueprintCallable)
-	void SetLockedOn(bool isLocked);
-
-	UFUNCTION(BlueprintCallable)
 	void SetReticleImage(UTexture2D* NewTexture);
 
 	UFUNCTION(BlueprintCallable)
 	void SetSmallerReticleImage(UTexture2D* NewTexture);
+
+	void SelectedAnimation();
+
+	void SelectStop();
 
 	void UpdateLockProgress(float Percent);
 

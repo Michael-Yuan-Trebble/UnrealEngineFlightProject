@@ -293,7 +293,7 @@ void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target)
 		LockTime = 0.f;
 	}
 	float LockPercent;
-	if (LockTime == 0) LockPercent = 1.f;
+	if (LOCKTIME == 0) LockPercent = 1.f;
 	else LockPercent = FMath::Clamp(LockTime / LOCKTIME, 0.f, 1.f);
 	OnHUDLockedOn.Broadcast(LockPercent);
 }
@@ -302,5 +302,5 @@ void UWeaponSystemComponent::ResetLockedOn()
 {
 	LockTime = 0.f;
 	bLocked = false;
-	OnHUDLockedOn.Broadcast(bLocked);
+	OnHUDLockedOn.Broadcast(0.f);
 }

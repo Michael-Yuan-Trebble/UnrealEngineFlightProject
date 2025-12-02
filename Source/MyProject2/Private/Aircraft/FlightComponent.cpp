@@ -336,6 +336,7 @@ float UFlightComponent::PitchDrag()
 
 void UFlightComponent::ApplyPitch(float DeltaSeconds)
 {
+	if (!IsValid(Controlled)) return;
 	float InterpSpeed = 0;
 	float CurveTurn = Controlled->AirStats->DragCurve->GetFloatValue(GetCurrentSpeedKMH());
 	float CompressionTurn = Controlled->AirStats->CompressionCurve->GetFloatValue(GetCurrentSpeedKMH());
@@ -377,6 +378,7 @@ void UFlightComponent::ApplyPitch(float DeltaSeconds)
 
 void UFlightComponent::ApplyYaw(float DeltaSeconds)
 {
+	if (!IsValid(Controlled)) return;
 	float InterpSpeed = 0;
 	if (Controlled->GetController() && Controlled->GetController()->IsPlayerController())
 	{
@@ -413,6 +415,7 @@ void UFlightComponent::ApplyYaw(float DeltaSeconds)
 
 void UFlightComponent::ApplyRoll(float DeltaSeconds)
 {
+	if (!IsValid(Controlled)) return;
 	float InterpSpeed = 0;
 	if (Controlled->GetController() && Controlled->GetController()->IsPlayerController())
 	{

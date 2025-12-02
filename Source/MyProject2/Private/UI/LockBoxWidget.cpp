@@ -19,26 +19,6 @@ void ULockBoxWidget::NativeConstruct()
 	}
 }
 
-void ULockBoxWidget::SetLockedOn(bool isLocked) 
-{
-	if (isLockedOn == isLocked) return;
-	isLockedOn = isLocked;
-	if (ReticleImage) 
-	{
-		
-		// TODO: Change from opacity to color when reticle texture changes
-		FLinearColor Color = ReticleImage->GetColorAndOpacity();
-		Color.A = !isLocked ? 1 : 0.1f;
-		ReticleImage->SetColorAndOpacity(Color);
-	}
-	if (SmallReticleImage) 
-	{
-		FLinearColor Color = SmallReticleImage->GetColorAndOpacity();
-		Color.A = !isLocked ? 0.f : 0.1f;
-		SmallReticleImage->SetColorAndOpacity(Color);
-	}
-}
-
 void ULockBoxWidget::UpdateLockProgress(float Percent) 
 {
 	if (Percent <= 0.f)
@@ -98,21 +78,33 @@ void ULockBoxWidget::PlayStartLockAnimation()
 void ULockBoxWidget::PlayFullLockAnimation()
 {
 	bIsLocking = false;
-	if (LockConfirm) PlayAnimation(LockConfirm, 0.f, 0, EUMGSequencePlayMode::Forward, 1.f);
+	if (LockConfirm) StopAnimation(LockConfirm);
 
 	if (SmallReticleImage)
 	{
 		FLinearColor C = SmallReticleImage->GetColorAndOpacity();
-		C.A = 0.1f;
+		C.A = 1.f;
 		SmallReticleImage->SetColorAndOpacity(C);
 	}
 
 	if (ReticleImage) 
 	{
 		FLinearColor F = ReticleImage->GetColorAndOpacity();
-		F.A = 0.1f;
+		F.A = 1.f;
+		F.R = 200.f;
+		F.B = 0.f;
+		F.G = 0.f;
 		ReticleImage->SetColorAndOpacity(F);
 	}
+}
+
+void ULockBoxWidget::SelectedAnimation() 
+{
+	if (LockConfirm) PlayAnimation(LockConfirm, 0.f, 0.f, EUMGSequencePlayMode::Forward, 1.f);
+}
+
+void ULockBoxWidget::SelectStop() {
+	if (LockConfirm) StopAnimation(LockConfirm);
 }
 
 void ULockBoxWidget::SetReticleImage(UTexture2D* NewTexture) 

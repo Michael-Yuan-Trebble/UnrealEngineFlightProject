@@ -24,7 +24,8 @@ public:
 	APlayerHUD();
 
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds);
+	virtual void Tick(float DeltaSeconds) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ULockBoxWidget> LockBoxWidgetClass;
@@ -35,11 +36,13 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> AimReticleClass;
 
+	UPROPERTY()
 	UUserWidget* AimReticleWidget;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> AOAReticleClass;
 
+	UPROPERTY()
 	UUserWidget* AOAReticleWidget;
 
 	UPROPERTY(EditAnywhere)
@@ -48,6 +51,7 @@ public:
 	UPROPERTY()
 	UPitchLadder* PitchLadderWidget;
 
+	UPROPERTY()
 	UMinimapWidget* MiniMap;
 
 	UPROPERTY()
@@ -66,6 +70,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UHitNotificationWidget> HitNotiClass;
 
+	UPROPERTY()
 	UHitNotificationWidget* HitNotiWidget;
 
 	UPROPERTY()

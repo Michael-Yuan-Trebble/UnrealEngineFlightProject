@@ -8,7 +8,8 @@
 void AAircraftSpawnPoint::BeginPlay() 
 {
 	Super::BeginPlay();
-	if (bStressTest) {
+	if (bStressTest) 
+	{
 		StressTest();
 	}
 	else {
@@ -18,8 +19,8 @@ void AAircraftSpawnPoint::BeginPlay()
 
 void AAircraftSpawnPoint::ActivateSpawn() 
 {
-	if (bSpawned) return;
-	if (!AircraftClass) return;
+	if (bSpawned || !AircraftClass) return;
+
 	UWorld* World = GetWorld();
 
 	if (!World) return;
@@ -63,7 +64,9 @@ void AAircraftSpawnPoint::ActivateSpawn()
 	}
 }
 
-void AAircraftSpawnPoint::StressTest() {
+void AAircraftSpawnPoint::StressTest() 
+{
+	if (!AircraftClass) return;
 	for (int32 i = 0; i < Count; i++)
 	{
 		FVector Location = GetActorLocation() + FVector(i * 200.f, 0, 0);

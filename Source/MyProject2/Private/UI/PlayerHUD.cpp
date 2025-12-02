@@ -155,7 +155,8 @@ void APlayerHUD::UpdateLocked(float LockPercent)
     if (FoundWidget && IsValid(*FoundWidget))
     {
         ULockBoxWidget* Widget = *FoundWidget;
-        if (Widget) {
+        if (Widget) 
+        {
             Widget->UpdateLockProgress(LockPercent);
         }
     }
@@ -223,7 +224,8 @@ void APlayerHUD::UpdateTargetWidgets()
     UpdateSelected();
 }
 
-void APlayerHUD::HandleRadarScan(const TArray<FDetectedAircraftInfo>& InEnemies) {
+void APlayerHUD::HandleRadarScan(const TArray<FDetectedAircraftInfo>& InEnemies)
+{
     TArray<ABaseUnit*> Array;
     if (!Controlled) return;
     for (FDetectedAircraftInfo T : InEnemies) 
@@ -265,6 +267,7 @@ void APlayerHUD::UpdateSelected()
     if (FoundWidget && IsValid(*FoundWidget))
     {
         SelectedAircraftWidget = *FoundWidget;
+        SelectedAircraftWidget->SelectedAnimation();
     }
     else
     {
@@ -272,13 +275,34 @@ void APlayerHUD::UpdateSelected()
     }
 }
 
-void APlayerHUD::SetTarget(TWeakObjectPtr<ABaseUnit> InTarget) 
+void APlayerHUD::SetTarget(TWeakObjectPtr<ABaseUnit> InTarget)
 {
     if (!InTarget.IsValid()) return;
     APlayerAircraft* IfControl = Cast<APlayerAircraft>(InTarget.Get());
     if (IfControl) return;
 
+    if (Target) 
+    {
+        ULockBoxWidget** FoundWidget = ActiveWidgets.Find(Target);
+        if (FoundWidget && IsValid(*FoundWidget))
+        {
+            ULockBoxWidget* Temp = *FoundWidget;
+            Temp->SelectStop();
+        }
+    }
+
     Target = InTarget.Get(); 
     if (!Targets.Contains(Target)) Targets.Add(Target); 
     UpdateTargetWidgets();
+}
+
+void APlayerHUD::EndPlay(const EEndPlayReason::Type EndPlayReason) 
+{
+    for (auto& Pair : ActiveWidgets)
+    {
+        if (Pair.Value) Pair.Value->RemoveFromParent();
+    }
+    ActiveWidgets.Empty();
+
+    Super::EndPlay(EndPlayReason);
 }

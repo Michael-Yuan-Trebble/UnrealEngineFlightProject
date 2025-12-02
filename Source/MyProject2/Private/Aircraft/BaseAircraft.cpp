@@ -42,6 +42,8 @@ void ABaseAircraft::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (!Airframe || !RadarComponent || !FlightComponent) return;
+
 	RadarComponent->Setup(this);
 	FlightComponent->Setup(this, AirStats);
 
@@ -158,6 +160,7 @@ void ABaseAircraft::DeactivateVortexFX()
 void ABaseAircraft::HandleLOD(FVector CameraLoc) 
 {
 	// Setting distance to KM
+	if (!Airframe) return;
 	float Distance = FVector::Dist(CameraLoc, GetActorLocation()) * 0.00001;
 	if (Distance >= 5 && bIsVisible) 
 	{
