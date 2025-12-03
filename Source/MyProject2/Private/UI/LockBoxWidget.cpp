@@ -103,7 +103,8 @@ void ULockBoxWidget::SelectedAnimation()
 	if (LockConfirm) PlayAnimation(LockConfirm, 0.f, 0.f, EUMGSequencePlayMode::Forward, 1.f);
 }
 
-void ULockBoxWidget::SelectStop() {
+void ULockBoxWidget::SelectStop() 
+{
 	if (LockConfirm) StopAnimation(LockConfirm);
 }
 

@@ -5,15 +5,12 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Structs and Data/CameraPerspective.h"
 #include "CameraManagerComponent.generated.h"
 
 class APlayerAircraft;
 class APlayerHUD;
-
-enum class ECameraMode {
-	FirstPerson,
-	ThirdPerson
-};
+class UAircraftAudioComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UCameraManagerComponent : public UActorComponent
@@ -37,15 +34,19 @@ public:
 
 	USpringArmComponent* SpringArm;
 
+	UAircraftAudioComponent* AudioComp;
+
 	void SetSpringArm(USpringArmComponent* InArm) { SpringArm = InArm; }
 
 	void SetControlled(APlayerAircraft* InControl) { Controlled = InControl; };
 
 	void SetHUD(APlayerHUD* InHUD) { HUD = InHUD; };
 
+	void SetAudioComp(UAircraftAudioComponent* InAudio) { AudioComp = InAudio; };
+
 	void SwitchCamera();
 
-	ECameraMode CurrentMode = ECameraMode::ThirdPerson;
+	ECameraPerspective CurrentMode = ECameraPerspective::ThirdPerson;
 
 	APlayerAircraft* Controlled;
 

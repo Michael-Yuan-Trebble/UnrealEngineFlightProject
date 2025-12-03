@@ -6,12 +6,13 @@
 #include "Aircraft/FlightComponent.h"
 #include "Aircraft/RadarComponent.h"
 #include "HealthComponent.h"
+#include "Aircraft/AircraftAudioComponent.h"
 #include "Aircraft/WeaponSystemComponent.h"
+#include "Components/AudioComponent.h"
 #include "Aircraft/Player/CameraManagerComponent.h"
 
 APlayerAircraft::APlayerAircraft() 
 {
-
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->bDoCollisionTest = false;
 	SpringArm->SetupAttachment(Airframe, USpringArmComponent::SocketName);
@@ -27,6 +28,12 @@ APlayerAircraft::APlayerAircraft()
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponSystemComponent>(TEXT("WeaponComponent"));
 	ManagerComp = CreateDefaultSubobject<UCameraManagerComponent>(TEXT("CameraManagerComponent"));
+	AudioComp = CreateDefaultSubobject<UAircraftAudioComponent>(TEXT("AudioComponent"));
+
+	PersonalAircraftAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("PersonalAircraftAudio"));
+	PersonalAircraftAudio->SetupAttachment(GetRootComponent());
+	PersonalAircraftAudio->bAutoActivate = false;
+	PersonalAircraftAudio->bIsUISound = false;
 
 	health = 100;
 	Faction = EFaction::Ally;
@@ -36,8 +43,10 @@ void APlayerAircraft::BeginPlay()
 {
 	Super::BeginPlay();
 	WeaponComponent->Setup(this, AirStats);
+	AudioComp->SetControlled(this);
 	ManagerComp->SetSpringArm(SpringArm);
 	ManagerComp->SetControlled(this);
+	ManagerComp->SetAudioComp(AudioComp);
 }
 
 void APlayerAircraft::Tick(float DeltaSeconds) 

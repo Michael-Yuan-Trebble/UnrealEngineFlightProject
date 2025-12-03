@@ -3,6 +3,7 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Camera Manager!"));
 #include "Aircraft/Player/CameraManagerComponent.h"
 #include "Aircraft/Player/PlayerAircraft.h"
+#include "Aircraft/AircraftAudioComponent.h"
 #include "UI/PlayerHUD.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -14,7 +15,6 @@ UCameraManagerComponent::UCameraManagerComponent()
 void UCameraManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void UCameraManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -25,14 +25,14 @@ void UCameraManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType
 void UCameraManagerComponent::SwitchCamera() 
 {
 	int Next = (int)CurrentMode + 1;
-	if (Next > (int)ECameraMode::ThirdPerson) Next = 0;
-	CurrentMode = (ECameraMode)Next;
+	if (Next > (int)ECameraPerspective::ThirdPerson) Next = 0;
+	CurrentMode = (ECameraPerspective)Next;
 	switch (CurrentMode) 
 	{
-		case ECameraMode::FirstPerson:
+		case ECameraPerspective::FirstPerson:
 			SetFirstPerson();
 			break;
-		case ECameraMode::ThirdPerson:
+		case ECameraPerspective::ThirdPerson:
 			SetThirdPerson();
 			break;
 		default:
@@ -46,7 +46,7 @@ void UCameraManagerComponent::SetFirstPerson()
 	APlayerController* PC = Cast<APlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	if (!PC || !Controlled) return;
 
-	CurrentMode = ECameraMode::FirstPerson;
+	CurrentMode = ECameraPerspective::FirstPerson;
 
 	LookXLock = 120.f;
 	LookYLock = 60.f;
@@ -61,6 +61,8 @@ void UCameraManagerComponent::SetFirstPerson()
 
 	if (!HUD) return;
 	HUD->TogglePitchLadder(false);
+	if (!AudioComp) return;
+	AudioComp->PlayPerspectiveSound(CurrentMode);
 }
 
 void UCameraManagerComponent::SetThirdPerson() 
@@ -68,7 +70,7 @@ void UCameraManagerComponent::SetThirdPerson()
 	APlayerController* PC = Cast<APlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	if (!PC || !Controlled) return;
 
-	CurrentMode = ECameraMode::ThirdPerson;
+	CurrentMode = ECameraPerspective::ThirdPerson;
 
 	LookXLock = 180.f;
 	LookYLock = 85.f;
@@ -86,16 +88,18 @@ void UCameraManagerComponent::SetThirdPerson()
 
 	if (!HUD) return;
 	HUD->TogglePitchLadder(true);
+	if (!AudioComp) return;
+	AudioComp->PlayPerspectiveSound(CurrentMode);
 }
 
 void UCameraManagerComponent::LookHor(float lookX) 
 {
 	switch (CurrentMode)
 	{
-	case ECameraMode::FirstPerson:
+	case ECameraPerspective::FirstPerson:
 		FirstPersonHorizontal(lookX);
 		break;
-	case ECameraMode::ThirdPerson:
+	case ECameraPerspective::ThirdPerson:
 		ThirdPersonHorizontal(lookX);
 		break;
 	default:
@@ -108,10 +112,10 @@ void UCameraManagerComponent::LookVer(float lookY)
 {
 	switch (CurrentMode) 
 	{
-		case ECameraMode::FirstPerson:
+		case ECameraPerspective::FirstPerson:
 			FirstPersonVertical(lookY);
 			break;
-		case ECameraMode::ThirdPerson:
+		case ECameraPerspective::ThirdPerson:
 			ThirdPersonVertical(lookY);
 			break;
 		default:

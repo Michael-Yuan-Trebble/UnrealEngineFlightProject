@@ -10,6 +10,7 @@
 
 class AAircraftPlayerController;
 class UCameraManagerComponent;
+class UAircraftAudioComponent;
 
 UCLASS()
 class MYPROJECT2_API APlayerAircraft : public ABaseAircraft
@@ -23,6 +24,11 @@ public:
 	AAircraftPlayerController* Controlled;
 
 	UCameraManagerComponent* ManagerComp;
+
+	UPROPERTY(EditAnywhere)
+	UAircraftAudioComponent* AudioComp;
+
+	UAudioComponent* PersonalAircraftAudio;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USpringArmComponent* SpringArm;
@@ -43,6 +49,8 @@ public:
 	UCameraComponent* GetFirstPersonCamera() const{ return FirstPersonCamera; };
 
 	float ReturnSpringArmLength() const { return springArmLength; };
+
+	UAudioComponent* GetAudioComponent() const { return PersonalAircraftAudio; };
 
 protected:
 	virtual void BeginPlay() override;
