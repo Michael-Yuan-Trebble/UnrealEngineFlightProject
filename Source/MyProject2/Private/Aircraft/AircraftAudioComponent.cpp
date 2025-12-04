@@ -5,32 +5,65 @@
 #include "Sound/SoundWave.h"
 #include "Sound/SoundAttenuation.h"
 #include "Aircraft/BaseAircraft.h"
+#include "Aircraft/Player/PlayerAircraft.h"
 #include "Components/AudioComponent.h"
 
-UAircraftAudioComponent::UAircraftAudioComponent() {
+UAircraftAudioComponent::UAircraftAudioComponent() 
+{
 
 }
 
-void UAircraftAudioComponent::PlayPerspectiveSound(ECameraPerspective Perspective) {
-	if (!PersonalAircraftAudio) {
-		if (AActor* Owner = GetOwner()) {
-			PersonalAircraftAudio = Owner->FindComponentByClass<UAudioComponent>();
+void UAircraftAudioComponent::PlayPerspectiveSound(ECameraPerspective Perspective) 
+{
+	if (!PersonalAircraftAudio) 
+	{
+		if (AActor* Owner = GetOwner()) 
+		{
+			if (APlayerAircraft* Player = Cast<APlayerAircraft>(Owner)) 
+			{
+				PersonalAircraftAudio = Player->GetAircraftAudio();
+			}
 		}
 		if (!PersonalAircraftAudio) return;
 	}
 	USoundWave* SoundToPlay = nullptr;
-	switch (Perspective) {
+	switch (Perspective) 
+	{
 		case ECameraPerspective::ThirdPerson:
 			SoundToPlay = ThirdPersonSound;
+			break;
 		case ECameraPerspective::FirstPerson:
 			SoundToPlay = CockpitSound;
+			break;
 		default:
 			SoundToPlay = ThirdPersonSound;
+			break;
 	}
 
 	if (!SoundToPlay) return;
 	PersonalAircraftAudio->SetSound(SoundToPlay);
-	if (!PersonalAircraftAudio->IsPlaying()) {
-		PersonalAircraftAudio->Play();
+	if (!PersonalAircraftAudio->IsPlaying()) PersonalAircraftAudio->Play();
+}
+
+void UAircraftAudioComponent::HandleGunSound(bool bFiring) 
+{
+	if (!GunAudio) {
+		if (AActor* Owner = GetOwner())
+		{
+			if (APlayerAircraft* Player = Cast<APlayerAircraft>(Owner))
+			{
+				GunAudio = Player->GetGunAudio();
+			}
+		}
+		if (!GunAudio || !GunSound) return;
+		GunAudio->SetSound(GunSound);
+	}
+	if (bFiring) 
+	{
+		if (!GunAudio->IsPlaying()) GunAudio->Play();
+	}
+	else 
+	{
+		if (GunAudio->IsPlaying()) GunAudio->Stop();
 	}
 }

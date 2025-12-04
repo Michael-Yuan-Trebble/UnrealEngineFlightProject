@@ -30,6 +30,8 @@ public:
 
 	UAudioComponent* PersonalAircraftAudio;
 
+	UAudioComponent* GunAudio;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USpringArmComponent* SpringArm;
 
@@ -50,7 +52,9 @@ public:
 
 	float ReturnSpringArmLength() const { return springArmLength; };
 
-	UAudioComponent* GetAudioComponent() const { return PersonalAircraftAudio; };
+	UAudioComponent* GetAircraftAudio() const { return PersonalAircraftAudio; };
+
+	UAudioComponent* GetGunAudio() const { return GunAudio; };
 
 protected:
 	virtual void BeginPlay() override;

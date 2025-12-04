@@ -20,15 +20,22 @@ public:
 
 	UAudioComponent* PersonalAircraftAudio;
 
+	UAudioComponent* GunAudio;
+
 	UPROPERTY(EditAnywhere)
 	USoundWave* CockpitSound;
 
 	UPROPERTY(EditAnywhere)
 	USoundWave* ThirdPersonSound;
 
+	UPROPERTY(EditAnywhere)
+	USoundWave* GunSound;
+
 	ABaseAircraft* Controlled;
 	
 	void PlayPerspectiveSound(ECameraPerspective Perspective);
+
+	void HandleGunSound(bool bFiring);
 
 	void SetControlled(ABaseAircraft* InControl) { Controlled = InControl; };
 };
