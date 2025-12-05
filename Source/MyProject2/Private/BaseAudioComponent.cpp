@@ -9,7 +9,8 @@
 
 UBaseAudioComponent::UBaseAudioComponent() {}
 
-void UBaseAudioComponent::BeginPlay() {
+void UBaseAudioComponent::BeginPlay() 
+{
 	Super::BeginPlay();
 	if (!PrimaryLoop) 
 	{
@@ -24,18 +25,21 @@ void UBaseAudioComponent::BeginPlay() {
 	}
 }
 
-void UBaseAudioComponent::PlayLoop(USoundBase* Sound) {
+void UBaseAudioComponent::PlayLoop(USoundBase* Sound) 
+{
 	if (!PrimaryLoop || !Sound) return;
 	PrimaryLoop->SetSound(Sound);
 	PrimaryLoop->Play();
 }
 
-void UBaseAudioComponent::StopLoop() {
+void UBaseAudioComponent::StopLoop() 
+{
 	if (!PrimaryLoop) return;
 	PrimaryLoop->Stop();
 }
 
-void UBaseAudioComponent::PlayOneShot(USoundBase* Sound) {
+void UBaseAudioComponent::PlayOneShot(USoundBase* Sound)
+{
 	if (!GetOwner()) return;
 	UGameplayStatics::PlaySoundAtLocation(
 		this,
@@ -44,7 +48,8 @@ void UBaseAudioComponent::PlayOneShot(USoundBase* Sound) {
 	);
 }
 
-void UBaseAudioComponent::PlayOneShotAtLocation(USoundBase* Sound, FVector Location) {
+void UBaseAudioComponent::PlayOneShotAtLocation(USoundBase* Sound, FVector Location)
+{
 	UGameplayStatics::PlaySoundAtLocation(
 		this,
 		Sound,

@@ -8,18 +8,16 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Structs and Data/MenuState.h"
-#include "Gamemodes/CurrentPlayerState.h"
 #include "Structs and Data/ControlModeTypes.h"
 #include "AircraftPlayerController.generated.h"
+
+#define MIDDLETHRUST 0.5f
 
 class APlayerAircraft;
 class UInputMappingContext;
 class UEnhancedInputComponent;
 class UMenuManagerComponent;
-class UFlightComponent;
-class URadarComponent;
 class UWeaponSystemComponent;
-class UCameraManagerComponent;
 class APlayerHUD;
 
 UCLASS()
@@ -103,51 +101,30 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* IA_TogglePerspective;
 
-	bool bIsPaused = false;
-
-	int32 AircraftMappingPriority = 0;
-
-	int32 MenuMappingPriority = 1;
-
-	EControlMode CurrentMode = EControlMode::Null;
-
-	TArray<EMenuState> MenuHistory;
-
-	UMenuManagerComponent* MenuManager;
-
-	UFlightComponent* FlightComp;
-
-	UWeaponSystemComponent* WeaponComp;
-
-	URadarComponent* RadarComp;
-
-	UCameraManagerComponent* ManagerComp;
-
-	APlayerHUD* HUD;
-
-	TSubclassOf<ABaseWeapon> CurrentWeaponClass;
+	// Functions
 
 	void ManageMenuSetting(EMenuState NewState);
+	void SetComponents(UWeaponSystemComponent* InWeapon);
+	void SetControlMode(EControlMode NewMode);
 
-	void SetComponents(
-		UFlightComponent* InFlight,
-		UWeaponSystemComponent* InWeapon,
-		URadarComponent* InRadar,
-		UCameraManagerComponent* InManager
-	);
-
-	//UVariables
+	// Vars
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isFlying = false;
 
-	FTimerHandle RepeatTimerHandle;
-
-	AActor* Selected;
-
 	int SelectedIndex = -1;
+	bool bIsPaused = false;
 
-	void SetControlMode(EControlMode NewMode);
+	int32 AircraftMappingPriority = 0;
+	int32 MenuMappingPriority = 1;
+
+	EControlMode CurrentMode = EControlMode::Null;
+	TArray<EMenuState> MenuHistory;
+
+	APlayerAircraft* Controlled;
+	UMenuManagerComponent* MenuManager;
+	UWeaponSystemComponent* WeaponComp;
+	APlayerHUD* HUD;
 
 private:
 
@@ -202,15 +179,13 @@ private:
 
 	void UpdateLODs();
 
-	FTimerHandle MissileVFXHandle;
-
 	//Variables
 
 	bool fire = false;
-
-	float thrustPercentage = 0.5f;
-
-	int CurrentWeaponIndex = 0;
-
 	bool isThrust = false;
+
+	float thrustPercentage = MIDDLETHRUST;
+	int32 WeaponIndex = 0;
+
+	FTimerHandle UpdateVFXHandle;
 };

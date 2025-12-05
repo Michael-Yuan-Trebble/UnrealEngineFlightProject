@@ -35,6 +35,11 @@ APlayerAircraft::APlayerAircraft()
 	PersonalAircraftAudio->bAutoActivate = false;
 	PersonalAircraftAudio->bIsUISound = false;
 
+	GunAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("GunAudio"));
+	GunAudio->SetupAttachment(GetRootComponent());
+	GunAudio->bAutoActivate = false;
+	GunAudio->bIsUISound = false;
+
 	health = 100;
 	Faction = EFaction::Ally;
 }
@@ -60,10 +65,78 @@ void APlayerAircraft::PossessedBy(AController* NewController)
 
 	Controlled = Cast<AAircraftPlayerController>(NewController);
 	if (!Controlled) return;
-	Controlled->SetComponents(FlightComponent, WeaponComponent, RadarComponent, ManagerComp);
+	Controlled->SetComponents(WeaponComponent);
 }
 
 void APlayerAircraft::HandleHit() 
 {
 
 }
+
+void APlayerAircraft::WeaponComponentOnUnitDeath() {
+	WeaponComponent->ResetLockedOn();
+}
+
+void APlayerAircraft::FireWeaponSelected() { if (WeaponComponent) WeaponComponent->FireWeaponSelected(WeaponComponent->GetWeapon()->GetClass(), Tracked, FlightComponent->GetSpeed()); }
+
+void APlayerAircraft::FireBullets() { if (WeaponComponent) WeaponComponent->FireBullets(); }
+
+void APlayerAircraft::StartBullets() 
+{
+	GunSoundEffect(true);
+	FireBullets();
+	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &APlayerAircraft::FireBullets, BulletStats->FireRate, true);
+}
+
+void APlayerAircraft::EndBullets()
+{
+	GunSoundEffect(false);
+	GetWorld()->GetTimerManager().ClearTimer(RepeatTimerHandle);
+}
+
+void APlayerAircraft::SelectWeapon(float index) { if (WeaponComponent) WeaponComponent->SelectWeapon(index); }
+
+int32 APlayerAircraft::AdvanceWeapon(int32 index, bool bForward) 
+{
+	if (!WeaponComponent || WeaponComponent->WeaponGroups.Num() == 0) return 0;
+
+	TArray<TSubclassOf<ABaseWeapon>> Keys;
+	WeaponComponent->WeaponGroups.GetKeys(Keys);
+
+	int32 CurrentIndex = Keys.IndexOfByKey(WeaponComponent->GetWeapon()->GetClass());
+	if (bForward) CurrentIndex = (CurrentIndex + 1) % Keys.Num();
+	else CurrentIndex = (CurrentIndex - 1 + Keys.Num()) % Keys.Num();
+
+	WeaponComponent->SelectWeapon(CurrentIndex);
+	return CurrentIndex;
+}
+
+void APlayerAircraft::SetThrust(float thrust) {
+	if (FlightComponent) FlightComponent->SetThrust(thrust);
+}
+
+void APlayerAircraft::GunSoundEffect(bool bShooting) 
+{
+	if (AudioComp) AudioComp->HandleGunSound(bShooting);
+}
+
+void APlayerAircraft::SetRoll(float roll) { if (FlightComponent) FlightComponent->SetRoll(roll); }
+
+void APlayerAircraft::SetPitch(float pitch) { if (FlightComponent) FlightComponent->SetPitch(pitch); }
+
+void APlayerAircraft::SetRudder(float rudder) { if (FlightComponent) FlightComponent->SetYaw(rudder); }
+
+void APlayerAircraft::CycleTarget() { if (RadarComponent) RadarComponent->CycleTarget(); };
+
+void APlayerAircraft::SetHUD(APlayerHUD* InHUD) 
+{
+	if (!ManagerComp) return;
+	ManagerComp->SetHUD(InHUD);
+	ManagerComp->SetThirdPerson();
+}
+
+void APlayerAircraft::SwitchCameras() { if (ManagerComp) ManagerComp->SwitchCamera(); }
+
+void APlayerAircraft::HandleVertical(float Vertical) { if (ManagerComp) ManagerComp->LookVer(Vertical); }
+
+void APlayerAircraft::HandleHorizontal(float Horizontal) { if (ManagerComp) ManagerComp->LookHor(Horizontal); }

@@ -189,8 +189,6 @@ void UWeaponSystemComponent::SelectWeapon(int WeaponIndex)
 
 	TSubclassOf<ABaseWeapon> SelectedClass = Keys[WeaponIndex];
 
-	if (PC) PC->CurrentWeaponClass = SelectedClass;
-
 	const TArray<FCooldownWeapon*>* WeaponArray = WeaponGroups.Find(SelectedClass);
 	if (!WeaponArray || WeaponArray->Num() == 0) return;
 	ResetLockedOn();

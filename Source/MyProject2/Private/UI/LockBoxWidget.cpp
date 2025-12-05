@@ -48,8 +48,18 @@ void ULockBoxWidget::ResetLockAnimation()
 {
 	bIsLocking = false;
 	isLockedOn = false;
-	if (LockApproachAnim) StopAnimation(LockApproachAnim);
-	if (LockConfirm) StopAnimation(LockConfirm);
+	if (LockApproachAnim) 
+	{ 
+		StopAnimation(LockApproachAnim); 
+		PlayAnimation(LockApproachAnim, 0.0f, 1, EUMGSequencePlayMode::Reverse);
+		StopAnimation(LockApproachAnim);
+	}
+	if (LockConfirm) 
+	{
+		StopAnimation(LockConfirm);
+		PlayAnimation(LockConfirm, 0.0f, 1, EUMGSequencePlayMode::Reverse);
+		StopAnimation(LockConfirm);
+	}
 	if (ReticleImage)
 	{
 		FLinearColor C = ReticleImage->GetColorAndOpacity();

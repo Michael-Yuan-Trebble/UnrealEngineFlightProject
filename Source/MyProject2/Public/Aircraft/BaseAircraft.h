@@ -102,6 +102,12 @@ public:
 
 	virtual void HandleLOD(FVector CameraLoc) override;
 
+	virtual void FireBullets() {};
+
+	virtual void StartBullets() {};
+
+	virtual void EndBullets() {};
+
 protected:
 
 	virtual void BeginPlay() override;

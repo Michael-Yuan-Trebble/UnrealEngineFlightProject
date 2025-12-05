@@ -59,10 +59,8 @@ void UCameraManagerComponent::SetFirstPerson()
 	Controlled->FirstPersonCamera->SetActive(true);
 	Controlled->ThirdPersonCamera->SetActive(false);
 
-	if (!HUD) return;
-	HUD->TogglePitchLadder(false);
-	if (!AudioComp) return;
-	AudioComp->PlayPerspectiveSound(CurrentMode);
+	if (HUD) HUD->TogglePitchLadder(false);
+	if (AudioComp) AudioComp->PlayPerspectiveSound(CurrentMode);
 }
 
 void UCameraManagerComponent::SetThirdPerson() 
@@ -77,19 +75,15 @@ void UCameraManagerComponent::SetThirdPerson()
 	currentX = 0.f;
 	currentY = 0.f;
 
-	if (!SpringArm) return;
-
-	SpringArm->SetRelativeRotation(FRotator::ZeroRotator);
+	if (SpringArm) SpringArm->SetRelativeRotation(FRotator::ZeroRotator);
 
 	Controlled->FirstPersonCamera->SetActive(false);
 	Controlled->ThirdPersonCamera->SetActive(true);
 
 	PC->SetViewTargetWithBlend(Controlled, 0.f, VTBlend_Cubic);
 
-	if (!HUD) return;
-	HUD->TogglePitchLadder(true);
-	if (!AudioComp) return;
-	AudioComp->PlayPerspectiveSound(CurrentMode);
+	if (HUD) HUD->TogglePitchLadder(true);
+	if (AudioComp) AudioComp->PlayPerspectiveSound(CurrentMode);
 }
 
 void UCameraManagerComponent::LookHor(float lookX) 

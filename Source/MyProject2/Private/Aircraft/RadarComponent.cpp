@@ -176,17 +176,9 @@ void URadarComponent::CycleToNextTarget()
 void URadarComponent::SetTarget(AActor* NewTarget) 
 {
 	ABaseUnit* Unit = Cast<ABaseUnit>(NewTarget);
-	if (!IsValid(Unit)) return;
+	if (!IsValid(Unit) || Selected == Unit) return;
 
-	if (Selected == Unit) return;
-
-	if (IsValid(LastSelected)) 
-	{
-		if (Unit->GetActorGuid() == LastSelected->GetActorGuid()) 
-		{
-			return;
-		}
-	}
+	if (IsValid(LastSelected) && Unit->GetActorGuid() == LastSelected->GetActorGuid()) return;
 
 	if (IsValid(Selected))
 	{
@@ -199,9 +191,7 @@ void URadarComponent::SetTarget(AActor* NewTarget)
 		Unit->OnUnitDeath.AddDynamic(this, &URadarComponent::HandleSelectedDestroyed);
 	}
 
-	if (!HUD) return;
-
-	HUD->SetTarget(Unit);
+	if (HUD) HUD->SetTarget(Unit);
 	LastSelected = Unit;
 	if (Controlled) Controlled->Tracked = Unit;
 	// VFX

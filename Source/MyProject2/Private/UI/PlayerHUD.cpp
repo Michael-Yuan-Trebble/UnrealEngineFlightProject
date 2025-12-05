@@ -245,8 +245,8 @@ void APlayerHUD::OnUnitDestroyed(ABaseUnit* Death)
     {
         W->RemoveFromParent();
     }
-
     ActiveWidgets.Remove(Death);
+    Controlled->WeaponComponentOnUnitDeath();
 }
 
 void APlayerHUD::UpdateSelected()

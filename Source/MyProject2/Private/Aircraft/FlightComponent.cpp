@@ -5,7 +5,6 @@
 
 EThrottleStage UFlightComponent::getThrottleStage(float throttle)
 {
-	// Throttle Stages for pronounced acceleration differences
 	throttle *= 100.f;
 	if (throttle >= 0 && throttle <= 40) return EThrottleStage::Slow;
 	else if (throttle <= 80) return EThrottleStage::Normal;

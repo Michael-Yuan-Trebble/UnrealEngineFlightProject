@@ -102,6 +102,8 @@ public:
 
 	EThrottleStage ReturnPrevThrottleStage() const { return prevStage; };
 
+	float GetSpeed() const { return currentSpeed; };
+
 private:
 	float CalculateSpeedDrag();
 

@@ -16,4 +16,7 @@ class MYPROJECT2_API UBulletStats : public UBaseWeaponStats
 public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AAircraftBullet> BulletClass;
+
+	UPROPERTY(EditAnywhere)
+	float FireRate;
 };

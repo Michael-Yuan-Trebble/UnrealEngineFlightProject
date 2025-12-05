@@ -94,6 +94,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AAircraftBullet> Bullet;
 
-private:
+	ABaseWeapon* GetWeapon() const { return CurrentWeapon; };
+
 	void ResetLockedOn();
+
+private:
 };

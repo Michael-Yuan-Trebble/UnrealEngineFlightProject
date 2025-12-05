@@ -3,17 +3,10 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("AH!"));
 #include "AircraftPlayerController.h"
 #include "InputMappingContext.h"
-#include "Aircraft/FlightComponent.h"
-#include "Math/UnrealMathUtility.h"
-#include "GameFramework/SpectatorPawn.h"
 #include "Aircraft/MenuManagerComponent.h"
 #include "Aircraft/WeaponSystemComponent.h"
-#include "Aircraft/Player/CameraManagerComponent.h"
-#include "Aircraft/RadarComponent.h"
-#include "UI/PlayerHUD.h"
 #include "Gamemodes/CurrentPlayerState.h"
-#include "Kismet/GameplayStatics.h"
-#include "HealthComponent.h"
+#include "UI/PlayerHUD.h"
 #include "TimerManager.h"
 #include "Weapons/Missiles/BaseMissile.h"
 #include "Structs and Data/MissileManagerSubsystem.h"
@@ -26,24 +19,17 @@ AAircraftPlayerController::AAircraftPlayerController()
 	MenuManager = CreateDefaultSubobject<UMenuManagerComponent>(TEXT("MenuManager"));
 
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> AircraftMapFinder(TEXT("/Game/Controls/Mapping.Mapping"));
-	if (AircraftMapFinder.Succeeded()) 
-	{
-		Mapping = AircraftMapFinder.Object;
-	}
+	if (AircraftMapFinder.Succeeded()) { Mapping = AircraftMapFinder.Object; }
 
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> MenuMapFinder(TEXT("/Game/Controls/MenuInputMapping.MenuInputMapping"));
-	if (MenuMapFinder.Succeeded()) 
-	{
-		MenuInputMapping = MenuMapFinder.Object;
-	}
+	if (MenuMapFinder.Succeeded()) { MenuInputMapping = MenuMapFinder.Object; }
 }
 
 void AAircraftPlayerController::BeginPlay() 
 {
 	Super::BeginPlay();
 	ACurrentPlayerState* PS = Cast<ACurrentPlayerState>(this->PlayerState);
-	if (!PS) return;
-	MenuManager->InitializePC(this, PS);
+	if (PS) MenuManager->InitializePC(this, PS);
 	if (UAircraftRegistry* Reg = UAircraftRegistry::Get(GetWorld()))
 	{
 		Reg->OnAnyUnitHit.AddUObject(this, &AAircraftPlayerController::OnUnitHit);
@@ -51,7 +37,7 @@ void AAircraftPlayerController::BeginPlay()
 	}
 	const float ScanTime = 0.15f;
 	GetWorld()->GetTimerManager().SetTimer(
-		MissileVFXHandle,
+		UpdateVFXHandle,
 		this,
 		&AAircraftPlayerController::UpdateLODs,
 		ScanTime,
@@ -63,37 +49,25 @@ void AAircraftPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	HUD = Cast<APlayerHUD>(GetHUD());
-	if (!ManagerComp || !HUD) return;
-	HUD->Init(this);
-	ManagerComp->SetHUD(HUD);
-	ManagerComp->SetThirdPerson();
+	Controlled = Cast<APlayerAircraft>(InPawn);
+	if (HUD) HUD->Init(this);
+	if (Controlled) Controlled->SetHUD(HUD);
 }
 
-void AAircraftPlayerController::SetComponents(
-	UFlightComponent* InFlight,
-	UWeaponSystemComponent* InWeapon,
-	URadarComponent* InRadar,
-	UCameraManagerComponent* InManager
-) 
+void AAircraftPlayerController::SetComponents(UWeaponSystemComponent* InWeapon) 
 {
-	FlightComp = InFlight;
-
 	WeaponComp = InWeapon;
 	WeaponComp->OnWeaponHit.AddDynamic(this, &AAircraftPlayerController::HandleWeaponHit);
 	WeaponComp->OnHUDLockedOn.AddDynamic(this, &AAircraftPlayerController::HandleHUDLockedOn);
 	WeaponComp->OnWeaponCountUpdated.AddDynamic(this, &AAircraftPlayerController::HandleWeaponCount);
-
-	RadarComp = InRadar;
-
-	ManagerComp = InManager;
 }
 
 void AAircraftPlayerController::UpdateLODs()
 {
+	FVector CameraLoc = PlayerCameraManager->GetCameraLocation();
 	// Missile LODs
 	if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>())
 	{
-		FVector CameraLoc = PlayerCameraManager->GetCameraLocation();
 		for (TWeakObjectPtr<ABaseMissile> Missile : Subsystem->ActiveMissiles)
 		{
 			if (!Missile.IsValid()) continue;
@@ -103,50 +77,40 @@ void AAircraftPlayerController::UpdateLODs()
 	}
 
 	// Airframe LODs
-	if (UAircraftRegistry* Registry = UAircraftRegistry::Get(GetWorld())) {
-		FVector CameraLoc = PlayerCameraManager->GetCameraLocation();
-		for (TWeakObjectPtr<ABaseUnit> Unit : Registry->RegisteredUnits) {
+	if (UAircraftRegistry* Registry = UAircraftRegistry::Get(GetWorld())) 
+	{
+		for (TWeakObjectPtr<ABaseUnit> Unit : Registry->RegisteredUnits) 
+		{
 			if (!Unit.IsValid()) continue;
 			ABaseUnit* U = Unit.Get();
+			U->HandleLOD(CameraLoc);
 		}
 	}
 }
 
 void AAircraftPlayerController::HandleWeaponHit(bool bHit)
 {
-	if (bHit || !HUD) return;
-	HUD->HandleWeaponMiss();
+	if (!bHit && HUD) HUD->HandleWeaponMiss();
 }
 
 void AAircraftPlayerController::OnUnitHit(AActor* Launcher) 
 {
-	if (!HUD) return;
-	if (Launcher == GetPawn()) 
-	{
-		HUD->UpdateTargetHit(false);
-	}
+	if (HUD && Launcher == GetPawn()) HUD->UpdateTargetHit(false);
 }
 
 void AAircraftPlayerController::OnUnitDestroyed(AActor* Launcher) 
 {
-	if (!HUD) return;
-	if (Launcher == GetPawn())
-	{
-		HUD->UpdateTargetHit(true);
-	}
+	if (HUD && Launcher == GetPawn()) HUD->UpdateTargetHit(true);
 }
 
 void AAircraftPlayerController::HandleHUDLockedOn(float LockPercent)
 {
-	if (!HUD) return;
-	HUD->UpdateLocked(LockPercent);
+	if (HUD) HUD->UpdateLocked(LockPercent);
 }
 
 void AAircraftPlayerController::HandleWeaponCount(FName WeaponName, int32 CurrentCount, int32 MaxCount) 
 {
-	if (!HUD) return;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Count: %d"), CurrentCount));
-	HUD->OnWeaponChanged(WeaponName, CurrentCount, MaxCount);
+	if (HUD) HUD->OnWeaponChanged(WeaponName, CurrentCount, MaxCount);
 }
 
 // Setting controls
@@ -239,7 +203,6 @@ void AAircraftPlayerController::BindAircraftInputs(UEnhancedInputComponent* Enha
 	IA_TogglePerspective = SoftPerspective.LoadSynchronous();
 	if (IA_TogglePerspective) 
 	{
-		print(text)
 		EnhancedInputComp->BindAction(IA_TogglePerspective, ETriggerEvent::Started, this, &AAircraftPlayerController::TogglePerspective);
 	}
 }
@@ -354,10 +317,7 @@ void AAircraftPlayerController::SetControlMode(EControlMode NewMode)
 
 void AAircraftPlayerController::MenuBack() 
 {
-	print(text)
-	if (!MenuManager) return;
-	if (MenuHistory.Num() <= 0) return;
-	MenuManager->GoBack(MenuHistory.Pop());
+	if (MenuManager && MenuHistory.Num() > 0) MenuManager->GoBack(MenuHistory.Pop());
 }
 
 void AAircraftPlayerController::ManageMenuSetting(EMenuState NewMenu) 
@@ -378,62 +338,34 @@ void AAircraftPlayerController::Thrust(const FInputActionValue& Value)
 
 void AAircraftPlayerController::Roll(const FInputActionValue& Value) 
 {
-	if (FlightComp) FlightComp->SetRoll(Value.Get<float>());
+	if (Controlled) Controlled->SetRoll(Value.Get<float>());
 }
 
 void AAircraftPlayerController::Pitch(const FInputActionValue& Value)
 {
-	if (FlightComp) FlightComp->SetPitch(Value.Get<float>());
+	if (Controlled) Controlled->SetPitch(Value.Get<float>());
 }
 
 void AAircraftPlayerController::Rudder(const FInputActionValue& Value) 
 {
-	if (FlightComp) FlightComp->SetYaw(Value.Get<float>());
+	if (Controlled) Controlled->SetRudder(Value.Get<float>());
 }
 
 //Specials
 
 void AAircraftPlayerController::Weapons()
 {
-	if (!RadarComp || !WeaponComp || !FlightComp) return;
-	if (WeaponComp->WeaponGroups.Num() > 0 && !CurrentWeaponClass)
-	{
-		TArray<TSubclassOf<ABaseWeapon>> Keys;
-		WeaponComp->WeaponGroups.GetKeys(Keys);
-		CurrentWeaponClass = Keys[0];
-	}
-	//if (!RadarComp->Selected.IsValid()) return;
-	WeaponComp->FireWeaponSelected(CurrentWeaponClass, RadarComp->Selected, FlightComp->currentSpeed);
+	if (Controlled) Controlled->FireWeaponSelected();
 }
 
 void AAircraftPlayerController::NextWeapon() 
 {
-	if (!WeaponComp) return;
-	if (WeaponComp->WeaponGroups.Num() == 0) return;
-
-	TArray<TSubclassOf<ABaseWeapon>> Keys;
-	WeaponComp->WeaponGroups.GetKeys(Keys);
-
-	int32 CurrentIndex = Keys.IndexOfByKey(CurrentWeaponClass);
-	CurrentIndex = (CurrentIndex + 1) % Keys.Num();
-	//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%d"),CurrentIndex));
-	WeaponComp->SelectWeapon(CurrentIndex);
-	CurrentWeaponClass = Keys[CurrentIndex];
+	if (Controlled) WeaponIndex = Controlled->AdvanceWeapon(WeaponIndex, true);
 }
 
 void AAircraftPlayerController::PreviousWeapon() 
 {
-	if (!WeaponComp) return;
-	if (WeaponComp->WeaponGroups.Num() == 0) return;
-
-	TArray<TSubclassOf<ABaseWeapon>> Keys;
-	WeaponComp->WeaponGroups.GetKeys(Keys);
-
-	int32 CurrentIndex = Keys.IndexOfByKey(CurrentWeaponClass);
-	CurrentIndex = (CurrentIndex - 1 + Keys.Num()) % Keys.Num();
-	//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%d"), CurrentIndex));
-	WeaponComp->SelectWeapon(CurrentIndex);
-	CurrentWeaponClass = Keys[CurrentIndex];
+	if (Controlled) WeaponIndex = Controlled->AdvanceWeapon(WeaponIndex, false);
 }
 
 void AAircraftPlayerController::Special() 
@@ -444,40 +376,32 @@ void AAircraftPlayerController::Special()
 
 void AAircraftPlayerController::ShootStart() 
 {
-	if (!fire) 
-	{
-		fire = true;
-		Bullets();
-		GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AAircraftPlayerController::Bullets, 0.1f, true);
-	}
+	if (fire) return;
+	fire = true;
+	if (Controlled) Controlled->StartBullets();
 }
 
 void AAircraftPlayerController::ShootEnd() 
 {
 	fire = false;
-	GetWorld()->GetTimerManager().ClearTimer(RepeatTimerHandle);
+	if (Controlled) Controlled->EndBullets();
 }
 
 void AAircraftPlayerController::Bullets() 
 {
-	if (WeaponComp) WeaponComp->FireBullets();
+	if (Controlled) Controlled->FireBullets();
 }
 
 //Camera Movement
 
 void AAircraftPlayerController::Switch() 
 {
-	if (RadarComp) RadarComp->CycleTarget();
-	if (Selected)
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Pitch: %s"), *Selected->GetName()));
-	}
+	if (Controlled) Controlled->CycleTarget();
 }
 
 void AAircraftPlayerController::TogglePerspective() 
 {
-	if (!ManagerComp) return;
-	ManagerComp->SwitchCamera();
+	if (Controlled) Controlled->SwitchCameras();
 }
 
 void AAircraftPlayerController::Focus()
@@ -492,14 +416,12 @@ void AAircraftPlayerController::FocusStop()
 
 void AAircraftPlayerController::LookHor(const FInputActionValue& ValueX) 
 {
-	if (!ManagerComp) return;
-	ManagerComp->LookHor(ValueX.Get<float>());
+	if (Controlled) Controlled->HandleHorizontal(ValueX.Get<float>());
 }
 
 void AAircraftPlayerController::LookVer(const FInputActionValue& ValueY) 
 {
-	if (!ManagerComp) return;
-	ManagerComp->LookVer(ValueY.Get<float>());
+	if (Controlled) Controlled->HandleVertical(ValueY.Get<float>());
 }
 
 //Map
@@ -518,16 +440,8 @@ void AAircraftPlayerController::StopMapZoom()
 void AAircraftPlayerController::Tick(float DeltaSeconds) 
 {
 	if (CurrentMode == EControlMode::Menu) return;
-	if (!isThrust) thrustPercentage = FMath::FInterpTo(thrustPercentage, 0.5, DeltaSeconds, 2.f);
-	if (FlightComp) FlightComp->SetThrust(thrustPercentage);
+	if (!isThrust) thrustPercentage = FMath::FInterpTo(thrustPercentage, MIDDLETHRUST, DeltaSeconds, 2.f);
+	if (Controlled) Controlled->SetThrust(thrustPercentage);
 	
-	if (RadarComp && HUD) 
-	{
-		ABaseAircraft* Temp = Cast<ABaseAircraft>(RadarComp->Selected);
-		if (Temp) 
-		{
-			HUD->Targets.Add(Temp);
-		}
-	}
 	Super::Tick(DeltaSeconds);
 }

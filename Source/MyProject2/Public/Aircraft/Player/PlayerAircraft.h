@@ -11,6 +11,8 @@
 class AAircraftPlayerController;
 class UCameraManagerComponent;
 class UAircraftAudioComponent;
+class ABaseWeapon;
+class APlayerHUD;
 
 UCLASS()
 class MYPROJECT2_API APlayerAircraft : public ABaseAircraft
@@ -55,6 +57,41 @@ public:
 	UAudioComponent* GetAircraftAudio() const { return PersonalAircraftAudio; };
 
 	UAudioComponent* GetGunAudio() const { return GunAudio; };
+
+	float GetCameraLocation() const;
+
+	void GunSoundEffect(bool bShoot);
+
+	void WeaponComponentOnUnitDeath();
+
+	FTimerHandle RepeatTimerHandle;
+
+// Controller Functions
+public:
+	// Flight Component
+	void SetThrust(float thrust);
+	void SetRoll(float roll);
+	void SetPitch(float pitch);
+	void SetRudder(float rudder);
+
+	// Weapon Component
+	void FireWeaponSelected();
+	virtual void FireBullets() override;
+	
+	virtual void StartBullets() override;
+	virtual void EndBullets() override;
+
+	void SelectWeapon(float index);
+	int32 AdvanceWeapon(int32 index, bool bForward);
+
+	// Radar Component
+	void CycleTarget();
+
+	// Camera Manager
+	void SetHUD(APlayerHUD* InHUD);
+	void SwitchCameras();
+	void HandleVertical(float Vertical);
+	void HandleHorizontal(float Horizontal);
 
 protected:
 	virtual void BeginPlay() override;
