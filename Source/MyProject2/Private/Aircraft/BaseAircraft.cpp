@@ -109,6 +109,8 @@ void ABaseAircraft::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void ABaseAircraft::FireWeaponSelected() { if (WeaponComponent) WeaponComponent->FireWeaponSelected(WeaponComponent->GetWeapon()->GetClass(), Tracked, FlightComponent->GetSpeed()); }
+
 void ABaseAircraft::HandleAfterburnerFX(bool isActive) 
 {
 	if (isActive) ActivateAfterburnerFX();
@@ -173,3 +175,13 @@ void ABaseAircraft::HandleLOD(FVector CameraLoc)
 		bIsVisible = true;
 	}
 }
+
+void ABaseAircraft::SetThrust(float thrust) { if (FlightComponent) FlightComponent->SetThrust(thrust); }
+
+void ABaseAircraft::SetRoll(float roll) { if (FlightComponent) FlightComponent->SetRoll(roll); }
+
+void ABaseAircraft::SetPitch(float pitch) { if (FlightComponent) FlightComponent->SetPitch(pitch); }
+
+void ABaseAircraft::SetRudder(float rudder) { if (FlightComponent) FlightComponent->SetYaw(rudder); }
+
+void ABaseAircraft::SetFlying(bool bIsFlying) { if (FlightComponent) FlightComponent->isFlying = bIsFlying; }

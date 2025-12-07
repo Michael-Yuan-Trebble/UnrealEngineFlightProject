@@ -48,18 +48,8 @@ void ULockBoxWidget::ResetLockAnimation()
 {
 	bIsLocking = false;
 	isLockedOn = false;
-	if (LockApproachAnim) 
-	{ 
-		StopAnimation(LockApproachAnim); 
-		PlayAnimation(LockApproachAnim, 0.0f, 1, EUMGSequencePlayMode::Reverse);
-		StopAnimation(LockApproachAnim);
-	}
-	if (LockConfirm) 
-	{
-		StopAnimation(LockConfirm);
-		PlayAnimation(LockConfirm, 0.0f, 1, EUMGSequencePlayMode::Reverse);
-		StopAnimation(LockConfirm);
-	}
+	if (LockApproachAnim) ResetAnimation(LockApproachAnim);
+	if (LockConfirm) ResetAnimation(LockConfirm);
 	if (ReticleImage)
 	{
 		FLinearColor C = ReticleImage->GetColorAndOpacity();
@@ -136,4 +126,12 @@ void ULockBoxWidget::SetSmallerReticleImage(UTexture2D* NewTexture)
 	Brush.ImageSize = FVector2D(128, 128);
 	Brush.DrawAs = ESlateBrushDrawType::Image;
 	SmallReticleImage->SetBrush(Brush);
+}
+
+void ULockBoxWidget::ResetAnimation(UWidgetAnimation* Animation) 
+{
+	if (!Animation) return;
+	StopAnimation(Animation);
+	PlayAnimation(Animation, 0.0f, 1, EUMGSequencePlayMode::Reverse);
+	StopAnimation(Animation);
 }

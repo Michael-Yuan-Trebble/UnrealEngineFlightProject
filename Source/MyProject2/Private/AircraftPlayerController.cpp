@@ -51,7 +51,12 @@ void AAircraftPlayerController::OnPossess(APawn* InPawn)
 	HUD = Cast<APlayerHUD>(GetHUD());
 	Controlled = Cast<APlayerAircraft>(InPawn);
 	if (HUD) HUD->Init(this);
-	if (Controlled) Controlled->SetHUD(HUD);
+	if (Controlled) 
+	{
+		Controlled->SetHUD(HUD);
+		Controlled->OnMissileLaunchedAtSelf.AddDynamic(this, &AAircraftPlayerController::HandleMissileLaunchedAtPlayer);
+		Controlled->OnLockedOnByEnemy.AddDynamic(this, &AAircraftPlayerController::HandleMissileLockedAtPlayer);
+	}
 }
 
 void AAircraftPlayerController::SetComponents(UWeaponSystemComponent* InWeapon) 
@@ -111,6 +116,16 @@ void AAircraftPlayerController::HandleHUDLockedOn(float LockPercent)
 void AAircraftPlayerController::HandleWeaponCount(FName WeaponName, int32 CurrentCount, int32 MaxCount) 
 {
 	if (HUD) HUD->OnWeaponChanged(WeaponName, CurrentCount, MaxCount);
+}
+
+void AAircraftPlayerController::HandleMissileLaunchedAtPlayer(ABaseMissile* Missile) 
+{
+	if (HUD) HUD->HandleMissileLaunchedAtSelf(Missile);
+}
+
+void AAircraftPlayerController::HandleMissileLockedAtPlayer() 
+{
+	if (HUD) HUD->HandleMissileLockedAtSelf();
 }
 
 // Setting controls

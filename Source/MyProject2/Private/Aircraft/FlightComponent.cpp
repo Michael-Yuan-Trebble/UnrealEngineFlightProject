@@ -362,6 +362,7 @@ void UFlightComponent::ApplyPitch(float DeltaSeconds)
 	}
 	else
 	{
+		/*
 		InterpSpeed = AircraftStats->TurnRate * CurveTurn * CompressionTurn;
 		float TargetPitchAngle = UserPitch * InterpSpeed;
 		FRotator CurrentRot = Controlled->Airframe->GetRelativeRotation();
@@ -371,7 +372,24 @@ void UFlightComponent::ApplyPitch(float DeltaSeconds)
 
 		CurrentRot.Pitch = NewPitch;
 		if (IsValid(Controlled) && IsValid(Controlled->Airframe))
-			Controlled->Airframe->SetRelativeRotation(CurrentRot);
+			Controlled->Airframe->SetRelativeRotation(CurrentRot);*/
+		if (UserPitch == 0)
+		{
+			NextPitch = FMath::FInterpTo(NextPitch, 0, DeltaSeconds, 3.f);
+			FRotator DeltaRot(NextPitch * DeltaSeconds, 0.f, 0.f);
+			Controlled->Airframe->AddLocalRotation(DeltaRot);
+			return;
+		}
+
+		InterpSpeed = AircraftStats->TurnRate * CurveTurn * CompressionTurn;
+		InterpSpeed = UserPitch < 0 ? InterpSpeed * 0.5 : InterpSpeed;
+
+		float TargetPitchRate = UserPitch * InterpSpeed;
+		NextPitch = FMath::FInterpTo(NextPitch, TargetPitchRate, DeltaSeconds, 5.f);
+
+		FRotator DeltaRot(NextPitch * DeltaSeconds, 0.f, 0.f);
+		if (IsValid(Controlled) && IsValid(Controlled->Airframe))
+			Controlled->Airframe->AddLocalRotation(DeltaRot);
 	}
 }
 

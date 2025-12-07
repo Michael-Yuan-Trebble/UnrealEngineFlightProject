@@ -61,7 +61,6 @@ void ABaseMissile::Tick(float DeltaTime)
 
 void ABaseMissile::LaunchSequence(float speed) 
 {
-
 }
 
 void ABaseMissile::activateSmoke() 
@@ -92,6 +91,15 @@ void ABaseMissile::activateSmoke()
 	);
 
 	ProjectileMovement->Velocity = GetActorForwardVector() * ProjectileMovement->InitialSpeed;
+}
+
+bool ABaseMissile::CalculateIfOvershoot(FVector ToTarget) {
+	ToTarget.Normalize();
+	float Dot = FVector::DotProduct(GetActorForwardVector(), ToTarget);
+	if (Dot < 0.f) {
+		return true;
+	}
+	return false;
 }
 
 void ABaseMissile::ApplyVFXLOD(FVector CameraLoc) 

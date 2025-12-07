@@ -296,6 +296,16 @@ void APlayerHUD::SetTarget(TWeakObjectPtr<ABaseUnit> InTarget)
     UpdateTargetWidgets();
 }
 
+void APlayerHUD::HandleMissileLaunchedAtSelf(ABaseMissile* Missile) 
+{
+
+}
+
+void APlayerHUD::HandleMissileLockedAtSelf() 
+{
+
+}
+
 void APlayerHUD::EndPlay(const EEndPlayReason::Type EndPlayReason) 
 {
     for (auto& Pair : ActiveWidgets)

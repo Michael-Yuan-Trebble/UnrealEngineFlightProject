@@ -10,6 +10,7 @@
 #include "EnemyAircraft.generated.h"
 
 class AEnemyAircraftAI;
+class ABaseWeapon;
 
 UCLASS()
 class MYPROJECT2_API AEnemyAircraft : public ABaseAircraft
@@ -24,5 +25,12 @@ public:
 
 	virtual void PossessedBy(AController* Controller) override;
 
-protected:
+	FTimerHandle RepeatTimerHandle;
+
+	virtual void FireBullets() override;
+	virtual void StartBullets() override;
+	virtual void EndBullets() override;
+
+	void SwitchWeapon(TSubclassOf<ABaseWeapon> InWeapon);
+
 };

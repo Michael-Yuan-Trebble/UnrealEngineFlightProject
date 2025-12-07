@@ -52,26 +52,36 @@ void AEnemyAircraftAI::Tick(float DeltaTime)
 
 void AEnemyAircraftAI::Weapons(TSubclassOf<ABaseWeapon> WeaponClass, AActor* Selected, float Speed)
 {
-	if (!WeaponClass || !Selected || !WeaponComp) return;
-	WeaponComp->FireWeaponSelected(WeaponClass, Selected, Speed);
+	if (!IsValid(Controlled)) return;
+	Controlled->FireWeaponSelected();
 }
+
+void AEnemyAircraftAI::SwitchWeapon(TSubclassOf<ABaseWeapon> InWeapon) 
+{
+	if (IsValid(Controlled)) Controlled->SwitchWeapon(InWeapon);
+}
+
+void AEnemyAircraftAI::ShootGun(bool bShoot) 
+{
+	if (!IsValid(Controlled) || bShoot == bIsFiring) return;
+	if (bShoot) Controlled->StartBullets();
+	else Controlled->EndBullets();
+}
+
+void AEnemyAircraftAI::SetThrust(float Thrust) { if (Controlled) Controlled->SetThrust(Thrust); }
+
+void AEnemyAircraftAI::SetPitch(float Pitch) { if (Controlled) Controlled->SetPitch(Pitch); }
+
+void AEnemyAircraftAI::SetRoll(float Roll) { if (Controlled) Controlled->SetRoll(Roll); }
+
+void AEnemyAircraftAI::SetYaw(float Yaw) { if (Controlled) Controlled->SetRudder(Yaw); }
+
+void AEnemyAircraftAI::SetFlying(bool bIsFlying) { if (Controlled) Controlled->SetFlying(bIsFlying); }
 
 void AEnemyAircraftAI::Special() {
 
 }
 
 void AEnemyAircraftAI::SpecialCooldown() {
-
-}
-
-void AEnemyAircraftAI::ShootStart() {
-
-}
-
-void AEnemyAircraftAI::ShootEnd() {
-
-}
-
-void AEnemyAircraftAI::Bullets() {
 
 }

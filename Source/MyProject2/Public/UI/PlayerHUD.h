@@ -93,6 +93,10 @@ public:
 
 	void SetTarget(TWeakObjectPtr<ABaseUnit> InTarget);
 
+	void HandleMissileLaunchedAtSelf(ABaseMissile* Missile);
+	
+	void HandleMissileLockedAtSelf();
+
 	UPROPERTY(BlueprintReadWrite)
 	int CurrentNum = 0;
 

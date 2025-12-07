@@ -68,14 +68,8 @@ public:
 
 // Controller Functions
 public:
-	// Flight Component
-	void SetThrust(float thrust);
-	void SetRoll(float roll);
-	void SetPitch(float pitch);
-	void SetRudder(float rudder);
 
 	// Weapon Component
-	void FireWeaponSelected();
 	virtual void FireBullets() override;
 	
 	virtual void StartBullets() override;

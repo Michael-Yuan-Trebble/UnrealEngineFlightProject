@@ -19,6 +19,7 @@ class UEnhancedInputComponent;
 class UMenuManagerComponent;
 class UWeaponSystemComponent;
 class APlayerHUD;
+class ABaseMissile;
 
 UCLASS()
 class MYPROJECT2_API AAircraftPlayerController : public APlayerController
@@ -176,6 +177,12 @@ private:
 
 	UFUNCTION()
 	void OnUnitDestroyed(AActor* Launcher);
+
+	UFUNCTION()
+	void HandleMissileLaunchedAtPlayer(ABaseMissile* Missile);
+
+	UFUNCTION()
+	void HandleMissileLockedAtPlayer();
 
 	void UpdateLODs();
 

@@ -57,6 +57,8 @@ public:
 
 	void GetCount();
 
+	void SearchAndEquipWeapon(TSubclassOf<ABaseWeapon> WeaponClass);
+
 	UFUNCTION()
 	void OnWeaponResult(bool bHit);
 

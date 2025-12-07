@@ -47,7 +47,8 @@ void UAircraftAudioComponent::PlayPerspectiveSound(ECameraPerspective Perspectiv
 
 void UAircraftAudioComponent::HandleGunSound(bool bFiring) 
 {
-	if (!GunAudio) {
+	if (!GunAudio) 
+	{
 		if (AActor* Owner = GetOwner())
 		{
 			if (APlayerAircraft* Player = Cast<APlayerAircraft>(Owner))

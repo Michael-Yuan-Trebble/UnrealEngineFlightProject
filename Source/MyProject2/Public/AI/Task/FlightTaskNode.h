@@ -7,6 +7,8 @@
 #include "Aircraft/FlightComponent.h"
 #include "FlightTaskNode.generated.h"
 
+class AEnemyAircraftAI;
+
 UCLASS(Blueprintable)
 class MYPROJECT2_API UBTTaskFlightTaskNode : public UBTTaskNode
 {
@@ -32,5 +34,5 @@ protected:
 
 	UBlackboardComponent* BlackboardComp;
 
-	UFlightComponent* FlightComp;
+	AEnemyAircraftAI* Controller;
 };

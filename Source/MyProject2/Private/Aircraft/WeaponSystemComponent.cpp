@@ -191,10 +191,29 @@ void UWeaponSystemComponent::SelectWeapon(int WeaponIndex)
 
 	const TArray<FCooldownWeapon*>* WeaponArray = WeaponGroups.Find(SelectedClass);
 	if (!WeaponArray || WeaponArray->Num() == 0) return;
+
+	const FCooldownWeapon* WeaponData = (*WeaponArray)[0];
+	if (!WeaponData || !WeaponData->WeaponInstance) return;
+
 	ResetLockedOn();
 
 	CurrentWeapon = (*WeaponArray)[0]->WeaponInstance;
 	GetCount();
+}
+
+// For AI to find a weapon
+void UWeaponSystemComponent::SearchAndEquipWeapon(TSubclassOf<ABaseWeapon> WeaponClass) 
+{
+	if (IsValid(CurrentWeapon) && WeaponClass == CurrentWeapon->GetClass()) return;
+	const TArray<FCooldownWeapon*>* WeaponArray = WeaponGroups.Find(WeaponClass);
+	if (!WeaponArray || WeaponArray->Num() == 0) return;
+	
+	const FCooldownWeapon* WeaponData = (*WeaponArray)[0];
+	if (!WeaponData || !WeaponData->WeaponInstance) return;
+
+	ResetLockedOn();
+
+	CurrentWeapon = (*WeaponArray)[0]->WeaponInstance;
 }
 
 void UWeaponSystemComponent::GetCount() 
@@ -290,6 +309,8 @@ void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target)
 		bLocked = false;
 		LockTime = 0.f;
 	}
+	if (bLocked) if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Target)) Aircraft->OnLockedOnByEnemy.Broadcast();
+
 	float LockPercent;
 	if (LOCKTIME == 0) LockPercent = 1.f;
 	else LockPercent = FMath::Clamp(LockTime / LOCKTIME, 0.f, 1.f);

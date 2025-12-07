@@ -77,8 +77,6 @@ void APlayerAircraft::WeaponComponentOnUnitDeath() {
 	WeaponComponent->ResetLockedOn();
 }
 
-void APlayerAircraft::FireWeaponSelected() { if (WeaponComponent) WeaponComponent->FireWeaponSelected(WeaponComponent->GetWeapon()->GetClass(), Tracked, FlightComponent->GetSpeed()); }
-
 void APlayerAircraft::FireBullets() { if (WeaponComponent) WeaponComponent->FireBullets(); }
 
 void APlayerAircraft::StartBullets() 
@@ -111,20 +109,10 @@ int32 APlayerAircraft::AdvanceWeapon(int32 index, bool bForward)
 	return CurrentIndex;
 }
 
-void APlayerAircraft::SetThrust(float thrust) {
-	if (FlightComponent) FlightComponent->SetThrust(thrust);
-}
-
 void APlayerAircraft::GunSoundEffect(bool bShooting) 
 {
 	if (AudioComp) AudioComp->HandleGunSound(bShooting);
 }
-
-void APlayerAircraft::SetRoll(float roll) { if (FlightComponent) FlightComponent->SetRoll(roll); }
-
-void APlayerAircraft::SetPitch(float pitch) { if (FlightComponent) FlightComponent->SetPitch(pitch); }
-
-void APlayerAircraft::SetRudder(float rudder) { if (FlightComponent) FlightComponent->SetYaw(rudder); }
 
 void APlayerAircraft::CycleTarget() { if (RadarComponent) RadarComponent->CycleTarget(); };
 

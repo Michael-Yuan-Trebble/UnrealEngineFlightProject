@@ -65,6 +65,8 @@ public:
 
 	bool bMissileVFXOn = true;
 
+	bool bMissed = false;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -73,6 +75,8 @@ protected:
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 
 	void DestroyMissile();
+
+	virtual bool CalculateIfOvershoot(FVector ToTarget);
 
 private:
 	UFUNCTION()

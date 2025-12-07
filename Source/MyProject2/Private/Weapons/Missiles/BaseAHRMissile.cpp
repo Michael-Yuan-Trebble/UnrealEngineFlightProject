@@ -70,10 +70,21 @@ void ABaseAHRMissile::Tick(float DeltaTime)
 
 	timeTilDelt += DeltaTime;
 
+	if (IsValid(Tracking))
+	{
+		if (CalculateIfOvershoot(Tracking->GetActorLocation() - GetActorLocation())) 
+		{
+			OnWeaponResult.Broadcast(false);
+			ProjectileMovement->HomingTargetComponent = nullptr;
+			ProjectileMovement->bIsHomingProjectile = false;
+			bMissed = true;
+		}
+	}
+
 	// Missile explodes at range
 
 	if (!(timeTilDelt >= MissileStats->LifeTime)) return;
-	OnWeaponResult.Broadcast(false);
+	if (!bMissed) OnWeaponResult.Broadcast(false);
 	DestroyMissile();
 }
 

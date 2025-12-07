@@ -18,19 +18,17 @@ EBTNodeResult::Type UBTTaskFlightTaskNode::ExecuteTask(UBehaviorTreeComponent& O
 	BlackboardComp = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComp) return EBTNodeResult::Aborted;
 
-	AEnemyAircraftAI* Controller = Cast<AEnemyAircraftAI>(OwnerComp.GetAIOwner());
+	Controller = Cast<AEnemyAircraftAI>(OwnerComp.GetAIOwner());
 	if (!Controller) return EBTNodeResult::Aborted;
 
-	AEnemyAircraft* Controlled = Cast<AEnemyAircraft>(Controller->Controlled);
-	if (!Controlled) return EBTNodeResult::Aborted;
-
-	FlightComp = Controlled->FlightComponent;
-	FlightComp->isFlying = true;
+	Controller->SetFlying(true);
 	return EBTNodeResult::InProgress;
 }
 
 void UBTTaskFlightTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
+	if (!Controller) return;
+
 	float YawOffset = BlackboardComp->GetValueAsFloat(YawKey.SelectedKeyName);
 	YawOffset = FMath::IsNearlyZero(YawOffset) ? 0.f : YawOffset;
 
@@ -43,10 +41,8 @@ void UBTTaskFlightTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* N
 	float Throttle = BlackboardComp->GetValueAsFloat(ThrottleKey.SelectedKeyName);
 	Throttle = FMath::IsNearlyZero(Throttle) ? 0.f : Throttle;
 
-	FlightComp->SetPitch(PitchOffset);
-	FlightComp->SetRoll(RollOffset);
-	FlightComp->SetYaw(YawOffset);
-	FlightComp->ReturnAOA(DeltaSeconds);
-
-	FlightComp->SetThrust(Throttle);
+	Controller->SetPitch(PitchOffset);
+	Controller->SetRoll(RollOffset);
+	Controller->SetYaw(YawOffset);
+	Controller->SetThrust(Throttle);
 }

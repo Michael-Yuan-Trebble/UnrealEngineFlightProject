@@ -16,6 +16,10 @@
 class UFlightComponent;
 class URadarComponent;
 class UWeaponSystemComponent;
+class ABaseMissile;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissileLaunchedAtSelf, ABaseMissile*, IncomingMissile);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLockedOnByEnemy);
 
 UCLASS()
 class MYPROJECT2_API ABaseAircraft : public ABaseUnit
@@ -24,6 +28,10 @@ class MYPROJECT2_API ABaseAircraft : public ABaseUnit
 
 public:
 	ABaseAircraft();
+
+	FOnMissileLaunchedAtSelf OnMissileLaunchedAtSelf;
+
+	FOnLockedOnByEnemy OnLockedOnByEnemy;
 
 	UPROPERTY(EditAnywhere)
 	UAircraftStats* AirStats;
@@ -107,6 +115,18 @@ public:
 	virtual void StartBullets() {};
 
 	virtual void EndBullets() {};
+
+public:
+	// Set Controller
+	void SetThrust(float thrust);
+
+	void SetRoll(float roll);
+	void SetPitch(float pitch);
+	void SetRudder(float rudder);
+
+	void SetFlying(bool bIsFlying);
+
+	void FireWeaponSelected();
 
 protected:
 

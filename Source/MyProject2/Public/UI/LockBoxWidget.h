@@ -60,4 +60,7 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	USizeBox* SizeBox_Reticle;
+
+private:
+	void ResetAnimation(UWidgetAnimation* Animation);
 };

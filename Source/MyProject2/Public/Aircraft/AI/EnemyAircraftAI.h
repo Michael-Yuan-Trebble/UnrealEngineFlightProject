@@ -10,7 +10,7 @@
 #include "Structs and Data/FDetectedAircraftInfo.h"
 #include "EnemyAircraftAI.generated.h"
 
-class ABaseAircraft;
+class AEnemyAircraft;
 class ABaseWeapon;
 class UWeaponSystemComponent;
 
@@ -38,23 +38,33 @@ public:
 	float currentSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	ABaseAircraft* Controlled;
+	AEnemyAircraft* Controlled;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FDetectedAircraftInfo Tracking;
 
 	UWeaponSystemComponent* WeaponComp;
+
+	bool bIsFiring = false;
 	
 	void Weapons(TSubclassOf<ABaseWeapon> WeaponClass, AActor* Selected, float Speed);
+
+public:
+	// Setting Controller Values
+	void SetThrust(float Thrust);
+
+	void SetPitch(float Pitch);
+	void SetRoll(float Raw);
+	void SetYaw(float Yaw);
+
+	void SetFlying(bool bIsFlying);
+
+	void ShootGun(bool bShoot);
+	void SwitchWeapon(TSubclassOf<ABaseWeapon> InWeapon);
 
 private:
 	void Special();
 
 	void SpecialCooldown();
 
-	void ShootStart();
-
-	void ShootEnd();
-
-	void Bullets();
 };
