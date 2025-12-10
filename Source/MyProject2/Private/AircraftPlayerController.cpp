@@ -128,6 +128,7 @@ void AAircraftPlayerController::HandleMissileLockedAtPlayer()
 	if (HUD) HUD->HandleMissileLockedAtSelf();
 }
 
+
 // Setting controls
 
 void AAircraftPlayerController::BindAircraftInputs(UEnhancedInputComponent* EnhancedInputComp) 

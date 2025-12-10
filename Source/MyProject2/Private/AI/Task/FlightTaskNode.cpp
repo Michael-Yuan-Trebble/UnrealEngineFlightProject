@@ -45,4 +45,7 @@ void UBTTaskFlightTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* N
 	Controller->SetRoll(RollOffset);
 	Controller->SetYaw(YawOffset);
 	Controller->SetThrust(Throttle);
+
+	bool bShootGun = BlackboardComp->GetValueAsBool(bFireGun.SelectedKeyName);
+	Controller->ShootGun(bShootGun);
 }

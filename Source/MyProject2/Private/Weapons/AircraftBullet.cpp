@@ -12,57 +12,71 @@
 AAircraftBullet::AAircraftBullet()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	
+	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
+	RootComponent = Collision;
+
+	Collision->SetCollisionProfileName("Projectile");
+	Collision->SetNotifyRigidBodyCollision(true);
+	Collision->SetGenerateOverlapEvents(false);
+
+	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
+	ProjectileMovement->bRotationFollowsVelocity = true;
+	ProjectileMovement->bShouldBounce = false;
+	ProjectileMovement->ProjectileGravityScale = 1.f;
+	ProjectileMovement->bAutoActivate = true;
+	ProjectileMovement->bSweepCollision = true;
+	ProjectileMovement->bForceSubStepping = true;
 
 	BulletMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BulletMesh"));
 	BulletMesh->SetWorldScale3D(FVector(5.f));
-
-	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
-	RootComponent = Collision;
-	Collision->SetCollisionProfileName("BlockAllDynamic");
-	Collision->SetSimulatePhysics(true);
-	Collision->SetNotifyRigidBodyCollision(true);
-	Collision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	BulletMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	BulletMesh->SetupAttachment(RootComponent);
+	
 }
 
 void AAircraftBullet::BeginPlay()
 {
 	Super::BeginPlay();
-	Collision->OnComponentHit.AddDynamic(this, &AAircraftBullet::OnHit);
 	damage = BulletStat->Damage;
-	if (GetOwner()) Owner = Cast<ABaseAircraft>(GetOwner());
-}
-
-// Called every frame
-void AAircraftBullet::Tick(float DeltaTime)
-{
-	if (currentTime >= LifeTime) Destroy();
-	currentTime += DeltaTime;
-
-	Super::Tick(DeltaTime);
-
+	if (IsValid(GetOwner())) 
+	{
+		Owner = Cast<ABaseAircraft>(GetOwner());
+		Collision->IgnoreActorWhenMoving(GetOwner(), true);
+	}
+	SetLifeSpan(LifeTime);
+	Collision->OnComponentBeginOverlap.AddDynamic(this, &AAircraftBullet::OnOverlapBegin);
+	Collision->OnComponentHit.AddDynamic(this, &AAircraftBullet::OnHit);
 }
 
 void AAircraftBullet::FireInDirection(const FVector& ShootDirection) 
 {
-	FVector Impulse = ShootDirection * BulletSpeed * 2;
-	Collision->AddImpulse(Impulse, NAME_None, true);
+	if (!ProjectileMovement) return;
+	ProjectileMovement->SetUpdatedComponent(Collision);
+	ProjectileMovement->Velocity = ShootDirection.GetSafeNormal() * BulletSpeed;
 }
 
 void AAircraftBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
 	
-	if (OtherActor && OtherActor != this) 
-	{
-		if (OtherActor && OtherComp->GetCollisionObjectType() == ECC_WorldStatic) 
-		{
-			DestroyBullet(OtherActor);
-		}
-	}
+	DestroyBullet(OtherActor);
+}
+
+void AAircraftBullet::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult)
+{
+	DestroyBullet(OtherActor);
 }
 
 void AAircraftBullet::DestroyBullet(AActor* OtherActor)
 {
+	if (bDestroyed) return;
+	bDestroyed = true;
 	if (!OtherActor || OtherActor == this || OtherActor == GetOwner()) return;
+	if (!Owner || !Owner->IsValidLowLevelFast()) return;
 
 	if (OtherActor->Implements<UTeamInterface>())
 	{
@@ -75,4 +89,15 @@ void AAircraftBullet::DestroyBullet(AActor* OtherActor)
 	{
 		IDamageableInterface::Execute_OnDamage(OtherActor, this, Owner, OtherActor, damage);
 	}
+
+	if (ExplosionEffect) {
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			ExplosionEffect,
+			GetActorLocation(),
+			GetActorRotation()
+		);
+	}
+
+	Destroy();
 }

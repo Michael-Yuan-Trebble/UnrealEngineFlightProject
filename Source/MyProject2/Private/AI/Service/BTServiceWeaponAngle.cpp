@@ -8,7 +8,8 @@
 #include "Aircraft/AI/EnemyAircraftAI.h"
 #include "Weapons/BaseWeapon.h"
 
-UBTServiceWeaponAngle::UBTServiceWeaponAngle() {
+UBTServiceWeaponAngle::UBTServiceWeaponAngle() 
+{
 	NodeName = "Update Weapon Angle";
 	Interval = 2.f;
 	bNotifyBecomeRelevant = true;

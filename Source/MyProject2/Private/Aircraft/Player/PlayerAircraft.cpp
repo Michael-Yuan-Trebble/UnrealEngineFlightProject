@@ -26,7 +26,6 @@ APlayerAircraft::APlayerAircraft()
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCamera->SetupAttachment(FirstPersonSpringArm);
 
-	WeaponComponent = CreateDefaultSubobject<UWeaponSystemComponent>(TEXT("WeaponComponent"));
 	ManagerComp = CreateDefaultSubobject<UCameraManagerComponent>(TEXT("CameraManagerComponent"));
 	AudioComp = CreateDefaultSubobject<UAircraftAudioComponent>(TEXT("AudioComponent"));
 
@@ -47,7 +46,7 @@ APlayerAircraft::APlayerAircraft()
 void APlayerAircraft::BeginPlay()
 {
 	Super::BeginPlay();
-	WeaponComponent->Setup(this, AirStats);
+	//WeaponComponent->Setup(this, AirStats);
 	AudioComp->SetControlled(this);
 	ManagerComp->SetSpringArm(SpringArm);
 	ManagerComp->SetControlled(this);

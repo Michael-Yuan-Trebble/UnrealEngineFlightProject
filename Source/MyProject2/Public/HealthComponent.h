@@ -8,6 +8,9 @@
 
 class ABaseUnit;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnDeath, AActor*, Weapon, AActor*, Launcher, AActor*, Target);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDamage);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UHealthComponent : public UActorComponent
 {
@@ -22,10 +25,8 @@ public:
 
 	float GetHealth() const { return CurrentHealth; };
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnDeath, AActor*, Weapon, AActor*, Launcher, AActor*, Target);
 	FOnDeath OnDeath;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDamage);
 	FOnDamage OnDamage;
 
 	ABaseUnit* Controller;

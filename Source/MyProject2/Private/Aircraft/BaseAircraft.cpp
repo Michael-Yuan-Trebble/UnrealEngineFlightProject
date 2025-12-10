@@ -31,6 +31,7 @@ ABaseAircraft::ABaseAircraft()
 
 	FlightComponent = CreateDefaultSubobject<UFlightComponent>(TEXT("FlightComponent"));
 	RadarComponent = CreateDefaultSubobject<URadarComponent>(TEXT("Radar"));
+	WeaponComponent = CreateDefaultSubobject<UWeaponSystemComponent>(TEXT("WeaponComponent"));
 
 	PrimaryActorTick.bCanEverTick = true;
 	bLocked = false;
@@ -46,6 +47,7 @@ void ABaseAircraft::BeginPlay()
 
 	RadarComponent->Setup(this);
 	FlightComponent->Setup(this, AirStats);
+	WeaponComponent->Setup(this, AirStats);
 
 	if (AfterburnerSystem) 
 	{

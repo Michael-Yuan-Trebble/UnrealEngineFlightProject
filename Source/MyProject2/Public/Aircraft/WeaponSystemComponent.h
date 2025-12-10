@@ -14,11 +14,11 @@
 #define LOCKTIME 1.f
 
 class ABaseAircraft;
-class AAircraftPlayerController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWeaponCountUpdated,FName, WeaponName, int32, CurrentCount, int32, MaxCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHUDLockedOn, float, LockPercent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponSystemWeaponHitResult, bool, bHit);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHUDBulletHit);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UWeaponSystemComponent : public UActorComponent
@@ -30,6 +30,8 @@ public:
 	FWeaponSystemWeaponHitResult OnWeaponHit;
 
 	FOnHUDLockedOn OnHUDLockedOn;
+
+	FOnHUDBulletHit OnHUDBulletHit;
 
 	UWeaponSystemComponent();
 
@@ -77,8 +79,6 @@ public:
 
 	ABaseAircraft* Controlled;
 
-	AAircraftPlayerController* PC;
-
 	UAircraftStats* AirStats;
 
 	ABaseWeapon* CurrentWeapon;
@@ -101,4 +101,5 @@ public:
 	void ResetLockedOn();
 
 private:
+
 };

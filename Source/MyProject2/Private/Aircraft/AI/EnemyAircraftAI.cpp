@@ -66,6 +66,7 @@ void AEnemyAircraftAI::ShootGun(bool bShoot)
 	if (!IsValid(Controlled) || bShoot == bIsFiring) return;
 	if (bShoot) Controlled->StartBullets();
 	else Controlled->EndBullets();
+	bIsFiring = bShoot;
 }
 
 void AEnemyAircraftAI::SetThrust(float Thrust) { if (Controlled) Controlled->SetThrust(Thrust); }

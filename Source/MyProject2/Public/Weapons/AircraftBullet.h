@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "NiagaraSystem.h"
 #include "Structs and Data/Weapon Data/BulletStats.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "AircraftBullet.generated.h"
 
 class ABaseAircraft;
@@ -28,9 +30,14 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UBulletStats* BulletStat;
 
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* ExplosionEffect;
+
+	UProjectileMovementComponent* ProjectileMovement;
+
 	ABaseAircraft* Owner;
 
-	float BulletSpeed = 100000.f;
+	float BulletSpeed = 75000.f;
 
 	float damage = 0.f;
 
@@ -40,15 +47,23 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	bool bDestroyed = false;
+
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	void FireInDirection(const FVector& ShootDirection);
 
 protected:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
 
 	void DestroyBullet(AActor* OtherActor);
 };

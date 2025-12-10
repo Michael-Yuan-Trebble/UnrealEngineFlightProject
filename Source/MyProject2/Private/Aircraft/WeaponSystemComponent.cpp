@@ -8,7 +8,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/PlayerHUD.h"
 #include "Structs and Data/LockableTarget.h"
-#include "AircraftPlayerController.h"
 #include "DrawDebugHelpers.h"
 
 UWeaponSystemComponent::UWeaponSystemComponent()
@@ -20,7 +19,6 @@ void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStat
 {
 	Controlled = InBase;
 	AirStats = InStats;
-	PC = Cast<AAircraftPlayerController>(GetWorld()->GetFirstPlayerController());
 }
 
 void UWeaponSystemComponent::FireBullets()

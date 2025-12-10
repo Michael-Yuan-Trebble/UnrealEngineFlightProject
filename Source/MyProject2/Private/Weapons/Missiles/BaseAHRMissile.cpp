@@ -96,11 +96,16 @@ void ABaseAHRMissile::FireStatic(float launchSpeed)
 void ABaseAHRMissile::FireTracking(float launchSpeed, AActor* Target)
 {
 	Tracking = Target;
-	if (Tracking) 
+	if (IsValid(Tracking))
 	{
 		ProjectileMovement->bIsHomingProjectile = true;
 		ProjectileMovement->HomingTargetComponent = Tracking->GetRootComponent();
 		ProjectileMovement->HomingAccelerationMagnitude = turnRate;
+		ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Target);
+		if (Aircraft)
+		{
+			Aircraft->OnMissileLaunchedAtSelf.Broadcast(this);
+		}
 	}
 	LaunchSequence(launchSpeed);
 }
