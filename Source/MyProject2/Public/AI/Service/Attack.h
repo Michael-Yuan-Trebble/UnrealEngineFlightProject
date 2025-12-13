@@ -64,6 +64,8 @@ protected:
 
 	const float RollGain = 0.015f;
 
+
+
 private:
 	EAIThrottleMode GetThrottleMode(float distance);
 

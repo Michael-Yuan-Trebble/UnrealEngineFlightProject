@@ -6,6 +6,7 @@
 #include "Aircraft/FlightComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Aircraft/AI/EnemyAircraftAI.h"
+#include "DrawDebugHelpers.h"
 
 EAIThrottleMode UBTServiceAttack::GetThrottleMode(float distance) 
 {
@@ -47,11 +48,17 @@ void UBTServiceAttack::CalculateAngle(float DeltaSeconds)
 	FTransform AirframeTransform = Controlled->Airframe->GetComponentTransform();
 	FVector LocalDir = AirframeTransform.InverseTransformVectorNoScale(ToTargetWorld);
 
-	float DesiredPitchInput = CalculatePitchDegrees(LocalDir);
-	float DesiredYawInput = CalculateYawDegrees(LocalDir);
 	float DesiredRollInput = CalculateRollDegrees(LocalDir);
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan,FString::Printf(TEXT("YawErr: %.2f PitchErr: %.2f"), DesiredPitchInput, DesiredRollInput));
+	// TODO: Change this later, for now this is temp here for preventing rolling and pitching funkiness
+	float DesiredPitchInput = 0.f;
+	if (DesiredRollInput < 0.1) 
+	{
+		DesiredPitchInput = CalculatePitchDegrees(LocalDir);
+	}
+	float DesiredYawInput = CalculateYawDegrees(LocalDir);
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan,FString::Printf(TEXT("Pitch: %.2f Roll: %.2f"), DesiredPitchInput, DesiredRollInput));
 
 	BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, -DesiredRollInput);
 	BlackboardComp->SetValueAsFloat(PitchKey.SelectedKeyName, DesiredPitchInput);

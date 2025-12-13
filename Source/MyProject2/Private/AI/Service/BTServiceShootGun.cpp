@@ -48,6 +48,7 @@ bool UBTServiceShootGun::IsInsideCone()
 	{
 		float HalfAngleRad = FMath::DegreesToRadians(CONEANGLE);
 
+		/*
 		DrawDebugCone(
 			GetWorld(),
 			Pawn->GetActorLocation(),
@@ -61,7 +62,7 @@ bool UBTServiceShootGun::IsInsideCone()
 			0.05f,
 			0,
 			1.0f
-		);
+		);*/
 	}
 
 	float Distance = FVector::Dist(Controller->GetPawn()->GetActorLocation(), Selected->GetActorLocation());
