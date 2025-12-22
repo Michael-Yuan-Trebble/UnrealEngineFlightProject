@@ -35,7 +35,7 @@ protected:
 
 	UProjectileMovementComponent* ProjectileMovement;
 
-	ABaseAircraft* Owner;
+	TWeakObjectPtr<ABaseAircraft> Owner;
 
 	float BulletSpeed = 75000.f;
 
@@ -66,4 +66,12 @@ protected:
 		const FHitResult& SweepResult);
 
 	void DestroyBullet(AActor* OtherActor);
+
+private:
+	void EnableCollision();
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) {
+		Super::EndPlay(EndPlayReason);
+		GetWorldTimerManager().ClearAllTimersForObject(this);
+	}
 };

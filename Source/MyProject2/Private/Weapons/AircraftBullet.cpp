@@ -7,6 +7,7 @@
 #include "Structs and Data/Weapon Data/BulletStats.h"
 #include "Structs and Data/TeamInterface.h"
 #include "Structs and Data/DamageableInterface.h"
+#include "Aircraft/Player/PlayerAircraft.h"
 #include "DrawDebugHelpers.h"
 
 AAircraftBullet::AAircraftBullet()
@@ -17,8 +18,6 @@ AAircraftBullet::AAircraftBullet()
 	RootComponent = Collision;
 
 	Collision->SetCollisionProfileName("Projectile");
-	Collision->SetNotifyRigidBodyCollision(true);
-	Collision->SetGenerateOverlapEvents(false);
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->bRotationFollowsVelocity = true;
@@ -45,8 +44,25 @@ void AAircraftBullet::BeginPlay()
 		Collision->IgnoreActorWhenMoving(GetOwner(), true);
 	}
 	SetLifeSpan(LifeTime);
+	Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Collision->SetGenerateOverlapEvents(false);
+
 	Collision->OnComponentBeginOverlap.AddDynamic(this, &AAircraftBullet::OnOverlapBegin);
 	Collision->OnComponentHit.AddDynamic(this, &AAircraftBullet::OnHit);
+	FTimerHandle Timer;
+	GetWorldTimerManager().SetTimer(
+		Timer,
+		this,
+		&AAircraftBullet::EnableCollision,
+		0.02f,
+		false
+	);
+}
+
+void AAircraftBullet::EnableCollision() {
+	if (!IsValid(this) || bDestroyed) return;
+	Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Collision->SetGenerateOverlapEvents(true);
 }
 
 void AAircraftBullet::FireInDirection(const FVector& ShootDirection) 
@@ -57,7 +73,6 @@ void AAircraftBullet::FireInDirection(const FVector& ShootDirection)
 }
 
 void AAircraftBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
-	
 	DestroyBullet(OtherActor);
 }
 
@@ -68,26 +83,27 @@ void AAircraftBullet::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
+
 	DestroyBullet(OtherActor);
 }
 
 void AAircraftBullet::DestroyBullet(AActor* OtherActor)
 {
 	if (bDestroyed) return;
+	if (!Owner.IsValid()) return;
+	if (!OtherActor  || OtherActor == Owner.Get() || OtherActor->IsA(AAircraftBullet::StaticClass())) return;
 	bDestroyed = true;
-	if (!OtherActor || OtherActor == this || OtherActor == GetOwner()) return;
-	if (!Owner || !Owner->IsValidLowLevelFast()) return;
 
 	if (OtherActor->Implements<UTeamInterface>())
 	{
-		EFaction OtherFaction = Owner->Faction;
+		EFaction OtherFaction = Owner.Get()->Faction;
 		OtherFaction = ITeamInterface::Execute_GetFaction(OtherActor);
-		if (OtherFaction == Owner->Faction) return;
+		if (OtherFaction == Owner.Get()->Faction) return;
 	}
 
 	if (OtherActor->Implements<UDamageableInterface>())
 	{
-		IDamageableInterface::Execute_OnDamage(OtherActor, this, Owner, OtherActor, damage);
+		IDamageableInterface::Execute_OnDamage(OtherActor, this, Owner.Get(), OtherActor, damage);
 	}
 
 	if (ExplosionEffect) {

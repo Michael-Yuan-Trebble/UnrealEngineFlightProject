@@ -24,18 +24,28 @@ void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStat
 void UWeaponSystemComponent::FireBullets()
 {
 	//Spawns a bullet actor whilst firing at socket
-	if (!Controlled || !Controlled->BulletStats->BulletClass || !(Controlled->Airframe->DoesSocketExist("Gun"))) return;
-	FVector MuzzleLocation = Controlled->Airframe->GetSocketLocation("Gun");
-	FRotator MuzzleRotation = Controlled->Airframe->GetSocketRotation("Gun");
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = Controlled;
-	SpawnParams.Instigator = Controlled->GetInstigator();
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	if (!Controlled || !Controlled->BulletStats->BulletClass || !Controlled->Airframe) return;
+	
+	int32 GunI = 0;
+	while (true) 
+	{
+		const FName SocketName = FName(*FString::Printf(TEXT("Gun%d"), GunI));
 
-	AAircraftBullet* SpawnBullet = GetWorld()->SpawnActor<AAircraftBullet>(Controlled->BulletStats->BulletClass, MuzzleLocation, MuzzleRotation, SpawnParams);
-	if (!SpawnBullet) return;
+		if (!Controlled->Airframe->DoesSocketExist(SocketName)) break;
 
-	SpawnBullet->FireInDirection(MuzzleRotation.Vector());
+		GunI++;
+
+		FVector MuzzleLocation = Controlled->Airframe->GetSocketLocation(SocketName);
+		FRotator MuzzleRotation = Controlled->Airframe->GetSocketRotation(SocketName);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = Controlled;
+		SpawnParams.Instigator = Controlled;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		AAircraftBullet* SpawnBullet = GetWorld()->SpawnActor<AAircraftBullet>(Controlled->BulletStats->BulletClass, MuzzleLocation, MuzzleRotation, SpawnParams);
+		if (!SpawnBullet) return;
+		SpawnBullet->FireInDirection(MuzzleRotation.Vector());
+	}
 }
 
 void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -78,10 +88,13 @@ void UWeaponSystemComponent::AddPylons()
 		FName SocketName = FName(*FString::Printf(TEXT("Pylon%d"), i));
 		if (TempPylon && AirStats->Pylon)
 		{
-			TempPylon->SetupAttachment(Controlled->Airframe, SocketName);
-			TempPylon->RegisterComponent();
+			FTransform SocketTransform = Controlled->Airframe->GetSocketTransform(SocketName, RTS_World);
+			SocketTransform.SetScale3D(FVector(1.f));
 			TempPylon->SetStaticMesh(AirStats->Pylon);
-			TempPylon->SetRelativeLocation(FVector(0, 0, -20));
+			TempPylon->SetWorldTransform(SocketTransform);
+			TempPylon->RegisterComponent();
+			TempPylon->AttachToComponent(Controlled->Airframe, FAttachmentTransformRules::KeepWorldTransform);
+			TempPylon->AddLocalOffset(FVector(0, 0, -20));
 			PylonSockets.Add(SocketName, TempPylon);
 		}
 	}

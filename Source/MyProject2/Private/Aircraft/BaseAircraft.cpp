@@ -5,6 +5,7 @@
 #include "AircraftRegistry.h"
 #include "Aircraft/FlightComponent.h"
 #include "Aircraft/WeaponSystemComponent.h"
+#include "Aircraft/AircraftVisualComponent.h"
 #include "Aircraft/RadarComponent.h"
 
 ABaseAircraft::ABaseAircraft()
@@ -42,6 +43,13 @@ ABaseAircraft::ABaseAircraft()
 void ABaseAircraft::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (VisualCompClass) {
+		VisualComp = NewObject<UAircraftVisualComponent>(this, VisualCompClass);
+		if (VisualComp) {
+			VisualComp->RegisterComponent();
+		}
+	}
 
 	if (!Airframe || !RadarComponent || !FlightComponent) return;
 
@@ -109,6 +117,13 @@ void ABaseAircraft::PossessedBy(AController* NewController)
 void ABaseAircraft::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (VisualComp && FlightComponent) 
+	{
+		VisualComp->SetPitch(FlightComponent->UserPitch);
+		VisualComp->SetYaw(FlightComponent->UserYaw);
+		VisualComp->SetRoll(FlightComponent->UserRoll);
+		VisualComp->SetThrust(FlightComponent->CurrentThrust);
+	}
 }
 
 void ABaseAircraft::FireWeaponSelected() { if (WeaponComponent) WeaponComponent->FireWeaponSelected(WeaponComponent->GetWeapon()->GetClass(), Tracked, FlightComponent->GetSpeed()); }
@@ -159,6 +174,17 @@ void ABaseAircraft::DeactivateVortexFX()
 		if (!IsValid(FX)) continue;
 		FX->Deactivate();
 	}
+}
+
+void ABaseAircraft::DisableAllMainWingVapors() {
+	for (UStaticMeshComponent* Mesh : AllMainWingVapors) {
+		if (!IsValid(Mesh)) continue;
+		Mesh->SetVisibility(false);
+	}
+}
+
+void ABaseAircraft::EnableAllMainWingVapors() {
+
 }
 
 void ABaseAircraft::HandleLOD(FVector CameraLoc) 

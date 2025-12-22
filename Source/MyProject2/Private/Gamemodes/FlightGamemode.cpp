@@ -138,7 +138,7 @@ TMap<FName, TSubclassOf<ABaseWeapon>> AFlightGamemode::TemporaryLoadout()
 {
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
 
-	if (!AircraftSelected->AircraftStat) return Loadout;
+	if (!AircraftSelected || !AircraftSelected->AircraftStat) return Loadout;
 
 	if (AircraftSelected->AircraftStat->NumOfPylons < 2) return Loadout;
 

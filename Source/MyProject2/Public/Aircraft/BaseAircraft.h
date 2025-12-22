@@ -16,6 +16,7 @@
 class UFlightComponent;
 class URadarComponent;
 class UWeaponSystemComponent;
+class UAircraftVisualComponent;
 class ABaseMissile;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissileLaunchedAtSelf, ABaseMissile*, IncomingMissile);
@@ -47,6 +48,12 @@ public:
 
 	URadarComponent* RadarComponent;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UAircraftVisualComponent> VisualCompClass;
+
+	UPROPERTY(BlueprintReadOnly)
+	UAircraftVisualComponent* VisualComp;
+
 	float springArmLength;
 
 	float TakeoffSpeed;
@@ -63,11 +70,24 @@ public:
 
 	bool bLocked;
 
+	float AOA;
+
 	UPROPERTY(EditAnywhere)
 	int32 NumOfAfterburners;
 
 	UPROPERTY(EditAnywhere)
 	int32 NumOfVortices;
+
+	UPROPERTY(EditANywhere)
+	int32 NumOfMainWingVapors;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="VFX")
+	TArray<UStaticMeshComponent*> AllMainWingVapors;
+
+	UFUNCTION(BlueprintCallable, Category="Vapors")
+	void SetWingVapors(const TArray<UStaticMeshComponent*>& Vapors) {
+		AllMainWingVapors = Vapors;
+	}
 
 	AActor* Tracking;
 
@@ -127,6 +147,9 @@ public:
 	void SetFlying(bool bIsFlying);
 
 	void FireWeaponSelected();
+
+	void DisableAllMainWingVapors();
+	void EnableAllMainWingVapors();
 
 protected:
 
