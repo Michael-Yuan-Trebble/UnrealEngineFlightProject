@@ -55,7 +55,12 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ABaseWeapon> Bomb;
 
+	UPROPERTY(EditAnywhere)
+	float PlayerSpawnSpeed = 0.f;
+
 	virtual void BeginPlay() override;
+
+	void SetPlayerSpeed();
 
 private:
 	void FallBackAircraft();

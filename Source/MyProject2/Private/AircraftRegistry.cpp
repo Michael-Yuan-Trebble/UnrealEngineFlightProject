@@ -5,9 +5,7 @@
 #include "Aircraft/BaseAircraft.h"
 #include "EngineUtils.h"
 
-UAircraftRegistry::UAircraftRegistry()
-{
-}
+UAircraftRegistry::UAircraftRegistry() {}
 
 void UAircraftRegistry::Register(ABaseUnit* Aircraft)
 {

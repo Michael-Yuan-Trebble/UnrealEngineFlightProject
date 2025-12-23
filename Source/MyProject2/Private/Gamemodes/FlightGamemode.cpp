@@ -21,6 +21,8 @@ AFlightGamemode::AFlightGamemode()
 
 void AFlightGamemode::BeginPlay() 
 {
+	Super::BeginPlay();
+
 	if (!GetWorld()) return;
 
 	FActorSpawnParameters Params;
@@ -43,15 +45,19 @@ void AFlightGamemode::BeginPlay()
 	if (PlayerSpawnedIn) 
 	{ 
 		PC->SetControlMode(EControlMode::Aircraft);
+		SetPlayerSpeed();
 	}
-
-	Super::BeginPlay();
 }
 
 // TODO: Move this logic into actual AI spawn points and just move them around in the editor
 
 void AFlightGamemode::SpawnAIAircraft() 
 {
+}
+
+void AFlightGamemode::SetPlayerSpeed() {
+	if (!PlayerSpawnedIn) return;
+	PlayerSpawnedIn->SetSpeed(PlayerSpawnSpeed/0.034);
 }
 
 void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl)

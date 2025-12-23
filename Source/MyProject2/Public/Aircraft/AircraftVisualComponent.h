@@ -16,28 +16,17 @@ class MYPROJECT2_API UAircraftVisualComponent : public UActorComponent
 public:	
 	UAircraftVisualComponent();
 
-	UPROPERTY(BlueprintReadWrite)
-	float Rudder;
-
-	UPROPERTY(BlueprintReadWrite)
-	float Slat;
-
-	UPROPERTY(BlueprintReadWrite)
-	float Flap;
-
-	UPROPERTY(BlueprintReadWrite)
-	float Nozzle;
-
-	UPROPERTY(BlueprintReadWrite)
-	float AirBrake;
-
-	UPROPERTY(BlueprintReadWrite)
-	float Elevator;
-
 	void SetThrust(float In) { InputThrust = In; };
 	void SetPitch(float In) { InputPitch = In; };
 	void SetYaw(float In) { InputYaw = In; };
 	void SetRoll(float In) { InputRoll = In; };
+
+	float GetRudder() const { return Rudder; };
+	float GetSlat() const { return Slat; };
+	float GetFlap() const { return Flap; };
+	float GetNozzle() const { return Nozzle; };
+	float GetAirBrake() const { return AirBrake; };
+	float GetElevator() const { return Elevator; };
 
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -78,4 +67,11 @@ private:
 
 	float ElevatorRoll;
 	float ElevatorPitch;
+
+	float Rudder;
+	float Slat;
+	float Flap;
+	float Nozzle;
+	float AirBrake;
+	float Elevator;
 };

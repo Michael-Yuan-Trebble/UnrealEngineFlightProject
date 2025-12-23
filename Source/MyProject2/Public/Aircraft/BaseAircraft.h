@@ -73,6 +73,9 @@ public:
 	float AOA;
 
 	UPROPERTY(EditAnywhere)
+	bool bLandingGear = false;
+
+	UPROPERTY(EditAnywhere)
 	int32 NumOfAfterburners;
 
 	UPROPERTY(EditAnywhere)
@@ -109,7 +112,13 @@ public:
 	UBoxComponent* RudderCollision;
 
 	UPROPERTY(EditAnywhere)
+	UBoxComponent* LandingGearCollision;
+
+	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* AfterburnerSystem;
+
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* LandingGear;
 
 	TArray<UNiagaraComponent*> AllAfterburners;
 
@@ -117,14 +126,6 @@ public:
 	UNiagaraSystem* WingVortexSystem;
 
 	TArray<UNiagaraComponent*> AllVortices;
-
-	//Return Functions for UObjects
-
-	virtual USkeletalMeshComponent* GetMesh() const { return Airframe; };
-
-	//Return Functions for Vars
-
-	virtual float ReturnTakeoffSpeed() const { return TakeoffSpeed; };
 
 	virtual void PossessedBy(AController* Controller) override;
 
@@ -139,17 +140,49 @@ public:
 public:
 	// Set Controller
 	void SetThrust(float thrust);
-
 	void SetRoll(float roll);
 	void SetPitch(float pitch);
 	void SetRudder(float rudder);
 
 	void SetFlying(bool bIsFlying);
 
+	void SetLandingGearVisiblility(bool b) 
+	{ 
+		// TODO: For now its hardcoded for testing, but later change it so that the gamemode dictates if landing gear is present
+		if (LandingGear) LandingGear->SetVisibility(bLandingGear);
+
+		// TODO: Eventually have this collision box work, however it doesn't instantly kill the player upon reaching designated ground
+		if (LandingGearCollision) LandingGearCollision->SetCollisionEnabled(bLandingGear ? ECollisionEnabled::NoCollision : ECollisionEnabled::NoCollision);
+	};
+
+	void SetSpeed(float speed);
+
 	void FireWeaponSelected();
 
 	void DisableAllMainWingVapors();
 	void EnableAllMainWingVapors();
+
+	USkeletalMeshComponent* GetMesh() const { return Airframe; };
+
+	virtual float ReturnTakeoffSpeed() const { return TakeoffSpeed; };
+
+	UFUNCTION(BlueprintCallable)
+	float ReturnRudder() const;
+
+	UFUNCTION(BlueprintCallable)
+	float ReturnSlat() const;
+
+	UFUNCTION(BlueprintCallable)
+	float ReturnFlap() const;
+
+	UFUNCTION(BlueprintCallable)
+	float ReturnNozzle() const;
+
+	UFUNCTION(BlueprintCallable)
+	float ReturnAirbrake() const;
+
+	UFUNCTION(BlueprintCallable)
+	float ReturnElevator() const;
 
 protected:
 

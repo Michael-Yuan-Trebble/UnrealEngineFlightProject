@@ -7,7 +7,6 @@
 #include "Structs and Data/Weapon Data/BulletStats.h"
 #include "Structs and Data/TeamInterface.h"
 #include "Structs and Data/DamageableInterface.h"
-#include "Aircraft/Player/PlayerAircraft.h"
 #include "DrawDebugHelpers.h"
 
 AAircraftBullet::AAircraftBullet()

@@ -72,7 +72,8 @@ void APlayerAircraft::HandleHit()
 
 }
 
-void APlayerAircraft::WeaponComponentOnUnitDeath() {
+void APlayerAircraft::WeaponComponentOnUnitDeath() 
+{
 	WeaponComponent->ResetLockedOn();
 }
 

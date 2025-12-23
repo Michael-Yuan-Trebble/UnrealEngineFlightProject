@@ -14,6 +14,10 @@ ABaseAircraft::ABaseAircraft()
 	Airframe->SetupAttachment(Collision);
 	Airframe->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	LandingGear = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Landing Gear"));
+	LandingGear->SetupAttachment(Airframe);
+	LandingGear->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	BodyCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BodyCollision"));
 	BodyCollision->SetupAttachment(Collision);
 	BodyCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -30,6 +34,10 @@ ABaseAircraft::ABaseAircraft()
 	RudderCollision->SetupAttachment(Collision);
 	RudderCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	LandingGearCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("LandingGearCollision"));
+	LandingGearCollision->SetupAttachment(Collision);
+	LandingGearCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	FlightComponent = CreateDefaultSubobject<UFlightComponent>(TEXT("FlightComponent"));
 	RadarComponent = CreateDefaultSubobject<URadarComponent>(TEXT("Radar"));
 	WeaponComponent = CreateDefaultSubobject<UWeaponSystemComponent>(TEXT("WeaponComponent"));
@@ -42,6 +50,7 @@ ABaseAircraft::ABaseAircraft()
 
 void ABaseAircraft::BeginPlay()
 {
+
 	Super::BeginPlay();
 
 	if (VisualCompClass) {
@@ -107,6 +116,8 @@ void ABaseAircraft::BeginPlay()
 
 	FlightComponent->OnAfterburnerEngaged.AddDynamic(this, &ABaseAircraft::HandleAfterburnerFX);
 	FlightComponent->OnVortexActivate.AddDynamic(this, &ABaseAircraft::HandleVortexFX);
+
+	SetLandingGearVisiblility(bLandingGear);
 }
 
 void ABaseAircraft::PossessedBy(AController* NewController) 
@@ -213,3 +224,23 @@ void ABaseAircraft::SetPitch(float pitch) { if (FlightComponent) FlightComponent
 void ABaseAircraft::SetRudder(float rudder) { if (FlightComponent) FlightComponent->SetYaw(rudder); }
 
 void ABaseAircraft::SetFlying(bool bIsFlying) { if (FlightComponent) FlightComponent->isFlying = bIsFlying; }
+
+void ABaseAircraft::SetSpeed(float speed) { 
+	if (FlightComponent) 
+	{
+		FlightComponent->currentSpeed = speed;
+		FlightComponent->Velocity = this->GetActorForwardVector() * speed;
+	}
+}
+
+float ABaseAircraft::ReturnRudder() const { if (VisualComp) return VisualComp->GetRudder(); else return 0; }
+
+float ABaseAircraft::ReturnSlat() const { if (VisualComp) return VisualComp->GetSlat(); else return 0; }
+
+float ABaseAircraft::ReturnFlap() const { if (VisualComp) return VisualComp->GetFlap(); else return 0; }
+
+float ABaseAircraft::ReturnNozzle() const { if (VisualComp) return VisualComp->GetNozzle(); else return 0; }
+
+float ABaseAircraft::ReturnAirbrake() const { if (VisualComp) return VisualComp->GetAirBrake(); else return 0; }
+
+float ABaseAircraft::ReturnElevator() const { if (VisualComp) return VisualComp->GetElevator(); else return 0; }
