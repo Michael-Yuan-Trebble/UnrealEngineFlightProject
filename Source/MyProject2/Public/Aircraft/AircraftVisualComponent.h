@@ -23,7 +23,8 @@ public:
 
 	float GetRudder() const { return Rudder; };
 	float GetSlat() const { return Slat; };
-	float GetFlap() const { return Flap; };
+	float GetLFlap() const { return LFlap; };
+	float GetRFlap() const { return RFlap; };
 	float GetNozzle() const { return Nozzle; };
 	float GetAirBrake() const { return AirBrake; };
 	float GetElevator() const { return Elevator; };
@@ -62,7 +63,9 @@ private:
 	float InputYaw;
 	float InputRoll;
 
-	float FlapRoll;
+	float LFlapRoll;
+	float RFlapRoll;
+
 	float FlapPitch;
 
 	float ElevatorRoll;
@@ -71,6 +74,10 @@ private:
 	float Rudder;
 	float Slat;
 	float Flap;
+
+	float LFlap;
+	float RFlap;
+
 	float Nozzle;
 	float AirBrake;
 	float Elevator;

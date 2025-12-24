@@ -29,3 +29,5 @@ void UCountermeasures::ActivateSpecial() {
 
 	World->SpawnActor<AActor>(FlareActorClass, FlareLocation, FlareRotator, SpawnParams);
 }
+
+bool UCountermeasures::CanActivate() { return CurrentCooldown == 0; }

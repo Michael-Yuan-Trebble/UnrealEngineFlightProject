@@ -58,7 +58,8 @@ void AAircraftBullet::BeginPlay()
 	);
 }
 
-void AAircraftBullet::EnableCollision() {
+void AAircraftBullet::EnableCollision() 
+{
 	if (!IsValid(this) || bDestroyed) return;
 	Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Collision->SetGenerateOverlapEvents(true);
@@ -71,7 +72,12 @@ void AAircraftBullet::FireInDirection(const FVector& ShootDirection)
 	ProjectileMovement->Velocity = ShootDirection.GetSafeNormal() * BulletSpeed;
 }
 
-void AAircraftBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
+void AAircraftBullet::OnHit(UPrimitiveComponent* HitComp, 
+	AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, 
+	FVector NormalImpulse, 
+	const FHitResult& Hit) 
+{
 	DestroyBullet(OtherActor);
 }
 
@@ -82,7 +88,6 @@ void AAircraftBullet::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-
 	DestroyBullet(OtherActor);
 }
 

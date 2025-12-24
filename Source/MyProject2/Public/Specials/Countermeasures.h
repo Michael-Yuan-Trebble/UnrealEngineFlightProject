@@ -15,6 +15,8 @@ class MYPROJECT2_API UCountermeasures : public UBaseSpecial
 public:
 	virtual void ActivateSpecial() override;
 
+	virtual bool CanActivate() override;
+
 private:
 	TSubclassOf<AActor> FlareActorClass;
 	ABaseAircraft* OwningAircraft;

@@ -14,5 +14,15 @@ class MYPROJECT2_API UBaseSpecial : public UObject
 public:
 	FName SpecialName;
 
-	virtual void ActivateSpecial() PURE_VIRTUAL(UBaseSpecial::ActivateSpecial, );
+	float CooldownTime;
+
+	float CurrentCooldown;
+
+	void UpdateCooldown(float In) { CurrentCooldown = FMath::Clamp(CurrentCooldown - In, 0, CooldownTime); };
+
+	virtual bool CanActivate() {};
+
+	virtual void ActivateSpecial() {};
+
+	float GetCooldown() const { return CooldownTime; };
 };

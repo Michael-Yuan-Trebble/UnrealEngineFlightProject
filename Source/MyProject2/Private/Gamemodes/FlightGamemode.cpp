@@ -12,7 +12,6 @@
 #include "UI/PlayerHUD.h"
 #include "EngineUtils.h"
 #include "AircraftRegistry.h"
-#include "Aircraft/WeaponSystemComponent.h"
 #include "Weapons/BaseWeapon.h"
 
 AFlightGamemode::AFlightGamemode() 
@@ -102,7 +101,7 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 
 	UGameplayStatics::FinishSpawningActor(PlayerSpawnedIn, PlayerStart->GetActorTransform());
 
-	PlayerSpawnedIn->WeaponComponent->SetWeapons(Loadout);
+	PlayerSpawnedIn->SetWeapons(Loadout);
 
 	if (IsValid(PC))
 	{

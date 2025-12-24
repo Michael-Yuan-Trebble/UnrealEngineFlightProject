@@ -18,7 +18,8 @@ void UAircraftVisualComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 	// In order to account for both pitch and roll playing a roll
 	Elevator = ElevatorPitch + ElevatorRoll;
-	Flap = FlapPitch + FlapRoll;
+	RFlap = FlapPitch + RFlapRoll;
+	LFlap = FlapPitch + LFlapRoll;
 }
 
 #define MAXSLATS AircraftInfo.MaxSlats
@@ -45,10 +46,8 @@ void UAircraftVisualComponent::PitchCalculation(float D)
 		else ElevatorPitch = FMath::FInterpTo(ElevatorPitch, FMath::Clamp(ElevatorPitch + InputPitch, -MAXPITCHELEVATOR, MAXPITCHELEVATOR), D, INTERPSPEED);
 	}
 
-	// TODO: Currently Flaps are inverses of each other, somehow change that
-
 	if (InputPitch <= 0) FlapPitch = FMath::FInterpTo(FlapPitch, 0, D, INTERPSPEED);
-	else FlapPitch = FMath::FInterpTo(FlapPitch, FMath::Clamp(FlapPitch + InputPitch, MINPITCHFLAPS, MAXPITCHFLAPS), D, INTERPSPEED);
+	else FlapPitch = FMath::FInterpTo(FlapPitch, FMath::Clamp(FlapPitch - InputPitch, -MAXPITCHFLAPS, -MINPITCHFLAPS), D, INTERPSPEED);
 
 	if (bCanards) 
 	{
@@ -71,10 +70,19 @@ void UAircraftVisualComponent::YawCalculation(float D)
 void UAircraftVisualComponent::RollCalculation(float D) 
 {
 	// Flaps roll equally
-	if (InputRoll == 0) FlapRoll = FMath::FInterpTo(FlapRoll, 0, D, INTERPSPEED);
-	else FlapRoll = FMath::FInterpTo(FlapRoll, FMath::Clamp(FlapRoll + InputRoll, -MAXROLLFLAPS, MAXROLLFLAPS), D, INTERPSPEED);
+	if (InputRoll == 0) 
+	{
+		LFlapRoll = FMath::FInterpTo(LFlapRoll, 0, D, INTERPSPEED);
+		RFlapRoll = FMath::FInterpTo(RFlapRoll, 0, D, INTERPSPEED);
+	}
+	else 
+	{
+		LFlapRoll = FMath::FInterpTo(LFlapRoll, FMath::Clamp(LFlapRoll + InputRoll, -MAXROLLFLAPS, MAXROLLFLAPS), D, INTERPSPEED);
+		RFlapRoll = -LFlapRoll;
+	}
 
 	// Elevators have a slight pitch when rolling
+	// TODO: Also separate the roll logic here
 
 	if (bElevators)
 	{
@@ -84,7 +92,6 @@ void UAircraftVisualComponent::RollCalculation(float D)
 }
 
 #define AFTERBURNERPERCENT 0.8
-#define DIFFERENCE 1 - AFTERBURNERPERCENT 
 #define MINNOZZLE AircraftInfo.MinExhaust
 #define MAXNOZZLE AircraftInfo.MaxExhaust
 
@@ -101,7 +108,7 @@ void UAircraftVisualComponent::ThrustCalculation(float D)
 		}
 		else 
 		{
-			float Ratio = (InputThrust - AFTERBURNERPERCENT) / DIFFERENCE;
+			float Ratio = (InputThrust - AFTERBURNERPERCENT) / (1 - AFTERBURNERPERCENT);
 			Nozzle = FMath::FInterpTo(Nozzle, FMath::Clamp(MAXNOZZLE * Ratio, MINNOZZLE, MAXNOZZLE), D, INTERPSPEED);
 		}
 	}

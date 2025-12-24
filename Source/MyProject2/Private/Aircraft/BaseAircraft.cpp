@@ -7,6 +7,7 @@
 #include "Aircraft/WeaponSystemComponent.h"
 #include "Aircraft/AircraftVisualComponent.h"
 #include "Aircraft/RadarComponent.h"
+#include "Aircraft/SpecialSystemComponent.h"
 
 ABaseAircraft::ABaseAircraft()
 {
@@ -41,6 +42,7 @@ ABaseAircraft::ABaseAircraft()
 	FlightComponent = CreateDefaultSubobject<UFlightComponent>(TEXT("FlightComponent"));
 	RadarComponent = CreateDefaultSubobject<URadarComponent>(TEXT("Radar"));
 	WeaponComponent = CreateDefaultSubobject<UWeaponSystemComponent>(TEXT("WeaponComponent"));
+	SpecialComp = CreateDefaultSubobject<USpecialSystemComponent>(TEXT("SpecialComponent"));
 
 	PrimaryActorTick.bCanEverTick = true;
 	bLocked = false;
@@ -233,11 +235,17 @@ void ABaseAircraft::SetSpeed(float speed) {
 	}
 }
 
+void ABaseAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) { if (WeaponComponent) WeaponComponent->SetWeapons(In); }
+
+void ABaseAircraft::SetSpecial(UBaseSpecial* In) { if (SpecialComp) SpecialComp->SetSpecial(In); }
+
 float ABaseAircraft::ReturnRudder() const { if (VisualComp) return VisualComp->GetRudder(); else return 0; }
 
 float ABaseAircraft::ReturnSlat() const { if (VisualComp) return VisualComp->GetSlat(); else return 0; }
 
-float ABaseAircraft::ReturnFlap() const { if (VisualComp) return VisualComp->GetFlap(); else return 0; }
+float ABaseAircraft::ReturnRFlap() const { if (VisualComp) return VisualComp->GetRFlap(); else return 0; }
+
+float ABaseAircraft::ReturnLFlap() const { if (VisualComp) return VisualComp->GetLFlap(); else return 0; }
 
 float ABaseAircraft::ReturnNozzle() const { if (VisualComp) return VisualComp->GetNozzle(); else return 0; }
 

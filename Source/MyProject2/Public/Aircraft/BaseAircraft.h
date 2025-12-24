@@ -17,7 +17,10 @@ class UFlightComponent;
 class URadarComponent;
 class UWeaponSystemComponent;
 class UAircraftVisualComponent;
+class USpecialSystemComponent;
 class ABaseMissile;
+class ABaseWeapon;
+class UBaseSpecial;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissileLaunchedAtSelf, ABaseMissile*, IncomingMissile);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLockedOnByEnemy);
@@ -54,6 +57,8 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UAircraftVisualComponent* VisualComp;
 
+	USpecialSystemComponent* SpecialComp;
+
 	float springArmLength;
 
 	float TakeoffSpeed;
@@ -88,9 +93,7 @@ public:
 	TArray<UStaticMeshComponent*> AllMainWingVapors;
 
 	UFUNCTION(BlueprintCallable, Category="Vapors")
-	void SetWingVapors(const TArray<UStaticMeshComponent*>& Vapors) {
-		AllMainWingVapors = Vapors;
-	}
+	void SetWingVapors(const TArray<UStaticMeshComponent*>& Vapors) { AllMainWingVapors = Vapors; }
 
 	AActor* Tracking;
 
@@ -157,6 +160,10 @@ public:
 
 	void SetSpeed(float speed);
 
+	void SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In);
+
+	void SetSpecial(UBaseSpecial* In);
+
 	void FireWeaponSelected();
 
 	void DisableAllMainWingVapors();
@@ -173,7 +180,10 @@ public:
 	float ReturnSlat() const;
 
 	UFUNCTION(BlueprintCallable)
-	float ReturnFlap() const;
+	float ReturnRFlap() const;
+
+	UFUNCTION(BlueprintCallable)
+	float ReturnLFlap() const;
 
 	UFUNCTION(BlueprintCallable)
 	float ReturnNozzle() const;
