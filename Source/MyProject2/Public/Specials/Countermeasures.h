@@ -7,17 +7,24 @@
 #include "Aircraft/BaseAircraft.h"
 #include "Countermeasures.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFlareDeployed);
+
 UCLASS()
 class MYPROJECT2_API UCountermeasures : public UBaseSpecial
 {
 	GENERATED_BODY()
 	
 public:
+	FOnFlareDeployed OnFlareDeployed;
+
 	virtual void ActivateSpecial() override;
 
 	virtual bool CanActivate() override;
 
 private:
-	TSubclassOf<AActor> FlareActorClass;
-	ABaseAircraft* OwningAircraft;
+	
+	UPROPERTY(EditAnywhere)
+	float CooldownTime = 5.f;
+
+	float CurrentCooldownTime = 0.f;
 };

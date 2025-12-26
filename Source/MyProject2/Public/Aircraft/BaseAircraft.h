@@ -9,6 +9,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
+#include "Structs and Data/ApproachingMissileInterface.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "BaseUnit.h"
 #include "BaseAircraft.generated.h"
@@ -26,7 +27,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissileLaunchedAtSelf, ABaseMissi
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLockedOnByEnemy);
 
 UCLASS()
-class MYPROJECT2_API ABaseAircraft : public ABaseUnit
+class MYPROJECT2_API ABaseAircraft : public ABaseUnit, public IApproachingMissileInterface
 {
 	GENERATED_BODY()
 
@@ -58,6 +59,8 @@ public:
 	UAircraftVisualComponent* VisualComp;
 
 	USpecialSystemComponent* SpecialComp;
+
+	TArray<TWeakObjectPtr<ABaseMissile>> IncomingMissiles;
 
 	float springArmLength;
 
@@ -193,6 +196,16 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float ReturnElevator() const;
+
+	virtual void RegisterIncomingMissile_Implementation(ABaseMissile* Missile) override {
+		IncomingMissiles.AddUnique(Missile);
+	};
+
+	virtual void UnregisterIncomingMissile_Implementation(ABaseMissile* Missile) override {
+		IncomingMissiles.RemoveSingle(Missile);
+	};
+
+	virtual void OnCountermeasuresDeployed_Implementation(ABaseMissile* Missile) override;
 
 protected:
 

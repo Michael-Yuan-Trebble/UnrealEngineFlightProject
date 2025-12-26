@@ -20,7 +20,7 @@ public:
 
 	void UpdateCooldown(float In) { CurrentCooldown = FMath::Clamp(CurrentCooldown - In, 0, CooldownTime); };
 
-	virtual bool CanActivate() {};
+	virtual bool CanActivate() { return false; };
 
 	virtual void ActivateSpecial() {};
 
