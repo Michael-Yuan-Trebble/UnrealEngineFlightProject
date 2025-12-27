@@ -24,9 +24,12 @@ public:
 	bool IsInsideCone(AActor* Player, float ConeDegrees);
 	bool CanShotHit(AActor* Player);
 
+	UPROPERTY()
 	UBlackboardComponent* BlackboardComp;
 
+	UPROPERTY()
 	AEnemyAircraftAI* Controller;
 
+	UPROPERTY()
 	AActor* Selected;
 };

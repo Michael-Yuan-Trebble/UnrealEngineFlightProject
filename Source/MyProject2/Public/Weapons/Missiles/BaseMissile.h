@@ -33,10 +33,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* ExplosionEffect;
 
+	UPROPERTY()
 	UProjectileMovementComponent* ProjectileMovement;
 
 	FVector CurrentDirection;
 
+	UPROPERTY()
 	AActor* Tracking;
 
 	float missileAcceleration;
@@ -57,6 +59,7 @@ public:
 
 	void activateSmoke();
 
+	UPROPERTY()
 	ABaseAircraft* Owner;
 
 	FTimerHandle VFXCheckhandle;

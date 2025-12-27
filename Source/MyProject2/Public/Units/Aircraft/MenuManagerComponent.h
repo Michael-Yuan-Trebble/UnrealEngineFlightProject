@@ -45,18 +45,25 @@ public:
 	UPROPERTY()
 	UPlayerGameInstance* GameInstance;
 
+	UPROPERTY()
 	UAircraftData* SelectedAircraft;
 
+	UPROPERTY()
 	UAircraftData* TempAircraft;
 
+	UPROPERTY()
 	TSubclassOf<UBaseSpecial> SelectedSpecial;
 
+	UPROPERTY()
 	TSubclassOf<UUserWidget> AircraftSelectClass;
 
+	UPROPERTY()
 	TSubclassOf<UUserWidget> WeaponSelectClass;
 
+	UPROPERTY()
 	TSubclassOf<UUserWidget> BuySelectionClass;
 
+	UPROPERTY()
 	TSubclassOf<UUserWidget> SpecialSelectionClass;
 
 	UPROPERTY()

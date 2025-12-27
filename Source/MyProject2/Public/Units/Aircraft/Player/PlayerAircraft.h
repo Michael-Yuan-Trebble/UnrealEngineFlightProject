@@ -23,15 +23,19 @@ public:
 
 	virtual void PossessedBy(AController* Controller) override;
 
+	UPROPERTY()
 	AAircraftPlayerController* Controlled;
 
+	UPROPERTY()
 	UCameraManagerComponent* ManagerComp;
 
 	UPROPERTY(EditAnywhere)
 	UAircraftAudioComponent* AudioComp;
 
+	UPROPERTY()
 	UAudioComponent* PersonalAircraftAudio;
 
+	UPROPERTY()
 	UAudioComponent* GunAudio;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

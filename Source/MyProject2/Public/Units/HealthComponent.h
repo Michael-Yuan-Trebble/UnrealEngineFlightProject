@@ -29,6 +29,7 @@ public:
 
 	FOnDamage OnDamage;
 
+	UPROPERTY()
 	ABaseUnit* Controller;
 
 private:

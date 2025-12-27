@@ -32,8 +32,10 @@ protected:
 
 	FTimerHandle TimerHandle;
 	
+	UPROPERTY()
 	UAircraftData* AircraftSelected;
 
+	UPROPERTY()
 	UAircraftDatabase* Database;
 
 	UPROPERTY()

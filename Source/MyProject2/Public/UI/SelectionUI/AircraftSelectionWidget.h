@@ -46,6 +46,7 @@ public:
 
 	TArray<FName> Owned;
 
+	UPROPERTY()
 	TMap<FName, UAircraftButtonWidget*> ButtonArray;
 
 	int CurrentMoney;

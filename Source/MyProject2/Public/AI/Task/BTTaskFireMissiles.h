@@ -30,14 +30,19 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector MissileClass;
 
+	UPROPERTY()
 	UBlackboardComponent* BlackboardComp;
 
+	UPROPERTY()
 	AEnemyAircraftAI* Controller;
 
+	UPROPERTY()
 	UFlightComponent* FlightComp;
 
+	UPROPERTY()
 	UWeaponSystemComponent* WeaponComp;
 
+	UPROPERTY()
 	AActor* Selected;
 
 private:

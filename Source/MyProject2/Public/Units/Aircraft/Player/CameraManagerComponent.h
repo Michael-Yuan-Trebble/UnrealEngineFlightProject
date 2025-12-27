@@ -32,8 +32,10 @@ public:
 	void FirstPersonHorizontal(float X);
 	void FirstPersonVertical(float Y);
 
+	UPROPERTY()
 	USpringArmComponent* SpringArm;
 
+	UPROPERTY()
 	UAircraftAudioComponent* AudioComp;
 
 	void SetSpringArm(USpringArmComponent* InArm) { SpringArm = InArm; }
@@ -48,8 +50,10 @@ public:
 
 	ECameraPerspective CurrentMode = ECameraPerspective::ThirdPerson;
 
+	UPROPERTY()
 	APlayerAircraft* Controlled;
 
+	UPROPERTY()
 	APlayerHUD* HUD;
 
 	float LookXLock = 0.f;

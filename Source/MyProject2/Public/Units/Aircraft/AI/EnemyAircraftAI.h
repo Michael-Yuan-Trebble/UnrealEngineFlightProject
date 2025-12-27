@@ -43,6 +43,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FDetectedAircraftInfo Tracking;
 
+	UPROPERTY()
 	UWeaponSystemComponent* WeaponComp;
 
 	bool bIsFiring = false;

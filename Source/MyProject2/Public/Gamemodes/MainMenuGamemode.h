@@ -23,8 +23,10 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	UPROPERTY()
 	AAircraftPlayerController* APC;
 
+	UPROPERTY()
 	ACurrentPlayerState* PS;
 
 	UPROPERTY(EditAnywhere)

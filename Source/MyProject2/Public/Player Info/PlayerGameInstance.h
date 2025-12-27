@@ -22,14 +22,19 @@ public:
 	UPROPERTY()
 	class USaveGameManager* SaveManager;
 
+	UPROPERTY()
 	TSubclassOf<ABaseAircraft> AircraftClass;
 
+	UPROPERTY()
 	UAircraftStats* SelectedAircraftStats;
 
+	UPROPERTY()
 	TMap<FName, TSubclassOf<ABaseWeapon>> SelectedWeapons;
 
+	UPROPERTY()
 	TSubclassOf<UBaseSpecial> SelectedSpecial;
 
+	UPROPERTY()
 	UMainMenuManager* MainMenuManager;
 
 	UMainMenuManager* GetMainMenuManager() const { return MainMenuManager; };

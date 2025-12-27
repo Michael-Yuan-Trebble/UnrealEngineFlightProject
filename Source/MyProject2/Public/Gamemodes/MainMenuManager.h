@@ -46,24 +46,34 @@ public:
 
 	bool OpenLevel(FName LevelName);
 
+	UPROPERTY()
 	AAircraftPlayerController* APC;
 
+	UPROPERTY()
 	TSubclassOf<UMainMenuWidget> MainMenuClass;
 
+	UPROPERTY()
 	TSubclassOf<UFreeFlightWidget> FreeFlightClass;
 
+	UPROPERTY()
 	TSubclassOf<UUserWidget> TransitionScreenClass;
 
+	UPROPERTY()
 	UPlayerGameInstance* PlayerInstance;
 
 private:
+	UPROPERTY()
 	UMainMenuWidget* MainMenuWidget;
 
+	UPROPERTY()
 	UFreeFlightWidget* FreeFlightWidget;
 
+	UPROPERTY()
 	UUserWidget* TransitionScreenWidget;
 
+	UPROPERTY()
 	TArray<UUserWidget*> MenuStack;
 
+	UPROPERTY()
 	UUserWidget* CurrentMenu;
 };

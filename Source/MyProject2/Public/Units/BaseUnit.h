@@ -47,6 +47,7 @@ public:
 
 	float health;
 
+	UPROPERTY()
 	UHealthComponent* HealthComp;
 
 	virtual FVector GetTargetLocation() const override { return this->GetActorLocation(); };
@@ -70,6 +71,7 @@ public:
 
 	virtual void HandleLOD(FVector CameraLoc);
 
+	UPROPERTY()
 	AActor* Tracked;
 
 protected:

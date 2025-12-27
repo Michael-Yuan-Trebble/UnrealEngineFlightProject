@@ -39,6 +39,7 @@ public:
 	UPROPERTY()
 	UMenuManagerComponent* MenuManager;
 
+	UPROPERTY()
 	UAircraftData* Aircraft;
 
 	UPROPERTY()
@@ -49,6 +50,7 @@ public:
 
 	int32 CurrentPylonIndex = 0;
 
+	UPROPERTY()
 	TMap<FName, TSubclassOf<ABaseWeapon>> WeaponSelection;
 
 	void WeaponSelectionMenu();

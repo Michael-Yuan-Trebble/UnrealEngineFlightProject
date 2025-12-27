@@ -36,12 +36,16 @@ protected:
 
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
+	UPROPERTY()
 	AActor* Selected;
 
+	UPROPERTY()
 	AEnemyAircraft* Controlled;
 
+	UPROPERTY(Transient)
 	UBlackboardComponent* BlackboardComp;
 
+	UPROPERTY()
 	AEnemyAircraftAI* Controller;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")

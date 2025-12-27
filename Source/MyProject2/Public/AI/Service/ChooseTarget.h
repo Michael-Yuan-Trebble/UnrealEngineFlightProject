@@ -29,6 +29,7 @@ protected:
 
 	FDetectedAircraftInfo Selected;
 
+	UPROPERTY()
 	AEnemyAircraft* Controlled;
 
 	float timeSinceLastPick;

@@ -50,6 +50,7 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	UWeaponSystemComponent* WeaponComponent;
 
+	UPROPERTY()
 	URadarComponent* RadarComponent;
 
 	UPROPERTY(EditAnywhere)
@@ -58,6 +59,7 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UAircraftVisualComponent* VisualComp;
 
+	UPROPERTY()
 	USpecialSystemComponent* SpecialComp;
 
 	TArray<TWeakObjectPtr<ABaseMissile>> IncomingMissiles;
@@ -98,6 +100,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Vapors")
 	void SetWingVapors(const TArray<UStaticMeshComponent*>& Vapors) { AllMainWingVapors = Vapors; }
 
+	UPROPERTY()
 	AActor* Tracking;
 
 	//UObjects
@@ -126,11 +129,13 @@ public:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* LandingGear;
 
+	UPROPERTY()
 	TArray<UNiagaraComponent*> AllAfterburners;
 
 	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* WingVortexSystem;
 
+	UPROPERTY()
 	TArray<UNiagaraComponent*> AllVortices;
 
 	virtual void PossessedBy(AController* Controller) override;

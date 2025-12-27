@@ -21,6 +21,7 @@ public:
 
 	AEnemyAircraft();
 
+	UPROPERTY()
 	AEnemyAircraftAI* Controller;
 
 	virtual void PossessedBy(AController* Controller) override;

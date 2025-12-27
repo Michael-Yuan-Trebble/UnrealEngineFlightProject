@@ -39,6 +39,7 @@ public:
 	UFUNCTION()
 	void SetAircraft(UAircraftData* Aircraft);
 
+	UPROPERTY()
 	TSubclassOf<UUserWidget> SelectionWidget;
 
 	UPROPERTY()

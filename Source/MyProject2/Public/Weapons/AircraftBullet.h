@@ -33,6 +33,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* ExplosionEffect;
 
+	UPROPERTY()
 	UProjectileMovementComponent* ProjectileMovement;
 
 	TWeakObjectPtr<ABaseAircraft> Owner;

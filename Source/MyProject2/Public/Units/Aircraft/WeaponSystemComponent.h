@@ -77,20 +77,28 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnWeaponCountUpdated OnWeaponCountUpdated;
 
+	UPROPERTY()
 	ABaseAircraft* Controlled;
 
+	UPROPERTY()
 	UAircraftStats* AirStats;
 
+	UPROPERTY()
 	ABaseWeapon* CurrentWeapon;
 
+	UPROPERTY()
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
 
+	UPROPERTY()
 	TMap<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon*>> WeaponGroups;
 
+	UPROPERTY()
 	TMap<FName, UStaticMeshComponent*> PylonSockets;
 
+	UPROPERTY()
 	TArray<FName> EquippedWeaponNames;
 
+	UPROPERTY()
 	TArray<FCooldownWeapon> AvailableWeapons;
 
 	UPROPERTY(EditAnywhere)

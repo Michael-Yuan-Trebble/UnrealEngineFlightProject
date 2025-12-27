@@ -49,12 +49,14 @@ public:
 
 	void SpawnInAircraft(TSubclassOf<APawn> SpawnIn);
 
+	UPROPERTY()
 	APawn* AircraftDisplayed;
 
 	void SpawnInWeapon(TSubclassOf<ABaseWeapon> Weapon, FName Pylon);
 
 	void ClearWeapons(FName Pylon);
 
+	UPROPERTY()
 	TMap<FName, AActor*> EquippedWeapons;
 
 	void EndSelection(AAircraftPlayerController* Controller);
@@ -63,6 +65,7 @@ public:
 
 	int PlayersRequired = 1;
 
+	UPROPERTY()
 	TSet<AAircraftPlayerController*> ReadyPlayers;
 
 protected:

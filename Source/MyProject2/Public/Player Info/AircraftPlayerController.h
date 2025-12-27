@@ -122,9 +122,16 @@ public:
 	EControlMode CurrentMode = EControlMode::Null;
 	TArray<EMenuState> MenuHistory;
 
+	UPROPERTY()
 	APlayerAircraft* Controlled;
+
+	UPROPERTY()
 	UMenuManagerComponent* MenuManager;
+
+	UPROPERTY()
 	UWeaponSystemComponent* WeaponComp;
+
+	UPROPERTY()
 	APlayerHUD* HUD;
 
 private:

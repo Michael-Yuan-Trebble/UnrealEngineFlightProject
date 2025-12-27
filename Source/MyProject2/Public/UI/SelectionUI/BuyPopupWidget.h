@@ -22,6 +22,7 @@ public:
 
 	UBuyPopupWidget(const FObjectInitializer& ObjectInitializer);
 
+	UPROPERTY()
 	UAircraftData* Aircraft;
 
 	UFUNCTION(BlueprintCallable)

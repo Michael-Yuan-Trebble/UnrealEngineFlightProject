@@ -35,7 +35,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector bFireGun;
 
+	UPROPERTY()
 	UBlackboardComponent* BlackboardComp;
 
+	UPROPERTY()
 	AEnemyAircraftAI* Controller;
 };

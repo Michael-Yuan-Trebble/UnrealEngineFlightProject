@@ -32,10 +32,13 @@ protected:
 
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
+	UPROPERTY()
 	AActor* Selected;
 
+	UPROPERTY()
 	AEnemyAircraft* Controlled;
 	
+	UPROPERTY()
 	UBlackboardComponent* BlackboardComp;
 
 private:

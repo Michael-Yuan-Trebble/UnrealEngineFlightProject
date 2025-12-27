@@ -18,8 +18,10 @@ public:
 
 	UAircraftAudioComponent();
 
+	UPROPERTY()
 	UAudioComponent* PersonalAircraftAudio;
 
+	UPROPERTY()
 	UAudioComponent* GunAudio;
 
 	UPROPERTY(EditAnywhere)
@@ -31,6 +33,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	USoundWave* GunSound;
 
+	UPROPERTY()
 	ABaseAircraft* Controlled;
 	
 	void PlayPerspectiveSound(ECameraPerspective Perspective);

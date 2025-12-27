@@ -63,6 +63,7 @@ public:
 	UPROPERTY()
 	ULockBoxWidget* SelectedAircraftWidget = nullptr;
 
+	UPROPERTY()
 	APlayerAircraft* Controlled;
 
 	TWeakObjectPtr<ABaseUnit> LastActor;
@@ -76,6 +77,7 @@ public:
 	UPROPERTY()
 	TMap<ABaseUnit*, ULockBoxWidget*> ActiveWidgets;
 
+	UPROPERTY()
 	ABaseUnit* Target;
 
 	void UpdateLocked(float LockPercent);
