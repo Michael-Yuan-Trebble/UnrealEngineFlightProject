@@ -13,6 +13,7 @@ class AAircraftPlayerController;
 class ACurrentPlayerState;
 class AAircraftRegistry;
 class ABaseWeapon;
+class UBaseSpecial;
 
 UCLASS()
 class MYPROJECT2_API AFlightGamemode : public AGameModeBase
@@ -54,6 +55,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ABaseWeapon> Bomb;
+
+	UPROPERTY(EditAnywhere) 
+	TSubclassOf<UBaseSpecial> Special;
 
 	UPROPERTY(EditAnywhere)
 	float PlayerSpawnSpeed = 0.f;

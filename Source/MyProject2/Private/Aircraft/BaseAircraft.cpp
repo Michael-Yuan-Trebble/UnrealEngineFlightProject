@@ -8,6 +8,7 @@
 #include "Aircraft/AircraftVisualComponent.h"
 #include "Aircraft/RadarComponent.h"
 #include "Aircraft/SpecialSystemComponent.h"
+#include "Weapons/Missiles/BaseMissile.h"
 
 ABaseAircraft::ABaseAircraft()
 {
@@ -52,13 +53,13 @@ ABaseAircraft::ABaseAircraft()
 
 void ABaseAircraft::BeginPlay()
 {
-
 	Super::BeginPlay();
 
 	if (VisualCompClass) {
 		VisualComp = NewObject<UAircraftVisualComponent>(this, VisualCompClass);
 		if (VisualComp) {
 			VisualComp->RegisterComponent();
+			VisualComp->SetMesh(Airframe);
 		}
 	}
 
@@ -217,6 +218,22 @@ void ABaseAircraft::HandleLOD(FVector CameraLoc)
 	}
 }
 
+void ABaseAircraft::ActivateSpecial() {
+	if (SpecialComp) SpecialComp->ActivateSpecial(this);
+	if (VisualComp && VisualComp->IsCountermeasures()) VisualComp->ActivateFlares();
+}
+
+void ABaseAircraft::OnCountermeasureDeployed_Implementation() 
+{
+	for (auto& Missile : IncomingMissiles) 
+	{
+		if (Missile.IsValid()) 
+		{
+			Missile->NotifyCountermeasure();
+		}
+	}
+}
+
 void ABaseAircraft::SetThrust(float thrust) { if (FlightComponent) FlightComponent->SetThrust(thrust); }
 
 void ABaseAircraft::SetRoll(float roll) { if (FlightComponent) FlightComponent->SetRoll(roll); }
@@ -237,7 +254,11 @@ void ABaseAircraft::SetSpeed(float speed) {
 
 void ABaseAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) { if (WeaponComponent) WeaponComponent->SetWeapons(In); }
 
-void ABaseAircraft::SetSpecial(UBaseSpecial* In) { if (SpecialComp) SpecialComp->SetSpecial(In); }
+void ABaseAircraft::SetSpecial(TSubclassOf<UBaseSpecial> In) { 
+	if (SpecialComp) { 
+		SpecialComp->SetSpecial(In); 
+	} 
+}
 
 float ABaseAircraft::ReturnRudder() const { if (VisualComp) return VisualComp->GetRudder(); else return 0; }
 

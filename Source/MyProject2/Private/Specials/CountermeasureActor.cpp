@@ -25,15 +25,12 @@ void ACountermeasureActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (!FlareEffect) return;
+	if (!FlareEffect || !FlareComponent) return;
 	FlareComponent->SetAsset(FlareEffect);
-	FlareComponent->Activate(true);
-
-	RootMesh->AddImpulse(GetActorForwardVector() * 100, NAME_None, true);
-
-	GetWorld()->GetTimerManager().SetTimer(LifetimeTimer, this, &ACountermeasureActor::OnLifetimeExpired, Lifetime, false);
 }
 
-void ACountermeasureActor::OnLifetimeExpired() {
-	Destroy();
+void ACountermeasureActor::Activate() 
+{
+	FlareComponent->Activate(true);
+	RootMesh->AddImpulse(GetActorForwardVector() * 100, NAME_None, true);
 }

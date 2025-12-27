@@ -386,6 +386,7 @@ void AAircraftPlayerController::PreviousWeapon()
 
 void AAircraftPlayerController::Special() 
 {
+	if (Controlled) Controlled->ActivateSpecial();
 }
 
 //Gun

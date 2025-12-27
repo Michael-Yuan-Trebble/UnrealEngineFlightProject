@@ -14,6 +14,8 @@ class MYPROJECT2_API ACountermeasureActor : public AActor
 public:	
 	ACountermeasureActor();
 
+	void Activate();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -30,6 +32,9 @@ protected:
 
 	float Lifetime = 5;
 
-	UFUNCTION()
-	void OnLifetimeExpired();
+	UPROPERTY(EditAnywhere)
+	float Repitions = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	float AmountPerRepition = 0.f;
 };

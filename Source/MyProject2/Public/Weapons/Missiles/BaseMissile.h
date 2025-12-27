@@ -63,6 +63,8 @@ public:
 
 	void ApplyVFXLOD(FVector CameraDistance);
 
+	void NotifyCountermeasure();
+
 	bool bMissileVFXOn = true;
 
 	bool bMissed = false;

@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Special!"));
 #include "Aircraft/SpecialSystemComponent.h"
 #include "Specials/BaseSpecial.h"
 
@@ -12,15 +12,19 @@ USpecialSystemComponent::USpecialSystemComponent()
 void USpecialSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (Special && !Special->CanActivate()) Special->UpdateCooldown(DeltaTime);
+	if (IsValid(Special) && !Special->CanActivate()) Special->UpdateCooldown(DeltaTime);
 }
 
-void USpecialSystemComponent::Activate() 
+void USpecialSystemComponent::SetSpecial(TSubclassOf<UBaseSpecial> In) {
+	Special = NewObject<UBaseSpecial>(this, In);
+}
+
+void USpecialSystemComponent::ActivateSpecial(ABaseAircraft* In)
 {
-	if (Special && Special->CanActivate()) Special->ActivateSpecial();
+	if (Special && Special->CanActivate()) { Special->ActivateSpecial(In); }
 }
 
-void USpecialSystemComponent::Deactivate() {
+void USpecialSystemComponent::DeactivateSpecial() {
 
 }
 

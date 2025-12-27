@@ -7,6 +7,7 @@
 #include "SpecialSystemComponent.generated.h"
 
 class UBaseSpecial;
+class ABaseAircraft;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API USpecialSystemComponent : public UActorComponent
@@ -18,12 +19,13 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetSpecial(UBaseSpecial* In) { Special = In; };
+	void SetSpecial(TSubclassOf<UBaseSpecial> In);
 
-	void Activate();
+	void ActivateSpecial(ABaseAircraft* In);
 
-	void Deactivate();
+	void DeactivateSpecial();
 
 private:
+	UPROPERTY()
 	UBaseSpecial* Special;
 };

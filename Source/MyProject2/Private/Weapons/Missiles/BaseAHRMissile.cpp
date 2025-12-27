@@ -6,6 +6,7 @@
 #include "Aircraft/BaseAircraft.h"
 #include "Structs and Data/DamageableInterface.h"
 #include "Structs and Data/TeamInterface.h"
+#include "Structs and Data/ApproachingMissileInterface.h"
 
 ABaseAHRMissile::ABaseAHRMissile()
 {
@@ -78,6 +79,14 @@ void ABaseAHRMissile::Tick(float DeltaTime)
 			ProjectileMovement->HomingTargetComponent = nullptr;
 			ProjectileMovement->bIsHomingProjectile = false;
 			bMissed = true;
+
+			if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Tracking))
+			{
+				if (Aircraft->Implements<UApproachingMissileInterface>())
+				{
+					IApproachingMissileInterface::Execute_UnregisterIncomingMissile(Aircraft,this);
+				}
+			}
 		}
 	}
 
@@ -101,10 +110,13 @@ void ABaseAHRMissile::FireTracking(float launchSpeed, AActor* Target)
 		ProjectileMovement->bIsHomingProjectile = true;
 		ProjectileMovement->HomingTargetComponent = Tracking->GetRootComponent();
 		ProjectileMovement->HomingAccelerationMagnitude = turnRate;
-		ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Target);
-		if (Aircraft)
+		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Tracking))
 		{
 			Aircraft->OnMissileLaunchedAtSelf.Broadcast(this);
+			if (Aircraft->Implements<UApproachingMissileInterface>()) 
+			{
+				IApproachingMissileInterface::Execute_RegisterIncomingMissile(Aircraft,this);
+			}
 		}
 	}
 	LaunchSequence(launchSpeed);
@@ -128,6 +140,16 @@ void ABaseAHRMissile::CheckAndDelete(AActor* OtherActor)
 {
 	if (!OtherActor || OtherActor == this || OtherActor == Owner || !bAir) return;
 	if (!Owner || !Owner->IsValidLowLevelFast()) return;
+
+	if (IsValid(Tracking)) {
+		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Tracking))
+		{
+			if (Aircraft->Implements<UApproachingMissileInterface>())
+			{
+				IApproachingMissileInterface::Execute_UnregisterIncomingMissile(Aircraft,this);
+			}
+		}
+	}
 
 	if (OtherActor->Implements<UTeamInterface>())
 	{

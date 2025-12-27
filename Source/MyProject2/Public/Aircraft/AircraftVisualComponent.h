@@ -7,6 +7,7 @@
 #include "Structs and Data/AircraftAnimationInformation.h"
 #include "AircraftVisualComponent.generated.h"
 
+class ACountermeasureActor;
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UAircraftVisualComponent : public UActorComponent
@@ -28,6 +29,20 @@ public:
 	float GetNozzle() const { return Nozzle; };
 	float GetAirBrake() const { return AirBrake; };
 	float GetElevator() const { return Elevator; };
+	bool IsCountermeasures() const { return bUsingCountermeasures; };
+
+	USkeletalMeshComponent* Mesh;
+
+	void ActivateFlares();
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ACountermeasureActor> FlareClass;
+
+	UPROPERTY(EditAnywhere)
+	bool bUsingCountermeasures;
+
+public:
+	void SetMesh(USkeletalMeshComponent* In) { Mesh = In; };
 
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

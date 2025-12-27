@@ -103,6 +103,8 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 
 	PlayerSpawnedIn->SetWeapons(Loadout);
 
+	if (Special) PlayerSpawnedIn->SetSpecial(Special);
+
 	if (IsValid(PC))
 	{
 		PC->Possess(PlayerSpawnedIn);

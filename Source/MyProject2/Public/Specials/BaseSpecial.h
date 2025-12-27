@@ -6,7 +6,9 @@
 #include "UObject/NoExportTypes.h"
 #include "BaseSpecial.generated.h"
 
-UCLASS()
+class ABaseAircraft;
+
+UCLASS(Abstract, Blueprintable, BlueprintType)
 class MYPROJECT2_API UBaseSpecial : public UObject
 {
 	GENERATED_BODY()
@@ -14,15 +16,16 @@ class MYPROJECT2_API UBaseSpecial : public UObject
 public:
 	FName SpecialName;
 
+	UPROPERTY(EditAnywhere)
 	float CooldownTime;
 
 	float CurrentCooldown;
 
 	void UpdateCooldown(float In) { CurrentCooldown = FMath::Clamp(CurrentCooldown - In, 0, CooldownTime); };
 
-	virtual bool CanActivate() { return false; };
+	virtual bool CanActivate() { return true; };
 
-	virtual void ActivateSpecial() {};
+	virtual void ActivateSpecial(ABaseAircraft* In) {};
 
 	float GetCooldown() const { return CooldownTime; };
 };

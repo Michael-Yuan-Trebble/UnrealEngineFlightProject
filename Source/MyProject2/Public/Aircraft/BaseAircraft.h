@@ -12,6 +12,7 @@
 #include "Structs and Data/ApproachingMissileInterface.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "BaseUnit.h"
+#include "Weapons/Missiles/BaseMissile.h"
 #include "BaseAircraft.generated.h"
 
 class UFlightComponent;
@@ -19,7 +20,6 @@ class URadarComponent;
 class UWeaponSystemComponent;
 class UAircraftVisualComponent;
 class USpecialSystemComponent;
-class ABaseMissile;
 class ABaseWeapon;
 class UBaseSpecial;
 
@@ -143,6 +143,8 @@ public:
 
 	virtual void EndBullets() {};
 
+	void ActivateSpecial();
+
 public:
 	// Set Controller
 	void SetThrust(float thrust);
@@ -165,7 +167,7 @@ public:
 
 	void SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In);
 
-	void SetSpecial(UBaseSpecial* In);
+	void SetSpecial(TSubclassOf<UBaseSpecial> In);
 
 	void FireWeaponSelected();
 
@@ -205,7 +207,7 @@ public:
 		IncomingMissiles.RemoveSingle(Missile);
 	};
 
-	virtual void OnCountermeasuresDeployed_Implementation(ABaseMissile* Missile) override;
+	virtual void OnCountermeasureDeployed_Implementation() override;
 
 protected:
 

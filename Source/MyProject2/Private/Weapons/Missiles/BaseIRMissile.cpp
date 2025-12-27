@@ -61,6 +61,13 @@ void ABaseIRMissile::Tick(float DeltaTime)
 			ProjectileMovement->bIsHomingProjectile = false;
 			bMissed = true;
 		}
+		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Tracking))
+		{
+			if (Aircraft->Implements<UApproachingMissileInterface>()) 
+			{
+				IApproachingMissileInterface::Execute_UnregisterIncomingMissile(Aircraft,this);
+			}
+		}
 	}
 
 	// Missile explodes at range
@@ -78,15 +85,18 @@ void ABaseIRMissile::FireStatic(float launchSpeed)
 void ABaseIRMissile::FireTracking(float launchSpeed, AActor* Target) 
 {
 	Tracking = Target;
-	if (Tracking)
+	if (IsValid(Tracking))
 	{
 		ProjectileMovement->bIsHomingProjectile = true;
 		ProjectileMovement->HomingTargetComponent = Tracking->GetRootComponent();
 		ProjectileMovement->HomingAccelerationMagnitude = turnRate;
-		ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Target);
-		if (Aircraft) 
+		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Tracking))
 		{
 			Aircraft->OnMissileLaunchedAtSelf.Broadcast(this);
+			if (Aircraft->Implements<UApproachingMissileInterface>()) 
+			{
+				IApproachingMissileInterface::Execute_RegisterIncomingMissile(Aircraft,this);
+			}
 		}
 	}
 	LaunchSequence(launchSpeed);
@@ -106,6 +116,17 @@ void ABaseIRMissile::LaunchSequence(float Speed)
 void ABaseIRMissile::CheckAndDelete(AActor* OtherActor)
 {
 	if (!OtherActor || OtherActor == this || OtherActor == Owner || !bAir) return;
+
+	if (IsValid(Tracking))
+	{
+		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Tracking))
+		{
+			if (Aircraft->Implements<UApproachingMissileInterface>())
+			{
+				IApproachingMissileInterface::Execute_UnregisterIncomingMissile(Aircraft,this);
+			}
+		}
+	}
 
 	if (OtherActor->Implements<UTeamInterface>())
 	{

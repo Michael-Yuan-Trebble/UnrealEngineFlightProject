@@ -4,6 +4,7 @@
 #include "Weapons/Missiles/BaseMissile.h"
 #include "Aircraft/BaseAircraft.h"
 #include "Structs and Data/MissileManagerSubsystem.h"
+#include "Structs and Data/ApproachingMissileInterface.h"
 
 ABaseMissile::ABaseMissile() 
 {
@@ -119,6 +120,23 @@ void ABaseMissile::ApplyVFXLOD(FVector CameraLoc)
 		SmokeTrail->Activate(true);
 		MissileRocket->Activate(true);
 		bMissileVFXOn = true;
+	}
+}
+
+void ABaseMissile::NotifyCountermeasure() 
+{
+	if (IsValid(Tracking) && ProjectileMovement)
+	{
+		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Tracking)) {
+			if (Aircraft->Implements<UApproachingMissileInterface>()) 
+			{
+				IApproachingMissileInterface::Execute_UnregisterIncomingMissile(Aircraft,this);
+			}
+		}
+		ProjectileMovement->bIsHomingProjectile = false;
+		ProjectileMovement->HomingTargetComponent = nullptr;
+		ProjectileMovement->Velocity = GetActorForwardVector() * missileAcceleration;
+		Tracking = nullptr;
 	}
 }
 

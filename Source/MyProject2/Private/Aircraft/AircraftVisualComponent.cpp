@@ -2,6 +2,7 @@
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Visual Comp!"));
 #include "Aircraft/AircraftVisualComponent.h"
+#include "Specials/CountermeasureActor.h"
 
 #define INTERPSPEED 30
 
@@ -20,6 +21,19 @@ void UAircraftVisualComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	Elevator = ElevatorPitch + ElevatorRoll;
 	RFlap = FlapPitch + RFlapRoll;
 	LFlap = FlapPitch + LFlapRoll;
+}
+
+void UAircraftVisualComponent::ActivateFlares() {
+	if (!FlareClass || !Mesh) return;
+	FName SocketName = FName(*FString::Printf(TEXT("CountermeasureSocket")));
+	print(text)
+	if (!Mesh->DoesSocketExist(SocketName)) return;
+	print(text)
+	ACountermeasureActor* FlareActor = GetWorld()->SpawnActor<ACountermeasureActor>(
+		FlareClass,
+		Mesh->GetSocketTransform(SocketName)
+	);
+	if (FlareActor) FlareActor->Activate();
 }
 
 #define MAXSLATS AircraftInfo.MaxSlats
