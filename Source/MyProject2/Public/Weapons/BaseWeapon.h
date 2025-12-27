@@ -8,7 +8,7 @@
 #include "NiagaraSystem.h"
 #include "Components/StaticMeshComponent.h"
 #include "Structs and Data/Weapon Data/BaseWeaponStats.h"
-#include "Structs and Data/LockableTarget.h"
+#include "Interfaces/LockableTarget.h"
 #include "BaseWeapon.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponResult, bool, bHit);

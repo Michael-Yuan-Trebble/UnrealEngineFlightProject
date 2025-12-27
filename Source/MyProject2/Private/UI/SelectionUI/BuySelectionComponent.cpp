@@ -3,9 +3,9 @@
 
 #include "UI/SelectionUI/BuySelectionComponent.h"
 #include "UI/SelectionUI/BuyPopupWidget.h"
-#include "AircraftPlayerController.h"
-#include "Gamemodes/PlayerGameInstance.h"
-#include "SaveGameManager.h"
+#include "Player Info/AircraftPlayerController.h"
+#include "Player Info/PlayerGameInstance.h"
+#include "Player Info/SaveGameManager.h"
 #include "UI/SelectionUI/AircraftSelectionWidget.h"
 #include "UI/SelectionUI/AircraftSelectionComponent.h"
 

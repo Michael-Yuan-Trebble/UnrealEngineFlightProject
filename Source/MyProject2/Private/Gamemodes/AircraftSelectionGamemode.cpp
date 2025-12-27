@@ -4,15 +4,15 @@
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "UI/SelectionUI/AircraftSelectionWidget.h"
-#include "AircraftPlayerController.h"
-#include "Gamemodes/CurrentPlayerState.h"
-#include "Aircraft/Player/PlayerAircraft.h"
-#include "Aircraft/MenuManagerComponent.h"
-#include "Structs and Data/ControlModeTypes.h"
+#include "Player Info/AircraftPlayerController.h"
+#include "Player Info/CurrentPlayerState.h"
+#include "Units/Aircraft/Player/PlayerAircraft.h"
+#include "Units/Aircraft/MenuManagerComponent.h"
+#include "Enums/ControlModeTypes.h"
 #include "Kismet/GameplayStatics.h"
-#include "Structs and Data/MenuState.h"
-#include "Gamemodes/PlayerGameInstance.h"
-#include "Aircraft/BaseAircraft.h"
+#include "Enums/MenuState.h"
+#include "Player Info/PlayerGameInstance.h"
+#include "Units/Aircraft/BaseAircraft.h"
 
 FActorSpawnParameters SpawnParams;
 

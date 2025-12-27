@@ -2,10 +2,10 @@
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Attack!"));
 #include "AI/Service/Attack.h"
-#include "Aircraft/AI/EnemyAircraft.h"
-#include "Aircraft/FlightComponent.h"
+#include "Units/Aircraft/AI/EnemyAircraft.h"
+#include "Units/Aircraft/FlightComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
-#include "Aircraft/AI/EnemyAircraftAI.h"
+#include "Units/Aircraft/AI/EnemyAircraftAI.h"
 #include "DrawDebugHelpers.h"
 
 EAIThrottleMode UBTServiceAttack::GetThrottleMode(float distance) 

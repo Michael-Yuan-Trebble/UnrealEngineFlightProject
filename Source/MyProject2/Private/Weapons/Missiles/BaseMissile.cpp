@@ -2,9 +2,9 @@
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Missile!"));
 #include "Weapons/Missiles/BaseMissile.h"
-#include "Aircraft/BaseAircraft.h"
-#include "Structs and Data/MissileManagerSubsystem.h"
-#include "Structs and Data/ApproachingMissileInterface.h"
+#include "Units/Aircraft/BaseAircraft.h"
+#include "Subsystem/MissileManagerSubsystem.h"
+#include "Interfaces/ApproachingMissileInterface.h"
 
 ABaseMissile::ABaseMissile() 
 {

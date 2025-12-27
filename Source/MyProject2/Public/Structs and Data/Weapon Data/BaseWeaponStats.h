@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "Structs and Data/TargetTypes.h"
+#include "Enums/TargetTypes.h"
 #include "BaseWeaponStats.generated.h"
 
 UENUM(BlueprintType)

@@ -2,10 +2,10 @@
 
 
 #include "AI/Service/BTServiceWeaponAngle.h"
-#include "Aircraft/WeaponSystemComponent.h"
-#include "Aircraft/FlightComponent.h"
-#include "Aircraft/AI/EnemyAircraft.h"
-#include "Aircraft/AI/EnemyAircraftAI.h"
+#include "Units/Aircraft/WeaponSystemComponent.h"
+#include "Units/Aircraft/FlightComponent.h"
+#include "Units/Aircraft/AI/EnemyAircraft.h"
+#include "Units/Aircraft/AI/EnemyAircraftAI.h"
 #include "Weapons/BaseWeapon.h"
 
 UBTServiceWeaponAngle::UBTServiceWeaponAngle() 

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Structs and Data/TargetTypes.h"
+#include "Enums/TargetTypes.h"
 #include "BaseSpawnPoint.generated.h"
 
 UCLASS()

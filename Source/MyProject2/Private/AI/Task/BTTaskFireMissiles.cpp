@@ -2,8 +2,8 @@
 
 
 #include "AI/Task/BTTaskFireMissiles.h"
-#include "Aircraft/AI/EnemyAircraft.h"
-#include "Aircraft/AI/EnemyAircraftAI.h"
+#include "Units/Aircraft/AI/EnemyAircraft.h"
+#include "Units/Aircraft/AI/EnemyAircraftAI.h"
 #include "Weapons/BaseWeapon.h"
 
 UBTTaskFireMissiles::UBTTaskFireMissiles()

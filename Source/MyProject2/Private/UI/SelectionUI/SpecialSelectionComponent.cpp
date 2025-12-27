@@ -3,9 +3,9 @@
 
 #include "UI/SelectionUI/SpecialSelectionComponent.h"
 #include "UI/SelectionUI/SpecialSelectionWidget.h"
-#include "AircraftPlayerController.h"
-#include "Gamemodes/PlayerGameInstance.h"
-#include "Aircraft/MenuManagerComponent.h"
+#include "Player Info/AircraftPlayerController.h"
+#include "Player Info/PlayerGameInstance.h"
+#include "Units/Aircraft/MenuManagerComponent.h"
 
 USpecialSelectionComponent::USpecialSelectionComponent()
 {

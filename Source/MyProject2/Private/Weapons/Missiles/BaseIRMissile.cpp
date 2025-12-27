@@ -3,9 +3,9 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Missile!"));
 #include "Weapons/Missiles/BaseIRMissile.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Structs and Data/TeamInterface.h"
-#include "Structs and Data/DamageableInterface.h"
-#include "Aircraft/BaseAircraft.h"
+#include "Interfaces/TeamInterface.h"
+#include "Interfaces/DamageableInterface.h"
+#include "Units/Aircraft/BaseAircraft.h"
 
 ABaseIRMissile::ABaseIRMissile()
 {

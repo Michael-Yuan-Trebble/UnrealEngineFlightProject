@@ -3,8 +3,8 @@
 
 #include "UI/SelectionUI/SpecialSelectionWidget.h"
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
-#include "AircraftPlayerController.h"
-#include "Aircraft/MenuManagerComponent.h"
+#include "Player Info/AircraftPlayerController.h"
+#include "Units/Aircraft/MenuManagerComponent.h"
 #include "UI/SelectionUI/SpecialSelectionComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/SelectionUI/SpecialButtonWidget.h"

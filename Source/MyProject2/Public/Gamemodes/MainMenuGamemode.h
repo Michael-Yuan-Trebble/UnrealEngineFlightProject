@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Gamemodes/CurrentPlayerState.h"
+#include "Player Info/CurrentPlayerState.h"
 #include "MainMenuGamemode.generated.h"
 
 class AAircraftPlayerController;

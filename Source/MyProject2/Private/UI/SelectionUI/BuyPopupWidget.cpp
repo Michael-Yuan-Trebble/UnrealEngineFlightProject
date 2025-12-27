@@ -5,8 +5,8 @@
 #include "UI/SelectionUI/BuyButton.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "Kismet/GameplayStatics.h"
-#include "AircraftPlayerController.h"
-#include "Aircraft/MenuManagerComponent.h"
+#include "Player Info/AircraftPlayerController.h"
+#include "Units/Aircraft/MenuManagerComponent.h"
 #include "UI/SelectionUI/BuySelectionComponent.h"
 
 UBuyPopupWidget::UBuyPopupWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) 

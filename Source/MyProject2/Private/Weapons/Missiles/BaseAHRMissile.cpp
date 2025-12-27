@@ -3,10 +3,10 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Hit!"));
 #include "Weapons/Missiles/BaseAHRMissile.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Aircraft/BaseAircraft.h"
-#include "Structs and Data/DamageableInterface.h"
-#include "Structs and Data/TeamInterface.h"
-#include "Structs and Data/ApproachingMissileInterface.h"
+#include "Units/Aircraft/BaseAircraft.h"
+#include "Interfaces/DamageableInterface.h"
+#include "Interfaces/TeamInterface.h"
+#include "Interfaces/ApproachingMissileInterface.h"
 
 ABaseAHRMissile::ABaseAHRMissile()
 {

@@ -2,7 +2,7 @@
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Bomb!"));
 #include "Weapons/BaseBomb.h"
-#include "Aircraft/BaseAircraft.h"
+#include "Units/Aircraft/BaseAircraft.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 

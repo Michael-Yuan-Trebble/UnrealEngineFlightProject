@@ -9,8 +9,6 @@
 #include "Components/Button.h"
 #include "AircraftButtonWidget.generated.h"
 
-
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAircraftSelected, UAircraftData*, SelectedAircraft);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAircraftPicked, UAircraftData*, PickedAircraft);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAircraftBuyPicked, UAircraftData*, Aircraft, int, Cost);

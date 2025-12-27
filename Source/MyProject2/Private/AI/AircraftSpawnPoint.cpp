@@ -2,8 +2,8 @@
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("AI Spawned!"));
 #include "AI/AircraftSpawnPoint.h"
-#include "Aircraft/BaseAircraft.h"
-#include "Aircraft/AI/EnemyAircraftAI.h"
+#include "Units/Aircraft/BaseAircraft.h"
+#include "Units/Aircraft/AI/EnemyAircraftAI.h"
 
 void AAircraftSpawnPoint::BeginPlay() 
 {

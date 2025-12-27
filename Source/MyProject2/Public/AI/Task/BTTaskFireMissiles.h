@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "Aircraft/WeaponSystemComponent.h"
-#include "Aircraft/FlightComponent.h"
+#include "Units/Aircraft/WeaponSystemComponent.h"
+#include "Units/Aircraft/FlightComponent.h"
 #include "BTTaskFireMissiles.generated.h"
 
 class AEnemyAircraftAI;

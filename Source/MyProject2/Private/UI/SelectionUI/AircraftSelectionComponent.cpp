@@ -2,11 +2,11 @@
 
 #include "UI/SelectionUI/AircraftSelectionComponent.h"
 #include "UI/SelectionUI/AircraftSelectionWidget.h"
-#include "SaveGameManager.h"
-#include "Gamemodes/PlayerGameInstance.h"
-#include "Aircraft/MenuManagerComponent.h"
+#include "Player Info/SaveGameManager.h"
+#include "Player Info/PlayerGameInstance.h"
+#include "Units/Aircraft/MenuManagerComponent.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
-#include "AircraftPlayerController.h"
+#include "Player Info/AircraftPlayerController.h"
 
 UAircraftSelectionComponent::UAircraftSelectionComponent()
 { 

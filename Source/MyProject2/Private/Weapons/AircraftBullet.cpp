@@ -3,10 +3,10 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Bullet!"));
 #include "Weapons/AircraftBullet.h"
 #include "Components/BoxComponent.h"
-#include "Aircraft/BaseAircraft.h"
+#include "Units/Aircraft/BaseAircraft.h"
 #include "Structs and Data/Weapon Data/BulletStats.h"
-#include "Structs and Data/TeamInterface.h"
-#include "Structs and Data/DamageableInterface.h"
+#include "Interfaces/TeamInterface.h"
+#include "Interfaces/DamageableInterface.h"
 #include "DrawDebugHelpers.h"
 
 AAircraftBullet::AAircraftBullet()

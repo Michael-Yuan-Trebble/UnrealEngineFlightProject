@@ -2,16 +2,16 @@
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("HUD!"));
 #include "UI/PlayerHUD.h"
-#include "AircraftPlayerController.h"
+#include "Player Info/AircraftPlayerController.h"
 #include "DrawDebugHelpers.h"
-#include "Aircraft/BaseAircraft.h"
+#include "Units/Aircraft/BaseAircraft.h"
 #include "UI/LockBoxWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
-#include "Aircraft/FlightComponent.h"
-#include "Aircraft/RadarComponent.h"
+#include "Units/Aircraft/FlightComponent.h"
+#include "Units/Aircraft/RadarComponent.h"
 #include "Components/CanvasPanelSlot.h"
-#include "Aircraft/WeaponSystemComponent.h"
-#include "Aircraft/Player/PlayerAircraft.h"
+#include "Units/Aircraft/WeaponSystemComponent.h"
+#include "Units/Aircraft/Player/PlayerAircraft.h"
 
 APlayerHUD::APlayerHUD() 
 {

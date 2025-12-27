@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
-#include "Aircraft/BaseAircraft.h"
+#include "Units/Aircraft/BaseAircraft.h"
 #include "BTServiceWeaponAngle.generated.h"
 
 class AEnemyAircraft;

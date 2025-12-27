@@ -3,10 +3,10 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Service Fire Gun!"));
 #include "AI/Service/BTServiceShootGun.h"
 #include "DrawDebugHelpers.h"
-#include "Aircraft/WeaponSystemComponent.h"
-#include "Aircraft/FlightComponent.h"
-#include "Aircraft/AI/EnemyAircraft.h"
-#include "Aircraft/AI/EnemyAircraftAI.h"
+#include "Units/Aircraft/WeaponSystemComponent.h"
+#include "Units/Aircraft/FlightComponent.h"
+#include "Units/Aircraft/AI/EnemyAircraft.h"
+#include "Units/Aircraft/AI/EnemyAircraftAI.h"
 
 UBTServiceShootGun::UBTServiceShootGun() {
 	NodeName = "Update Gun Shot";

@@ -3,7 +3,7 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Main Menu Gamemode!"));
 #include "Gamemodes/MainMenuGamemode.h"
 #include "Kismet/GameplayStatics.h"
-#include "AircraftPlayerController.h"
+#include "Player Info/AircraftPlayerController.h"
 #include "UI/MainMenuUI/MainMenuWidget.h"
 #include "UI/MainMenuUI/FreeFlightWidget.h"
 #include "Gamemodes/MainMenuManager.h"

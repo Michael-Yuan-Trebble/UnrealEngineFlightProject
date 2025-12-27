@@ -9,7 +9,7 @@
 #include "MinimapWidget.h"
 #include "Structs and Data/FDetectedAircraftInfo.h"
 #include "PitchLadder.h"
-#include "AircraftPlayerController.h"
+#include "Player Info/AircraftPlayerController.h"
 #include "PlayerHUD.generated.h"
 
 class APlayerAircraft;

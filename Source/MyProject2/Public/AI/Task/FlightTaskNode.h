@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "Aircraft/FlightComponent.h"
+#include "Units/Aircraft/FlightComponent.h"
 #include "FlightTaskNode.generated.h"
 
 class AEnemyAircraftAI;

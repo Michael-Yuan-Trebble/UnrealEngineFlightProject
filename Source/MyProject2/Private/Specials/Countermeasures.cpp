@@ -2,7 +2,7 @@
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Flare!"));
 #include "Specials/Countermeasures.h"
-#include "Aircraft/BaseAircraft.h"
+#include "Units/Aircraft/BaseAircraft.h"
 #include "Kismet/GameplayStatics.h"
 
 void UCountermeasures::ActivateSpecial(ABaseAircraft* In) {

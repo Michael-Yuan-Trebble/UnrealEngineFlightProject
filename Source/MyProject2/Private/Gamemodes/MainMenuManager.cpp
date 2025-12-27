@@ -5,7 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/MainMenuUI/FreeFlightWidget.h"
-#include "Gamemodes/PlayerGameInstance.h"
+#include "Player Info/PlayerGameInstance.h"
 #include "UI/MainMenuUI/MainMenuWidget.h"
 
 UMainMenuManager::UMainMenuManager() 
