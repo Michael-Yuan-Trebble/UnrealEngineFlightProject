@@ -89,7 +89,6 @@ public:
 	UPROPERTY()
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
 
-	UPROPERTY()
 	TMap<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon*>> WeaponGroups;
 
 	UPROPERTY()

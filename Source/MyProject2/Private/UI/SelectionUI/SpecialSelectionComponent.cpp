@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "UI/SelectionUI/SpecialSelectionComponent.h"
 #include "UI/SelectionUI/SpecialSelectionWidget.h"
 #include "Player Info/AircraftPlayerController.h"
@@ -11,10 +10,9 @@ USpecialSelectionComponent::USpecialSelectionComponent()
 {
 }
 
-void USpecialSelectionComponent::Setup(AAircraftPlayerController* InPlayer, ACurrentPlayerState* InPS, UMenuManagerComponent* InMenu)
+void USpecialSelectionComponent::Setup(AAircraftPlayerController* InPlayer, UMenuManagerComponent* InMenu)
 {
 	PC = InPlayer;
-	PS = InPS;
 	MenuManager = InMenu;
 	GameInstance = Cast<UPlayerGameInstance>(GetWorld()->GetGameInstance());
 }

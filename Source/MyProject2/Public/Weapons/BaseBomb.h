@@ -26,7 +26,6 @@ public:
 
 	FVector Velocity;
 
-	UPROPERTY()
 	ABaseAircraft* Owner;
 
 	bool isAir = false;

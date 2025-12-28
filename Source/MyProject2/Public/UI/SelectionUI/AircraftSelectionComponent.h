@@ -10,7 +10,6 @@
 
 class AAircraftPlayerController;
 class AAircraftSelectionGamemode;
-class ACurrentPlayerState;
 class UPlayerGameInstance;
 class UMenuManagerComponent;
 class UAircraftSelectionWidget;
@@ -27,7 +26,6 @@ public:
 
 	void Setup(AAircraftPlayerController* InPlayer, 
 		AAircraftSelectionGamemode* InGM, 
-		ACurrentPlayerState* InPS, 
 		UMenuManagerComponent* InMenu,
 		TSubclassOf<UUserWidget> InClass);
 
@@ -47,9 +45,6 @@ public:
 
 	UPROPERTY()
 	AAircraftSelectionGamemode* GM;
-
-	UPROPERTY()
-	ACurrentPlayerState* PS;
 
 	UPROPERTY()
 	UAircraftDatabase* AircraftDatabase;

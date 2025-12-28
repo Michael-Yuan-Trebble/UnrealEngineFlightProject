@@ -12,7 +12,6 @@
 
 class AAircraftPlayerController;
 class AAircraftSelectionGamemode;
-class ACurrentPlayerState;
 class UPlayerGameInstance;
 class UMenuManagerComponent;
 class USpecialSelectionWidget;
@@ -27,7 +26,7 @@ public:
 
 	void SpecialSelectionMenu();
 
-	void Setup(AAircraftPlayerController* InPlayer, ACurrentPlayerState* InPS, UMenuManagerComponent* InMenu);
+	void Setup(AAircraftPlayerController* InPlayer, UMenuManagerComponent* InMenu);
 
 	UFUNCTION()
 	void SetSpecial(TSubclassOf<UBaseSpecial> InSpecial);
@@ -42,9 +41,6 @@ public:
 
 	UPROPERTY()
 	AAircraftPlayerController* PC;
-
-	UPROPERTY()
-	ACurrentPlayerState* PS;
 
 	UPROPERTY()
 	UPlayerGameInstance* GameInstance;

@@ -14,13 +14,11 @@ UAircraftSelectionComponent::UAircraftSelectionComponent()
 
 void UAircraftSelectionComponent::Setup(AAircraftPlayerController* InPlayer,
 	AAircraftSelectionGamemode* InGM,
-	ACurrentPlayerState* InPS,
 	UMenuManagerComponent* InMenu,
 	TSubclassOf<UUserWidget> InClass)
 {
 	PC = InPlayer;
 	GM = InGM;
-	PS = InPS;
 	MenuManager = InMenu;
 	SelectionWidget = InClass;
 	GameInstance = Cast<UPlayerGameInstance>(GetWorld()->GetGameInstance());

@@ -15,10 +15,14 @@ ACountermeasureActor::ACountermeasureActor()
 	RootMesh->SetEnableGravity(true);
 	RootMesh->SetLinearDamping(1.5f);
 	RootMesh->SetAngularDamping(0.5f);
+	RootMesh->SetMobility(EComponentMobility::Movable);
 
 	FlareComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FlareEffect"));
 	FlareComponent->SetupAttachment(RootComponent);
-	FlareComponent->bAutoActivate = false;
+	FlareComponent->SetAutoActivate(false);
+	FlareComponent->SetUsingAbsoluteScale(true);
+	FlareComponent->SetVisibility(true);
+	FlareComponent->SetMobility(EComponentMobility::Movable);
 }
 
 void ACountermeasureActor::BeginPlay()
@@ -32,5 +36,5 @@ void ACountermeasureActor::BeginPlay()
 void ACountermeasureActor::Activate() 
 {
 	FlareComponent->Activate(true);
-	RootMesh->AddImpulse(GetActorForwardVector() * 100, NAME_None, true);
+	RootMesh->AddImpulse(GetActorForwardVector() * 5, NAME_None, true);
 }

@@ -10,7 +10,6 @@
 
 class APlayerAircraft;
 class AAircraftPlayerController;
-class ACurrentPlayerState;
 class AAircraftRegistry;
 class ABaseWeapon;
 class UBaseSpecial;
@@ -45,9 +44,6 @@ protected:
 	AAircraftPlayerController* PC;
 
 	FTimerHandle TempHandle;
-
-	UPROPERTY()
-	ACurrentPlayerState* PS;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSubclassOf<APlayerAircraft> Player;

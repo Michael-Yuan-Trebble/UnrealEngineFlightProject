@@ -9,7 +9,6 @@
 #include "AircraftSelectionGamemode.generated.h"
 
 class UAircraftSelectionWidget;
-class ACurrentPlayerState;
 class AAircraftPlayerController;
 class UMenuManagerComponent;
 class UAircraftSelectionWidget;
@@ -41,9 +40,6 @@ public:
 	UPROPERTY()
 	AAircraftPlayerController* APC;
 
-	UPROPERTY()
-	ACurrentPlayerState* PS;
-	
 	UPROPERTY()
 	UMenuManagerComponent* MenuManager;
 

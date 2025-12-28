@@ -21,9 +21,8 @@ void AMainMenuGamemode::BeginPlay()
 	if (!PC) return;
 
 	APC = Cast<AAircraftPlayerController>(PC);
-	PS = Cast<ACurrentPlayerState>(PC->PlayerState);
 
-	if (!APC || !PS) return;
+	if (!APC) return;
 	APC->SetControlMode(EControlMode::Menu);
 
 	UMainMenuManager* MenuManager = GetWorld()->GetGameInstance()->GetSubsystem<UMainMenuManager>();

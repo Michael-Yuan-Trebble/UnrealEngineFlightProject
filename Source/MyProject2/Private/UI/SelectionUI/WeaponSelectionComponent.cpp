@@ -18,11 +18,10 @@ UWeaponSelectionComponent::UWeaponSelectionComponent()
 	}
 }
 
-void UWeaponSelectionComponent::Setup(AAircraftPlayerController* InPlayer, AAircraftSelectionGamemode* InGM, ACurrentPlayerState* InPS, UMenuManagerComponent* InMenu)
+void UWeaponSelectionComponent::Setup(AAircraftPlayerController* InPlayer, AAircraftSelectionGamemode* InGM, UMenuManagerComponent* InMenu)
 {
 	PC = InPlayer;
 	GM = InGM;
-	PS = InPS;
 	MenuManager = InMenu;
 }
 

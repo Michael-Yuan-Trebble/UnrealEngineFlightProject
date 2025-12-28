@@ -11,7 +11,6 @@
 #include "MenuManagerComponent.generated.h"
 
 class AAircraftPlayerController;
-class ACurrentPlayerState;
 class AAircraftSelectionGamemode;
 class UPlayerGameInstance;
 class UAircraftSelectionComponent;
@@ -27,7 +26,7 @@ class MYPROJECT2_API UMenuManagerComponent : public UActorComponent
 public:	
 	UMenuManagerComponent();
 
-	void InitializePC(AAircraftPlayerController* InPC, ACurrentPlayerState* InPS);
+	void InitializePC(AAircraftPlayerController* InPC);
 
 	void GoBack(EMenuState Current);
 
@@ -35,9 +34,6 @@ public:
 
 	UPROPERTY()
 	AAircraftPlayerController* PC;
-
-	UPROPERTY()
-	ACurrentPlayerState* PS;
 
 	UPROPERTY()
 	AAircraftSelectionGamemode* GM;

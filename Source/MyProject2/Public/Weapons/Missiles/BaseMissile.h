@@ -59,7 +59,6 @@ public:
 
 	void activateSmoke();
 
-	UPROPERTY()
 	ABaseAircraft* Owner;
 
 	FTimerHandle VFXCheckhandle;

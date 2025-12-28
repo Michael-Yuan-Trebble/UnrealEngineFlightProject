@@ -5,7 +5,6 @@
 #include "GameFramework/SpectatorPawn.h"
 #include "UI/SelectionUI/AircraftSelectionWidget.h"
 #include "Player Info/AircraftPlayerController.h"
-#include "Player Info/CurrentPlayerState.h"
 #include "Units/Aircraft/Player/PlayerAircraft.h"
 #include "Units/Aircraft/MenuManagerComponent.h"
 #include "Enums/ControlModeTypes.h"
@@ -34,9 +33,7 @@ void AAircraftSelectionGamemode::BeginPlay()
 
 	PC->Possess(Spectator);
 	APC = Cast<AAircraftPlayerController>(PC);
-	PS = Cast<ACurrentPlayerState>(PC->PlayerState);
-
-	if (!APC || !PS) return; 
+	if (!APC) return; 
 	APC->SetControlMode(EControlMode::Menu);
 	TWeakObjectPtr<AAircraftPlayerController> WeakAPC = APC;
 

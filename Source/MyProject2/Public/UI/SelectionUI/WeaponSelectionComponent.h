@@ -10,7 +10,6 @@
 
 class AAircraftPlayerController;
 class AAircraftSelectionGamemode;
-class ACurrentPlayerState;
 class UPlayerGameInstance;
 class UMenuManagerComponent;
 class UWeaponSelectionWidget;
@@ -23,7 +22,7 @@ class MYPROJECT2_API UWeaponSelectionComponent : public UActorComponent
 public:	
 	UWeaponSelectionComponent();
 		
-	void Setup(AAircraftPlayerController* InPlayer, AAircraftSelectionGamemode* InGM, ACurrentPlayerState* InPS, UMenuManagerComponent* InMenu);
+	void Setup(AAircraftPlayerController* InPlayer, AAircraftSelectionGamemode* InGM, UMenuManagerComponent* InMenu);
 	
 	void AddAircraft(UAircraftData* Data);
 	
@@ -32,9 +31,6 @@ public:
 
 	UPROPERTY()
 	AAircraftSelectionGamemode* GM; 
-
-	UPROPERTY()
-	ACurrentPlayerState* PS; 
 
 	UPROPERTY()
 	UMenuManagerComponent* MenuManager;

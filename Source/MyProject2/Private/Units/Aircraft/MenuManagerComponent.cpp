@@ -21,10 +21,9 @@ UMenuManagerComponent::UMenuManagerComponent()
 {
 }
 
-void UMenuManagerComponent::InitializePC(AAircraftPlayerController* InPC, ACurrentPlayerState* InPS)
+void UMenuManagerComponent::InitializePC(AAircraftPlayerController* InPC)
 {
 	PC = InPC;
-	PS = InPS;
 	GM = Cast<AAircraftSelectionGamemode>(UGameplayStatics::GetGameMode(this));
 	GameInstance = Cast<UPlayerGameInstance>(GetWorld()->GetGameInstance());
 
@@ -32,16 +31,16 @@ void UMenuManagerComponent::InitializePC(AAircraftPlayerController* InPC, ACurre
 	InputMode.SetHideCursorDuringCapture(true);
 
 	AircraftSelectionUI = NewObject<UAircraftSelectionComponent>(this);
-	AircraftSelectionUI->Setup(PC, GM, PS, this,AircraftSelectClass);
+	AircraftSelectionUI->Setup(PC, GM, this, AircraftSelectClass);
 
 	WeaponSelectionUI = NewObject<UWeaponSelectionComponent>(this);
-	WeaponSelectionUI->Setup(PC, GM, PS, this);
+	WeaponSelectionUI->Setup(PC, GM, this);
 
 	BuySelectionUI = NewObject<UBuySelectionComponent>(this);
 	BuySelectionUI->Setup(PC, GameInstance);
 
 	SpecialSelectionUI = NewObject<USpecialSelectionComponent>(this);
-	SpecialSelectionUI->Setup(PC, PS, this);
+	SpecialSelectionUI->Setup(PC, this);
 }
 
 void UMenuManagerComponent::SetupClasses(TSubclassOf<UUserWidget> InAircraftClass,

@@ -5,7 +5,6 @@
 #include "InputMappingContext.h"
 #include "Units/Aircraft/MenuManagerComponent.h"
 #include "Units/Aircraft/WeaponSystemComponent.h"
-#include "Player Info/CurrentPlayerState.h"
 #include "UI/PlayerHUD.h"
 #include "TimerManager.h"
 #include "Weapons/Missiles/BaseMissile.h"
@@ -28,8 +27,7 @@ AAircraftPlayerController::AAircraftPlayerController()
 void AAircraftPlayerController::BeginPlay() 
 {
 	Super::BeginPlay();
-	ACurrentPlayerState* PS = Cast<ACurrentPlayerState>(this->PlayerState);
-	if (PS) MenuManager->InitializePC(this, PS);
+	MenuManager->InitializePC(this);
 	if (UAircraftRegistry* Reg = UAircraftRegistry::Get(GetWorld()))
 	{
 		Reg->OnAnyUnitHit.AddUObject(this, &AAircraftPlayerController::OnUnitHit);

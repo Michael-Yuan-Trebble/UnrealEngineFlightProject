@@ -5,7 +5,6 @@
 #include "UObject/ConstructorHelpers.h"
 #include "GameFramework/PlayerStart.h"
 #include "Player Info/AircraftPlayerController.h"
-#include "Player Info/CurrentPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Units/Aircraft/Player/PlayerAircraft.h"
 #include "Player Info/PlayerGameInstance.h"
@@ -29,9 +28,6 @@ void AFlightGamemode::BeginPlay()
 
 	PC = Cast<AAircraftPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	if (!PC) return;
-
-	PS = Cast<ACurrentPlayerState>(PC->PlayerState);
-	if (!PS) return;
 
 	Database = NewObject<UAircraftDatabase>(PC->GetGameInstance());
 	if (!Database) return;

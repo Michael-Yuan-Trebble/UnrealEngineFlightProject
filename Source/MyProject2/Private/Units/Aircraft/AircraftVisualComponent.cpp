@@ -23,12 +23,11 @@ void UAircraftVisualComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	LFlap = FlapPitch + LFlapRoll;
 }
 
-void UAircraftVisualComponent::ActivateFlares() {
+void UAircraftVisualComponent::ActivateFlares() 
+{
 	if (!FlareClass || !Mesh) return;
 	FName SocketName = FName(*FString::Printf(TEXT("CountermeasureSocket")));
-	print(text)
 	if (!Mesh->DoesSocketExist(SocketName)) return;
-	print(text)
 	ACountermeasureActor* FlareActor = GetWorld()->SpawnActor<ACountermeasureActor>(
 		FlareClass,
 		Mesh->GetSocketTransform(SocketName)
