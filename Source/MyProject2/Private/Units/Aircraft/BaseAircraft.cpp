@@ -254,11 +254,9 @@ void ABaseAircraft::SetSpeed(float speed) {
 
 void ABaseAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) { if (WeaponComponent) WeaponComponent->SetWeapons(In); }
 
-void ABaseAircraft::SetSpecial(TSubclassOf<UBaseSpecial> In) { 
-	if (SpecialComp) { 
-		SpecialComp->SetSpecial(In); 
-	} 
-}
+void ABaseAircraft::SetSpecial(TSubclassOf<UBaseSpecial> In) { if (SpecialComp) SpecialComp->SetSpecial(In); }
+
+void ABaseAircraft::SetFlightMode(EFlightMode FlightMode) { if (FlightComponent) FlightComponent->SetFlightMode(FlightMode); }
 
 float ABaseAircraft::ReturnRudder() const { if (VisualComp) return VisualComp->GetRudder(); else return 0; }
 

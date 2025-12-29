@@ -13,21 +13,21 @@ struct FCooldownWeapon
 
 	FCooldownWeapon();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf <ABaseWeapon> WeaponClass;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	ABaseWeapon* WeaponInstance;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	bool bCanFire = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	FName SocketName;
 
 	float time;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	float cooldownTime;
 
 	bool CanFire() const { return bCanFire; }

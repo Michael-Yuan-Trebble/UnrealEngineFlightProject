@@ -40,9 +40,6 @@ protected:
 	UFlightComponent* FlightComp;
 
 	UPROPERTY()
-	UWeaponSystemComponent* WeaponComp;
-
-	UPROPERTY()
 	AActor* Selected;
 
 private:

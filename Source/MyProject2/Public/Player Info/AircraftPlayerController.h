@@ -9,6 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Enums/MenuState.h"
 #include "Enums/ControlModeTypes.h"
+#include "Enums/FlightMode.h"
 #include "AircraftPlayerController.generated.h"
 
 #define MIDDLETHRUST 0.5f
@@ -107,6 +108,7 @@ public:
 	void ManageMenuSetting(EMenuState NewState);
 	void SetComponents(UWeaponSystemComponent* InWeapon);
 	void SetControlMode(EControlMode NewMode);
+	void SetFlightMode(EFlightMode FlightMode);
 
 	// Vars
 

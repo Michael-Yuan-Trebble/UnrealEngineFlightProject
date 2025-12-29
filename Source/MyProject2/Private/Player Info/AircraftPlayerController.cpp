@@ -91,6 +91,10 @@ void AAircraftPlayerController::UpdateLODs()
 	}
 }
 
+void AAircraftPlayerController::SetFlightMode(EFlightMode FlightMode) {
+
+}
+
 void AAircraftPlayerController::HandleWeaponHit(bool bHit)
 {
 	if (!bHit && HUD) HUD->HandleWeaponMiss();

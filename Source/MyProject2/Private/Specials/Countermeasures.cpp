@@ -5,8 +5,11 @@
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Kismet/GameplayStatics.h"
 
-void UCountermeasures::ActivateSpecial(ABaseAircraft* In) {
+void UCountermeasures::ActivateSpecial(ABaseAircraft* In) 
+{
 	if (!In) return;
+
+	// TODO: Make it so it also passes countermeasure pos so that the missile "goes" toward the flare
 	In->OnCountermeasureDeployed_Implementation();
 	CurrentCooldown = CooldownTime;
 }

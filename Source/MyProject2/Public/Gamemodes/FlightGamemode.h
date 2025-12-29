@@ -45,7 +45,7 @@ protected:
 
 	FTimerHandle TempHandle;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<APlayerAircraft> Player;
 
 	UPROPERTY(EditAnywhere)
@@ -68,4 +68,10 @@ private:
 	void FallBackAircraft();
 
 	TMap<FName,TSubclassOf<ABaseWeapon>> TemporaryLoadout();
+
+	void SpawnInController();
+
+	void SetFlightMode();
+
+	bool bTakingOff;
 };

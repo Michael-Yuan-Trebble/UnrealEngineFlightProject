@@ -32,6 +32,9 @@ public:
 	void FirstPersonHorizontal(float X);
 	void FirstPersonVertical(float Y);
 
+	void SetHorizontal(float X) { SetX = X; };
+	void SetVertical(float Y) { SetY = Y; };
+
 	UPROPERTY()
 	USpringArmComponent* SpringArm;
 
@@ -65,6 +68,10 @@ protected:
 	virtual void BeginPlay() override;
 		
 private:
+
+	float SetX = 0.f;
+	float SetY = 0.f;
+
 	float currentX = 0.f;
 
 	float currentY = 0.f;

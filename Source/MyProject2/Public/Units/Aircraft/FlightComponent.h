@@ -7,6 +7,7 @@
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Enums/ThrottleStage.h"
+#include "Enums/FlightMode.h"
 #include "FlightComponent.generated.h"
 
 #define VORTEXG 9.f
@@ -74,6 +75,8 @@ public:
 
 	EThrottleStage currentStage = EThrottleStage::Normal;
 
+	EFlightMode FlightMode = EFlightMode::Flight;
+
 	bool switchingPhase = false;
 
 	void ApplySpeed(float ThrottlePercentage, float DeltaSeconds);
@@ -99,6 +102,8 @@ public:
 	void SetRoll(float RollValue) { UserRoll = RollValue; };
 
 	void SetThrust(float Thrust) { CurrentThrust = Thrust; };
+
+	void SetFlightMode(EFlightMode InMode);
 
 	EThrottleStage ReturnThrottleStage() const { return currentStage; };
 

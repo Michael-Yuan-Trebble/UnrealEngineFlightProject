@@ -23,7 +23,7 @@ public:
 
 	void UpdateCooldown(float In) { CurrentCooldown = FMath::Clamp(CurrentCooldown - In, 0, CooldownTime); };
 
-	virtual bool CanActivate() { return true; };
+	virtual bool CanActivate() { return CurrentCooldown == 0; };
 
 	virtual void ActivateSpecial(ABaseAircraft* In) {};
 

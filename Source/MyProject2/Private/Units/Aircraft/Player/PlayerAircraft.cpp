@@ -125,6 +125,6 @@ void APlayerAircraft::SetHUD(APlayerHUD* InHUD)
 
 void APlayerAircraft::SwitchCameras() { if (ManagerComp) ManagerComp->SwitchCamera(); }
 
-void APlayerAircraft::HandleVertical(float Vertical) { if (ManagerComp) ManagerComp->LookVer(Vertical); }
+void APlayerAircraft::HandleVertical(float Vertical) { if (ManagerComp) ManagerComp->SetVertical(Vertical); }
 
-void APlayerAircraft::HandleHorizontal(float Horizontal) { if (ManagerComp) ManagerComp->LookHor(Horizontal); }
+void APlayerAircraft::HandleHorizontal(float Horizontal) { if (ManagerComp) ManagerComp->SetHorizontal(Horizontal); }

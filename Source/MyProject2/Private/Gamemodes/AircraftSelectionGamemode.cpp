@@ -26,14 +26,15 @@ void AAircraftSelectionGamemode::BeginPlay()
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
 	if (!PC)  return;
 
+	APC = Cast<AAircraftPlayerController>(PC);
+	if (!APC)
+
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	ASpectatorPawn* Spectator = GetWorld()->SpawnActor<ASpectatorPawn>(ASpectatorPawn::StaticClass(), FVector::ZeroVector,FRotator::ZeroRotator,SpawnParams);
 
 	if (!Spectator)  return;
 
-	PC->Possess(Spectator);
-	APC = Cast<AAircraftPlayerController>(PC);
-	if (!APC) return; 
+	APC->Possess(Spectator);
 	APC->SetControlMode(EControlMode::Menu);
 	TWeakObjectPtr<AAircraftPlayerController> WeakAPC = APC;
 

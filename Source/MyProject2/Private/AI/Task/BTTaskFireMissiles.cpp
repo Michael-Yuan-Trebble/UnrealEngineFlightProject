@@ -34,6 +34,7 @@ void UBTTaskFireMissiles::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Nod
 	if (!BlackboardComp->GetValueAsBool(bFireMissile.SelectedKeyName)) return;
 	TSubclassOf<ABaseWeapon> Class = BlackboardComp->GetValueAsClass(MissileClass.SelectedKeyName);
 
+	// TODO: Make it first select the class if not selected then fire, ithout using FlightComp
 	if (!Class) return;
 	Controller->Weapons(Class, Selected, FlightComp->currentSpeed);
 }

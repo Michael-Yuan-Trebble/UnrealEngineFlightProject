@@ -11,6 +11,7 @@
 #include "NiagaraSystem.h"
 #include "Interfaces/ApproachingMissileInterface.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Enums/FlightMode.h"
 #include "Units/BaseUnit.h"
 #include "Weapons/Missiles/BaseMissile.h"
 #include "BaseAircraft.generated.h"
@@ -173,6 +174,8 @@ public:
 	void SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In);
 
 	void SetSpecial(TSubclassOf<UBaseSpecial> In);
+
+	void SetFlightMode(EFlightMode FlightMode);
 
 	void FireWeaponSelected();
 

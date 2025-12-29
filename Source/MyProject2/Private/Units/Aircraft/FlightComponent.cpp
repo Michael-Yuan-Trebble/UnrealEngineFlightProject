@@ -22,6 +22,11 @@ void UFlightComponent::Setup(ABaseAircraft* InControl, UAircraftStats* InStats)
 	AircraftStats = InStats;
 }
 
+void UFlightComponent::SetFlightMode(EFlightMode InFlight) 
+{
+	FlightMode = InFlight;
+}
+
 void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -54,19 +59,15 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 		else if (currentStage == EThrottleStage::Afterburner) OnAfterburnerEngaged.Broadcast(true);
 	}
 
-	AdjustSpringArm(DeltaSeconds, ThrottlePercentage);
-
-	float drag = CalculateSpeedDrag();
-
 	prevStage = currentStage;
 
-	float AOADrag = DragAOA();
-	if (!FMath::IsFinite(AOADrag)) AOADrag = 0;
+	AdjustSpringArm(DeltaSeconds, ThrottlePercentage);
 
-	float pitchDrag = PitchDrag();
-	if (!FMath::IsFinite(pitchDrag)) pitchDrag = 0;
+	float speedDrag = CalculateSpeedDrag();
+	float AOADrag = FMath::IsFinite(DragAOA()) ? DragAOA() : 0;
+	float pitchDrag = FMath::IsFinite(PitchDrag()) ? PitchDrag() : 0;
 
-	float totalDrag = drag + AOADrag + pitchDrag;
+	float totalDrag = speedDrag + AOADrag + pitchDrag;
 
 	float trueAcceleration = Acceleration - totalDrag;
 	trueAcceleration = FMath::Abs(trueAcceleration) < 0.001 ? 0 : trueAcceleration;
@@ -84,7 +85,8 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 
 	if (Velocity.ContainsNaN() || !FMath::IsFinite(Velocity.X) || Velocity.Size() > 1e6f) Velocity = FVector::ZeroVector;
 
-	if (IsValid(Controlled)) {
+	if (IsValid(Controlled)) 
+	{
 		Controlled->AddActorWorldOffset(Velocity * DeltaSeconds, true);
 		CalculateGForce(DeltaSeconds);
 
@@ -160,14 +162,8 @@ void UFlightComponent::CalculateGForce(float DeltaSeconds)
 
 void UFlightComponent::CalculateVortex() 
 {
-	if (displayG >= VORTEXG && previousGForce < VORTEXG)
-	{
-		OnVortexActivate.Broadcast(true);
-	}
-	else if (displayG < VORTEXG && previousGForce >= VORTEXG)
-	{
-		OnVortexActivate.Broadcast(false);
-	}
+	if (displayG >= VORTEXG && previousGForce < VORTEXG) OnVortexActivate.Broadcast(true);
+	else if (displayG < VORTEXG && previousGForce >= VORTEXG) OnVortexActivate.Broadcast(false);
 }
 
 // ====================================
@@ -221,6 +217,7 @@ void UFlightComponent::ApplyRot(float DeltaSeconds)
 void UFlightComponent::ReturnAOA(float DeltaSeconds)
 {
 	// Rotates the Root vector toward Airframe's vector
+	if (!IsValid(Controlled)) return;
 	FQuat CurrentQuat = Controlled->GetActorQuat();
 	FQuat TargetQuat = Controlled->Airframe->GetComponentQuat();
 	float RootTurnSpeed = 2.0f;
@@ -250,6 +247,7 @@ void UFlightComponent::AdjustSpringArm(float DeltaSeconds, float ThrottlePercent
 
 float UFlightComponent::GetAOA() 
 {
+	if (!IsValid(Controlled)) return 0.f;
 	FVector Forward = Controlled->Airframe->GetForwardVector().GetSafeNormal();
 	FVector VelocityDir = Velocity.GetSafeNormal();
 	if (Velocity.IsNearlyZero()) VelocityDir = Forward;
@@ -269,14 +267,11 @@ float UFlightComponent::GetAOA()
 
 float UFlightComponent::DragAOA()
 {
-	float AOARadians = GetAOA();
-	//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%f"), drag));
-
 	float dragCo = Controlled->AirStats->DragCoefficient;
 
-	float drag = FMath::Abs(AOARadians) * dragCo * (GetCurrentSpeedKMH() / 4);
+	float drag = FMath::Abs(GetAOA()) * dragCo * (GetCurrentSpeedKMH() / 4);
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
 
 	return drag;
 }
@@ -306,7 +301,6 @@ void UFlightComponent::RollAOA(float DeltaSeconds)
 	if (PitchAngle > -85.f)
 	{
 		FQuat Rotate = FQuat(WorldPitchAxis, FMath::DegreesToRadians(DownPitch));
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), DownPitch));
 		Controlled->Airframe->AddWorldRotation(Rotate);
 	}
 }
@@ -339,7 +333,7 @@ void UFlightComponent::ApplyPitch(float DeltaSeconds)
 	float InterpSpeed = 0;
 	float CurveTurn = Controlled->AirStats->DragCurve->GetFloatValue(GetCurrentSpeedKMH());
 	float CompressionTurn = Controlled->AirStats->CompressionCurve->GetFloatValue(GetCurrentSpeedKMH());
-	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Curve: %.2f"), CurveTurn));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Curve: %.2f"), CurveTurn));
 	if (Controlled->GetController() && Controlled->GetController()->IsPlayerController())
 	{
 		if (UserPitch == 0)
