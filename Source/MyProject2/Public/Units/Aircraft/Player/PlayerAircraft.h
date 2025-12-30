@@ -30,6 +30,9 @@ public:
 	UCameraManagerComponent* ManagerComp;
 
 	UPROPERTY(EditAnywhere)
+	float CameraSens = 1.f;
+
+	UPROPERTY(EditAnywhere)
 	UAircraftAudioComponent* AudioComp;
 
 	UPROPERTY()
@@ -39,7 +42,10 @@ public:
 	UAudioComponent* GunAudio;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USpringArmComponent* SpringArm;
+	USpringArmComponent* FirstPersonSpringArm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USpringArmComponent* ThirdPersonSpringArm;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCameraComponent* ThirdPersonCamera;
@@ -47,14 +53,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCameraComponent* FirstPersonCamera;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USpringArmComponent* FirstPersonSpringArm;
+	USpringArmComponent* GetFirstPersonSpringArm() const { return FirstPersonSpringArm; };
 
-	USpringArmComponent* GetSpringArm() const { return SpringArm; };
+	USpringArmComponent* GetThirdPersonSpringArm() const { return ThirdPersonSpringArm; };
 
 	UCameraComponent* GetThirdPersonCamera() const { return ThirdPersonCamera; };
 
 	UCameraComponent* GetFirstPersonCamera() const{ return FirstPersonCamera; };
+
+	void SetFirstPersonCamera(bool bActive);
+
+	void SetThirdPersonCamera(bool bActive);
 
 	float ReturnSpringArmLength() const { return springArmLength; };
 
@@ -85,11 +94,29 @@ public:
 	// Radar Component
 	void CycleTarget();
 
+	UPROPERTY(EditAnywhere)
+	float RollLagStrength = 0.25f;
+
+	UPROPERTY(EditAnywhere)
+	float RollLagSpeed = 4.f;
+
+	UPROPERTY(EditAnywhere)
+	float Interp = 1.f;
+
+	void SetInterp();
+
+	float GetRoll();
+
 	// Camera Manager
 	void SetHUD(APlayerHUD* InHUD);
 	void SwitchCameras();
 	void HandleVertical(float Vertical);
 	void HandleHorizontal(float Horizontal);
+	void SetSensitivity(float Sens);
+	void SetRollStrength(float S);
+	void SetRollSpeed(float S);
+
+	float GetThrottle();
 
 protected:
 	virtual void BeginPlay() override;
@@ -99,4 +126,7 @@ protected:
 private:
 	UFUNCTION()
 	void HandleHit();
+
+	float OriginalFirstPersonSpringArmLength = 0.f;
+	float OriginalThirdPersonSpringArmLength = 0.f;
 };

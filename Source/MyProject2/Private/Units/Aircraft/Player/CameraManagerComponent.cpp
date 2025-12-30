@@ -7,6 +7,8 @@
 #include "UI/PlayerHUD.h"
 #include "Kismet/GameplayStatics.h"
 
+#define INTERPSPEED InterpSpeed
+
 UCameraManagerComponent::UCameraManagerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -20,6 +22,58 @@ void UCameraManagerComponent::BeginPlay()
 void UCameraManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (bXZero) LookX = FMath::FInterpTo(LookX, 0, DeltaTime, INTERPSPEED);
+	if (bYZero) LookY = FMath::FInterpTo(LookY, 0, DeltaTime, INTERPSPEED);
+	HandleHorizontal();
+	HandleVertical();
+	HandleRollLag(DeltaTime);
+	if (IsValid(Controlled)) SetSpringArm(Controlled->GetThrottle(), DeltaTime);
+}
+
+void UCameraManagerComponent::HandleRollLag(float D) {
+	if (!IsValid(MainSpringArm) || !IsValid(Controlled)) return;
+
+	TargetRollOffset = FMath::Clamp(Controlled->GetRoll() * RollLagStrength,-80.f,80.f);
+
+	CameraRollOffset = FMath::FInterpTo(
+		CameraRollOffset,
+		TargetRollOffset,
+		D,
+		RollLagSpeed
+	);
+
+	FRotator Rot = MainSpringArm->GetRelativeRotation();
+	Rot.Roll = CameraRollOffset;
+	MainSpringArm->SetRelativeRotation(Rot);
+}
+
+void UCameraManagerComponent::SetSpringArm(float Throttle, float D) {
+	if (!IsValid(MainSpringArm)) return;
+	float Org = 0.f;
+	float Delta = 0.f;
+	if (MainSpringArm == ThirdPersonSpringArm) 
+	{
+		Org = ThirdPersonLength;
+		Delta = 200 * (0.5 - Throttle);
+	}
+	else 
+	{ 
+		Org = FirstPersonLength; 
+		Delta = 10 * (0.5 - Throttle);
+	}
+	MainSpringArm->TargetArmLength = FMath::FInterpTo(MainSpringArm->TargetArmLength, Org - Delta, D, 5.f);
+}
+
+void UCameraManagerComponent::SetHorizontal(float X)
+{
+	if (GetWorld()) LookX = FMath::FInterpTo(LookX, X * Sensitivity, GetWorld()->GetDeltaSeconds(), INTERPSPEED);
+	bXZero = FMath::IsNearlyZero(X);
+}
+
+void UCameraManagerComponent::SetVertical(float Y) 
+{
+	if (GetWorld()) LookY = FMath::FInterpTo(LookY, Y * Sensitivity, GetWorld()->GetDeltaSeconds(), INTERPSPEED);
+	bYZero = FMath::IsNearlyZero(Y);
 }
 
 void UCameraManagerComponent::SwitchCamera() 
@@ -44,155 +98,96 @@ void UCameraManagerComponent::SwitchCamera()
 void UCameraManagerComponent::SetFirstPerson() 
 {
 	APlayerController* PC = Cast<APlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-	if (!PC || !Controlled) return;
+	if (!IsValid(PC) || !IsValid(Controlled)) return;
 
 	CurrentMode = ECameraPerspective::FirstPerson;
 
 	LookXLock = 120.f;
 	LookYLock = 60.f;
-	FirstPersonX = 0.f;
-	FirstPersonY = 0.f;
 
-	Controlled->FirstPersonSpringArm->SetRelativeRotation(FRotator::ZeroRotator);
+	if (!IsValid(FirstPersonSpringArm)) { 
+		FirstPersonSpringArm = Controlled->GetFirstPersonSpringArm(); 
+		if (IsValid(FirstPersonSpringArm)) FirstPersonLength = FirstPersonSpringArm->TargetArmLength;
+		else return;
+	}
+
+	FRotator Rotation = FRotator::ZeroRotator;
+
+	if (IsValid(MainSpringArm)) 
+	{
+		Rotation = MainSpringArm->GetRelativeRotation();
+		Rotation.Pitch = FMath::Clamp(Rotation.Pitch, -LookYLock, LookYLock);
+		Rotation.Yaw = FMath::Clamp(Rotation.Yaw, -LookXLock, LookXLock);
+	}
+
+	MainSpringArm = FirstPersonSpringArm;
+	MainSpringArm->SetRelativeRotation(Rotation);
+
+	Controlled->SetFirstPersonCamera(true);
+	Controlled->SetThirdPersonCamera(false);
 
 	PC->SetViewTargetWithBlend(Controlled, 0.f, VTBlend_Cubic);
-	Controlled->FirstPersonCamera->SetActive(true);
-	Controlled->ThirdPersonCamera->SetActive(false);
 
-	if (HUD) HUD->TogglePitchLadder(false);
-	if (AudioComp) AudioComp->PlayPerspectiveSound(CurrentMode);
+	if (IsValid(HUD)) HUD->TogglePitchLadder(false);
+	if (IsValid(AudioComp)) AudioComp->PlayPerspectiveSound(CurrentMode);
 }
 
 void UCameraManagerComponent::SetThirdPerson() 
 {
 	APlayerController* PC = Cast<APlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-	if (!PC || !Controlled) return;
+	if (!IsValid(PC) || !IsValid(Controlled)) return;
 
 	CurrentMode = ECameraPerspective::ThirdPerson;
 
 	LookXLock = 180.f;
 	LookYLock = 85.f;
-	currentX = 0.f;
-	currentY = 0.f;
 
-	if (SpringArm) SpringArm->SetRelativeRotation(FRotator::ZeroRotator);
+	if (!IsValid(ThirdPersonSpringArm)) { 
+		ThirdPersonSpringArm = Controlled->GetThirdPersonSpringArm(); 
+		if (IsValid(ThirdPersonSpringArm)) ThirdPersonLength = ThirdPersonSpringArm->TargetArmLength;
+		else return;
+	}
 
-	Controlled->FirstPersonCamera->SetActive(false);
-	Controlled->ThirdPersonCamera->SetActive(true);
+	FRotator Rotation = FRotator::ZeroRotator;
+
+	if (IsValid(MainSpringArm)) 
+	{
+		Rotation = MainSpringArm->GetRelativeRotation();
+
+		Rotation.Pitch = FMath::Clamp(Rotation.Pitch, -LookYLock, LookYLock);
+		Rotation.Yaw = FMath::Clamp(Rotation.Yaw, -LookXLock, LookXLock);
+	}
+
+	MainSpringArm = ThirdPersonSpringArm;
+	MainSpringArm->SetRelativeRotation(Rotation);
+
+	Controlled->SetFirstPersonCamera(false);
+	Controlled->SetThirdPersonCamera(true);
 
 	PC->SetViewTargetWithBlend(Controlled, 0.f, VTBlend_Cubic);
 
-	if (HUD) HUD->TogglePitchLadder(true);
-	if (AudioComp) AudioComp->PlayPerspectiveSound(CurrentMode);
+	if (IsValid(HUD)) HUD->TogglePitchLadder(true);
+	if (IsValid(AudioComp)) AudioComp->PlayPerspectiveSound(CurrentMode);
 }
 
-void UCameraManagerComponent::LookHor(float lookX) 
+void UCameraManagerComponent::HandleHorizontal()
 {
-	switch (CurrentMode)
-	{
-	case ECameraPerspective::FirstPerson:
-		FirstPersonHorizontal(lookX);
-		break;
-	case ECameraPerspective::ThirdPerson:
-		ThirdPersonHorizontal(lookX);
-		break;
-	default:
-		ThirdPersonHorizontal(lookX);
-		break;
-	}
+	if (!IsValid(Controlled) || !IsValid(MainSpringArm)) return;
+
+	FRotator Rotation = MainSpringArm->GetRelativeRotation();
+
+	Rotation.Yaw = FMath::Clamp(Rotation.Yaw + LookX, -LookXLock, LookXLock);
+
+	MainSpringArm->SetRelativeRotation(Rotation);
 }
 
-void UCameraManagerComponent::LookVer(float lookY) 
+void UCameraManagerComponent::HandleVertical() 
 {
-	switch (CurrentMode) 
-	{
-		case ECameraPerspective::FirstPerson:
-			FirstPersonVertical(lookY);
-			break;
-		case ECameraPerspective::ThirdPerson:
-			ThirdPersonVertical(lookY);
-			break;
-		default:
-			ThirdPersonVertical(lookY);
-			break;
-	}
-}
+	if (!IsValid(Controlled) || !IsValid(MainSpringArm)) return;
 
-#define INTERPSPEED 10
+	FRotator Rotation = MainSpringArm->GetRelativeRotation();
 
-void UCameraManagerComponent::FirstPersonHorizontal(float X) 
-{
-	if (!Controlled || !Controlled->FirstPersonSpringArm) return;
+	Rotation.Pitch = FMath::Clamp(Rotation.Pitch + LookY, -LookYLock, LookYLock);
 
-	FirstPersonPrevX = X;
-
-	Controlled->FirstPersonSpringArm->AddRelativeRotation(FRotator(0.f,X,0.f));
-
-	FRotator Rotation = Controlled->FirstPersonSpringArm->GetRelativeRotation();
-
-	float Yaw = FMath::Clamp(Rotation.Yaw, -LookXLock, LookXLock);
-
-	Rotation.Yaw = Yaw;
-
-	Controlled->FirstPersonSpringArm->SetRelativeRotation(Rotation);
-}
-
-void UCameraManagerComponent::FirstPersonVertical(float Y) 
-{
-	if (!Controlled || !Controlled->FirstPersonSpringArm) return;
-
-	FirstPersonPrevY = Y;
-
-	FRotator PrevRotation = Controlled->FirstPersonSpringArm->GetRelativeRotation();
-
-	float Pitch = FMath::FInterpTo(PrevRotation.Pitch, PrevRotation.Pitch + Y, GetWorld()->GetDeltaSeconds(), INTERPSPEED);
-
-	FRotator Rotation = Controlled->FirstPersonSpringArm->GetRelativeRotation();
-
-	Pitch = FMath::Clamp(Pitch, -LookYLock, LookYLock);
-
-	PrevRotation.Pitch = Pitch;
-
-
-	Controlled->FirstPersonSpringArm->SetRelativeRotation(PrevRotation);
-}
-
-void UCameraManagerComponent::ThirdPersonHorizontal(float X) 
-{
-	if (!SpringArm) return;
-	X = FMath::Abs(X) == 0 ? 0 : X;
-
-	prevX = currentX;
-
-	currentX = FMath::FInterpTo(currentX, currentX + X, GetWorld()->GetDeltaSeconds(), INTERPSPEED);
-
-	currentX = FMath::Clamp(currentX, -LookXLock, LookXLock);
-
-	if (currentX == -LookXLock || currentX == LookXLock) X = LookXLock - prevX;
-
-	SpringArm->AddRelativeRotation(FRotator(0.f, X, 0.f));
-
-	FMath::Clamp(SpringArm->GetRelativeRotation().Yaw, -LookXLock, LookXLock);
-}
-
-void UCameraManagerComponent::ThirdPersonVertical(float Y) 
-{
-	if (!SpringArm) return;
-	Y = FMath::Abs(Y) == 0 ? 0 : Y;
-
-	prevY = currentY;
-
-	currentY = FMath::FInterpTo(currentY, currentY + Y, GetWorld()->GetDeltaSeconds(), INTERPSPEED);
-
-	currentY = FMath::Clamp(currentY, -LookYLock, LookYLock);
-
-	if (currentY == LookYLock)
-	{
-		Y = LookYLock - prevY;
-	}
-	else if (currentY == -LookYLock)
-	{
-		Y = LookYLock + prevY;
-	}
-	SpringArm->AddRelativeRotation(FRotator(Y, 0.f, 0.f));
+	MainSpringArm->SetRelativeRotation(Rotation);
 }

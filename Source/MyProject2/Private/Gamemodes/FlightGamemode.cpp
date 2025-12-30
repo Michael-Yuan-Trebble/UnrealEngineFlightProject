@@ -32,17 +32,17 @@ void AFlightGamemode::SpawnInController()
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	PC = Cast<AAircraftPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-	if (!PC) return;
+	if (!IsValid(PC)) return;
 
 	Database = NewObject<UAircraftDatabase>(PC->GetGameInstance());
-	if (!Database) return;
+	if (!IsValid(Database)) return;
 
 	FString Path = "/Game/Aircraft/AircraftData";
 	Database->LoadAllAircraftFromFolder(Path);
 
 	HandlePlayerState(PC);
 
-	if (PlayerSpawnedIn)
+	if (IsValid(PlayerSpawnedIn))
 	{
 		PC->SetControlMode(EControlMode::Aircraft);
 		SetPlayerSpeed();
@@ -62,7 +62,7 @@ void AFlightGamemode::SpawnAIAircraft()
 }
 
 void AFlightGamemode::SetPlayerSpeed() {
-	if (!PlayerSpawnedIn) return;
+	if (!IsValid(PlayerSpawnedIn)) return;
 	PlayerSpawnedIn->SetSpeed(PlayerSpawnSpeed/0.034);
 }
 
@@ -72,7 +72,7 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 
 	UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
 
-	if (!GI) return;
+	if (!IsValid(GI)) return;
 
 	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It)
 	{
@@ -80,9 +80,9 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 		break;
 	}
 
-	if (!PlayerStart || !HasAuthority()) return;
+	if (!IsValid(PlayerStart) || !HasAuthority()) return;
 
-	if (!GI->AircraftClass)
+	if (!IsValid(GI->AircraftClass))
 	{
 		FallBackAircraft();
 	}
@@ -104,13 +104,13 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 		Loadout = GI->SelectedWeapons;
 	}
 
-	if (!PlayerSpawnedIn) return;
+	if (!IsValid(PlayerSpawnedIn)) return;
 
 	UGameplayStatics::FinishSpawningActor(PlayerSpawnedIn, PlayerStart->GetActorTransform());
 
 	PlayerSpawnedIn->SetWeapons(Loadout);
 
-	if (Special) PlayerSpawnedIn->SetSpecial(Special);
+	if (IsValid(Special)) PlayerSpawnedIn->SetSpecial(Special);
 
 	if (IsValid(PC))
 	{
@@ -132,7 +132,7 @@ void AFlightGamemode::FallBackAircraft()
 		}
 	}
 
-	if (!AircraftSelected || !HasAuthority() || !AircraftSelected->AircraftClass) return;
+	if (!IsValid(AircraftSelected) || !HasAuthority() || !IsValid(AircraftSelected->AircraftClass)) return;
 
 	APlayerStart* PlayerStart = nullptr;
 
@@ -142,7 +142,7 @@ void AFlightGamemode::FallBackAircraft()
 		break;
 	}
 
-	if (!PlayerStart) return;
+	if (!IsValid(PlayerStart)) return;
 	PlayerSpawnedIn = GetWorld()->SpawnActorDeferred<APlayerAircraft>(AircraftSelected->AircraftClass, PlayerStart->GetActorTransform());
 }
 
@@ -152,7 +152,7 @@ TMap<FName, TSubclassOf<ABaseWeapon>> AFlightGamemode::TemporaryLoadout()
 {
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
 
-	if (!AircraftSelected || !AircraftSelected->AircraftStat) return Loadout;
+	if (!IsValid(AircraftSelected) || !AircraftSelected->AircraftStat) return Loadout;
 
 	if (AircraftSelected->AircraftStat->NumOfPylons < 2) return Loadout;
 

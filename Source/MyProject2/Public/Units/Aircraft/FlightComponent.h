@@ -103,6 +103,8 @@ public:
 
 	void SetThrust(float Thrust) { CurrentThrust = Thrust; };
 
+	float GetRoll() { return NextRoll; };
+
 	void SetFlightMode(EFlightMode InMode);
 
 	EThrottleStage ReturnThrottleStage() const { return currentStage; };
@@ -110,6 +112,8 @@ public:
 	EThrottleStage ReturnPrevThrottleStage() const { return prevStage; };
 
 	float GetSpeed() const { return currentSpeed; };
+
+	float GetThrottle() const { return CurrentThrust; };
 
 private:
 	float CalculateSpeedDrag();
@@ -123,8 +127,6 @@ private:
 	float GetAOA();
 
 	float PitchDrag();
-
-	void AdjustSpringArm(float DeltaSeconds, float ThrottlePercentage);
 
 	void ApplyPitch(float DeltaSeconds);
 

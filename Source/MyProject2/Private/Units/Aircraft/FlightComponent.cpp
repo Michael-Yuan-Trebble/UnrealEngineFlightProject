@@ -2,6 +2,7 @@
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Flight Component!"));
 #include "Units/Aircraft/FlightComponent.h"
+#include "Units/Aircraft/Player/PlayerAircraft.h"
 
 EThrottleStage UFlightComponent::getThrottleStage(float throttle)
 {
@@ -60,8 +61,6 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 	}
 
 	prevStage = currentStage;
-
-	AdjustSpringArm(DeltaSeconds, ThrottlePercentage);
 
 	float speedDrag = CalculateSpeedDrag();
 	float AOADrag = FMath::IsFinite(DragAOA()) ? DragAOA() : 0;
@@ -237,12 +236,6 @@ void UFlightComponent::ReturnAOA(float DeltaSeconds)
 	{
 		Controlled->Airframe->SetRelativeRotation(NewRelQuat.Rotator());
 	}
-}
-
-void UFlightComponent::AdjustSpringArm(float DeltaSeconds, float ThrottlePercentage)
-{
-	//TODO: Move SpringArm based on User's throttle input
-	//Controlled->SpringArm->TargetArmLength = FMath::FInterpTo(Controlled->SpringArm->TargetArmLength, AircraftStats->SpringArmLength + (50 * (0.5 - ThrottlePercentage)), DeltaSeconds, 2.f);
 }
 
 float UFlightComponent::GetAOA() 

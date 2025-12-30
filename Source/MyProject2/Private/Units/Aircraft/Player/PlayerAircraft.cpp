@@ -13,15 +13,22 @@
 
 APlayerAircraft::APlayerAircraft() 
 {
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->bDoCollisionTest = false;
-	SpringArm->SetupAttachment(Airframe, USpringArmComponent::SocketName);
+	ThirdPersonSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("ThirdPersonPivot"));
+	ThirdPersonSpringArm->bDoCollisionTest = false;
+	ThirdPersonSpringArm->SetupAttachment(Airframe, USpringArmComponent::SocketName);
+	ThirdPersonSpringArm->bEnableCameraLag = false;
+	ThirdPersonSpringArm->bEnableCameraRotationLag = true;
+	ThirdPersonSpringArm->CameraRotationLagSpeed = 3.f;
 
 	ThirdPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
-	ThirdPersonCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
+	ThirdPersonCamera->SetupAttachment(ThirdPersonSpringArm, USpringArmComponent::SocketName);
 
 	FirstPersonSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("FirstPersonPivot"));
+	FirstPersonSpringArm->bDoCollisionTest = false;
 	FirstPersonSpringArm->SetupAttachment(Airframe, USpringArmComponent::SocketName);
+	FirstPersonSpringArm->bEnableCameraLag = false;
+	FirstPersonSpringArm->bEnableCameraRotationLag = true;
+	FirstPersonSpringArm->CameraRotationLagSpeed = 3.f;
 
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCamera->SetupAttachment(FirstPersonSpringArm);
@@ -46,11 +53,13 @@ APlayerAircraft::APlayerAircraft()
 void APlayerAircraft::BeginPlay()
 {
 	Super::BeginPlay();
-	//WeaponComponent->Setup(this, AirStats);
 	AudioComp->SetControlled(this);
-	ManagerComp->SetSpringArm(SpringArm);
 	ManagerComp->SetControlled(this);
 	ManagerComp->SetAudioComp(AudioComp);
+	OriginalFirstPersonSpringArmLength = FirstPersonSpringArm->TargetArmLength;
+	OriginalThirdPersonSpringArmLength = ThirdPersonSpringArm->TargetArmLength;
+	SetSensitivity(0.f);
+	SetInterp();
 }
 
 void APlayerAircraft::Tick(float DeltaSeconds) 
@@ -63,7 +72,7 @@ void APlayerAircraft::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 
 	Controlled = Cast<AAircraftPlayerController>(NewController);
-	if (!Controlled) return;
+	if (!IsValid(Controlled)) return;
 	Controlled->SetComponents(WeaponComponent);
 }
 
@@ -96,7 +105,7 @@ void APlayerAircraft::SelectWeapon(float index) { if (WeaponComponent) WeaponCom
 
 int32 APlayerAircraft::AdvanceWeapon(int32 index, bool bForward) 
 {
-	if (!WeaponComponent || WeaponComponent->WeaponGroups.Num() == 0) return 0;
+	if (!IsValid(WeaponComponent) || WeaponComponent->WeaponGroups.Num() == 0) return 0;
 
 	TArray<TSubclassOf<ABaseWeapon>> Keys;
 	WeaponComponent->WeaponGroups.GetKeys(Keys);
@@ -111,20 +120,55 @@ int32 APlayerAircraft::AdvanceWeapon(int32 index, bool bForward)
 
 void APlayerAircraft::GunSoundEffect(bool bShooting) 
 {
-	if (AudioComp) AudioComp->HandleGunSound(bShooting);
+	if (IsValid(AudioComp)) AudioComp->HandleGunSound(bShooting);
 }
 
 void APlayerAircraft::CycleTarget() { if (RadarComponent) RadarComponent->CycleTarget(); };
 
 void APlayerAircraft::SetHUD(APlayerHUD* InHUD) 
 {
-	if (!ManagerComp) return;
+	if (!IsValid(ManagerComp)) return;
 	ManagerComp->SetHUD(InHUD);
 	ManagerComp->SetThirdPerson();
 }
 
-void APlayerAircraft::SwitchCameras() { if (ManagerComp) ManagerComp->SwitchCamera(); }
+float APlayerAircraft::GetRoll() { if (FlightComponent) return FlightComponent->GetRoll(); return 0; }
 
-void APlayerAircraft::HandleVertical(float Vertical) { if (ManagerComp) ManagerComp->SetVertical(Vertical); }
+void APlayerAircraft::SwitchCameras() { if (IsValid(ManagerComp)) ManagerComp->SwitchCamera(); }
 
-void APlayerAircraft::HandleHorizontal(float Horizontal) { if (ManagerComp) ManagerComp->SetHorizontal(Horizontal); }
+void APlayerAircraft::HandleVertical(float Vertical) { if (IsValid(ManagerComp)) ManagerComp->SetVertical(Vertical); }
+
+void APlayerAircraft::HandleHorizontal(float Horizontal) { if (IsValid(ManagerComp)) ManagerComp->SetHorizontal(Horizontal); }
+
+void APlayerAircraft::SetFirstPersonCamera(bool bActive) { if (IsValid(FirstPersonCamera)) FirstPersonCamera->SetActive(bActive); };
+
+void APlayerAircraft::SetThirdPersonCamera(bool bActive) { if (IsValid(ThirdPersonCamera)) ThirdPersonCamera->SetActive(bActive); };
+
+void APlayerAircraft::SetSensitivity(float Sens) {
+	if (IsValid(ManagerComp)) {
+		ManagerComp->Sensitivity = CameraSens;
+	}
+}
+
+void APlayerAircraft::SetRollStrength(float S) {
+	if (IsValid(ManagerComp)) {
+		ManagerComp->RollLagStrength = RollLagStrength;
+	}
+}
+
+void APlayerAircraft::SetRollSpeed(float S) {
+	if (IsValid(ManagerComp)) {
+		ManagerComp->RollLagSpeed = RollLagSpeed;
+	}
+}
+
+void APlayerAircraft::SetInterp() {
+	if (IsValid(ManagerComp)) {
+		ManagerComp->SetInterp(Interp);
+	}
+}
+
+float APlayerAircraft::GetThrottle() {
+	if (IsValid(FlightComponent)) return FlightComponent->GetThrottle();
+	return 0.f;
+}

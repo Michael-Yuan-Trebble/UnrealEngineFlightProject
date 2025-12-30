@@ -55,21 +55,23 @@ void ABaseAircraft::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (VisualCompClass) {
+	if (IsValid(VisualCompClass)) 
+	{
 		VisualComp = NewObject<UAircraftVisualComponent>(this, VisualCompClass);
-		if (VisualComp) {
+		if (IsValid(VisualComp)) 
+		{
 			VisualComp->RegisterComponent();
 			VisualComp->SetMesh(Airframe);
 		}
 	}
 
-	if (!Airframe || !RadarComponent || !FlightComponent) return;
+	if (!IsValid(Airframe) || !IsValid(RadarComponent) || !IsValid(FlightComponent)) return;
 
 	RadarComponent->Setup(this);
 	FlightComponent->Setup(this, AirStats);
 	WeaponComponent->Setup(this, AirStats);
 
-	if (AfterburnerSystem) 
+	if (IsValid(AfterburnerSystem))
 	{
 		for (int i = 0; i < NumOfAfterburners; i++)
 		{
@@ -93,7 +95,7 @@ void ABaseAircraft::BeginPlay()
 		}
 	}
 
-	if (WingVortexSystem) 
+	if (IsValid(WingVortexSystem))
 	{
 		for (int i = 0; i < NumOfVortices; i++)
 		{
@@ -131,7 +133,7 @@ void ABaseAircraft::PossessedBy(AController* NewController)
 void ABaseAircraft::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (VisualComp && FlightComponent) 
+	if (IsValid(VisualComp) && IsValid(FlightComponent))
 	{
 		VisualComp->SetPitch(FlightComponent->UserPitch);
 		VisualComp->SetYaw(FlightComponent->UserYaw);
@@ -140,7 +142,7 @@ void ABaseAircraft::Tick(float DeltaTime)
 	}
 }
 
-void ABaseAircraft::FireWeaponSelected() { if (WeaponComponent) WeaponComponent->FireWeaponSelected(WeaponComponent->GetWeapon()->GetClass(), Tracked, FlightComponent->GetSpeed()); }
+void ABaseAircraft::FireWeaponSelected() { if (IsValid(WeaponComponent)) WeaponComponent->FireWeaponSelected(WeaponComponent->GetWeapon()->GetClass(), Tracked, FlightComponent->GetSpeed()); }
 
 void ABaseAircraft::HandleAfterburnerFX(bool isActive) 
 {
@@ -152,8 +154,7 @@ void ABaseAircraft::ActivateAfterburnerFX()
 {
 	for (UNiagaraComponent* FX : AllAfterburners) 
 	{
-		if (!IsValid(FX)) continue;
-		FX->Activate();
+		if (IsValid(FX)) FX->Activate();
 	}
 }
 
@@ -161,8 +162,7 @@ void ABaseAircraft::DeactivateAfterburnerFX()
 {
 	for (UNiagaraComponent* FX : AllAfterburners)
 	{
-		if (!IsValid(FX)) continue;
-		FX->Deactivate();
+		if (IsValid(FX)) FX->Deactivate();
 	}
 }
 
@@ -176,8 +176,7 @@ void ABaseAircraft::ActivateVortexFX()
 {
 	for (UNiagaraComponent* FX : AllVortices) 
 	{
-		if (!IsValid(FX)) continue;
-		FX->Activate();
+		if (IsValid(FX)) FX->Activate();
 	}
 }
 
@@ -185,15 +184,13 @@ void ABaseAircraft::DeactivateVortexFX()
 {
 	for (UNiagaraComponent* FX : AllVortices) 
 	{
-		if (!IsValid(FX)) continue;
-		FX->Deactivate();
+		if (IsValid(FX)) FX->Deactivate();
 	}
 }
 
 void ABaseAircraft::DisableAllMainWingVapors() {
 	for (UStaticMeshComponent* Mesh : AllMainWingVapors) {
-		if (!IsValid(Mesh)) continue;
-		Mesh->SetVisibility(false);
+		if (IsValid(Mesh)) Mesh->SetVisibility(false);
 	}
 }
 
@@ -204,7 +201,7 @@ void ABaseAircraft::EnableAllMainWingVapors() {
 void ABaseAircraft::HandleLOD(FVector CameraLoc) 
 {
 	// Setting distance to KM
-	if (!Airframe) return;
+	if (!IsValid(Airframe)) return;
 	float Distance = FVector::Dist(CameraLoc, GetActorLocation()) * 0.00001;
 	if (Distance >= 5 && bIsVisible) 
 	{
@@ -219,8 +216,8 @@ void ABaseAircraft::HandleLOD(FVector CameraLoc)
 }
 
 void ABaseAircraft::ActivateSpecial() {
-	if (SpecialComp) SpecialComp->ActivateSpecial(this);
-	if (VisualComp && VisualComp->IsCountermeasures()) VisualComp->ActivateFlares();
+	if (IsValid(SpecialComp)) SpecialComp->ActivateSpecial(this);
+	if (IsValid(VisualComp) && VisualComp->IsCountermeasures()) VisualComp->ActivateFlares();
 }
 
 void ABaseAircraft::OnCountermeasureDeployed_Implementation() 
@@ -234,40 +231,40 @@ void ABaseAircraft::OnCountermeasureDeployed_Implementation()
 	}
 }
 
-void ABaseAircraft::SetThrust(float thrust) { if (FlightComponent) FlightComponent->SetThrust(thrust); }
+void ABaseAircraft::SetThrust(float thrust) { if (IsValid(FlightComponent)) FlightComponent->SetThrust(thrust); }
 
-void ABaseAircraft::SetRoll(float roll) { if (FlightComponent) FlightComponent->SetRoll(roll); }
+void ABaseAircraft::SetRoll(float roll) { if (IsValid(FlightComponent)) FlightComponent->SetRoll(roll); }
 
-void ABaseAircraft::SetPitch(float pitch) { if (FlightComponent) FlightComponent->SetPitch(pitch); }
+void ABaseAircraft::SetPitch(float pitch) { if (IsValid(FlightComponent)) FlightComponent->SetPitch(pitch); }
 
-void ABaseAircraft::SetRudder(float rudder) { if (FlightComponent) FlightComponent->SetYaw(rudder); }
+void ABaseAircraft::SetRudder(float rudder) { if (IsValid(FlightComponent)) FlightComponent->SetYaw(rudder); }
 
-void ABaseAircraft::SetFlying(bool bIsFlying) { if (FlightComponent) FlightComponent->isFlying = bIsFlying; }
+void ABaseAircraft::SetFlying(bool bIsFlying) { if (IsValid(FlightComponent)) FlightComponent->isFlying = bIsFlying; }
 
 void ABaseAircraft::SetSpeed(float speed) { 
-	if (FlightComponent) 
+	if (IsValid(FlightComponent))
 	{
 		FlightComponent->currentSpeed = speed;
 		FlightComponent->Velocity = this->GetActorForwardVector() * speed;
 	}
 }
 
-void ABaseAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) { if (WeaponComponent) WeaponComponent->SetWeapons(In); }
+void ABaseAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) { if (IsValid(WeaponComponent)) WeaponComponent->SetWeapons(In); }
 
-void ABaseAircraft::SetSpecial(TSubclassOf<UBaseSpecial> In) { if (SpecialComp) SpecialComp->SetSpecial(In); }
+void ABaseAircraft::SetSpecial(TSubclassOf<UBaseSpecial> In) { if (IsValid(SpecialComp)) SpecialComp->SetSpecial(In); }
 
-void ABaseAircraft::SetFlightMode(EFlightMode FlightMode) { if (FlightComponent) FlightComponent->SetFlightMode(FlightMode); }
+void ABaseAircraft::SetFlightMode(EFlightMode FlightMode) { if (IsValid(FlightComponent)) FlightComponent->SetFlightMode(FlightMode); }
 
-float ABaseAircraft::ReturnRudder() const { if (VisualComp) return VisualComp->GetRudder(); else return 0; }
+float ABaseAircraft::ReturnRudder() const { if (IsValid(VisualComp)) return VisualComp->GetRudder(); else return 0; }
 
-float ABaseAircraft::ReturnSlat() const { if (VisualComp) return VisualComp->GetSlat(); else return 0; }
+float ABaseAircraft::ReturnSlat() const { if (IsValid(VisualComp)) return VisualComp->GetSlat(); else return 0; }
 
-float ABaseAircraft::ReturnRFlap() const { if (VisualComp) return VisualComp->GetRFlap(); else return 0; }
+float ABaseAircraft::ReturnRFlap() const { if (IsValid(VisualComp)) return VisualComp->GetRFlap(); else return 0; }
 
-float ABaseAircraft::ReturnLFlap() const { if (VisualComp) return VisualComp->GetLFlap(); else return 0; }
+float ABaseAircraft::ReturnLFlap() const { if (IsValid(VisualComp)) return VisualComp->GetLFlap(); else return 0; }
 
-float ABaseAircraft::ReturnNozzle() const { if (VisualComp) return VisualComp->GetNozzle(); else return 0; }
+float ABaseAircraft::ReturnNozzle() const { if (IsValid(VisualComp)) return VisualComp->GetNozzle(); else return 0; }
 
-float ABaseAircraft::ReturnAirbrake() const { if (VisualComp) return VisualComp->GetAirBrake(); else return 0; }
+float ABaseAircraft::ReturnAirbrake() const { if (IsValid(VisualComp)) return VisualComp->GetAirBrake(); else return 0; }
 
-float ABaseAircraft::ReturnElevator() const { if (VisualComp) return VisualComp->GetElevator(); else return 0; }
+float ABaseAircraft::ReturnElevator() const { if (IsValid(VisualComp)) return VisualComp->GetElevator(); else return 0; }

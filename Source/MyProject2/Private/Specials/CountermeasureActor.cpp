@@ -29,12 +29,13 @@ void ACountermeasureActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (!FlareEffect || !FlareComponent) return;
+	if (!IsValid(FlareEffect) || !IsValid(FlareComponent)) return;
 	FlareComponent->SetAsset(FlareEffect);
 }
 
 void ACountermeasureActor::Activate() 
 {
+	if (!IsValid(FlareComponent) || !IsValid(RootMesh)) return;
 	FlareComponent->Activate(true);
 	RootMesh->AddImpulse(GetActorForwardVector() * 5, NAME_None, true);
 }

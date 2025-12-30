@@ -27,6 +27,7 @@ AAircraftPlayerController::AAircraftPlayerController()
 void AAircraftPlayerController::BeginPlay() 
 {
 	Super::BeginPlay();
+	if (!IsValid(MenuManager)) return;
 	MenuManager->InitializePC(this);
 	if (UAircraftRegistry* Reg = UAircraftRegistry::Get(GetWorld()))
 	{
@@ -48,8 +49,8 @@ void AAircraftPlayerController::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 	HUD = Cast<APlayerHUD>(GetHUD());
 	Controlled = Cast<APlayerAircraft>(InPawn);
-	if (HUD) HUD->Init(this);
-	if (Controlled) 
+	if (IsValid(HUD)) HUD->Init(this);
+	if (IsValid(Controlled))
 	{
 		Controlled->SetHUD(HUD);
 		Controlled->OnMissileLaunchedAtSelf.AddDynamic(this, &AAircraftPlayerController::HandleMissileLaunchedAtPlayer);
@@ -60,6 +61,7 @@ void AAircraftPlayerController::OnPossess(APawn* InPawn)
 void AAircraftPlayerController::SetComponents(UWeaponSystemComponent* InWeapon) 
 {
 	WeaponComp = InWeapon;
+	if (!IsValid(WeaponComp)) return;
 	WeaponComp->OnWeaponHit.AddDynamic(this, &AAircraftPlayerController::HandleWeaponHit);
 	WeaponComp->OnHUDLockedOn.AddDynamic(this, &AAircraftPlayerController::HandleHUDLockedOn);
 	WeaponComp->OnWeaponCountUpdated.AddDynamic(this, &AAircraftPlayerController::HandleWeaponCount);
@@ -97,45 +99,44 @@ void AAircraftPlayerController::SetFlightMode(EFlightMode FlightMode) {
 
 void AAircraftPlayerController::HandleWeaponHit(bool bHit)
 {
-	if (!bHit && HUD) HUD->HandleWeaponMiss();
+	if (!bHit && IsValid(HUD)) HUD->HandleWeaponMiss();
 }
 
 void AAircraftPlayerController::OnUnitHit(AActor* Launcher) 
 {
-	if (HUD && Launcher == GetPawn()) HUD->UpdateTargetHit(false);
+	if (IsValid(HUD) && Launcher == GetPawn()) HUD->UpdateTargetHit(false);
 }
 
 void AAircraftPlayerController::OnUnitDestroyed(AActor* Launcher) 
 {
-	if (HUD && Launcher == GetPawn()) HUD->UpdateTargetHit(true);
+	if (IsValid(HUD) && Launcher == GetPawn()) HUD->UpdateTargetHit(true);
 }
 
 void AAircraftPlayerController::HandleHUDLockedOn(float LockPercent)
 {
-	if (HUD) HUD->UpdateLocked(LockPercent);
+	if (IsValid(HUD)) HUD->UpdateLocked(LockPercent);
 }
 
 void AAircraftPlayerController::HandleWeaponCount(FName WeaponName, int32 CurrentCount, int32 MaxCount) 
 {
-	if (HUD) HUD->OnWeaponChanged(WeaponName, CurrentCount, MaxCount);
+	if (IsValid(HUD)) HUD->OnWeaponChanged(WeaponName, CurrentCount, MaxCount);
 }
 
 void AAircraftPlayerController::HandleMissileLaunchedAtPlayer(ABaseMissile* Missile) 
 {
-	if (HUD) HUD->HandleMissileLaunchedAtSelf(Missile);
+	if (IsValid(HUD)) HUD->HandleMissileLaunchedAtSelf(Missile);
 }
 
 void AAircraftPlayerController::HandleMissileLockedAtPlayer() 
 {
-	if (HUD) HUD->HandleMissileLockedAtSelf();
+	if (IsValid(HUD)) HUD->HandleMissileLockedAtSelf();
 }
-
 
 // Setting controls
 
 void AAircraftPlayerController::BindAircraftInputs(UEnhancedInputComponent* EnhancedInputComp) 
 {
-	if (!EnhancedInputComp) return;
+	if (!IsValid(EnhancedInputComp)) return;
 	FSoftObjectPath ThrottlePath(TEXT("/Game/Controls/Inputs/Throttle.Throttle"));
 	TSoftObjectPtr<UInputAction> SoftThrottle(ThrottlePath);
 	Throttle = SoftThrottle.LoadSynchronous();
@@ -311,10 +312,10 @@ void AAircraftPlayerController::SetControlMode(EControlMode NewMode)
 	CurrentMode = NewMode;
 
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	if (!Subsystem) return;
+	if (!IsValid(Subsystem)) return;
 
 	UEnhancedInputComponent* EnhancedInputComp = Cast<UEnhancedInputComponent>(InputComponent);
-	if (!EnhancedInputComp) return;
+	if (!IsValid(EnhancedInputComp)) return;
 
 	Subsystem->ClearAllMappings();
 	if (NewMode == EControlMode::Menu) 
@@ -335,7 +336,7 @@ void AAircraftPlayerController::SetControlMode(EControlMode NewMode)
 
 void AAircraftPlayerController::MenuBack() 
 {
-	if (MenuManager && MenuHistory.Num() > 0) MenuManager->GoBack(MenuHistory.Pop());
+	if (IsValid(MenuManager) && MenuHistory.Num() > 0) MenuManager->GoBack(MenuHistory.Pop());
 }
 
 void AAircraftPlayerController::ManageMenuSetting(EMenuState NewMenu) 
@@ -356,39 +357,39 @@ void AAircraftPlayerController::Thrust(const FInputActionValue& Value)
 
 void AAircraftPlayerController::Roll(const FInputActionValue& Value) 
 {
-	if (Controlled) Controlled->SetRoll(Value.Get<float>());
+	if (IsValid(Controlled)) Controlled->SetRoll(Value.Get<float>());
 }
 
 void AAircraftPlayerController::Pitch(const FInputActionValue& Value)
 {
-	if (Controlled) Controlled->SetPitch(Value.Get<float>());
+	if (IsValid(Controlled)) Controlled->SetPitch(Value.Get<float>());
 }
 
 void AAircraftPlayerController::Rudder(const FInputActionValue& Value) 
 {
-	if (Controlled) Controlled->SetRudder(Value.Get<float>());
+	if (IsValid(Controlled)) Controlled->SetRudder(Value.Get<float>());
 }
 
 //Specials
 
 void AAircraftPlayerController::Weapons()
 {
-	if (Controlled) Controlled->FireWeaponSelected();
+	if (IsValid(Controlled)) Controlled->FireWeaponSelected();
 }
 
 void AAircraftPlayerController::NextWeapon() 
 {
-	if (Controlled) WeaponIndex = Controlled->AdvanceWeapon(WeaponIndex, true);
+	if (IsValid(Controlled)) WeaponIndex = Controlled->AdvanceWeapon(WeaponIndex, true);
 }
 
 void AAircraftPlayerController::PreviousWeapon() 
 {
-	if (Controlled) WeaponIndex = Controlled->AdvanceWeapon(WeaponIndex, false);
+	if (IsValid(Controlled)) WeaponIndex = Controlled->AdvanceWeapon(WeaponIndex, false);
 }
 
 void AAircraftPlayerController::Special() 
 {
-	if (Controlled) Controlled->ActivateSpecial();
+	if (IsValid(Controlled)) Controlled->ActivateSpecial();
 }
 
 //Gun
@@ -397,30 +398,30 @@ void AAircraftPlayerController::ShootStart()
 {
 	if (fire) return;
 	fire = true;
-	if (Controlled) Controlled->StartBullets();
+	if (IsValid(Controlled)) Controlled->StartBullets();
 }
 
 void AAircraftPlayerController::ShootEnd() 
 {
 	fire = false;
-	if (Controlled) Controlled->EndBullets();
+	if (IsValid(Controlled)) Controlled->EndBullets();
 }
 
 void AAircraftPlayerController::Bullets() 
 {
-	if (Controlled) Controlled->FireBullets();
+	if (IsValid(Controlled)) Controlled->FireBullets();
 }
 
 //Camera Movement
 
 void AAircraftPlayerController::Switch() 
 {
-	if (Controlled) Controlled->CycleTarget();
+	if (IsValid(Controlled)) Controlled->CycleTarget();
 }
 
 void AAircraftPlayerController::TogglePerspective() 
 {
-	if (Controlled) Controlled->SwitchCameras();
+	if (IsValid(Controlled)) Controlled->SwitchCameras();
 }
 
 void AAircraftPlayerController::Focus()
@@ -435,12 +436,12 @@ void AAircraftPlayerController::FocusStop()
 
 void AAircraftPlayerController::LookHor(const FInputActionValue& ValueX) 
 {
-	if (Controlled) Controlled->HandleHorizontal(ValueX.Get<float>());
+	if (IsValid(Controlled)) Controlled->HandleHorizontal(ValueX.Get<float>());
 }
 
 void AAircraftPlayerController::LookVer(const FInputActionValue& ValueY) 
 {
-	if (Controlled) Controlled->HandleVertical(ValueY.Get<float>());
+	if (IsValid(Controlled)) Controlled->HandleVertical(ValueY.Get<float>());
 }
 
 //Map
@@ -460,7 +461,7 @@ void AAircraftPlayerController::Tick(float DeltaSeconds)
 {
 	if (CurrentMode == EControlMode::Menu) return;
 	if (!isThrust) thrustPercentage = FMath::FInterpTo(thrustPercentage, MIDDLETHRUST, DeltaSeconds, 2.f);
-	if (Controlled) Controlled->SetThrust(thrustPercentage);
+	if (IsValid(Controlled)) Controlled->SetThrust(thrustPercentage);
 	
 	Super::Tick(DeltaSeconds);
 }

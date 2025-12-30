@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Enums/CameraPerspective.h"
 #include "CameraManagerComponent.generated.h"
 
@@ -22,26 +23,20 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void LookHor(float InputX);
-
-	void LookVer(float InputY);
-
-	void ThirdPersonHorizontal(float X);
-	void ThirdPersonVertical(float Y);
-
-	void FirstPersonHorizontal(float X);
-	void FirstPersonVertical(float Y);
-
-	void SetHorizontal(float X) { SetX = X; };
-	void SetVertical(float Y) { SetY = Y; };
+	void SetHorizontal(float X);
+	void SetVertical(float Y);
 
 	UPROPERTY()
-	USpringArmComponent* SpringArm;
+	USpringArmComponent* FirstPersonSpringArm;
+
+	UPROPERTY()
+	USpringArmComponent* ThirdPersonSpringArm;
+
+	UPROPERTY()
+	USpringArmComponent* MainSpringArm;
 
 	UPROPERTY()
 	UAircraftAudioComponent* AudioComp;
-
-	void SetSpringArm(USpringArmComponent* InArm) { SpringArm = InArm; }
 
 	void SetControlled(APlayerAircraft* InControl) { Controlled = InControl; };
 
@@ -62,29 +57,40 @@ public:
 	float LookXLock = 0.f;
 	float LookYLock = 0.f;
 
+	float Sensitivity = 1.f;
+
+	float CameraRollOffset = 0.f;
+	float TargetRollOffset = 0.f;
+
+	float RollLagStrength = 0.25f;
+
+	float RollLagSpeed = 4.f;
+
 	void SetThirdPerson();
+	
+	float InterpSpeed = 1.f;
+
+	void SetInterp(float In) { InterpSpeed = In; };
+
+	void SetSpringArm(float Throttle, float D);
 
 protected:
 	virtual void BeginPlay() override;
 		
 private:
+	void HandleHorizontal();
+	void HandleVertical();
 
-	float SetX = 0.f;
-	float SetY = 0.f;
+	void HandleRollLag(float Delta);
 
-	float currentX = 0.f;
+	float LookX = 0.f;
+	float LookY = 0.f;
 
-	float currentY = 0.f;
+	bool bXZero = true;
+	bool bYZero = true;
 
-	float FirstPersonX = 0.f;
-	float FirstPersonY = 0.f;
-
-	float FirstPersonPrevX = 0.f;
-	float FirstPersonPrevY = 0.f;
-
-	float prevX = 0.f;
-
-	float prevY = 0.f;
+	float FirstPersonLength = 0.f;
+	float ThirdPersonLength = 0.f;
 
 	void SetFirstPerson();
 
