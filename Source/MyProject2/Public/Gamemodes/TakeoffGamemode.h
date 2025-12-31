@@ -6,12 +6,13 @@
 #include "Gamemodes/FlightGamemode.h"
 #include "TakeoffGamemode.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MYPROJECT2_API ATakeoffGamemode : public AFlightGamemode
 {
 	GENERATED_BODY()
 	
+public:
+	ATakeoffGamemode();
+
+	virtual void BeginPlay() override;
 };

@@ -459,9 +459,8 @@ void AAircraftPlayerController::StopMapZoom()
 //Might Make two states so Tick doesn't have to do as much, one grounded and one not
 void AAircraftPlayerController::Tick(float DeltaSeconds) 
 {
+	Super::Tick(DeltaSeconds);
 	if (CurrentMode == EControlMode::Menu) return;
 	if (!isThrust) thrustPercentage = FMath::FInterpTo(thrustPercentage, MIDDLETHRUST, DeltaSeconds, 2.f);
 	if (IsValid(Controlled)) Controlled->SetThrust(thrustPercentage);
-	
-	Super::Tick(DeltaSeconds);
 }

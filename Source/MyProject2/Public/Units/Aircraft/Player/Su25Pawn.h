@@ -78,17 +78,8 @@ class MYPROJECT2_API ASu25Pawn : public APlayerAircraft
 		virtual void PossessedBy(AController* NewController);
 
 	protected:
-
-		virtual void Tick(float DeltaTime) override;
 		virtual void BeginPlay() override;
 
 	private:
-		
-		void PitchElevatorCalculation(float DeltaSeconds);
-		void RollElevatorCalculation(float DeltaSeconds);
-		void SlatsElevationCalculation(float DeltaSeconds);
-		void RudderYawCalculation(float DeltaSeconds);
-		void WheelCalculation(float DeltaSeconds);
-		void AirbrakeCalculation(float DeltaSeconds);
 
 };

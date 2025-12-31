@@ -87,7 +87,7 @@ void ABaseAircraft::BeginPlay()
 				EAttachLocation::SnapToTarget,
 				false
 			);
-			if (tempAfterburner)
+			if (IsValid(tempAfterburner))
 			{
 				tempAfterburner->Deactivate();
 				AllAfterburners.Add(tempAfterburner);
@@ -111,7 +111,7 @@ void ABaseAircraft::BeginPlay()
 				EAttachLocation::SnapToTarget,
 				false
 			);
-			if (tempVortex)
+			if (IsValid(tempVortex))
 			{
 				tempVortex->Deactivate();
 				AllVortices.Add(tempVortex);
@@ -121,8 +121,6 @@ void ABaseAircraft::BeginPlay()
 
 	FlightComponent->OnAfterburnerEngaged.AddDynamic(this, &ABaseAircraft::HandleAfterburnerFX);
 	FlightComponent->OnVortexActivate.AddDynamic(this, &ABaseAircraft::HandleVortexFX);
-
-	SetLandingGearVisiblility(bLandingGear);
 }
 
 void ABaseAircraft::PossessedBy(AController* NewController) 
@@ -146,50 +144,30 @@ void ABaseAircraft::FireWeaponSelected() { if (IsValid(WeaponComponent)) WeaponC
 
 void ABaseAircraft::HandleAfterburnerFX(bool isActive) 
 {
-	if (isActive) ActivateAfterburnerFX();
-	else DeactivateAfterburnerFX();
-}
-
-void ABaseAircraft::ActivateAfterburnerFX() 
-{
 	for (UNiagaraComponent* FX : AllAfterburners) 
 	{
-		if (IsValid(FX)) FX->Activate();
-	}
-}
-
-void ABaseAircraft::DeactivateAfterburnerFX() 
-{
-	for (UNiagaraComponent* FX : AllAfterburners)
-	{
-		if (IsValid(FX)) FX->Deactivate();
+		if (IsValid(FX)) 
+		{
+			if (isActive) FX->Activate();
+			else FX->Deactivate();
+		}
 	}
 }
 
 void ABaseAircraft::HandleVortexFX(bool isActive) 
 {
-	if (isActive) ActivateVortexFX();
-	else DeactivateVortexFX();
-}
-
-void ABaseAircraft::ActivateVortexFX() 
-{
-	for (UNiagaraComponent* FX : AllVortices) 
-	{
-		if (IsValid(FX)) FX->Activate();
+	for (UNiagaraComponent* FX : AllVortices) {
+		if (IsValid(FX)) {
+			if (isActive) FX->Activate();
+			else FX->Deactivate();
+		}
 	}
 }
 
-void ABaseAircraft::DeactivateVortexFX() 
+void ABaseAircraft::DisableAllMainWingVapors() 
 {
-	for (UNiagaraComponent* FX : AllVortices) 
+	for (UStaticMeshComponent* Mesh : AllMainWingVapors) 
 	{
-		if (IsValid(FX)) FX->Deactivate();
-	}
-}
-
-void ABaseAircraft::DisableAllMainWingVapors() {
-	for (UStaticMeshComponent* Mesh : AllMainWingVapors) {
 		if (IsValid(Mesh)) Mesh->SetVisibility(false);
 	}
 }
@@ -231,6 +209,26 @@ void ABaseAircraft::OnCountermeasureDeployed_Implementation()
 	}
 }
 
+void ABaseAircraft::OnLandingGearHit(UPrimitiveComponent* HitComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	FVector NormalImpulse,
+	const FHitResult& Hi) {
+	if (bDestroyed) return;
+}
+
+void ABaseAircraft::OnBodyHit(UPrimitiveComponent* HitComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	FVector NormalImpulse,
+	const FHitResult& Hi) {
+
+}
+
+void ABaseAircraft::Crash() {
+	bDestroyed = true;
+}
+
 void ABaseAircraft::SetThrust(float thrust) { if (IsValid(FlightComponent)) FlightComponent->SetThrust(thrust); }
 
 void ABaseAircraft::SetRoll(float roll) { if (IsValid(FlightComponent)) FlightComponent->SetRoll(roll); }
@@ -241,19 +239,17 @@ void ABaseAircraft::SetRudder(float rudder) { if (IsValid(FlightComponent)) Flig
 
 void ABaseAircraft::SetFlying(bool bIsFlying) { if (IsValid(FlightComponent)) FlightComponent->isFlying = bIsFlying; }
 
-void ABaseAircraft::SetSpeed(float speed) { 
-	if (IsValid(FlightComponent))
-	{
-		FlightComponent->currentSpeed = speed;
-		FlightComponent->Velocity = this->GetActorForwardVector() * speed;
-	}
-}
+void ABaseAircraft::SetSpeed(float speed) { if (IsValid(FlightComponent)) FlightComponent->SetInitialSpeed(speed); }
 
 void ABaseAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) { if (IsValid(WeaponComponent)) WeaponComponent->SetWeapons(In); }
 
 void ABaseAircraft::SetSpecial(TSubclassOf<UBaseSpecial> In) { if (IsValid(SpecialComp)) SpecialComp->SetSpecial(In); }
 
-void ABaseAircraft::SetFlightMode(EFlightMode FlightMode) { if (IsValid(FlightComponent)) FlightComponent->SetFlightMode(FlightMode); }
+void ABaseAircraft::SetFlightMode(EFlightMode FlightMode)
+{ 
+	if (IsValid(FlightComponent)) FlightComponent->SetFlightMode(FlightMode); 
+	SetLandingGearVisiblility(FlightMode != EFlightMode::Flight);
+}
 
 float ABaseAircraft::ReturnRudder() const { if (IsValid(VisualComp)) return VisualComp->GetRudder(); else return 0; }
 

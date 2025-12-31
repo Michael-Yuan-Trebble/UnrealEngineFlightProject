@@ -51,8 +51,9 @@ void AFlightGamemode::SpawnInController()
 
 
 // Tells flight comp which mode to be set on
-void AFlightGamemode::SetFlightMode() {
-
+void AFlightGamemode::SetFlightMode() 
+{
+	if (IsValid(PlayerSpawnedIn)) PlayerSpawnedIn->SetFlightMode(FlightMode);
 }
 
 // TODO: Move this logic into actual AI spawn points and just move them around in the editor
@@ -61,7 +62,8 @@ void AFlightGamemode::SpawnAIAircraft()
 {
 }
 
-void AFlightGamemode::SetPlayerSpeed() {
+void AFlightGamemode::SetPlayerSpeed() 
+{
 	if (!IsValid(PlayerSpawnedIn)) return;
 	PlayerSpawnedIn->SetSpeed(PlayerSpawnSpeed/0.034);
 }
@@ -116,6 +118,7 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 	{
 		PC->Possess(PlayerSpawnedIn);
 	}
+	SetFlightMode();
 }
 
 // TODO: Might remove later, might keep in for default, unsure for now, maybe leave it in for a fun easter egg

@@ -65,8 +65,6 @@ public:
 
 	void SetThirdPersonCamera(bool bActive);
 
-	float ReturnSpringArmLength() const { return springArmLength; };
-
 	UAudioComponent* GetAircraftAudio() const { return PersonalAircraftAudio; };
 
 	UAudioComponent* GetGunAudio() const { return GunAudio; };

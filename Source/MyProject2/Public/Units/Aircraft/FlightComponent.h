@@ -103,6 +103,12 @@ public:
 
 	void SetThrust(float Thrust) { CurrentThrust = Thrust; };
 
+	void SetInitialSpeed(float Speed)
+	{ 
+		currentSpeed = Speed; 
+		if (IsValid(Controlled)) Velocity = Controlled->GetActorForwardVector() * Speed;
+	}
+
 	float GetRoll() { return NextRoll; };
 
 	void SetFlightMode(EFlightMode InMode);
@@ -116,6 +122,10 @@ public:
 	float GetThrottle() const { return CurrentThrust; };
 
 private:
+	float FlightDrag = 0.f;
+	
+	bool bRestrained = false;
+
 	float CalculateSpeedDrag();
 
 	void CalculateGForce(float DeltaSeconds);

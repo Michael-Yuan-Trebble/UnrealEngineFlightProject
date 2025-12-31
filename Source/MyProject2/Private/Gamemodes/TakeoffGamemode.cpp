@@ -3,3 +3,10 @@
 
 #include "Gamemodes/TakeoffGamemode.h"
 
+ATakeoffGamemode::ATakeoffGamemode() {
+	FlightMode = EFlightMode::Gears;
+}
+
+void ATakeoffGamemode::BeginPlay() {
+	Super::BeginPlay();
+}

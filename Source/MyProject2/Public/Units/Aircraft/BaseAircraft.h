@@ -65,26 +65,7 @@ public:
 
 	TArray<TWeakObjectPtr<ABaseMissile>> IncomingMissiles;
 
-	float springArmLength;
-
-	float TakeoffSpeed;
-
-	float InputPitchValue;
-
-	float InputRollValue;
-
-	float InputYawValue;
-
-	float InputThrust;
-
-	float LockTime;
-
 	bool bLocked;
-
-	float AOA;
-
-	UPROPERTY(EditAnywhere)
-	bool bLandingGear = false;
 
 	UPROPERTY(EditAnywhere)
 	int32 NumOfAfterburners;
@@ -163,10 +144,10 @@ public:
 	void SetLandingGearVisiblility(bool b) 
 	{ 
 		// TODO: For now its hardcoded for testing, but later change it so that the gamemode dictates if landing gear is present
-		if (LandingGear) LandingGear->SetVisibility(bLandingGear);
+		if (LandingGear) LandingGear->SetVisibility(b);
 
 		// TODO: Eventually have this collision box work, however it doesn't instantly kill the player upon reaching designated ground
-		if (LandingGearCollision) LandingGearCollision->SetCollisionEnabled(bLandingGear ? ECollisionEnabled::NoCollision : ECollisionEnabled::NoCollision);
+		if (LandingGearCollision) LandingGearCollision->SetCollisionEnabled(b ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
 	};
 
 	void SetSpeed(float speed);
@@ -183,8 +164,6 @@ public:
 	void EnableAllMainWingVapors();
 
 	USkeletalMeshComponent* GetMesh() const { return Airframe; };
-
-	virtual float ReturnTakeoffSpeed() const { return TakeoffSpeed; };
 
 	UFUNCTION(BlueprintCallable)
 	float ReturnRudder() const;
@@ -207,6 +186,27 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float ReturnElevator() const;
 
+	UPROPERTY(EditAnywhere)
+	float MaxSinkRate = 100.f;
+
+	UFUNCTION()
+	void OnLandingGearHit(UPrimitiveComponent* HitComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		FVector NormalImpulse,
+		const FHitResult& Hi);
+
+	UFUNCTION()
+	void OnBodyHit(UPrimitiveComponent* HitComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		FVector NormalImpulse,
+		const FHitResult& Hi);
+
+	bool bDestroyed = false;
+
+	void Crash();
+
 	virtual void RegisterIncomingMissile_Implementation(ABaseMissile* Missile) override {
 		IncomingMissiles.AddUnique(Missile);
 	};
@@ -221,11 +221,6 @@ protected:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	void ActivateAfterburnerFX();
-	void DeactivateAfterburnerFX();
-
-	void ActivateVortexFX();
-	void DeactivateVortexFX();
 
 private:
 

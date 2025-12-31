@@ -39,9 +39,4 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	void PitchCalculation(float Delta);
-	void RollCalculation(float Delta);
-	void YawCalculation(float Delta);
-	void AirBrakeCalculation(float Delta);
-	void ThrustCalculation(float Delta);
 };

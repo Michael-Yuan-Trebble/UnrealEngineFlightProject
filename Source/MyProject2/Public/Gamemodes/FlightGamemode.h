@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
+#include "Enums/FlightMode.h"
 #include "FlightGamemode.generated.h"
 
 class APlayerAircraft;
@@ -60,18 +61,21 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float PlayerSpawnSpeed = 0.f;
 
+	UPROPERTY(EditAnywhere)
+	EFlightMode FlightMode = EFlightMode::Flight;
+
 	virtual void BeginPlay() override;
 
 	void SetPlayerSpeed();
 
-private:
+protected:
 	void FallBackAircraft();
 
 	TMap<FName,TSubclassOf<ABaseWeapon>> TemporaryLoadout();
 
 	void SpawnInController();
 
-	void SetFlightMode();
+	virtual void SetFlightMode();
 
 	bool bTakingOff;
 };

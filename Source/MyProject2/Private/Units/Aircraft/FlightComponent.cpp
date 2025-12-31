@@ -26,6 +26,22 @@ void UFlightComponent::Setup(ABaseAircraft* InControl, UAircraftStats* InStats)
 void UFlightComponent::SetFlightMode(EFlightMode InFlight) 
 {
 	FlightMode = InFlight;
+	switch (InFlight) 
+	{
+	case EFlightMode::Flight:
+		FlightDrag = 0.f; 
+		break;
+	case EFlightMode::Gears:
+		if (IsValid(AircraftStats)) FlightDrag = AircraftStats->Acceleration * 0.5;
+		break;
+	case EFlightMode::Naval:
+		if (IsValid(AircraftStats)) FlightDrag = AircraftStats->Acceleration * 0.5;
+		bRestrained = true;
+		break;
+	default:
+		FlightDrag = 0.f;
+		break;
+	}
 }
 
 void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -68,7 +84,7 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 
 	float totalDrag = speedDrag + AOADrag + pitchDrag;
 
-	float trueAcceleration = Acceleration - totalDrag;
+	float trueAcceleration = Acceleration - totalDrag - FlightDrag;
 	trueAcceleration = FMath::Abs(trueAcceleration) < 0.001 ? 0 : trueAcceleration;
 
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
@@ -82,41 +98,12 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 	PreviousVelocity = Velocity;
 	Velocity = Controlled->GetActorForwardVector() * currentSpeed;
 
-	if (Velocity.ContainsNaN() || !FMath::IsFinite(Velocity.X) || Velocity.Size() > 1e6f) Velocity = FVector::ZeroVector;
+	if (Velocity.ContainsNaN() || Velocity.Size() > 1e6f) Velocity = FVector::ZeroVector;
 
-	if (IsValid(Controlled)) 
-	{
-		Controlled->AddActorWorldOffset(Velocity * DeltaSeconds, true);
-		CalculateGForce(DeltaSeconds);
+	if (!IsValid(Controlled)) return;
 
-		// ====================================
-		// Draw AOA lines
-		// Blue = Root forward
-		// Red = Mesh Forward
-		// ====================================
-
-		DrawDebugLine(
-			GetWorld(),
-			Controlled->GetActorLocation(),
-			Controlled->GetActorLocation() + Controlled->GetActorForwardVector() * 300,
-			FColor::Blue,
-			false,
-			0.f,
-			0,
-			2.f
-		);
-
-		DrawDebugLine(
-			GetWorld(),
-			Controlled->GetActorLocation(),
-			Controlled->GetActorLocation() + Controlled->Airframe->GetForwardVector() * 300,
-			FColor::Green,
-			false,
-			0.f,
-			0,
-			2.f
-		);
-	}
+	Controlled->AddActorWorldOffset(Velocity * DeltaSeconds, true);
+	CalculateGForce(DeltaSeconds);
 }
 
 float UFlightComponent::CalculateSpeedDrag() 
@@ -136,8 +123,6 @@ float UFlightComponent::CalculateSpeedDrag()
 
 	return FMath::Clamp(drag, 0, Acceleration * 10.f);
 }
-
-// TODO: Make this do something with wing vapor
 
 void UFlightComponent::CalculateGForce(float DeltaSeconds) 
 {
@@ -202,10 +187,6 @@ void UFlightComponent::AfterburnerSpeed(float ThrottlePercentage)
 
 void UFlightComponent::ApplyRot(float DeltaSeconds)
 {
-	// ====================================
-	// Apply User Inputs
-	// ====================================
-
 	ApplyYaw(DeltaSeconds);
 	ApplyRoll(DeltaSeconds);
 	ApplyPitch(DeltaSeconds);
@@ -222,20 +203,14 @@ void UFlightComponent::ReturnAOA(float DeltaSeconds)
 	float RootTurnSpeed = 2.0f;
 	float RootAlpha = FMath::Clamp(RootTurnSpeed * DeltaSeconds, 0.f, 1.f);
 	FQuat NewRootQuat = FQuat::Slerp(CurrentQuat, TargetQuat, RootAlpha);
-	if (IsValid(Controlled)) 
-	{
-		Controlled->SetActorRotation(NewRootQuat);
-	}
+	if (IsValid(Controlled)) Controlled->SetActorRotation(NewRootQuat);
 
 	// Resets the Airframe's vector 
 	FQuat AirframeCurrentRelQuat = Controlled->Airframe->GetRelativeRotation().Quaternion();
 	FQuat IdentityQuat = FQuat::Identity;
 	float NoseAlpha = FMath::Clamp(AircraftStats->AOARecoverySpeed * DeltaSeconds, 0.f, 1.f);
 	FQuat NewRelQuat = FQuat::Slerp(AirframeCurrentRelQuat, IdentityQuat, NoseAlpha);
-	if (IsValid(Controlled) && IsValid(Controlled->Airframe)) 
-	{
-		Controlled->Airframe->SetRelativeRotation(NewRelQuat.Rotator());
-	}
+	if (IsValid(Controlled) && IsValid(Controlled->Airframe)) Controlled->Airframe->SetRelativeRotation(NewRelQuat.Rotator());
 }
 
 float UFlightComponent::GetAOA() 
@@ -261,7 +236,6 @@ float UFlightComponent::GetAOA()
 float UFlightComponent::DragAOA()
 {
 	float dragCo = Controlled->AirStats->DragCoefficient;
-
 	float drag = FMath::Abs(GetAOA()) * dragCo * (GetCurrentSpeedKMH() / 4);
 
 	//GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
@@ -323,132 +297,58 @@ float UFlightComponent::PitchDrag()
 void UFlightComponent::ApplyPitch(float DeltaSeconds)
 {
 	if (!IsValid(Controlled)) return;
-	float InterpSpeed = 0;
 	float CurveTurn = Controlled->AirStats->DragCurve->GetFloatValue(GetCurrentSpeedKMH());
 	float CompressionTurn = Controlled->AirStats->CompressionCurve->GetFloatValue(GetCurrentSpeedKMH());
 	//GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Curve: %.2f"), CurveTurn));
-	if (Controlled->GetController() && Controlled->GetController()->IsPlayerController())
+	if (UserPitch == 0)
 	{
-		if (UserPitch == 0)
-		{
-			NextPitch = FMath::FInterpTo(NextPitch, 0, DeltaSeconds, 3.f);
-			FRotator DeltaRot(NextPitch * DeltaSeconds, 0.f, 0.f);
-			Controlled->Airframe->AddLocalRotation(DeltaRot);
-			return;
-		}
+		NextPitch = FMath::FInterpTo(NextPitch, 0, DeltaSeconds, 3.f);
+		FRotator DeltaRot(NextPitch * DeltaSeconds, 0.f, 0.f);
+		Controlled->Airframe->AddLocalRotation(DeltaRot);
+		return;
+	}
 		
-		InterpSpeed = AircraftStats->TurnRate * CurveTurn * CompressionTurn;
-		InterpSpeed = UserPitch < 0 ? InterpSpeed * 0.5 : InterpSpeed;
+	float InterpSpeed = AircraftStats->TurnRate * CurveTurn * CompressionTurn;
+	InterpSpeed = UserPitch < 0 ? InterpSpeed * 0.5 : InterpSpeed;
 
-		float TargetPitchRate = UserPitch * InterpSpeed;
-		NextPitch = FMath::FInterpTo(NextPitch, TargetPitchRate, DeltaSeconds, 5.f);
+	float TargetPitchRate = UserPitch * InterpSpeed;
+	NextPitch = FMath::FInterpTo(NextPitch, TargetPitchRate, DeltaSeconds, 5.f);
 
-		FRotator DeltaRot(NextPitch * DeltaSeconds, 0.f, 0.f);
-		if (IsValid(Controlled) && IsValid(Controlled->Airframe))
-			Controlled->Airframe->AddLocalRotation(DeltaRot);
-	}
-	else
-	{
-		/*
-		InterpSpeed = AircraftStats->TurnRate * CurveTurn * CompressionTurn;
-		float TargetPitchAngle = UserPitch * InterpSpeed;
-		FRotator CurrentRot = Controlled->Airframe->GetRelativeRotation();
-		float NewPitch = FMath::FInterpTo(CurrentRot.Pitch, TargetPitchAngle, DeltaSeconds, InterpSpeed);
-
-		if (FMath::IsNearlyZero(NewPitch, 0.01f) && FMath::IsNearlyZero(UserPitch, 0.01f)) NewPitch = 0.f;
-
-		CurrentRot.Pitch = NewPitch;
-		if (IsValid(Controlled) && IsValid(Controlled->Airframe))
-			Controlled->Airframe->SetRelativeRotation(CurrentRot);*/
-		if (UserPitch == 0)
-		{
-			NextPitch = FMath::FInterpTo(NextPitch, 0, DeltaSeconds, 3.f);
-			FRotator DeltaRot(NextPitch * DeltaSeconds, 0.f, 0.f);
-			Controlled->Airframe->AddLocalRotation(DeltaRot);
-			return;
-		}
-
-		InterpSpeed = AircraftStats->TurnRate * CurveTurn * CompressionTurn;
-		InterpSpeed = UserPitch < 0 ? InterpSpeed * 0.5 : InterpSpeed;
-
-		float TargetPitchRate = UserPitch * InterpSpeed;
-		NextPitch = FMath::FInterpTo(NextPitch, TargetPitchRate, DeltaSeconds, 5.f);
-
-		FRotator DeltaRot(NextPitch * DeltaSeconds, 0.f, 0.f);
-		if (IsValid(Controlled) && IsValid(Controlled->Airframe))
-			Controlled->Airframe->AddLocalRotation(DeltaRot);
-	}
+	FRotator DeltaRot(NextPitch * DeltaSeconds, 0.f, 0.f);
+	if (IsValid(Controlled) && IsValid(Controlled->Airframe))
+		Controlled->Airframe->AddLocalRotation(DeltaRot);
 }
 
 void UFlightComponent::ApplyYaw(float DeltaSeconds)
 {
 	if (!IsValid(Controlled)) return;
-	float InterpSpeed = 0;
-	if (Controlled->GetController() && Controlled->GetController()->IsPlayerController())
-	{
-		if (UserYaw == 0) {
-			NextYaw = FMath::FInterpTo(NextYaw, 0, DeltaSeconds, 3.f);
-			FRotator DeltaRot(0.f, NextYaw * DeltaSeconds,0.f);
-			Controlled->Airframe->AddLocalRotation(DeltaRot);
-			return;
-		}
-		InterpSpeed = AircraftStats->RudderRate * 50;
-		float TargetYawRate = UserYaw * InterpSpeed;
-		NextYaw = FMath::FInterpTo(UserYaw, TargetYawRate, DeltaSeconds, 2.f);
-
+	if (UserYaw == 0) {
+		NextYaw = FMath::FInterpTo(NextYaw, 0, DeltaSeconds, 3.f);
 		FRotator DeltaRot(0.f, NextYaw * DeltaSeconds,0.f);
-		if (IsValid(Controlled) && IsValid(Controlled->Airframe))
-			Controlled->Airframe->AddLocalRotation(DeltaRot);
+		Controlled->Airframe->AddLocalRotation(DeltaRot);
+		return;
 	}
-	else
-	{
-		InterpSpeed = AircraftStats->RudderRate;
-		float TargetYawAngle = UserYaw * InterpSpeed;
-		FRotator CurrentRot = Controlled->Airframe->GetRelativeRotation();
-		float NewYaw = FMath::FInterpTo(CurrentRot.Yaw, TargetYawAngle, DeltaSeconds, InterpSpeed);
+	float TargetYawRate = UserYaw * AircraftStats->RudderRate;
+	NextYaw = FMath::FInterpTo(NextYaw, TargetYawRate, DeltaSeconds, 2.f);
 
-		if (FMath::IsNearlyZero(NewYaw, 0.01f) && FMath::IsNearlyZero(UserYaw, 0.01f))
-		{
-			NewYaw = 0.f;
-		}
-		CurrentRot.Yaw = NewYaw;
-		if (IsValid(Controlled) && IsValid(Controlled->Airframe))
-			Controlled->Airframe->SetRelativeRotation(CurrentRot);
-	}
+	FRotator DeltaRot(0.f, NextYaw * DeltaSeconds,0.f);
+	if (IsValid(Controlled) && IsValid(Controlled->Airframe))
+		Controlled->Airframe->AddLocalRotation(DeltaRot);
 }
 
 void UFlightComponent::ApplyRoll(float DeltaSeconds)
 {
 	if (!IsValid(Controlled)) return;
-	float InterpSpeed = 0;
-	if (Controlled->GetController() && Controlled->GetController()->IsPlayerController())
+	if (UserRoll == 0) 
 	{
-		 if (UserRoll == 0) 
-		 {
-			 NextRoll = FMath::FInterpTo(NextRoll, 0, DeltaSeconds, 3.f);
-			 FRotator DeltaRot(0.f, 0.f, NextRoll * DeltaSeconds);
-			 Controlled->Airframe->AddLocalRotation(DeltaRot);
-			 return;
-		 }
-		 InterpSpeed = AircraftStats->RollRate * 10;
-		 float TargetRollRate = UserRoll * InterpSpeed;
-		 NextRoll = FMath::FInterpTo(NextRoll, TargetRollRate, DeltaSeconds, 5.f);
-		 FRotator DeltaRot(0.f, 0.f, NextRoll * DeltaSeconds);
-		 if (IsValid(Controlled) && IsValid(Controlled->Airframe))
-			Controlled->Airframe->AddLocalRotation(DeltaRot);
+		NextRoll = FMath::FInterpTo(NextRoll, 0, DeltaSeconds, 3.f);
+		FRotator DeltaRot(0.f, 0.f, NextRoll * DeltaSeconds);
+		Controlled->Airframe->AddLocalRotation(DeltaRot);
+		return;
 	}
-	else 
-	{
-		 InterpSpeed = AircraftStats->RollRate;
-		 float TargetRollAngle = UserRoll * InterpSpeed;
-		 FRotator CurrentRot = Controlled->Airframe->GetRelativeRotation();
-		 float NewRoll = FMath::FInterpTo(CurrentRot.Roll, TargetRollAngle, DeltaSeconds, InterpSpeed);
-
-		 if (FMath::IsNearlyZero(NewRoll, 0.01f) && FMath::IsNearlyZero(UserRoll, 0.01f))
-			 NewRoll = 0.f;
-
-		 CurrentRot.Roll = NewRoll;
-		 if (IsValid(Controlled) && IsValid(Controlled->Airframe))
-			Controlled->Airframe->SetRelativeRotation(CurrentRot);
-	}
+	float TargetRollRate = UserRoll * AircraftStats->RollRate;
+	NextRoll = FMath::FInterpTo(NextRoll, TargetRollRate, DeltaSeconds, 5.f);
+	FRotator DeltaRot(0.f, 0.f, NextRoll * DeltaSeconds);
+	if (IsValid(Controlled) && IsValid(Controlled->Airframe))
+		Controlled->Airframe->AddLocalRotation(DeltaRot);
 }
