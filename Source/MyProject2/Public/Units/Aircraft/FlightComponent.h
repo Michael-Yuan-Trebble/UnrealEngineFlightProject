@@ -121,10 +121,27 @@ public:
 
 	float GetThrottle() const { return CurrentThrust; };
 
+	float DropSpeed = 0.f;
+
+	void SetDropSpeed(float Speed) { DropSpeed = Speed; };
+
+	float StallSpeed = 0.f;
+
+	void SetStallSpeed(float Speed) { StallSpeed = Speed; };
+	
+	void AddDropSpeed(float D);
+
+	bool bDropping = false;
+
+	void Stall(float D);
+
+	void Landed();
+
 private:
 	float FlightDrag = 0.f;
 	
 	bool bRestrained = false;
+
 
 	float CalculateSpeedDrag();
 

@@ -30,6 +30,7 @@ void UFlightComponent::SetFlightMode(EFlightMode InFlight)
 	{
 	case EFlightMode::Flight:
 		FlightDrag = 0.f; 
+		isFlying = true;
 		break;
 	case EFlightMode::Gears:
 		if (IsValid(AircraftStats)) FlightDrag = AircraftStats->Acceleration * 0.5;
@@ -48,7 +49,7 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (!IsValid(Controlled) || !IsValid(Controlled->Airframe) || !AircraftStats) return;
-	if (!isFlying) isFlying = currentSpeed > TAKEOFFSPEED;
+	//if (!isFlying) isFlying = currentSpeed > TAKEOFFSPEED;
 
 	// ====================================
 	// Movement Application Components
@@ -57,6 +58,16 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	ApplySpeed(CurrentThrust, DeltaTime);
 	RollAOA(DeltaTime);
 	ApplyRot(DeltaTime);
+
+	if (GetCurrentSpeedKMH() <= DropSpeed) {
+		if (!bDropping) bDropping = true;
+		AddDropSpeed(DeltaTime);
+		if (GetCurrentSpeedKMH() <= StallSpeed) {
+			Stall(DeltaTime);
+		}
+	}
+	else if (bDropping) bDropping = false;
+	if (!bDropping) ReturnAOA(DeltaTime);
 }
 
 void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
@@ -79,7 +90,8 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 	prevStage = currentStage;
 
 	float speedDrag = CalculateSpeedDrag();
-	float AOADrag = FMath::IsFinite(DragAOA()) ? DragAOA() : 0;
+	float AOADrag = 0;
+	if (!bDropping) AOADrag = FMath::IsFinite(DragAOA()) ? DragAOA() : 0;
 	float pitchDrag = FMath::IsFinite(PitchDrag()) ? PitchDrag() : 0;
 
 	float totalDrag = speedDrag + AOADrag + pitchDrag;
@@ -104,6 +116,49 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 
 	Controlled->AddActorWorldOffset(Velocity * DeltaSeconds, true);
 	CalculateGForce(DeltaSeconds);
+}
+
+void UFlightComponent::AddDropSpeed(float D) {
+	if (!IsValid(Controlled)) return;
+
+	float Range = DropSpeed - StallSpeed;
+	float Speed = GetCurrentSpeedKMH();
+	float Percent = Speed / DropSpeed;
+
+	float fallSpeed = 100 / 0.036;
+
+	FRotator Rot = Controlled->GetActorRotation();
+	FRotator AirframeRot = Controlled->Airframe->GetComponentRotation();
+	float AllowedPitch = 180 * Percent;
+	float t = fallSpeed * (1 - Percent);
+	AllowedPitch -= 90;
+	Rot.Yaw = FMath::FInterpTo(Rot.Yaw, AirframeRot.Yaw, D, 10.f);
+	Rot.Roll = FMath::FInterpTo(Rot.Roll, AirframeRot.Roll, D, 10.f);
+
+	Velocity.Z += -t;
+	if (Rot.Pitch <= AllowedPitch) 
+	{
+		Rot.Pitch = FMath::FInterpTo(Rot.Pitch, AirframeRot.Pitch, D, 4.f);
+		Controlled->SetActorRotation(Rot);
+	}
+	else 
+	{
+		Rot.Pitch = FMath::FInterpTo(Rot.Pitch, AllowedPitch, D, 4.f);
+
+		Controlled->SetActorRotation(Rot);
+	}
+	Controlled->Airframe->SetWorldRotation(AirframeRot);
+	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), Percent));
+}
+
+void UFlightComponent::Stall(float D) {
+	if (!IsValid(Controlled)) return;
+
+	FQuat AirframeCurrentRelQuat = Controlled->Airframe->GetComponentQuat();
+	FQuat TargetQuat = Controlled->GetActorRotation().Quaternion();
+	float NoseAlpha = FMath::Clamp(1 * D, 0.f, 1.f);
+	FQuat NewRelQuat = FQuat::Slerp(AirframeCurrentRelQuat, TargetQuat, NoseAlpha);
+	if (IsValid(Controlled) && IsValid(Controlled->Airframe)) Controlled->Airframe->SetWorldRotation(NewRelQuat.Rotator());
 }
 
 float UFlightComponent::CalculateSpeedDrag() 
@@ -190,8 +245,6 @@ void UFlightComponent::ApplyRot(float DeltaSeconds)
 	ApplyYaw(DeltaSeconds);
 	ApplyRoll(DeltaSeconds);
 	ApplyPitch(DeltaSeconds);
-
-	ReturnAOA(DeltaSeconds);
 }
 
 void UFlightComponent::ReturnAOA(float DeltaSeconds)

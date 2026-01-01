@@ -69,6 +69,8 @@ void ABaseAircraft::BeginPlay()
 
 	RadarComponent->Setup(this);
 	FlightComponent->Setup(this, AirStats);
+	FlightComponent->SetDropSpeed(DropSpeed);
+	FlightComponent->SetStallSpeed(StallSpeed);
 	WeaponComponent->Setup(this, AirStats);
 
 	if (IsValid(AfterburnerSystem))
@@ -215,6 +217,7 @@ void ABaseAircraft::OnLandingGearHit(UPrimitiveComponent* HitComp,
 	FVector NormalImpulse,
 	const FHitResult& Hi) {
 	if (bDestroyed) return;
+
 }
 
 void ABaseAircraft::OnBodyHit(UPrimitiveComponent* HitComp,

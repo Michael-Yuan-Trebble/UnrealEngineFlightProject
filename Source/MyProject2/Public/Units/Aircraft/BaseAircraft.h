@@ -231,4 +231,10 @@ private:
 	void HandleVortexFX(bool isActive);
 
 	bool bIsVisible = true;
+
+	UPROPERTY(EditAnywhere)
+	float DropSpeed = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	float StallSpeed = 0.f;
 };
