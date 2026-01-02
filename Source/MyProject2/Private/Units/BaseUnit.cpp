@@ -9,15 +9,13 @@
 
 ABaseUnit::ABaseUnit()
 {
-	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision"));
-	SetRootComponent(Collision);
+	UnitRoot = CreateDefaultSubobject<UBoxComponent>(TEXT("Root"));
+	RootComponent = UnitRoot;
+
+	Constraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("Constraint"));
+	Constraint->SetupAttachment(UnitRoot);
 
 	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-
-	Collision->SetCollisionProfileName(TEXT("Pawn"));
-	Collision->SetNotifyRigidBodyCollision(true);
-	Collision->SetGenerateOverlapEvents(true);
-	Collision->SetBoxExtent(FVector(30.f));
 
 	PrimaryActorTick.bCanEverTick = true;
 	if (HealthComp) 

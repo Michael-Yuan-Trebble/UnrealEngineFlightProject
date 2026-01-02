@@ -13,7 +13,7 @@
 ABaseAircraft::ABaseAircraft()
 {
 	Airframe = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Airframe"));
-	Airframe->SetupAttachment(Collision);
+	Airframe->SetupAttachment(UnitRoot);
 	Airframe->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	LandingGear = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Landing Gear"));
@@ -21,24 +21,26 @@ ABaseAircraft::ABaseAircraft()
 	LandingGear->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	BodyCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BodyCollision"));
-	BodyCollision->SetupAttachment(Collision);
+	BodyCollision->SetupAttachment(Airframe);
 	BodyCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	LeftWingCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftWingCollision"));
-	LeftWingCollision->SetupAttachment(Collision);
+	LeftWingCollision->SetupAttachment(Airframe);
 	LeftWingCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	RightWingCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("RightWingCollision"));
-	RightWingCollision->SetupAttachment(Collision);
+	RightWingCollision->SetupAttachment(Airframe);
 	RightWingCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	RudderCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("RudderCollision"));
-	RudderCollision->SetupAttachment(Collision);
+	RudderCollision->SetupAttachment(Airframe);
 	RudderCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	LandingGearCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("LandingGearCollision"));
-	LandingGearCollision->SetupAttachment(Collision);
+	LandingGearCollision->SetupAttachment(Airframe);
 	LandingGearCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	Constraint->SetConstrainedComponents(LandingGearCollision, NAME_None, UnitRoot, NAME_None);
 
 	FlightComponent = CreateDefaultSubobject<UFlightComponent>(TEXT("FlightComponent"));
 	RadarComponent = CreateDefaultSubobject<URadarComponent>(TEXT("Radar"));
@@ -67,7 +69,11 @@ void ABaseAircraft::BeginPlay()
 
 	if (!IsValid(Airframe) || !IsValid(RadarComponent) || !IsValid(FlightComponent)) return;
 
+	OriginalCollOffset = UnitRoot->GetRelativeLocation();
+	OriginalExtent = UnitRoot->GetUnscaledBoxExtent();
+
 	RadarComponent->Setup(this);
+	FlightComponent->SetLanded(bLanded);
 	FlightComponent->Setup(this, AirStats);
 	FlightComponent->SetDropSpeed(DropSpeed);
 	FlightComponent->SetStallSpeed(StallSpeed);
@@ -123,6 +129,9 @@ void ABaseAircraft::BeginPlay()
 
 	FlightComponent->OnAfterburnerEngaged.AddDynamic(this, &ABaseAircraft::HandleAfterburnerFX);
 	FlightComponent->OnVortexActivate.AddDynamic(this, &ABaseAircraft::HandleVortexFX);
+
+	if (IsValid(LandingGearCollision)) {
+	}
 }
 
 void ABaseAircraft::PossessedBy(AController* NewController) 
@@ -211,22 +220,26 @@ void ABaseAircraft::OnCountermeasureDeployed_Implementation()
 	}
 }
 
-void ABaseAircraft::OnLandingGearHit(UPrimitiveComponent* HitComp,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	FVector NormalImpulse,
-	const FHitResult& Hi) {
-	if (bDestroyed) return;
+void ABaseAircraft::SetLandingGearVisiblility(bool b)
+{
+	// TODO: For now its hardcoded for testing, but later change it so that the gamemode dictates if landing gear is present
+	if (LandingGear) LandingGear->SetVisibility(b);
 
-}
+	// TODO: Eventually have this collision box work, however it doesn't instantly kill the player upon reaching designated ground
+	if (LandingGearCollision) LandingGearCollision->SetCollisionEnabled(b ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
 
-void ABaseAircraft::OnBodyHit(UPrimitiveComponent* HitComp,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	FVector NormalImpulse,
-	const FHitResult& Hi) {
+	if (!UnitRoot) return;
+	FVector Offset = OriginalCollOffset;
+	FVector Extent = OriginalExtent;
 
-}
+	if (b) {
+		Offset.Z -= AddedGearHeight * 0.5f;
+		Extent.Z += AddedGearHeight * 0.5f;
+	}
+
+	//Collision->SetBoxExtent(Extent);
+	//Collision->SetRelativeLocation(Offset);
+};
 
 void ABaseAircraft::Crash() {
 	bDestroyed = true;

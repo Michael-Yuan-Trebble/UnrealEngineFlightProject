@@ -90,7 +90,8 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 	}
 	else
 	{
-		PlayerSpawnedIn = GetWorld()->SpawnActorDeferred<APlayerAircraft>(GI->AircraftClass, PlayerStart->GetActorTransform());
+		FTransform SpawnTransform = PlayerStart->GetActorTransform();
+		PlayerSpawnedIn = GetWorld()->SpawnActorDeferred<APlayerAircraft>(GI->AircraftClass, SpawnTransform);
 	}
 
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
@@ -146,7 +147,9 @@ void AFlightGamemode::FallBackAircraft()
 	}
 
 	if (!IsValid(PlayerStart)) return;
-	PlayerSpawnedIn = GetWorld()->SpawnActorDeferred<APlayerAircraft>(AircraftSelected->AircraftClass, PlayerStart->GetActorTransform());
+	FTransform Transform = PlayerStart->GetActorTransform();
+	PlayerSpawnedIn = GetWorld()->SpawnActorDeferred<APlayerAircraft>(AircraftSelected->AircraftClass, Transform);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Z: %.2f"), Transform.GetLocation().Z));
 }
 
 // TODO: Remove this later, this is only to set different weapons for testing

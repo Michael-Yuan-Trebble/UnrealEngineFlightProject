@@ -37,12 +37,12 @@ APlayerAircraft::APlayerAircraft()
 	AudioComp = CreateDefaultSubobject<UAircraftAudioComponent>(TEXT("AudioComponent"));
 
 	PersonalAircraftAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("PersonalAircraftAudio"));
-	PersonalAircraftAudio->SetupAttachment(GetRootComponent());
+	PersonalAircraftAudio->SetupAttachment(UnitRoot);
 	PersonalAircraftAudio->bAutoActivate = false;
 	PersonalAircraftAudio->bIsUISound = false;
 
 	GunAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("GunAudio"));
-	GunAudio->SetupAttachment(GetRootComponent());
+	GunAudio->SetupAttachment(UnitRoot);
 	GunAudio->bAutoActivate = false;
 	GunAudio->bIsUISound = false;
 

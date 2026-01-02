@@ -6,7 +6,7 @@ ABaseGround::ABaseGround()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	Mesh->SetupAttachment(Collision);
+	Mesh->SetupAttachment(UnitRoot);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	UnitType = ETargetType::Ground;

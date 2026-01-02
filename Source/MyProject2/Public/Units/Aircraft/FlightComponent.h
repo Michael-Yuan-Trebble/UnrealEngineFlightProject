@@ -135,7 +135,11 @@ public:
 
 	void Stall(float D);
 
-	void Landed();
+	bool bLanded = false;
+
+	void SetLanded(bool b) { bLanded = b; };
+
+	void Landed(float D);
 
 private:
 	float FlightDrag = 0.f;

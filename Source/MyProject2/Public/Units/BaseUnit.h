@@ -9,6 +9,7 @@
 #include "Interfaces/DamageableInterface.h"
 #include "Interfaces/TeamInterface.h"
 #include "Subsystem/AircraftRegistry.h"
+#include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "BaseUnit.generated.h"
 
 class UHealthComponent;
@@ -26,10 +27,13 @@ public:
 	FOnThisDeath OnUnitDeath;
 
 	UPROPERTY(EditAnywhere)
-	UBoxComponent* Collision;
+	UBoxComponent* UnitRoot;
 
 	UPROPERTY(EditAnywhere)
 	EFaction Faction;
+
+	UPROPERTY()
+	UPhysicsConstraintComponent* Constraint;
 
 	UPROPERTY(EditAnywhere)
 	ETargetType UnitType = ETargetType::Unknown;

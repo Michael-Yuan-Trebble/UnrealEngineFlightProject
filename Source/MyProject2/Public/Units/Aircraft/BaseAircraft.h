@@ -120,6 +120,15 @@ public:
 	UPROPERTY()
 	TArray<UNiagaraComponent*> AllVortices;
 
+	UPROPERTY()
+	float AddedGearHeight;
+
+	UPROPERTY()
+	FVector OriginalCollOffset;
+
+	UPROPERTY()
+	FVector OriginalExtent;
+
 	virtual void PossessedBy(AController* Controller) override;
 
 	virtual void HandleLOD(FVector CameraLoc) override;
@@ -141,14 +150,7 @@ public:
 
 	void SetFlying(bool bIsFlying);
 
-	void SetLandingGearVisiblility(bool b) 
-	{ 
-		// TODO: For now its hardcoded for testing, but later change it so that the gamemode dictates if landing gear is present
-		if (LandingGear) LandingGear->SetVisibility(b);
-
-		// TODO: Eventually have this collision box work, however it doesn't instantly kill the player upon reaching designated ground
-		if (LandingGearCollision) LandingGearCollision->SetCollisionEnabled(b ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
-	};
+	void SetLandingGearVisiblility(bool b);
 
 	void SetSpeed(float speed);
 
@@ -189,20 +191,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	float MaxSinkRate = 100.f;
 
-	UFUNCTION()
-	void OnLandingGearHit(UPrimitiveComponent* HitComp,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		FVector NormalImpulse,
-		const FHitResult& Hi);
-
-	UFUNCTION()
-	void OnBodyHit(UPrimitiveComponent* HitComp,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		FVector NormalImpulse,
-		const FHitResult& Hi);
-
 	bool bDestroyed = false;
 
 	void Crash();
@@ -237,4 +225,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float StallSpeed = 0.f;
+
+	bool bLanded = false;
 };
