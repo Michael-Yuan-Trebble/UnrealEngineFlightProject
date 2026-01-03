@@ -227,18 +227,6 @@ void ABaseAircraft::SetLandingGearVisiblility(bool b)
 
 	// TODO: Eventually have this collision box work, however it doesn't instantly kill the player upon reaching designated ground
 	if (LandingGearCollision) LandingGearCollision->SetCollisionEnabled(b ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
-
-	if (!UnitRoot) return;
-	FVector Offset = OriginalCollOffset;
-	FVector Extent = OriginalExtent;
-
-	if (b) {
-		Offset.Z -= AddedGearHeight * 0.5f;
-		Extent.Z += AddedGearHeight * 0.5f;
-	}
-
-	//Collision->SetBoxExtent(Extent);
-	//Collision->SetRelativeLocation(Offset);
 };
 
 void ABaseAircraft::Crash() {

@@ -137,9 +137,15 @@ public:
 
 	bool bLanded = false;
 
+	float GroundContactTime = 0.f;
+
+	bool bCanTakeOff = false;
+
 	void SetLanded(bool b) { bLanded = b; };
 
 	void Landed(float D);
+
+	void CheckLanding(float D);
 
 private:
 	float FlightDrag = 0.f;
