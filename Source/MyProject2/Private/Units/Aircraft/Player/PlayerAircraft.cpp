@@ -83,7 +83,7 @@ void APlayerAircraft::HandleHit()
 
 void APlayerAircraft::WeaponComponentOnUnitDeath() 
 {
-	WeaponComponent->ResetLockedOn();
+	if (IsValid(WeaponComponent)) WeaponComponent->ResetLockedOn();
 }
 
 void APlayerAircraft::FireBullets() { if (WeaponComponent) WeaponComponent->FireBullets(); }
@@ -92,7 +92,7 @@ void APlayerAircraft::StartBullets()
 {
 	GunSoundEffect(true);
 	FireBullets();
-	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &APlayerAircraft::FireBullets, BulletStats->FireRate, true);
+	if (IsValid(BulletStats)) GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &APlayerAircraft::FireBullets, BulletStats->FireRate, true);
 }
 
 void APlayerAircraft::EndBullets()

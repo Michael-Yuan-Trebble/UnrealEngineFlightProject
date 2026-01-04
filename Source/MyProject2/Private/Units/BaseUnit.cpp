@@ -18,7 +18,7 @@ ABaseUnit::ABaseUnit()
 	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
 	PrimaryActorTick.bCanEverTick = true;
-	if (HealthComp) 
+	if (IsValid(HealthComp))
 	{
 		HealthComp->OnDeath.AddDynamic(this, &ABaseUnit::HandleDestroyed);
 	}
@@ -30,7 +30,7 @@ void ABaseUnit::BeginPlay()
 	isAlive = true;
 	if (UWorld* World = GetWorld()) Registry = UAircraftRegistry::Get(World);
 	if (bStartsTargetable) ActivateTarget();
-	HealthComp->Setup(health);
+	if (IsValid(HealthComp)) HealthComp->Setup(health);
 }
 
 void ABaseUnit::EndPlay(const EEndPlayReason::Type EndPlayReason) 
@@ -52,7 +52,7 @@ void ABaseUnit::PossessedBy(AController* NewController)
 
 void ABaseUnit::OnDamage_Implementation(AActor* Weapon, AActor* Launcher, AActor* Target, float Damage)
 {
-	if (!HealthComp) return;
+	if (!IsValid(HealthComp)) return;
 	HealthComp->ApplyDamage(Damage, Weapon, Launcher, Target);
 }
 
@@ -60,12 +60,12 @@ void ABaseUnit::HandleDestroyed(AActor* Weapon, AActor* Launcher, AActor* Target
 {
 	OnUnitDeath.Broadcast();
 	APlayerGameState* GS = GetWorld()->GetGameState<APlayerGameState>();
-	if (GS)
+	if (IsValid(GS))
 	{
 		GS->RegisterKill(Launcher, Target, Weapon->GetClass());
 	}
 	APlayerHUD* HUD = Cast<APlayerHUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
-	if (HUD) 
+	if (IsValid(HUD))
 	{
 		HUD->OnUnitDestroyed(this);
 	}
@@ -74,7 +74,7 @@ void ABaseUnit::HandleDestroyed(AActor* Weapon, AActor* Launcher, AActor* Target
 	SetActorTickEnabled(false);
 	for (auto* Comp : GetComponents()) 
 	{
-		if (Comp) Comp->SetComponentTickEnabled(false);
+		if (IsValid(Comp)) Comp->SetComponentTickEnabled(false);
 	}
 	DeactivateTarget();
 	Destroy();
@@ -84,14 +84,14 @@ void ABaseUnit::HandleLOD(FVector CameraLoc) {}
 
 void ABaseUnit::ActivateTarget() 
 {
-	if (!Registry || bIsTargetable) return;
+	if (!IsValid(Registry) || bIsTargetable) return;
 	bIsTargetable = true;
 	Registry->Register(this);
 }
 
 void ABaseUnit::DeactivateTarget()
 {
-	if (!Registry || !bIsTargetable) return;
+	if (!IsValid(Registry) || !bIsTargetable) return;
 	bIsTargetable = false;
 	Registry->Unregister(this);
 }

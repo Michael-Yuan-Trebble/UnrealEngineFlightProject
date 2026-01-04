@@ -28,7 +28,7 @@ void APlayerHUD::Init(AAircraftPlayerController* InPC)
     PC = InPC;
     //UpdateTargetWidgets();
     MiniMap = CreateWidget<UMinimapWidget>(GetWorld(), MiniMapClass);
-    if (!MiniMap) return;
+    if (!IsValid(MiniMap)) return;
     MiniMap->AddToViewport();
 
     MiniMap->InitializeBounds(
@@ -36,31 +36,31 @@ void APlayerHUD::Init(AAircraftPlayerController* InPC)
         FVector2D(20000.f, 20000.f)
     );
 
-    if (!AimReticleClass) return;
+    if (!IsValid(AimReticleClass)) return;
     AimReticleWidget = CreateWidget<UUserWidget>(PC, AimReticleClass);
     AimReticleWidget->AddToViewport();
     AimReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
 
-    if (!AOAReticleClass) return;
+    if (!IsValid(AOAReticleClass)) return;
     AOAReticleWidget = CreateWidget<UUserWidget>(PC, AOAReticleClass);
     AOAReticleWidget->AddToViewport();
     AOAReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
 
-    if (!PitchLadderClass) return;
+    if (!IsValid(PitchLadderClass)) return;
     PitchLadderWidget = CreateWidget<UPitchLadder>(PC, PitchLadderClass);
     PitchLadderWidget->AddToViewport();
     PitchLadderWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
 
-    if (!HitNotiClass) return;
+    if (!IsValid(HitNotiClass)) return;
     HitNotiWidget = CreateWidget<UHitNotificationWidget>(PC, HitNotiClass);
     HitNotiWidget->AddToViewport();
     HitNotiWidget->HideMessage();
     HitNotiWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
 
     Controlled = Cast<APlayerAircraft>(PC->GetPawn());
-    if (!Controlled) return;
+    if (!IsValid(Controlled)) return;
     URadarComponent* Radar = Controlled->RadarComponent;
-    if (!Radar) return;;
+    if (!IsValid(Radar)) return;;
     Radar->RadarScanEvent.AddDynamic(this, &APlayerHUD::HandleRadarScan);
 }
 
@@ -73,13 +73,13 @@ void APlayerHUD::OnWeaponChanged(FName WeaponName, int32 Current, int32 Max)
 
 void APlayerHUD::HandleWeaponMiss()
 {
-    if (!HitNotiWidget) return;
+    if (!IsValid(HitNotiWidget)) return;
     HitNotiWidget->ShowMessage(FText::FromString("Missed"));
 }
 
 void APlayerHUD::UpdateTargetHit(bool bDestroyed) 
 {
-    if (!HitNotiWidget) return;
+    if (!IsValid(HitNotiWidget)) return;
     if (bDestroyed) {
         HitNotiWidget->ShowMessage(FText::FromString("Destroyed"));
     }
@@ -91,13 +91,13 @@ void APlayerHUD::UpdateTargetHit(bool bDestroyed)
 void APlayerHUD::Tick(float DeltaSeconds) 
 {
 	Super::Tick(DeltaSeconds);
-    if (!PC) return;
-    if (LockBoxWidgetClass) 
+    if (!IsValid(PC)) return;
+    if (IsValid(LockBoxWidgetClass))
     {
         UpdateTargetWidgets();
     }
 
-    if (!Controlled || !AimReticleWidget || !AOAReticleWidget) return;
+    if (!IsValid(Controlled) || !IsValid(AimReticleWidget) || !IsValid(AOAReticleWidget)) return;
     FVector CamLoc;
     FRotator CamRot;
     PC->GetPlayerViewPoint(CamLoc, CamRot);
@@ -120,7 +120,7 @@ void APlayerHUD::Tick(float DeltaSeconds)
         AOAReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
         AOAReticleWidget->SetPositionInViewport(ScreenPos, true);
     }
-    if (!PitchLadderWidget) return;
+    if (!IsValid(PitchLadderWidget)) return;
 
     FVector LadderWorldPos = CamLoc + NoseDir * 10000.f;
     FVector2D LadderScreenPos;
@@ -135,7 +135,7 @@ void APlayerHUD::Tick(float DeltaSeconds)
 }
 
 void APlayerHUD::TogglePitchLadder(bool Toggle) {
-    if (!IsValid(PitchLadderWidget) || !PitchLadderWidget) return;
+    if (!IsValid(PitchLadderWidget) || !IsValid(PitchLadderWidget)) return;
 
     PitchLadderWidget->SetVisibility(Toggle ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
     isPitchLadderVisible = !Toggle;
@@ -143,7 +143,7 @@ void APlayerHUD::TogglePitchLadder(bool Toggle) {
 
 void APlayerHUD::PitchLadderUpdate() 
 {
-    if (!isPitchLadderVisible) return;
+    if (!isPitchLadderVisible || !IsValid(PitchLadderWidget)) return;
     float Pitch = FMath::RadiansToDegrees(FMath::Asin(Controlled->Airframe->GetForwardVector().Z));
     PitchLadderWidget->Update(Pitch);
 }
@@ -155,7 +155,7 @@ void APlayerHUD::UpdateLocked(float LockPercent)
     if (FoundWidget && IsValid(*FoundWidget))
     {
         ULockBoxWidget* Widget = *FoundWidget;
-        if (Widget) 
+        if (IsValid(Widget))
         {
             Widget->UpdateLockProgress(LockPercent);
         }
@@ -186,7 +186,7 @@ void APlayerHUD::UpdateTargetWidgets()
         if (!Reticle)
         {
             Reticle = CreateWidget<ULockBoxWidget>(PC, LockBoxWidgetClass);
-            if (Reticle)
+            if (IsValid(Reticle))
             {
                 Reticle->AddToViewport();
                 ActiveWidgets.Add(TargetActor, Reticle);
@@ -227,12 +227,11 @@ void APlayerHUD::UpdateTargetWidgets()
 void APlayerHUD::HandleRadarScan(const TArray<FDetectedAircraftInfo>& InEnemies)
 {
     TArray<ABaseUnit*> Array;
-    if (!Controlled) return;
+    if (!IsValid(Controlled)) return;
     for (FDetectedAircraftInfo T : InEnemies) 
     {
         ABaseUnit* Unit = Cast<ABaseUnit>(T.CurrentPawn);
-        if (!Unit) continue;
-        if (Unit->Faction == Controlled->Faction) continue;
+        if (!IsValid(Unit) || Unit->Faction == Controlled->Faction) continue;
         Array.Add(Unit);
     }
     Targets = Array;
@@ -258,7 +257,7 @@ void APlayerHUD::UpdateSelected()
         return;
     }
 
-    if (LastActor == Target) return;
+    if (!LastActor.IsValid() || LastActor == Target) return;
 
     LastActor = Target;
 
@@ -279,7 +278,7 @@ void APlayerHUD::SetTarget(TWeakObjectPtr<ABaseUnit> InTarget)
 {
     if (!InTarget.IsValid()) return;
     APlayerAircraft* IfControl = Cast<APlayerAircraft>(InTarget.Get());
-    if (IfControl) return;
+    if (IsValid(IfControl)) return;
 
     if (Target) 
     {
@@ -310,7 +309,7 @@ void APlayerHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     for (auto& Pair : ActiveWidgets)
     {
-        if (Pair.Value) Pair.Value->RemoveFromParent();
+        if (IsValid(Pair.Value)) Pair.Value->RemoveFromParent();
     }
     ActiveWidgets.Empty();
 

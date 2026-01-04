@@ -8,13 +8,8 @@
 void AAircraftSpawnPoint::BeginPlay() 
 {
 	Super::BeginPlay();
-	if (bStressTest) 
-	{
-		StressTest();
-	}
-	else {
-		ActivateSpawn();
-	}
+	if (bStressTest) StressTest();
+	else ActivateSpawn();
 }
 
 void AAircraftSpawnPoint::ActivateSpawn() 
@@ -23,7 +18,7 @@ void AAircraftSpawnPoint::ActivateSpawn()
 
 	UWorld* World = GetWorld();
 
-	if (!World) return;
+	if (!IsValid(World)) return;
 
 	FVector BaseLocation = GetActorLocation();
 	FRotator BaseRotation = GetActorRotation();
@@ -45,12 +40,8 @@ void AAircraftSpawnPoint::ActivateSpawn()
 			Params
 		);
 
-		if (SpawnedAircraft) {
-			bSpawned = true;
-		}
-		else {
-			continue;
-		}
+		if (IsValid(SpawnedAircraft)) bSpawned = true;
+		else continue;
 
 		if (SpawnedAircraft->AutoPossessAI == EAutoPossessAI::Disabled) 
 		{
@@ -58,15 +49,16 @@ void AAircraftSpawnPoint::ActivateSpawn()
 			AIParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 			AEnemyAircraftAI* AIC = World->SpawnActor<AEnemyAircraftAI>(AEnemyAircraftAI::StaticClass(), FTransform(), AIParams);
-			if (!AIC) continue;
+			if (!IsValid(AIC)) continue;
 			AIC->Possess(SpawnedAircraft);
+			SetInitialSpeed(SpawnedAircraft);
 		}
 	}
 }
 
 void AAircraftSpawnPoint::StressTest() 
 {
-	if (!AircraftClass) return;
+	if (!IsValid(AircraftClass)) return;
 	for (int32 i = 0; i < Count; i++)
 	{
 		FVector Location = GetActorLocation() + FVector(i * 200.f, 0, 0);
@@ -82,11 +74,15 @@ void AAircraftSpawnPoint::StressTest()
 			FTimerHandle TimerHandle;
 			GetWorldTimerManager().SetTimer(TimerHandle, [Aircraft]()
 				{
-					if (IsValid(Aircraft))
-					{
-						Aircraft->Destroy();
-					}
+					if (IsValid(Aircraft)) Aircraft->Destroy();
 				}, DestroyDelay, false);
 		}
+	}
+}
+
+void AAircraftSpawnPoint::SetInitialSpeed(APawn* Spawn) {
+	if (!IsValid(Spawn)) return;
+	if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Spawn)) {
+		Aircraft->SetSpeed(InitialSpeed / 0.036);
 	}
 }

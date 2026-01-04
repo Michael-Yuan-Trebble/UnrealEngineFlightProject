@@ -153,45 +153,39 @@ void UFlightComponent::CheckLanding(float D)
 }
 
 void UFlightComponent::AddDropSpeed(float D) {
+
+	// It doesn't have to go to 90! it can go to something like 30 or 40, once stalling then push it to 90 for the user to gain speed then exit stall
+
 	if (!IsValid(Controlled) || !IsValid(Controlled->Airframe)) return;
+	if (GetCurrentSpeedKMH() <= StallSpeed) return;
 
 	float Speed = GetCurrentSpeedKMH();
 	float Percent = FMath::Clamp(Speed / DropSpeed, 0.f, 1.f);
 
-	FRotator AirframeRot = Controlled->Airframe->GetComponentRotation();
-
+	FRotator AirframeRot = Controlled->Airframe->GetRelativeRotation();
 	FRotator NewRot = Controlled->GetActorRotation();
 
-	float t = (Percent * 180.f) - 90.f;
+	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Relative: Pitch: %.2f Roll: %.2f Yaw: %.2f"), AirframeRot.Pitch, AirframeRot.Roll, AirframeRot.Yaw));
+	
+	FRotator Current = Controlled->Airframe->GetComponentRotation();
+	float dif = Current.Pitch - NewRot.Pitch;
+	float a = Current.Pitch + 90;
+	
+	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Difference to 0: %.2f"), dif));
+	
+	float t = (1 - Percent) * a;
 
-	if (NewRot.Pitch > t) 
-	{
-		if (t == -90) t = -89.999f;
-		if (t == 90) t = 89.999f;
-		NewRot.Pitch = FMath::FInterpTo(NewRot.Pitch,t,D,5);
-	}
-	else 
-	{
-		// Maybe use apply pitch instead of this?
-		NewRot.Pitch = FMath::FInterpTo(NewRot.Pitch, AirframeRot.Pitch,D,5);
-	}
+	MaxPitch = a;
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Forward Pitch Deg: %.2f"), Percent));
-
-	NewRot.Yaw = FMath::FInterpTo(NewRot.Yaw, AirframeRot.Yaw, D, 5.f);
-
-	Controlled->SetActorRotation(NewRot);
-	Controlled->Airframe->SetWorldRotation(AirframeRot);
+	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Drop Amount: %.2f"), t));
+	ReturnAOA(D);
 }
 
 void UFlightComponent::Stall(float D) 
 {
 	if (!IsValid(Controlled) || !IsValid(Controlled->Airframe)) return;
-	FQuat AirframeCurrentRelQuat = Controlled->Airframe->GetComponentQuat();
-	FQuat TargetQuat = Controlled->GetActorRotation().Quaternion();
-	float NoseAlpha = FMath::Clamp(1 * D, 0.f, 1.f);
-	FQuat NewRelQuat = FQuat::Slerp(AirframeCurrentRelQuat, TargetQuat, NoseAlpha);
-	if (IsValid(Controlled) && IsValid(Controlled->Airframe)) Controlled->Airframe->SetWorldRotation(NewRelQuat.Rotator());
+	FVector Down = FVector::DownVector;
+	FRotator DownR = Down.Rotation();
 }
 
 void UFlightComponent::Landed(float D) 

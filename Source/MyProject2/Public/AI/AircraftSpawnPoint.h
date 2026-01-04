@@ -38,4 +38,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float DestroyDelay = 10.f;
+
+	UPROPERTY(EditAnywhere)
+	float InitialSpeed = 0.f;
+
+	void SetInitialSpeed(APawn* Spawn);
 };

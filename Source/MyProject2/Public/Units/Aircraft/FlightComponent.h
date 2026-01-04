@@ -137,9 +137,9 @@ public:
 
 	bool bLanded = false;
 
-	float GroundContactTime = 0.f;
-
 	bool bCanTakeOff = false;
+
+	float MaxPitch;
 
 	void SetLanded(bool b) { bLanded = b; };
 

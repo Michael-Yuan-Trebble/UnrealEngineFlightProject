@@ -26,7 +26,7 @@ void AFlightGamemode::BeginPlay()
 
 void AFlightGamemode::SpawnInController() 
 {
-	if (!GetWorld()) return;
+	if (!IsValid(GetWorld())) return;
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -65,7 +65,7 @@ void AFlightGamemode::SpawnAIAircraft()
 void AFlightGamemode::SetPlayerSpeed() 
 {
 	if (!IsValid(PlayerSpawnedIn)) return;
-	PlayerSpawnedIn->SetSpeed(PlayerSpawnSpeed/0.034);
+	PlayerSpawnedIn->SetSpeed(PlayerSpawnSpeed/0.036);
 }
 
 void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl)
@@ -129,7 +129,7 @@ void AFlightGamemode::FallBackAircraft()
 	if (Database->AllAircraft.Num() == 0) return;
 	for (UAircraftData* Data : Database->AllAircraft)
 	{
-		if (Data && Data->AircraftClass == Player)
+		if (IsValid(Data) && Data->AircraftClass == Player)
 		{
 			AircraftSelected = Data;
 			break;
@@ -158,7 +158,7 @@ TMap<FName, TSubclassOf<ABaseWeapon>> AFlightGamemode::TemporaryLoadout()
 {
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
 
-	if (!IsValid(AircraftSelected) || !AircraftSelected->AircraftStat) return Loadout;
+	if (!IsValid(AircraftSelected) || !IsValid(AircraftSelected->AircraftStat)) return Loadout;
 
 	if (AircraftSelected->AircraftStat->NumOfPylons < 2) return Loadout;
 
