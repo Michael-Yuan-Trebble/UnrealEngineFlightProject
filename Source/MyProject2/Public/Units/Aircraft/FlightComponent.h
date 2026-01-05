@@ -91,6 +91,12 @@ public:
 
 	void ReturnAOA(float DeltaSeconds);
 
+	void RecoverPitch(float D);
+
+	void RecoverRoll(float D);
+
+	void RecoverYaw(float D);
+
 	void Setup(ABaseAircraft* InControl, UAircraftStats* InStats);
 
 	EThrottleStage getThrottleStage(float throttle);
