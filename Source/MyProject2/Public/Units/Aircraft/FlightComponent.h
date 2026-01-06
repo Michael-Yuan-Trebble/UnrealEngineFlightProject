@@ -91,12 +91,6 @@ public:
 
 	void ReturnAOA(float DeltaSeconds);
 
-	void RecoverPitch(float D);
-
-	void RecoverRoll(float D);
-
-	void RecoverYaw(float D);
-
 	void Setup(ABaseAircraft* InControl, UAircraftStats* InStats);
 
 	EThrottleStage getThrottleStage(float throttle);
@@ -115,7 +109,7 @@ public:
 		if (IsValid(Controlled)) Velocity = Controlled->GetActorForwardVector() * Speed;
 	}
 
-	float GetRoll() { return NextRoll; };
+	float GetRoll() const { return NextRoll; };
 
 	void SetFlightMode(EFlightMode InMode);
 
@@ -127,9 +121,9 @@ public:
 
 	float GetThrottle() const { return CurrentThrust; };
 
-	float DropSpeed = 0.f;
-
 	void SetDropSpeed(float Speed) { DropSpeed = Speed; };
+
+	float DropSpeed = 0.f;
 
 	float StallSpeed = 0.f;
 
@@ -156,8 +150,9 @@ public:
 private:
 	float FlightDrag = 0.f;
 	
-	bool bRestrained = false;
+	FQuat PrevQuat = FQuat::Identity;
 
+	bool bRestrained = false;
 
 	float CalculateSpeedDrag();
 
@@ -176,6 +171,8 @@ private:
 	void ApplyYaw(float DeltaSeconds);
 
 	void ApplyRoll(float DeltaSeconds);
+
+	void TempRecovery(float D, float Deg);
 
 	void CalculateVortex();
 

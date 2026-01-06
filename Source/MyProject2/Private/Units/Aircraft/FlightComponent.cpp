@@ -159,32 +159,24 @@ void UFlightComponent::AddDropSpeed(float D) {
 	if (!IsValid(Controlled) || !IsValid(Controlled->Airframe)) return;
 	if (GetCurrentSpeedKMH() <= StallSpeed) return;
 
-	float MaxDropAngle = 20.f;
+	float MaxDropAngle = 30.f;
 
 	float Speed = GetCurrentSpeedKMH();
 	float Percent = FMath::Clamp(Speed / DropSpeed, 0.f, 1.f);
-
-	FRotator AirframeRot = Controlled->Airframe->GetRelativeRotation();
-	FRotator NewRot = Controlled->GetActorRotation();
-
-	//GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Relative: Pitch: %.2f Roll: %.2f Yaw: %.2f"), AirframeRot.Pitch, AirframeRot.Roll, AirframeRot.Yaw));
-
 	
 	float CurrentMaxAngleDrop = MaxDropAngle * (1 - Percent);
-	float CurrentMaxPitch = Controlled->GetActorRotation().Pitch - CurrentMaxAngleDrop;
 
-	//GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Max Pitch: %.2f"), Controlled->GetActorRotation().Pitch));
-	//GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Max Angle Drop: %.2f"), CurrentMaxAngleDrop));
-	RecoverPitch(D);
-	RecoverYaw(D);
-	RecoverRoll(D);
+	TempRecovery(D, CurrentMaxAngleDrop);
 }
 
 void UFlightComponent::Stall(float D) 
 {
 	if (!IsValid(Controlled) || !IsValid(Controlled->Airframe)) return;
-	FVector Down = FVector::DownVector;
-	FRotator DownR = Down.Rotation();
+	FQuat AirframeCurrentRelQuat = Controlled->Airframe->GetRelativeRotation().Quaternion();
+	FQuat IdentityQuat = FQuat::Identity;
+	float NoseAlpha = FMath::Clamp(AircraftStats->AOARecoverySpeed * D, 0.f, 1.f);
+	FQuat NewRelQuat = FQuat::Slerp(AirframeCurrentRelQuat, IdentityQuat, NoseAlpha);
+	if (IsValid(Controlled) && IsValid(Controlled->Airframe)) Controlled->Airframe->SetRelativeRotation(NewRelQuat.Rotator());
 }
 
 void UFlightComponent::Landed(float D) 
@@ -270,7 +262,7 @@ void UFlightComponent::AfterburnerSpeed(float ThrottlePercentage)
 {
 	if (ThrottlePercentage >= 0.9f)
 	{
-		Acceleration = AircraftStats->Acceleration * ThrottlePercentage * 3.f;
+		Acceleration = AircraftStats->Acceleration * ThrottlePercentage * 2.f;
 		targetSpeed = AircraftStats->MaxSpeed;
 		return;
 	}
@@ -317,63 +309,33 @@ void UFlightComponent::ReturnAOA(float DeltaSeconds)
 	if (IsValid(Controlled) && IsValid(Controlled->Airframe)) Controlled->Airframe->SetRelativeRotation(NewRelQuat.Rotator());
 }
 
-void UFlightComponent::RecoverPitch(float D) {
+#define INTERP 50
+
+void UFlightComponent::TempRecovery(float D, float Deg)
+{
 	if (!IsValid(Controlled) || !IsValid(Controlled->Airframe)) return;
 
-	FQuat CurrentQuat = Controlled->GetActorQuat();
-	FQuat TargetQuat = Controlled->Airframe->GetComponentQuat();
+	FQuat CurrentRootQuat = Controlled->GetActorQuat();
+	FQuat AirframeQuat = Controlled->Airframe->GetComponentQuat();
 
-	FQuat DeltaQuat = TargetQuat * CurrentQuat.Inverse();
-	FRotator DeltaRot = DeltaQuat.Rotator();
+	FVector WorldForward = FVector::ForwardVector;
+	FVector PitchAxis = FVector::CrossProduct(WorldForward, FVector::UpVector).GetSafeNormal();
+	FQuat DownOffset = FQuat(PitchAxis, FMath::DegreesToRadians(-Deg));
 
-	float PitchAlpha = FMath::Clamp(2.f * D, 0.f, 1.f);
-	float AppliedPitch = DeltaRot.Pitch * PitchAlpha;
-	MaxPitch = AppliedPitch;
-	FQuat PitchQuat = FRotator(AppliedPitch, 0.f, 0.f).Quaternion();
-	FQuat NewRootQuat = PitchQuat * CurrentQuat;
+	FQuat TargetRootQuat = AirframeQuat * DownOffset;
 
-	FRotator AirframeRelRot = Controlled->Airframe->GetRelativeRotation();
-	AirframeRelRot.Pitch = FMath::FInterpTo(
-		AirframeRelRot.Pitch,
-		0.f,
-		D,
-		AircraftStats->AOARecoverySpeed
-	);
-
-	//Controlled->Airframe->SetRelativeRotation(AirframeRelRot);
-}
-
-void UFlightComponent::RecoverRoll(float D) {
-	if (!IsValid(Controlled) || !IsValid(Controlled->Airframe)) return;
-
-	FQuat CurrentQuat = Controlled->GetActorQuat();
-	FQuat TargetQuat = Controlled->Airframe->GetComponentQuat();
-	float RootTurnSpeed = 2.0f;
-	float RootAlpha = FMath::Clamp(RootTurnSpeed * D, 0.f, 1.f);
-	FQuat NewRootQuat = FQuat::Slerp(CurrentQuat, TargetQuat, RootAlpha);
-	FRotator Rot = NewRootQuat.Rotator();
-
-	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Rotation Pitch: %.2f"), Rot.Pitch));
-
-	NewRootQuat = Rot.Quaternion();
-
+	float RootAlpha = FMath::Clamp(2.0f * D, 0.f, 1.f);
+	FQuat NewRootQuat = FQuat::Slerp(CurrentRootQuat, TargetRootQuat, RootAlpha);
 	Controlled->SetActorRotation(NewRootQuat);
 
 	FQuat AirframeCurrentRelQuat = Controlled->Airframe->GetRelativeRotation().Quaternion();
-	FQuat IdentityQuat = FQuat::Identity;
+
+	FQuat DesiredRelQuat = DownOffset.Inverse();
+
 	float NoseAlpha = FMath::Clamp(AircraftStats->AOARecoverySpeed * D, 0.f, 1.f);
-	FQuat NewRelQuat = FQuat::Slerp(AirframeCurrentRelQuat, IdentityQuat, NoseAlpha);
-	FRotator AirRot = NewRelQuat.Rotator();
-	
+	FQuat NewAirframeRelQuat = FQuat::Slerp(AirframeCurrentRelQuat, DesiredRelQuat, NoseAlpha);
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Airframe Pitch: %.2f"), AirRot.Pitch));
-	NewRelQuat = AirRot.Quaternion();
-
-	Controlled->Airframe->SetRelativeRotation(NewRelQuat.Rotator());
-}
-
-void UFlightComponent::RecoverYaw(float D) {
-
+	Controlled->Airframe->SetRelativeRotation(NewAirframeRelQuat);
 }
 
 float UFlightComponent::GetAOA() 
