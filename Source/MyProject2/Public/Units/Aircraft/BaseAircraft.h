@@ -205,6 +205,10 @@ public:
 
 	virtual void OnCountermeasureDeployed_Implementation() override;
 
+	bool IsLanded();
+
+	float GetSpeed();
+
 protected:
 
 	virtual void BeginPlay() override;

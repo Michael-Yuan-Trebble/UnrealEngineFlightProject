@@ -245,6 +245,10 @@ void ABaseAircraft::SetFlying(bool bIsFlying) { if (IsValid(FlightComponent)) Fl
 
 void ABaseAircraft::SetSpeed(float speed) { if (IsValid(FlightComponent)) FlightComponent->SetInitialSpeed(speed); }
 
+bool ABaseAircraft::IsLanded() { if (IsValid(FlightComponent)) return FlightComponent->IsLanded(); else return false; }
+
+float ABaseAircraft::GetSpeed() { if (IsValid(FlightComponent)) return FlightComponent->GetCurrentSpeedKMH(); else return 0.f; }
+
 void ABaseAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) { if (IsValid(WeaponComponent)) WeaponComponent->SetWeapons(In); }
 
 void ABaseAircraft::SetSpecial(TSubclassOf<UBaseSpecial> In) { if (IsValid(SpecialComp)) SpecialComp->SetSpecial(In); }

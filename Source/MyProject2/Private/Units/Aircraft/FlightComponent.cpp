@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Flight Component!"));
+#define CHECKCONTROLLED !IsValid(Controlled)
+#define CHECKAIRFRAME !IsValid(Controlled) || !IsValid(Controlled->Airframe)
 #include "Units/Aircraft/FlightComponent.h"
 #include "Units/Aircraft/Player/PlayerAircraft.h"
 
@@ -48,7 +50,7 @@ void UFlightComponent::SetFlightMode(EFlightMode InFlight)
 void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (!IsValid(Controlled) || !IsValid(Controlled->Airframe) || !AircraftStats) return;
+	if (CHECKAIRFRAME || !AircraftStats) return;
 
 	// ====================================
 	// Movement Application Components
@@ -71,6 +73,7 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		}
 		else if (GetCurrentSpeedKMH() <= StallSpeed) 
 		{
+			// TODO: Stall should enter a state where it goes down, but also skips that drop speed process because it feels clunky
 			Stall(DeltaTime);
 		}
 	}
@@ -128,7 +131,7 @@ void UFlightComponent::ApplySpeed(float ThrottlePercentage, float DeltaSeconds)
 
 	if (Velocity.ContainsNaN() || Velocity.Size() > 1e6f) Velocity = FVector::ZeroVector;
 
-	if (!IsValid(Controlled)) return;
+	if (CHECKCONTROLLED) return;
 
 	if (bLanded && !bCanTakeOff) { 
 		Velocity.Z = 0; 
@@ -156,7 +159,7 @@ void UFlightComponent::AddDropSpeed(float D) {
 
 	// It doesn't have to go to 90! it can go to something like 30 or 40, once stalling then push it to 90 for the user to gain speed then exit stall
 
-	if (!IsValid(Controlled) || !IsValid(Controlled->Airframe)) return;
+	if (CHECKAIRFRAME) return;
 	if (GetCurrentSpeedKMH() <= StallSpeed) return;
 
 	float MaxDropAngle = 30.f;
@@ -292,7 +295,7 @@ void UFlightComponent::ApplyRot(float DeltaSeconds)
 void UFlightComponent::ReturnAOA(float DeltaSeconds)
 {
 	// Rotates the Root vector toward Airframe's vector
-	if (!IsValid(Controlled)) return;
+	if (CHECKCONTROLLED) return;
 	FQuat CurrentQuat = Controlled->GetActorQuat();
 	FQuat TargetQuat = Controlled->Airframe->GetComponentQuat();
 	float RootTurnSpeed = 2.0f;
@@ -313,7 +316,7 @@ void UFlightComponent::ReturnAOA(float DeltaSeconds)
 
 void UFlightComponent::TempRecovery(float D, float Deg)
 {
-	if (!IsValid(Controlled) || !IsValid(Controlled->Airframe)) return;
+	if (CHECKAIRFRAME) return;
 
 	FQuat CurrentRootQuat = Controlled->GetActorQuat();
 	FQuat AirframeQuat = Controlled->Airframe->GetComponentQuat();
@@ -449,7 +452,7 @@ void UFlightComponent::ApplyPitch(float DeltaSeconds)
 
 void UFlightComponent::ApplyYaw(float DeltaSeconds)
 {
-	if (!IsValid(Controlled)) return;
+	if (CHECKCONTROLLED) return;
 	if (UserYaw == 0) {
 		NextYaw = FMath::FInterpTo(NextYaw, 0, DeltaSeconds, 3.f);
 		FRotator DeltaRot(0.f, NextYaw * DeltaSeconds,0.f);
@@ -460,13 +463,12 @@ void UFlightComponent::ApplyYaw(float DeltaSeconds)
 	NextYaw = FMath::FInterpTo(NextYaw, TargetYawRate, DeltaSeconds, 2.f);
 
 	FRotator DeltaRot(0.f, NextYaw * DeltaSeconds,0.f);
-	if (IsValid(Controlled) && IsValid(Controlled->Airframe))
-		Controlled->Airframe->AddLocalRotation(DeltaRot);
+	if (IsValid(Controlled) && IsValid(Controlled->Airframe)) Controlled->Airframe->AddLocalRotation(DeltaRot);
 }
 
 void UFlightComponent::ApplyRoll(float DeltaSeconds)
 {
-	if (!IsValid(Controlled)) return;
+	if (CHECKCONTROLLED) return;
 	if (UserRoll == 0) 
 	{
 		NextRoll = FMath::FInterpTo(NextRoll, 0, DeltaSeconds, 3.f);
@@ -477,6 +479,5 @@ void UFlightComponent::ApplyRoll(float DeltaSeconds)
 	float TargetRollRate = UserRoll * AircraftStats->RollRate;
 	NextRoll = FMath::FInterpTo(NextRoll, TargetRollRate, DeltaSeconds, 5.f);
 	FRotator DeltaRot(0.f, 0.f, NextRoll * DeltaSeconds);
-	if (IsValid(Controlled) && IsValid(Controlled->Airframe))
-		Controlled->Airframe->AddLocalRotation(DeltaRot);
+	if (IsValid(Controlled) && IsValid(Controlled->Airframe)) Controlled->Airframe->AddLocalRotation(DeltaRot);
 }

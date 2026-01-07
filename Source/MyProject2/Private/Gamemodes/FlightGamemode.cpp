@@ -83,6 +83,7 @@ void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl
 	}
 
 	if (!IsValid(PlayerStart) || !HasAuthority()) return;
+	PlayerSpawn = PlayerStart;
 
 	if (!IsValid(GI->AircraftClass))
 	{
@@ -177,4 +178,13 @@ TMap<FName, TSubclassOf<ABaseWeapon>> AFlightGamemode::TemporaryLoadout()
 	}
 
 	return Loadout;
+}
+
+void AFlightGamemode::FinishMission() 
+{
+	if (!PC || bFinished) return;
+	bFinished = true;
+	PC->ClientMessage(TEXT("COMPLETE"));
+	if (!IsValid(PlayerSpawnedIn)) return;
+	PlayerSpawnedIn->DisableInput(PC);
 }

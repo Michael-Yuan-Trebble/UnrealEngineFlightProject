@@ -4,26 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "Gamemodes/FlightGamemode.h"
-#include "TakeoffGamemode.generated.h"
+#include "LandingGamemode.generated.h"
 
 UCLASS()
-class MYPROJECT2_API ATakeoffGamemode : public AFlightGamemode
+class MYPROJECT2_API ALandingGamemode : public AFlightGamemode
 {
 	GENERATED_BODY()
 	
 public:
-	ATakeoffGamemode();
+	ALandingGamemode();
 
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float D) override;
 
 private:
-	void CheckTakeoff(float D);
+	void CheckLanding(float D);
 
 	UPROPERTY(EditAnywhere)
-	float Distance = 3000.f;
-
-	UPROPERTY(EditAnywhere)
-	float TakeoffTimer = 3.f;
+	float LandingTimeCounter = 3;
 };

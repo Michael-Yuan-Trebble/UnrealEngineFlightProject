@@ -7,8 +7,6 @@
 #include "UI/PlayerHUD.h"
 #include "Kismet/GameplayStatics.h"
 
-#define INTERPSPEED InterpSpeed
-
 UCameraManagerComponent::UCameraManagerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -22,8 +20,8 @@ void UCameraManagerComponent::BeginPlay()
 void UCameraManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (bXZero) LookX = FMath::FInterpTo(LookX, 0, DeltaTime, INTERPSPEED);
-	if (bYZero) LookY = FMath::FInterpTo(LookY, 0, DeltaTime, INTERPSPEED);
+	if (bXZero) LookX = FMath::FInterpTo(LookX, 0, DeltaTime, InterpSpeed);
+	if (bYZero) LookY = FMath::FInterpTo(LookY, 0, DeltaTime, InterpSpeed);
 	HandleHorizontal();
 	HandleVertical();
 	HandleRollLag(DeltaTime);
@@ -66,13 +64,13 @@ void UCameraManagerComponent::SetSpringArm(float Throttle, float D) {
 
 void UCameraManagerComponent::SetHorizontal(float X)
 {
-	if (GetWorld()) LookX = FMath::FInterpTo(LookX, X * Sensitivity, GetWorld()->GetDeltaSeconds(), INTERPSPEED);
+	if (GetWorld()) LookX = FMath::FInterpTo(LookX, X * Sensitivity, GetWorld()->GetDeltaSeconds(), InterpSpeed);
 	bXZero = FMath::IsNearlyZero(X);
 }
 
 void UCameraManagerComponent::SetVertical(float Y) 
 {
-	if (GetWorld()) LookY = FMath::FInterpTo(LookY, Y * Sensitivity, GetWorld()->GetDeltaSeconds(), INTERPSPEED);
+	if (GetWorld()) LookY = FMath::FInterpTo(LookY, Y * Sensitivity, GetWorld()->GetDeltaSeconds(), InterpSpeed);
 	bYZero = FMath::IsNearlyZero(Y);
 }
 

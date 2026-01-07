@@ -68,6 +68,8 @@ protected:
 
 	void SetPlayerSpeed();
 
+	APlayerStart* PlayerSpawn;
+
 protected:
 	void FallBackAircraft();
 
@@ -76,6 +78,10 @@ protected:
 	void SpawnInController();
 
 	virtual void SetFlightMode();
+
+	virtual void FinishMission();
+
+	bool bFinished = false;
 
 	bool bTakingOff;
 };

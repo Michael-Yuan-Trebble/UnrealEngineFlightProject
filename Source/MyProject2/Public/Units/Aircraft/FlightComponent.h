@@ -147,6 +147,10 @@ public:
 
 	void CheckLanding(float D);
 
+	float GetCurrentSpeedKMH() const { return FMath::Max((currentSpeed * 0.036f), 0); };
+
+	bool IsLanded() const { return bLanded; };
+
 private:
 	float FlightDrag = 0.f;
 	
@@ -175,6 +179,4 @@ private:
 	void TempRecovery(float D, float Deg);
 
 	void CalculateVortex();
-
-	float GetCurrentSpeedKMH() const { return FMath::Max((currentSpeed * 0.036f),0); };
 };
