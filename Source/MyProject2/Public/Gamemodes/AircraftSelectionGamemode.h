@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
+#include "Structs and Data/AircraftLoadoutData.h"
 #include "AircraftSelectionGamemode.generated.h"
 
 class UAircraftSelectionWidget;
@@ -22,48 +23,50 @@ public:
 
 	AAircraftSelectionGamemode();
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> AircraftSelectClass;
+	void SpawnInAircraft(const TSubclassOf<APawn> SpawnIn);
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> WeaponSelectClass;
+	void SpawnInWeapon(const TSubclassOf<ABaseWeapon> Weapon, const FName& Pylon);
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> BuySelectionClass;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> SpecialSelectionClass;
-
-	UPROPERTY()
-	UAircraftData* ChosenAircraft;
-
-	UPROPERTY()
-	AAircraftPlayerController* APC;
-
-	UPROPERTY()
-	UMenuManagerComponent* MenuManager;
-
-	void SpawnInAircraft(TSubclassOf<APawn> SpawnIn);
-
-	UPROPERTY()
-	APawn* AircraftDisplayed;
-
-	void SpawnInWeapon(TSubclassOf<ABaseWeapon> Weapon, FName Pylon);
-
-	void ClearWeapons(FName Pylon);
-
-	UPROPERTY()
-	TMap<FName, AActor*> EquippedWeapons;
+	void ClearWeapons(const FName& Pylon);
 
 	void EndSelection(AAircraftPlayerController* Controller);
 
 	void TryAdvanceToNextStage();
 
-	int PlayersRequired = 1;
+private:
+	UPROPERTY()
+	APawn* AircraftDisplayed = nullptr;
+
+	UPROPERTY()
+	TMap<FName, AActor*> EquippedWeapons;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> AircraftSelectClass = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> WeaponSelectClass = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> BuySelectionClass = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> SpecialSelectionClass = nullptr;
+
+	UPROPERTY()
+	UAircraftData* ChosenAircraft = nullptr;
+
+	UPROPERTY()
+	AAircraftPlayerController* APC = nullptr;
+
+	UPROPERTY()
+	UMenuManagerComponent* MenuManager = nullptr;
 
 	UPROPERTY()
 	TSet<AAircraftPlayerController*> ReadyPlayers;
 
-protected:
+	FAircraftLoadoutData FullLoadout{};
+
 	virtual void BeginPlay() override;
+
+	int PlayersRequired = 1;
 };

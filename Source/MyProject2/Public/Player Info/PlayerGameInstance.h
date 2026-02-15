@@ -7,10 +7,13 @@
 #include "Weapons/BaseWeapon.h"
 #include "Specials/BaseSpecial.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
+#include "Structs and Data/AircraftLoadoutData.h"
+#include "Structs and Data/MissionData.h"
 #include "PlayerGameInstance.generated.h"
 
 class UMainMenuManager;
 class ABaseAircraft;
+class UFadeWidget;
 
 UCLASS()
 class MYPROJECT2_API UPlayerGameInstance : public UGameInstance
@@ -20,36 +23,35 @@ class MYPROJECT2_API UPlayerGameInstance : public UGameInstance
 public:
 
 	UPROPERTY()
-	class USaveGameManager* SaveManager;
+	class USaveGameManager* SaveManager = nullptr;
+
+	void SetLevel(const FMissionData& InLevel) { Level = InLevel; };
+
+	const FMissionData& GetLevel() const { return Level; };
+
+	void SetLoadout(const FAircraftLoadoutData& InLoadout) { FullLoadout = InLoadout; };
+
+	const FAircraftLoadoutData& GetLoadout() { return FullLoadout; };
+
+	void FadeIn();
+
+	void FadeOut();
+
+	bool DoesFadeExist() const;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UFadeWidget> FadeWidgetClass;
 
 	UPROPERTY()
-	TSubclassOf<ABaseAircraft> AircraftClass;
+	UFadeWidget* FadeWidget;
 
-	UPROPERTY()
-	UAircraftStats* SelectedAircraftStats;
+private:
 
-	UPROPERTY()
-	TMap<FName, TSubclassOf<ABaseWeapon>> SelectedWeapons;
+	FMissionData Level;
 
-	UPROPERTY()
-	TSubclassOf<UBaseSpecial> SelectedSpecial;
-
-	UPROPERTY()
-	UMainMenuManager* MainMenuManager;
-
-	UMainMenuManager* GetMainMenuManager() const { return MainMenuManager; };
-
-	FName LevelName;
-
-	void SetLevel(const FName InLevel) { LevelName = InLevel; };
-
-	void SetClass(TSubclassOf<ABaseAircraft> InClass) { AircraftClass = InClass; };
-
-	void SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> InWeapons) { SelectedWeapons = InWeapons; };
-
-	void SetSpecial(TSubclassOf<UBaseSpecial> InSpecial) { SelectedSpecial = InSpecial; };
-
-protected:
 	void Init() override;
 
+	FAircraftLoadoutData FullLoadout;
+
+	void CreateFade();
 };

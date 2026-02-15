@@ -38,13 +38,13 @@ public:
 	TArray<FDetectedAircraftInfo> Enemies;
 
 	UPROPERTY()
-	ABaseUnit* Controlled;
+	ABaseUnit* Controlled = nullptr;
 
 	UPROPERTY()
-	ABaseUnit* Selected;
+	ABaseUnit* Selected = nullptr;
 
 	UPROPERTY()
-	APlayerHUD* HUD;
+	APlayerHUD* HUD = nullptr;
 
 	FTimerHandle RadarScanTimer;
 	

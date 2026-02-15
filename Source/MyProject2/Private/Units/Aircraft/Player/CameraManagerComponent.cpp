@@ -28,10 +28,12 @@ void UCameraManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	if (IsValid(Controlled)) SetSpringArm(Controlled->GetThrottle(), DeltaTime);
 }
 
-void UCameraManagerComponent::HandleRollLag(float D) {
+void UCameraManagerComponent::HandleRollLag(const float D) {
 	if (!IsValid(MainSpringArm) || !IsValid(Controlled)) return;
 
-	TargetRollOffset = FMath::Clamp(Controlled->GetRoll() * RollLagStrength,-80.f,80.f);
+	const float Roll = Controlled->GetNextRotation().Roll;
+
+	TargetRollOffset = FMath::Clamp(Roll * RollLagStrength,-80.f,80.f);
 
 	CameraRollOffset = FMath::FInterpTo(
 		CameraRollOffset,
@@ -45,7 +47,7 @@ void UCameraManagerComponent::HandleRollLag(float D) {
 	MainSpringArm->SetRelativeRotation(Rot);
 }
 
-void UCameraManagerComponent::SetSpringArm(float Throttle, float D) {
+void UCameraManagerComponent::SetSpringArm(const float Throttle, const float D) {
 	if (!IsValid(MainSpringArm)) return;
 	float Org = 0.f;
 	float Delta = 0.f;
@@ -62,13 +64,13 @@ void UCameraManagerComponent::SetSpringArm(float Throttle, float D) {
 	MainSpringArm->TargetArmLength = FMath::FInterpTo(MainSpringArm->TargetArmLength, Org - Delta, D, 5.f);
 }
 
-void UCameraManagerComponent::SetHorizontal(float X)
+void UCameraManagerComponent::SetHorizontal(const float X)
 {
 	if (GetWorld()) LookX = FMath::FInterpTo(LookX, X * Sensitivity, GetWorld()->GetDeltaSeconds(), InterpSpeed);
 	bXZero = FMath::IsNearlyZero(X);
 }
 
-void UCameraManagerComponent::SetVertical(float Y) 
+void UCameraManagerComponent::SetVertical(const float Y) 
 {
 	if (GetWorld()) LookY = FMath::FInterpTo(LookY, Y * Sensitivity, GetWorld()->GetDeltaSeconds(), InterpSpeed);
 	bYZero = FMath::IsNearlyZero(Y);

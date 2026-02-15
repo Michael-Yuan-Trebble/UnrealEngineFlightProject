@@ -19,24 +19,24 @@ public:
 	UAircraftAudioComponent();
 
 	UPROPERTY()
-	UAudioComponent* PersonalAircraftAudio;
+	UAudioComponent* PersonalAircraftAudio = nullptr;
 
 	UPROPERTY()
-	UAudioComponent* GunAudio;
+	UAudioComponent* GunAudio = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	USoundWave* CockpitSound;
+	USoundWave* CockpitSound = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	USoundWave* ThirdPersonSound;
+	USoundWave* ThirdPersonSound = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	USoundWave* GunSound;
+	USoundWave* GunSound = nullptr;
 
 	UPROPERTY()
-	ABaseAircraft* Controlled;
+	ABaseAircraft* Controlled = nullptr;
 	
-	void PlayPerspectiveSound(ECameraPerspective Perspective);
+	void PlayPerspectiveSound(const ECameraPerspective Perspective);
 
 	void HandleGunSound(bool bFiring);
 

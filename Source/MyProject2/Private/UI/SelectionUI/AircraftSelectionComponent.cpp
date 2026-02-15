@@ -68,7 +68,7 @@ void UAircraftSelectionComponent::SetAircraft(UAircraftData* Aircraft)
 	MenuManager->ChooseWeaponUI();
 }
 
-void UAircraftSelectionComponent::UpdateAircraft(FName Name) 
+void UAircraftSelectionComponent::UpdateAircraft(const FName& Name) 
 {
 	AircraftSelectUI->UpdateAircraft(Name);
 }

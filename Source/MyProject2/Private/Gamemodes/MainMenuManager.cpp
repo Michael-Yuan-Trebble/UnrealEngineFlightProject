@@ -75,7 +75,7 @@ void UMainMenuManager::ShowFreeFlight()
 	MenuStack.Push(FreeFlightWidget);
 }
 
-void UMainMenuManager::OnLevelPicked(FName LevelName) 
+void UMainMenuManager::OnLevelPicked(FMissionData LevelName)
 {
 	PlayerInstance->SetLevel(LevelName);
 	if (TransitionScreenClass)
@@ -99,7 +99,7 @@ void UMainMenuManager::OnLevelPicked(FName LevelName)
 	}, 0.5f, false);
 }
 
-bool UMainMenuManager::OpenLevel(FName LevelName)
+bool UMainMenuManager::OpenLevel(const FName& LevelName)
 {
 	UWorld* World = GetWorld();
 	if (!World) return false;

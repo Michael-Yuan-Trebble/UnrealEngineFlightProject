@@ -6,9 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "Compass.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MYPROJECT2_API UCompass : public UUserWidget
 {

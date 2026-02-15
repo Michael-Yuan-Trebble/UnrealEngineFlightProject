@@ -28,54 +28,54 @@ public:
 
 	void InitializePC(AAircraftPlayerController* InPC);
 
-	void GoBack(EMenuState Current);
+	void GoBack(const EMenuState Current);
 
-	void GetWidgetClassForState(EMenuState State);
-
-	UPROPERTY()
-	AAircraftPlayerController* PC;
+	void GetWidgetClassForState(const EMenuState State);
 
 	UPROPERTY()
-	AAircraftSelectionGamemode* GM;
+	AAircraftPlayerController* PC = nullptr;
 
 	UPROPERTY()
-	UPlayerGameInstance* GameInstance;
+	AAircraftSelectionGamemode* GM = nullptr;
 
 	UPROPERTY()
-	UAircraftData* SelectedAircraft;
+	UPlayerGameInstance* GameInstance = nullptr;
 
 	UPROPERTY()
-	UAircraftData* TempAircraft;
+	UAircraftData* SelectedAircraft = nullptr;
 
 	UPROPERTY()
-	TSubclassOf<UBaseSpecial> SelectedSpecial;
+	UAircraftData* TempAircraft = nullptr;
 
 	UPROPERTY()
-	TSubclassOf<UUserWidget> AircraftSelectClass;
+	TSubclassOf<UBaseSpecial> SelectedSpecial = nullptr;
 
 	UPROPERTY()
-	TSubclassOf<UUserWidget> WeaponSelectClass;
+	TSubclassOf<UUserWidget> AircraftSelectClass = nullptr;
 
 	UPROPERTY()
-	TSubclassOf<UUserWidget> BuySelectionClass;
+	TSubclassOf<UUserWidget> WeaponSelectClass = nullptr;
 
 	UPROPERTY()
-	TSubclassOf<UUserWidget> SpecialSelectionClass;
+	TSubclassOf<UUserWidget> BuySelectionClass = nullptr;
 
 	UPROPERTY()
-	UUserWidget* CurrentWidget;
+	TSubclassOf<UUserWidget> SpecialSelectionClass = nullptr;
 
 	UPROPERTY()
-	UAircraftSelectionComponent* AircraftSelectionUI;
+	UUserWidget* CurrentWidget = nullptr;
 
 	UPROPERTY()
-	UWeaponSelectionComponent* WeaponSelectionUI;
+	UAircraftSelectionComponent* AircraftSelectionUI = nullptr;
 
 	UPROPERTY()
-	UBuySelectionComponent* BuySelectionUI;
+	UWeaponSelectionComponent* WeaponSelectionUI = nullptr;
 
 	UPROPERTY()
-	USpecialSelectionComponent* SpecialSelectionUI;
+	UBuySelectionComponent* BuySelectionUI = nullptr;
+
+	UPROPERTY()
+	USpecialSelectionComponent* SpecialSelectionUI = nullptr;
 
 	void ChooseAircraftUI();
 
@@ -91,7 +91,7 @@ public:
 		TSubclassOf<UUserWidget> InSpecialClass);
 
 	UFUNCTION()
-	void SpawnBuy(UAircraftData* AircraftData, int Cost);
+	void SpawnBuy(UAircraftData* AircraftData, const int Cost);
 
 	UFUNCTION()
 	void AdvanceToLevel();

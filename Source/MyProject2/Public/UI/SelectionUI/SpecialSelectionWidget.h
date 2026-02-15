@@ -32,7 +32,7 @@ public:
 	FOnAdvanceWidget OnAdvance;
 
 	UPROPERTY()
-	UAircraftData* AircraftSelected;
+	UAircraftData* AircraftSelected = nullptr;
 
 	UFUNCTION(BlueprintCallable)
 	void GetAllSpecials();
@@ -40,26 +40,26 @@ public:
 	void Setup(UAircraftData* InAircraft, UMenuManagerComponent* InMenu, USpecialSelectionComponent* InSelect);
 
 	UPROPERTY()
-	UMenuManagerComponent* MenuManager;
+	UMenuManagerComponent* MenuManager = nullptr;
 
 	UPROPERTY()
-	USpecialSelectionComponent* SpecialUI;
+	USpecialSelectionComponent* SpecialUI = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* Advancebtn;
+	UButton* Advancebtn = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* AdvanceText;
+	UTextBlock* AdvanceText = nullptr;
 
 protected:
 	UFUNCTION()
 	void HandleSpecialSelected(TSubclassOf<UBaseSpecial> SpecialSelected);
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> SpecialButtonClass;
+	TSubclassOf<UUserWidget> SpecialButtonClass = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
-	UScrollBox* SpecialScrollBox;
+	UScrollBox* SpecialScrollBox = nullptr;
 
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		Super::ReleaseSlateResources(bReleaseChildren);

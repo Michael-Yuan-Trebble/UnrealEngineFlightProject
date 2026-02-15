@@ -30,7 +30,7 @@ public:
 	FOnAircraftBuyPicked OnBuyCreate;
 
 	UPROPERTY()
-	UAircraftData* ContainedData;
+	UAircraftData* ContainedData = nullptr;
 
 	TArray<FName> Owned;
 
@@ -50,8 +50,8 @@ protected:
 	void HandleBuyCreate();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* AircraftSelectButton;
+	UButton* AircraftSelectButton = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* AircraftNameText;
+	UTextBlock* AircraftNameText = nullptr;
 };

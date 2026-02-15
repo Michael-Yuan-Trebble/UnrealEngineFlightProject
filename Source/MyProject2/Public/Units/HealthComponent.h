@@ -19,9 +19,9 @@ class MYPROJECT2_API UHealthComponent : public UActorComponent
 public:	
 	UHealthComponent();
 
-	void Setup(float Health);
+	void Setup(const float Health);
 
-	void ApplyDamage(float Amount, AActor* Weaapon, AActor* Launcher, AActor* Target);
+	void ApplyDamage(const float Amount, AActor* Weaapon, AActor* Launcher, AActor* Target);
 
 	float GetHealth() const { return CurrentHealth; };
 
@@ -30,7 +30,7 @@ public:
 	FOnDamage OnDamage;
 
 	UPROPERTY()
-	ABaseUnit* Controller;
+	ABaseUnit* Controller = nullptr;
 
 private:
 	float CurrentHealth = 100.f;

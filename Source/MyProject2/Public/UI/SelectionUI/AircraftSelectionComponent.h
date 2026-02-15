@@ -32,31 +32,31 @@ public:
 	UFUNCTION()
 	void HandleAircraftPicked(UAircraftData* Aircraft);
 
-	void UpdateAircraft(FName Name);
+	void UpdateAircraft(const FName& Name);
 
 	UFUNCTION()
 	void SetAircraft(UAircraftData* Aircraft);
 
 	UPROPERTY()
-	TSubclassOf<UUserWidget> SelectionWidget;
+	TSubclassOf<UUserWidget> SelectionWidget = nullptr;
 
 	UPROPERTY()
-	AAircraftPlayerController* PC;
+	AAircraftPlayerController* PC = nullptr;
 
 	UPROPERTY()
-	AAircraftSelectionGamemode* GM;
+	AAircraftSelectionGamemode* GM = nullptr;
 
 	UPROPERTY()
-	UAircraftDatabase* AircraftDatabase;
+	UAircraftDatabase* AircraftDatabase = nullptr;
 
 	UPROPERTY()
-	UPlayerGameInstance* GameInstance;
+	UPlayerGameInstance* GameInstance = nullptr;
 
 	UPROPERTY()
 	UAircraftSelectionWidget* AircraftSelectUI;
 
 	UPROPERTY()
-	UMenuManagerComponent* MenuManager;
+	UMenuManagerComponent* MenuManager = nullptr;
 
 	void CloseAll();
 

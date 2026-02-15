@@ -17,11 +17,11 @@ public:
 	FName SpecialName;
 
 	UPROPERTY(EditAnywhere)
-	float CooldownTime;
+	float CooldownTime = 0.f;
 
-	float CurrentCooldown;
+	float CurrentCooldown = 0.f;
 
-	void UpdateCooldown(float In) { CurrentCooldown = FMath::Clamp(CurrentCooldown - In, 0, CooldownTime); };
+	void UpdateCooldown(const float In) { CurrentCooldown = FMath::Clamp(CurrentCooldown - In, 0, CooldownTime); };
 
 	virtual bool CanActivate() { return CurrentCooldown == 0; };
 

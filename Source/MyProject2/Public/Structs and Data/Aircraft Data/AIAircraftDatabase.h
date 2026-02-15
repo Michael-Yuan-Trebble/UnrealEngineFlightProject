@@ -6,9 +6,6 @@
 #include "Engine/DataAsset.h"
 #include "AIAircraftDatabase.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MYPROJECT2_API UAIAircraftDatabase : public UDataAsset
 {

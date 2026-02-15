@@ -21,7 +21,7 @@ public:
 
 	AEnemyAircraft();
 
-	AEnemyAircraftAI* Controller;
+	AEnemyAircraftAI* Controller = nullptr;
 
 	virtual void PossessedBy(AController* Controller) override;
 
@@ -31,6 +31,6 @@ public:
 	virtual void StartBullets() override;
 	virtual void EndBullets() override;
 
-	void SwitchWeapon(TSubclassOf<ABaseWeapon> InWeapon);
+	void SwitchWeapon(const TSubclassOf<ABaseWeapon> InWeapon);
 
 };

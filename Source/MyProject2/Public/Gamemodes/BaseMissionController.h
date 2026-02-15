@@ -26,7 +26,7 @@ public:
 	void StartMission();
 
 	UFUNCTION(BlueprintCallable)
-	void StartWave(int32 WaveIndex);
+	void StartWave(const int32 WaveIndex);
 
 	UFUNCTION(BlueprintCallable)
 	void OnEnemyDestroyed();

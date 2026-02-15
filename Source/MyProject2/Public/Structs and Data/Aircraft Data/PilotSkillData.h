@@ -14,14 +14,14 @@ public:
 	// Used to determine how long (generally speaking) it takes for a unit to do something
 	// Will make it random with the mean being this time, at least for now
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ReactionTime;
+	float ReactionTime = 0.f;
 
 	// The amount of turn this AI can do, not entirely sure if this implementation or having advanced units use AOA delimiter instead
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ManueverSkill;
+	float ManueverSkill = 0.f;
 
 	// For enemies specifically, how often they target the Player, will be either 0 or -1 for friendly
 	// Might make it so this comes into play with Friendly when targeting more HVT or make a general agression in order to make it more player vs HVT
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float PlayerAggression;
+	float PlayerAggression = 0.f;
 };

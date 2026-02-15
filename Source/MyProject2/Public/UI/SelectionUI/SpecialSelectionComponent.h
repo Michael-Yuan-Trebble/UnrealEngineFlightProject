@@ -37,22 +37,22 @@ public:
 	void SetAir(UAircraftData* InAir);
 
 	UPROPERTY()
-	TSubclassOf<UUserWidget> SelectionWidget;
+	TSubclassOf<UUserWidget> SelectionWidget = nullptr;
 
 	UPROPERTY()
-	AAircraftPlayerController* PC;
+	AAircraftPlayerController* PC = nullptr;
 
 	UPROPERTY()
-	UPlayerGameInstance* GameInstance;
+	UPlayerGameInstance* GameInstance = nullptr;
 
 	UPROPERTY()
-	USpecialSelectionWidget* SpecialSelectUI;
+	USpecialSelectionWidget* SpecialSelectUI = nullptr;
 
 	UPROPERTY()
-	UMenuManagerComponent* MenuManager;
+	UMenuManagerComponent* MenuManager = nullptr;
 
 	UPROPERTY()
-	UAircraftData* SelectedAircraft;
+	UAircraftData* SelectedAircraft = nullptr;
 
 	void CloseAll();
 

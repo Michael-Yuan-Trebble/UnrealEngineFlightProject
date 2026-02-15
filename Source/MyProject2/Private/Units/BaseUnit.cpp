@@ -7,7 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Units/HealthComponent.h"
 
-ABaseUnit::ABaseUnit()
+ABaseUnit::ABaseUnit() 
 {
 	UnitRoot = CreateDefaultSubobject<UBoxComponent>(TEXT("Root"));
 	RootComponent = UnitRoot;
@@ -27,7 +27,6 @@ ABaseUnit::ABaseUnit()
 void ABaseUnit::BeginPlay()
 {
 	Super::BeginPlay();
-	isAlive = true;
 	if (UWorld* World = GetWorld()) Registry = UAircraftRegistry::Get(World);
 	if (bStartsTargetable) ActivateTarget();
 	if (IsValid(HealthComp)) HealthComp->Setup(health);

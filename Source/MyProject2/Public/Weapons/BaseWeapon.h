@@ -26,10 +26,10 @@ public:
 	ABaseWeapon();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* WeaponMesh;
+	UStaticMeshComponent* WeaponMesh = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* Collision;
+	UBoxComponent* Collision = nullptr;
 
 	TArray<ETargetType> SupportedTargetTypes;
 
@@ -38,17 +38,17 @@ public:
 	UPROPERTY(EditAnywhere)
 	FName WeaponName;
 
-	float cooldownTime;
+	float cooldownTime = 0.f;
 
-	float timeTilDelt = 0;
+	float timeTilDelt = 0.f;
 
-	bool canLock;
+	bool canLock = false;
 
-	float range;
+	float range = 0.f;
 
-	virtual void FireStatic(float speed);
+	virtual void FireStatic(const float speed);
 
-	virtual void FireTracking(float speed, AActor* Target);
+	virtual void FireTracking(const float speed, AActor* Target);
 
 protected:
 	

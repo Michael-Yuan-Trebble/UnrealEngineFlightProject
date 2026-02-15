@@ -23,19 +23,19 @@ public:
 	FOnSpecialPicked OnSpecialPicked;
 
 	UPROPERTY()
-	TSubclassOf<UBaseSpecial> ContainedData;
+	TSubclassOf<UBaseSpecial> ContainedData = nullptr;
 
-	void Setup(TSubclassOf<UBaseSpecial> SpecialData);
+	void Setup(const TSubclassOf<UBaseSpecial>& SpecialData);
 
 protected:
 	UFUNCTION()
 	void HandleButtonClick();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* SpecialSelectButton;
+	UButton* SpecialSelectButton = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* SpecialNameText;
+	UTextBlock* SpecialNameText = nullptr;
 
 	virtual void NativeDestruct() override {
 		OnSpecialPicked.Clear();

@@ -18,5 +18,5 @@ class MYPROJECT2_API IDamageableInterface
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Damage")
-	void OnDamage(AActor* Missile, AActor* Owner, AActor* Target, float Damage);
+	void OnDamage(AActor* Missile, AActor* Owner, AActor* Target, const float Damage);
 };

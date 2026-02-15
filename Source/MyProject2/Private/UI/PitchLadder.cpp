@@ -37,7 +37,7 @@ void UPitchLadder::NativeConstruct()
 	}
 }
 
-void UPitchLadder::Update(float InPitch) 
+void UPitchLadder::Update(const float InPitch) 
 {
     if (!LadderCanvas || !IsVisible()) return;
 

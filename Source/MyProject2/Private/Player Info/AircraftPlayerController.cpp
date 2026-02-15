@@ -93,7 +93,7 @@ void AAircraftPlayerController::UpdateLODs()
 	}
 }
 
-void AAircraftPlayerController::SetFlightMode(EFlightMode FlightMode) {
+void AAircraftPlayerController::SetFlightMode(const EFlightMode FlightMode) {
 
 }
 
@@ -112,7 +112,7 @@ void AAircraftPlayerController::OnUnitDestroyed(AActor* Launcher)
 	if (IsValid(HUD) && Launcher == GetPawn()) HUD->UpdateTargetHit(true);
 }
 
-void AAircraftPlayerController::HandleHUDLockedOn(float LockPercent)
+void AAircraftPlayerController::HandleHUDLockedOn(const float LockPercent)
 {
 	if (IsValid(HUD)) HUD->UpdateLocked(LockPercent);
 }
@@ -306,7 +306,7 @@ void AAircraftPlayerController::TogglePauseMenu()
 
 // TODO: Change between two control modes mid game based on options and active gameplay
 
-void AAircraftPlayerController::SetControlMode(EControlMode NewMode) 
+void AAircraftPlayerController::SetControlMode(const EControlMode NewMode) 
 {
 	if (CurrentMode == NewMode || !GetLocalPlayer()) return;
 	CurrentMode = NewMode;
@@ -339,7 +339,7 @@ void AAircraftPlayerController::MenuBack()
 	if (IsValid(MenuManager) && MenuHistory.Num() > 0) MenuManager->GoBack(MenuHistory.Pop());
 }
 
-void AAircraftPlayerController::ManageMenuSetting(EMenuState NewMenu) 
+void AAircraftPlayerController::ManageMenuSetting(const EMenuState NewMenu) 
 {
 	MenuHistory.Push(NewMenu);
 	MenuManager->GetWidgetClassForState(NewMenu);
@@ -348,6 +348,7 @@ void AAircraftPlayerController::ManageMenuSetting(EMenuState NewMenu)
 //Neutral = 50% Throttle, increase/decrease accordingly
 void AAircraftPlayerController::Thrust(const FInputActionValue& Value)
 {
+	if (!bMovementEnabled) return;
 	float thrustNeeded = FMath::Clamp(thrustPercentage + (Value.Get<float>() / 2.f), 0, 1.f);
 	thrustPercentage = FMath::FInterpTo(thrustPercentage, thrustNeeded, GetWorld()->GetDeltaSeconds(), 2.f);
 	isThrust = Value.Get<float>() != 0;
@@ -357,16 +358,19 @@ void AAircraftPlayerController::Thrust(const FInputActionValue& Value)
 
 void AAircraftPlayerController::Roll(const FInputActionValue& Value) 
 {
+	if (!bMovementEnabled && IsValid(Controlled)) Controlled->SetRoll(0.f);
 	if (IsValid(Controlled)) Controlled->SetRoll(Value.Get<float>());
 }
 
 void AAircraftPlayerController::Pitch(const FInputActionValue& Value)
 {
+	if (!bMovementEnabled && IsValid(Controlled)) Controlled->SetPitch(0.f);
 	if (IsValid(Controlled)) Controlled->SetPitch(Value.Get<float>());
 }
 
 void AAircraftPlayerController::Rudder(const FInputActionValue& Value) 
 {
+	if (!bMovementEnabled && IsValid(Controlled)) Controlled->SetRudder(0.f);
 	if (IsValid(Controlled)) Controlled->SetRudder(Value.Get<float>());
 }
 
@@ -374,21 +378,25 @@ void AAircraftPlayerController::Rudder(const FInputActionValue& Value)
 
 void AAircraftPlayerController::Weapons()
 {
+	if (!bWeaponEnabled) return;
 	if (IsValid(Controlled)) Controlled->FireWeaponSelected();
 }
 
 void AAircraftPlayerController::NextWeapon() 
 {
+	if (!bWeaponEnabled) return;
 	if (IsValid(Controlled)) WeaponIndex = Controlled->AdvanceWeapon(WeaponIndex, true);
 }
 
 void AAircraftPlayerController::PreviousWeapon() 
 {
+	if (!bWeaponEnabled) return;
 	if (IsValid(Controlled)) WeaponIndex = Controlled->AdvanceWeapon(WeaponIndex, false);
 }
 
 void AAircraftPlayerController::Special() 
 {
+	if (!bWeaponEnabled) return;
 	if (IsValid(Controlled)) Controlled->ActivateSpecial();
 }
 
@@ -396,6 +404,7 @@ void AAircraftPlayerController::Special()
 
 void AAircraftPlayerController::ShootStart() 
 {
+	if (!bWeaponEnabled) ShootEnd();
 	if (fire) return;
 	fire = true;
 	if (IsValid(Controlled)) Controlled->StartBullets();
@@ -403,12 +412,14 @@ void AAircraftPlayerController::ShootStart()
 
 void AAircraftPlayerController::ShootEnd() 
 {
+	if (!fire) return;
 	fire = false;
 	if (IsValid(Controlled)) Controlled->EndBullets();
 }
 
 void AAircraftPlayerController::Bullets() 
 {
+	if (!bWeaponEnabled) ShootEnd();
 	if (IsValid(Controlled)) Controlled->FireBullets();
 }
 
@@ -416,11 +427,13 @@ void AAircraftPlayerController::Bullets()
 
 void AAircraftPlayerController::Switch() 
 {
+	if (!bCameraEnabled) return;
 	if (IsValid(Controlled)) Controlled->CycleTarget();
 }
 
 void AAircraftPlayerController::TogglePerspective() 
 {
+	if (!bCameraEnabled) return;
 	if (IsValid(Controlled)) Controlled->SwitchCameras();
 }
 
@@ -436,11 +449,13 @@ void AAircraftPlayerController::FocusStop()
 
 void AAircraftPlayerController::LookHor(const FInputActionValue& ValueX) 
 {
+	if (!bCameraEnabled) return;
 	if (IsValid(Controlled)) Controlled->HandleHorizontal(ValueX.Get<float>());
 }
 
 void AAircraftPlayerController::LookVer(const FInputActionValue& ValueY) 
 {
+	if (!bCameraEnabled) return;
 	if (IsValid(Controlled)) Controlled->HandleVertical(ValueY.Get<float>());
 }
 
@@ -461,6 +476,6 @@ void AAircraftPlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	if (CurrentMode == EControlMode::Menu) return;
-	if (!isThrust) thrustPercentage = FMath::FInterpTo(thrustPercentage, MIDDLETHRUST, DeltaSeconds, 2.f);
+	if (!isThrust) thrustPercentage = FMath::FInterpTo(thrustPercentage, MiddleThrust, DeltaSeconds, 2.f);
 	if (IsValid(Controlled)) Controlled->SetThrust(thrustPercentage);
 }

@@ -45,11 +45,11 @@ public:
 
 	void EquipWeapons();
 
-	void FireWeaponSelected(TSubclassOf<ABaseWeapon> WeaponClass, AActor* Target, float Speed);
+	void FireWeaponSelected(const TSubclassOf<ABaseWeapon> WeaponClass, AActor* Target, const float Speed);
 
-	void SelectWeapon(int WeaponIndex);
+	void SelectWeapon(const int WeaponIndex);
 
-	void UpdateLockedOn(float DeltaSeconds, AActor* Target);
+	void UpdateLockedOn(const float DeltaSeconds, AActor* Target);
 
 	void SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In);
 
@@ -59,7 +59,7 @@ public:
 
 	void GetCount();
 
-	void SearchAndEquipWeapon(TSubclassOf<ABaseWeapon> WeaponClass);
+	void SearchAndEquipWeapon(const TSubclassOf<ABaseWeapon> WeaponClass);
 
 	UFUNCTION()
 	void OnWeaponResult(bool bHit);
@@ -69,22 +69,22 @@ public:
 	float LockTime = 5.f;
 
 	UPROPERTY(BlueprintReadOnly)
-	float MaxWeaponCountSelected;
+	float MaxWeaponCountSelected = 0.f;
 
 	UPROPERTY(BlueprintReadOnly)
-	float CurrentWeaponCount;
+	float CurrentWeaponCount = 0.f;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnWeaponCountUpdated OnWeaponCountUpdated;
 
 	UPROPERTY()
-	ABaseAircraft* Controlled;
+	ABaseAircraft* Controlled = nullptr;
 
 	UPROPERTY()
-	UAircraftStats* AirStats;
+	UAircraftStats* AirStats = nullptr;
 
 	UPROPERTY()
-	ABaseWeapon* CurrentWeapon;
+	ABaseWeapon* CurrentWeapon = nullptr;
 
 	UPROPERTY()
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
@@ -101,7 +101,7 @@ public:
 	TArray<FCooldownWeapon> AvailableWeapons;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AAircraftBullet> Bullet;
+	TSubclassOf<AAircraftBullet> Bullet = nullptr;
 
 	ABaseWeapon* GetWeapon() const { return CurrentWeapon; };
 

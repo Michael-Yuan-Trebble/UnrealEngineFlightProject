@@ -13,7 +13,7 @@ struct MYPROJECT2_API FPylonLoadout
 public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	FName PylonName;
+	FName PylonName = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TSubclassOf<ABaseWeapon>> AllowedMissiles;
@@ -25,8 +25,7 @@ public:
 	TArray<TSubclassOf<ABaseWeapon>> AllowedMisc;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 MaxWeapons;
+	int32 MaxWeapons = 0;
 
-	FPylonLoadout()
-		: PylonName("") {};
+	FPylonLoadout() {};
 };

@@ -57,7 +57,7 @@ void URadarComponent::ScanTargets()
 	{
 		if (!RegisteredPawn.IsValid()) continue;
 		if (RegisteredPawn == Controlled) continue;
-		if (RegisteredPawn->Faction == Controlled->Faction) continue;
+		if (RegisteredPawn->GetFaction() == Controlled->GetFaction()) continue;
 		if (!RegisteredPawn->IsLockable()) continue;
 
 		ABaseUnit* Unit = RegisteredPawn.Get();
@@ -92,7 +92,7 @@ void URadarComponent::HandleSelectedDestroyed()
 {
 	Selected = nullptr;
 
-	if (Controlled) Controlled->Tracked = nullptr;
+	if (Controlled) Controlled->SetTracking(nullptr);
 	if (HUD) HUD->SetTarget(nullptr);
 
 	CycleToNextTarget();
@@ -193,6 +193,6 @@ void URadarComponent::SetTarget(AActor* NewTarget)
 
 	if (HUD) HUD->SetTarget(Unit);
 	LastSelected = Unit;
-	if (Controlled) Controlled->Tracked = Unit;
+	if (Controlled) Controlled->SetTracking(Unit);
 	// VFX
 }

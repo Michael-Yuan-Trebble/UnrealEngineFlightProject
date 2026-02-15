@@ -10,9 +10,6 @@
 #include "Enums/FlightMode.h"
 #include "FlightComponent.generated.h"
 
-#define VORTEXG 9.f
-#define TAKEOFFSPEED 10.f
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAfterburnerEngaged, bool, isActive);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVortexActivate, bool, isVortex);
 
@@ -31,39 +28,113 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UPROPERTY()
-	UAircraftStats* AircraftStats;
+	void ApplySpeed(const float ThrottlePercentage, const float DeltaSeconds);
 
-	UPROPERTY()
-	ABaseAircraft* Controlled;
+	void ApplyRot(const float DletaSeconds);
 
-	bool isFlying = false;
+	void SlowSpeed(const float ThrottlePercentage);
+
+	void NormalSpeed(const float ThrottlePercentage);
+
+	void AfterburnerSpeed(const float ThrottlePercentage);
+
+	void ReturnAOA(const float DeltaSeconds);
+
+	void Setup(ABaseAircraft* InControl, UAircraftStats* InStats);
+	
+	void AddDropSpeed(const float D);
+
+	void Stall(const float D);
+
+	void Landed(const float D);
+
+	void CheckLanding(const float D);
+
+	UPROPERTY(BlueprintReadOnly)
+	int displayG = 1;
 
 	UPROPERTY(BlueprintReadOnly)
 	float currentSpeed = 0.f;
 
-	float UserPitch = 0.f;
+// Getters/Setters
+public:
 
-	float UserYaw = 0.f;
+	bool IsLanded() const { return bLanded; };
 
-	float UserRoll = 0.f;
+	void SetStallSpeed(const float Speed) { StallSpeed = Speed; };
 
-	float NextPitch = 0.f;
+	float GetSpeed() const { return currentSpeed; };
 
-	float NextYaw = 0.f;
+	float GetThrottle() const { return CurrentThrust; };
 
-	float NextRoll = 0.f;
+	void SetDropSpeed(float Speed) { DropSpeed = Speed; };
+
+	void SetFlightMode(const EFlightMode InMode);
+
+	void SetLanded(bool b) { bLanded = b; };
+
+	EThrottleStage ReturnThrottleStage() const { return currentStage; };
+
+	EThrottleStage ReturnPrevThrottleStage() const { return prevStage; };
+
+	void SetInitialSpeed(const float Speed)
+	{
+		currentSpeed = Speed;
+		if (IsValid(Controlled)) Velocity = Controlled->GetActorForwardVector() * Speed;
+	}
+
+	float GetCurrentSpeedKMH() const { return FMath::Max((currentSpeed * 0.036f), 0.f); };
+
+	float ConvertKMHToSpeed(const float Speed) const { return FMath::Max((Speed / 0.036f), 0.f); };
+
+	EThrottleStage getThrottleStage(const float throttle);
+
+	void SetPitch(const float PitchValue) { UserRotation.Pitch = PitchValue; };
+
+	void SetYaw(const float YawValue) { UserRotation.Yaw = YawValue; };
+
+	void SetRoll(const float RollValue) { UserRotation.Roll = RollValue; };
+
+	void SetThrust(const float Thrust) { CurrentThrust = Thrust; };
+
+	const FRotator& GetUserRotation() const { return UserRotation; };
+
+	const FRotator& GetNextRotation() const { return NextRotation; };
+
+	float GetThrust() const { return CurrentThrust; };
+
+	void SetFlying(const bool InFly) { isFlying = InFly; bLanded = false; };
+
+	void AddSpeed(const float Speed, const float D);
+
+private:
+	float FlightDrag = 0.f;
+	
+	FQuat PrevQuat = FQuat::Identity;
+
+	float DropSpeed = 0.f;
+
+	float StallSpeed = 0.f;
+
+	FRotator UserRotation = FRotator::ZeroRotator;
+
+	FRotator NextRotation = FRotator::ZeroRotator;
 
 	float CurrentThrust = 0.f;
 
 	float targetSpeed = 0.f;
 
 	float Acceleration = 0.f;
-	
+
 	float DownPitch = 0.f;
 
-	UPROPERTY(BlueprintReadOnly)
-	int displayG = 1;
+	bool bLanded = false;
+
+	bool bCanTakeOff = false;
+
+	float MaxPitch = 0.f;
+
+	bool bDropping = false;
 
 	FVector Velocity = FVector::ZeroVector;
 
@@ -79,104 +150,47 @@ public:
 
 	bool switchingPhase = false;
 
-	void ApplySpeed(float ThrottlePercentage, float DeltaSeconds);
+	UPROPERTY()
+	UAircraftStats* AircraftStats = nullptr;
 
-	void ApplyRot(float DletaSeconds);
+	UPROPERTY()
+	ABaseAircraft* Controlled = nullptr;
 
-	void SlowSpeed(float ThrottlePercentage);
+	bool isFlying = false;
 
-	void NormalSpeed(float ThrottlePercentage);
-
-	void AfterburnerSpeed(float ThrottlePercentage);
-
-	void ReturnAOA(float DeltaSeconds);
-
-	void Setup(ABaseAircraft* InControl, UAircraftStats* InStats);
-
-	EThrottleStage getThrottleStage(float throttle);
-
-	void SetPitch(float PitchValue) { UserPitch = PitchValue; };
-
-	void SetYaw(float YawValue) { UserYaw = YawValue; };
-
-	void SetRoll(float RollValue) { UserRoll = RollValue; };
-
-	void SetThrust(float Thrust) { CurrentThrust = Thrust; };
-
-	void SetInitialSpeed(float Speed)
-	{ 
-		currentSpeed = Speed; 
-		if (IsValid(Controlled)) Velocity = Controlled->GetActorForwardVector() * Speed;
-	}
-
-	float GetRoll() const { return NextRoll; };
-
-	void SetFlightMode(EFlightMode InMode);
-
-	EThrottleStage ReturnThrottleStage() const { return currentStage; };
-
-	EThrottleStage ReturnPrevThrottleStage() const { return prevStage; };
-
-	float GetSpeed() const { return currentSpeed; };
-
-	float GetThrottle() const { return CurrentThrust; };
-
-	void SetDropSpeed(float Speed) { DropSpeed = Speed; };
-
-	float DropSpeed = 0.f;
-
-	float StallSpeed = 0.f;
-
-	void SetStallSpeed(float Speed) { StallSpeed = Speed; };
-	
-	void AddDropSpeed(float D);
-
-	bool bDropping = false;
-
-	void Stall(float D);
-
-	bool bLanded = false;
-
-	bool bCanTakeOff = false;
-
-	float MaxPitch;
-
-	void SetLanded(bool b) { bLanded = b; };
-
-	void Landed(float D);
-
-	void CheckLanding(float D);
-
-	float GetCurrentSpeedKMH() const { return FMath::Max((currentSpeed * 0.036f), 0); };
-
-	bool IsLanded() const { return bLanded; };
+	static constexpr float VortexG = 9.f;
+	static constexpr float TakeoffSpeed = 10.f;
+	static constexpr int Interp = 50;
 
 private:
-	float FlightDrag = 0.f;
-	
-	FQuat PrevQuat = FQuat::Identity;
-
-	bool bRestrained = false;
 
 	float CalculateSpeedDrag();
 
-	void CalculateGForce(float DeltaSeconds);
+	void CalculateGForce(const float DeltaSeconds);
 
 	float DragAOA();
 
-	void RollAOA(float DeltaSeconds);
+	void RollAOA(const float DeltaSeconds);
 
 	float GetAOA();
 
 	float PitchDrag();
 
-	void ApplyPitch(float DeltaSeconds);
+	void ApplyPitch(const float DeltaSeconds);
 
-	void ApplyYaw(float DeltaSeconds);
+	void ApplyYaw(const float DeltaSeconds);
 
-	void ApplyRoll(float DeltaSeconds);
+	void ApplyRoll(const float DeltaSeconds);
 
-	void TempRecovery(float D, float Deg);
+	void TempRecovery(const float D, const float Deg);
 
 	void CalculateVortex();
+
+	FORCEINLINE bool IsControlledValid() const {
+		return !IsValid(Controlled);
+	}
+
+	FORCEINLINE bool IsAirframeValid() const {
+		return !IsValid(Controlled) || !IsValid(Controlled->Airframe);
+	}
 };

@@ -14,7 +14,7 @@ class MYPROJECT2_API UWeaponData : public UPrimaryDataAsset
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AActor> WeaponMesh;
+	TSubclassOf<AActor> WeaponMesh = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText DisplayName;
@@ -23,6 +23,6 @@ public:
 	FText Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBaseWeaponStats* WeaponStat;
+	UBaseWeaponStats* WeaponStat = nullptr;
 
 };

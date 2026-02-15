@@ -28,34 +28,34 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ULockBoxWidget> LockBoxWidgetClass;
+	TSubclassOf<ULockBoxWidget> LockBoxWidgetClass = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UMinimapWidget> MiniMapClass;
+	TSubclassOf<UMinimapWidget> MiniMapClass = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> AimReticleClass;
+	TSubclassOf<UUserWidget> AimReticleClass = nullptr;
 
 	UPROPERTY()
-	UUserWidget* AimReticleWidget;
+	UUserWidget* AimReticleWidget = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> AOAReticleClass;
+	TSubclassOf<UUserWidget> AOAReticleClass = nullptr;
 
 	UPROPERTY()
-	UUserWidget* AOAReticleWidget;
+	UUserWidget* AOAReticleWidget = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UPitchLadder> PitchLadderClass;
+	TSubclassOf<UPitchLadder> PitchLadderClass = nullptr;
 
 	UPROPERTY()
-	UPitchLadder* PitchLadderWidget;
+	UPitchLadder* PitchLadderWidget = nullptr;
 
 	UPROPERTY()
-	UMinimapWidget* MiniMap;
+	UMinimapWidget* MiniMap = nullptr;
 
 	UPROPERTY()
-	AAircraftPlayerController* PC;
+	AAircraftPlayerController* PC = nullptr;
 
 	UPROPERTY()
 	TArray<ABaseUnit*> Targets;
@@ -64,23 +64,23 @@ public:
 	ULockBoxWidget* SelectedAircraftWidget = nullptr;
 
 	UPROPERTY()
-	APlayerAircraft* Controlled;
+	APlayerAircraft* Controlled = nullptr;
 
-	TWeakObjectPtr<ABaseUnit> LastActor;
+	TWeakObjectPtr<ABaseUnit> LastActor = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UHitNotificationWidget> HitNotiClass;
+	TSubclassOf<UHitNotificationWidget> HitNotiClass = nullptr;
 
 	UPROPERTY()
-	UHitNotificationWidget* HitNotiWidget;
+	UHitNotificationWidget* HitNotiWidget = nullptr;
 
 	UPROPERTY()
 	TMap<ABaseUnit*, ULockBoxWidget*> ActiveWidgets;
 
 	UPROPERTY()
-	ABaseUnit* Target;
+	ABaseUnit* Target = nullptr;
 
-	void UpdateLocked(float LockPercent);
+	void UpdateLocked(const float LockPercent);
 
 	void UpdateSelected();
 
@@ -106,9 +106,9 @@ public:
 	int MaxNum = 0;
 
 	UPROPERTY(BlueprintReadWrite)
-	FName CurrentName;
+	FName CurrentName = NAME_None;
 
-	bool isPitchLadderVisible;
+	bool isPitchLadderVisible = false;
 
 	void HandleWeaponMiss();
 

@@ -24,7 +24,7 @@ public:
 	
 	AFlightGamemode();
 
-	void HandlePlayerState(AAircraftPlayerController* PlayerControl);
+	void HandlePlayerState();
 	
 	void SpawnAIAircraft();
 
@@ -33,30 +33,30 @@ protected:
 	FTimerHandle TimerHandle;
 	
 	UPROPERTY()
-	UAircraftData* AircraftSelected;
+	UAircraftData* AircraftSelected = nullptr;
 
 	UPROPERTY()
-	UAircraftDatabase* Database;
+	UAircraftDatabase* Database = nullptr;
 
 	UPROPERTY()
-	APlayerAircraft* PlayerSpawnedIn;
+	APlayerAircraft* PlayerSpawnedIn = nullptr;
 
 	UPROPERTY()
-	AAircraftPlayerController* PC;
+	AAircraftPlayerController* PC = nullptr;
 
 	FTimerHandle TempHandle;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<APlayerAircraft> Player;
+	TSubclassOf<APlayerAircraft> Player = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ABaseWeapon> Missile;
+	TSubclassOf<ABaseWeapon> Missile = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ABaseWeapon> Bomb;
+	TSubclassOf<ABaseWeapon> Bomb = nullptr;
 
 	UPROPERTY(EditAnywhere) 
-	TSubclassOf<UBaseSpecial> Special;
+	TSubclassOf<UBaseSpecial> Special = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	float PlayerSpawnSpeed = 0.f;
@@ -64,11 +64,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	EFlightMode FlightMode = EFlightMode::Flight;
 
-	virtual void BeginPlay() override;
+	bool bFinished = false;
 
-	void SetPlayerSpeed();
-
-	APlayerStart* PlayerSpawn;
+	FTransform PlayerSpawnLoc = FTransform::Identity;
 
 protected:
 	void FallBackAircraft();
@@ -81,7 +79,9 @@ protected:
 
 	virtual void FinishMission();
 
-	bool bFinished = false;
+	virtual void HandlePlayerSpawnPoint();
 
-	bool bTakingOff;
+	virtual void BeginPlay() override;
+
+	void SetPlayerSpeed();
 };

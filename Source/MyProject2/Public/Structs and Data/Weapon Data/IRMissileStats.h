@@ -14,14 +14,14 @@ class MYPROJECT2_API UIRMissileStats : public UBaseWeaponStats
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float TurnRate;
+	float TurnRate = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Acceleration;
+	float Acceleration = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MaxSpeed;
+	float MaxSpeed = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float LockOnRange;
+	float LockOnRange = 0.f;
 };

@@ -11,6 +11,7 @@
 #include "UI/PlayerHUD.h"
 #include "EngineUtils.h"
 #include "Subsystem/AircraftRegistry.h"
+#include "Structs and Data/AircraftLoadoutData.h"
 #include "Weapons/BaseWeapon.h"
 
 AFlightGamemode::AFlightGamemode() 
@@ -37,10 +38,10 @@ void AFlightGamemode::SpawnInController()
 	Database = NewObject<UAircraftDatabase>(PC->GetGameInstance());
 	if (!IsValid(Database)) return;
 
-	FString Path = "/Game/Aircraft/AircraftData";
+	const FString Path = "/Game/Aircraft/AircraftData";
 	Database->LoadAllAircraftFromFolder(Path);
 
-	HandlePlayerState(PC);
+	HandlePlayerState();
 
 	if (IsValid(PlayerSpawnedIn))
 	{
@@ -64,55 +65,67 @@ void AFlightGamemode::SpawnAIAircraft()
 
 void AFlightGamemode::SetPlayerSpeed() 
 {
-	if (!IsValid(PlayerSpawnedIn)) return;
-	PlayerSpawnedIn->SetSpeed(PlayerSpawnSpeed/0.036);
+	if (IsValid(PlayerSpawnedIn)) PlayerSpawnedIn->SetSpeed(PlayerSpawnSpeed/0.036);
 }
 
-void AFlightGamemode::HandlePlayerState(AAircraftPlayerController* PlayerControl)
+void AFlightGamemode::HandlePlayerSpawnPoint() 
 {
-	APlayerStart* PlayerStart = nullptr;
+	if (FlightMode != EFlightMode::Naval) {
+		APlayerStart* PlayerStart = nullptr;
 
+		UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
+
+		if (!IsValid(GI)) return;
+
+		for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It)
+		{
+			PlayerStart = *It;
+			break;
+		}
+
+		if (!IsValid(PlayerStart) || !HasAuthority()) return;
+
+		PlayerSpawnLoc = PlayerStart->GetTransform();
+	}
+}
+
+void AFlightGamemode::HandlePlayerState()
+{
 	UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
 
+	HandlePlayerSpawnPoint();
+	
 	if (!IsValid(GI)) return;
+	const FAircraftLoadoutData& FullLoadout = GI->GetLoadout();
 
-	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It)
-	{
-		PlayerStart = *It;
-		break;
-	}
-
-	if (!IsValid(PlayerStart) || !HasAuthority()) return;
-	PlayerSpawn = PlayerStart;
-
-	if (!IsValid(GI->AircraftClass))
+	if (!IsValid(FullLoadout.AircraftClass))
 	{
 		FallBackAircraft();
 	}
 	else
 	{
-		FTransform SpawnTransform = PlayerStart->GetActorTransform();
-		PlayerSpawnedIn = GetWorld()->SpawnActorDeferred<APlayerAircraft>(GI->AircraftClass, SpawnTransform);
+		FTransform SpawnTransform = PlayerSpawnLoc;
+		PlayerSpawnedIn = GetWorld()->SpawnActorDeferred<APlayerAircraft>(FullLoadout.AircraftClass, SpawnTransform);
 	}
 
-	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
+	TMap<FName, TSubclassOf<ABaseWeapon>> WeaponLoadout;
 	
 	// TODO: Change later, its fine if the weapon is empty the user can choose that, just easier for testing for now
 
-	if (GI->SelectedWeapons.IsEmpty()) 
+	if (FullLoadout.EquippedWeapons.IsEmpty())
 	{
-		Loadout = TemporaryLoadout();
+		WeaponLoadout = TemporaryLoadout();
 	}
 	else 
 	{
-		Loadout = GI->SelectedWeapons;
+		WeaponLoadout = FullLoadout.EquippedWeapons;
 	}
 
 	if (!IsValid(PlayerSpawnedIn)) return;
 
-	UGameplayStatics::FinishSpawningActor(PlayerSpawnedIn, PlayerStart->GetActorTransform());
+	UGameplayStatics::FinishSpawningActor(PlayerSpawnedIn,PlayerSpawnLoc);
 
-	PlayerSpawnedIn->SetWeapons(Loadout);
+	PlayerSpawnedIn->SetWeapons(WeaponLoadout);
 
 	if (IsValid(Special)) PlayerSpawnedIn->SetSpecial(Special);
 
@@ -139,18 +152,8 @@ void AFlightGamemode::FallBackAircraft()
 
 	if (!IsValid(AircraftSelected) || !HasAuthority() || !IsValid(AircraftSelected->AircraftClass)) return;
 
-	APlayerStart* PlayerStart = nullptr;
-
-	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It)
-	{
-		PlayerStart = *It;
-		break;
-	}
-
-	if (!IsValid(PlayerStart)) return;
-	FTransform Transform = PlayerStart->GetActorTransform();
-	PlayerSpawnedIn = GetWorld()->SpawnActorDeferred<APlayerAircraft>(AircraftSelected->AircraftClass, Transform);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Z: %.2f"), Transform.GetLocation().Z));
+	HandlePlayerSpawnPoint();
+	PlayerSpawnedIn = GetWorld()->SpawnActorDeferred<APlayerAircraft>(AircraftSelected->AircraftClass, PlayerSpawnLoc);
 }
 
 // TODO: Remove this later, this is only to set different weapons for testing

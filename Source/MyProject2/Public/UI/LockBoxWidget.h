@@ -29,7 +29,7 @@ public:
 
 	void SelectStop();
 
-	void UpdateLockProgress(float Percent);
+	void UpdateLockProgress(const float Percent);
 
 	void PlayFullLockAnimation();
 
@@ -38,13 +38,13 @@ public:
 	void ResetLockAnimation();
 
 	UPROPERTY(meta=(BindWidgetAnim), Transient)
-	UWidgetAnimation* LockApproachAnim;
+	UWidgetAnimation* LockApproachAnim = nullptr;
 
 	UPROPERTY(meta=(BindWidgetAnim), Transient)
-	UWidgetAnimation* LockConfirm;
+	UWidgetAnimation* LockConfirm = nullptr;
 
 	UPROPERTY(BlueprintReadOnly)
-	AActor* TrackedTarget;
+	AActor* TrackedTarget = nullptr;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool isLockedOn = false;
@@ -53,13 +53,13 @@ public:
 
 protected:
 	UPROPERTY(meta = (BindWidget))
-	UImage* ReticleImage;
+	UImage* ReticleImage = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UImage* SmallReticleImage;
+	UImage* SmallReticleImage = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	USizeBox* SizeBox_Reticle;
+	USizeBox* SizeBox_Reticle = nullptr;
 
 private:
 	void ResetAnimation(UWidgetAnimation* Animation);

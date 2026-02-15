@@ -164,7 +164,7 @@ void UWeaponSystemComponent::BuildWeaponGroups()
 	if (WeaponGroups.Num() > 0) SelectWeapon(0);
 }
 
-void UWeaponSystemComponent::FireWeaponSelected(TSubclassOf<ABaseWeapon> WeaponClass, AActor* Target, float Speed)
+void UWeaponSystemComponent::FireWeaponSelected(const TSubclassOf<ABaseWeapon> WeaponClass, AActor* Target, const float Speed)
 {
 	if (!WeaponGroups.Contains(WeaponClass)) return;
 	for (FCooldownWeapon* Weapon : WeaponGroups[WeaponClass])
@@ -191,7 +191,7 @@ void UWeaponSystemComponent::OnWeaponResult(bool bHit)
 	OnWeaponHit.Broadcast(bHit);
 }
 
-void UWeaponSystemComponent::SelectWeapon(int WeaponIndex)
+void UWeaponSystemComponent::SelectWeapon(const int WeaponIndex)
 {
 	TArray<TSubclassOf<ABaseWeapon>> Keys;
 	WeaponGroups.GetKeys(Keys);
@@ -213,7 +213,7 @@ void UWeaponSystemComponent::SelectWeapon(int WeaponIndex)
 }
 
 // For AI to find a weapon
-void UWeaponSystemComponent::SearchAndEquipWeapon(TSubclassOf<ABaseWeapon> WeaponClass) 
+void UWeaponSystemComponent::SearchAndEquipWeapon(const TSubclassOf<ABaseWeapon> WeaponClass) 
 {
 	if (IsValid(CurrentWeapon) && WeaponClass == CurrentWeapon->GetClass()) return;
 	const TArray<FCooldownWeapon*>* WeaponArray = WeaponGroups.Find(WeaponClass);
@@ -253,7 +253,7 @@ void UWeaponSystemComponent::GetCount()
 	if (CurrentWeaponCount <= 0) ResetLockedOn();
 }
 
-void UWeaponSystemComponent::UpdateLockedOn(float DeltaSeconds, AActor* Target) 
+void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, AActor* Target)
 {
 	if (!CurrentWeapon || !IsValid(Target)) 
 	{

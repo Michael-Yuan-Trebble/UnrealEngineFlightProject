@@ -14,9 +14,6 @@ UBTServiceChooseTarget::UBTServiceChooseTarget() {
 	NodeName = "Update Target Actor";
 	Interval = 0.5f;
 	bNotifyBecomeRelevant = true;
-	timeSinceLastPick = 0.f;
-	//Make the pick interval based on pilot skill, what they are currently doing, and random chance
-	PickInterval = 3.f;
 }
 
 void UBTServiceChooseTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) {
@@ -49,7 +46,7 @@ void UBTServiceChooseTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 
 void UBTServiceChooseTarget::PickTarget() 
 {
-	for (FDetectedAircraftInfo Info : AllAircraft)
+	for (FDetectedAircraftInfo& Info : AllAircraft)
 	{
 		if (Info.CurrentPawn == Controlled) return;
 		if (GEngine && Info.CurrentPawn)

@@ -100,9 +100,9 @@ void AAircraftBullet::DestroyBullet(AActor* OtherActor)
 
 	if (OtherActor->Implements<UTeamInterface>())
 	{
-		EFaction OtherFaction = Owner.Get()->Faction;
+		EFaction OtherFaction = Owner.Get()->GetFaction();
 		OtherFaction = ITeamInterface::Execute_GetFaction(OtherActor);
-		if (OtherFaction == Owner.Get()->Faction) return;
+		if (OtherFaction == Owner.Get()->GetFaction()) return;
 	}
 
 	if (OtherActor->Implements<UDamageableInterface>())

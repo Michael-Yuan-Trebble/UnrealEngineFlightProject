@@ -19,25 +19,25 @@ public:
 
 	void Drop();
 
-	float ReturnCooldownTime() { return cooldownTime; }
+	float ReturnCooldownTime() const { return cooldownTime; }
 
 	UPROPERTY(EditAnywhere)
-	UBombStats* BombStats;
+	UBombStats* BombStats = nullptr;
 
-	FVector Velocity;
+	FVector Velocity = FVector::ZeroVector;
 
-	ABaseAircraft* Owner;
+	ABaseAircraft* Owner = nullptr;
 
 	bool isAir = false;
 	
-	float bombSpeed;
+	float bombSpeed = 0.f;
 
 protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void FireStatic(float launchSpeed);
+	virtual void FireStatic(const float launchSpeed);
 
 private:
 	UFUNCTION()

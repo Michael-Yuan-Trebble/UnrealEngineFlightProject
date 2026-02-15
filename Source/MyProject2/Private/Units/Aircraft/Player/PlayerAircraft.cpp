@@ -132,7 +132,7 @@ void APlayerAircraft::SetHUD(APlayerHUD* InHUD)
 	ManagerComp->SetThirdPerson();
 }
 
-float APlayerAircraft::GetRoll() { if (FlightComponent) return FlightComponent->GetRoll(); return 0; }
+const FRotator& APlayerAircraft::GetNextRotation() { if (FlightComponent) return FlightComponent->GetNextRotation(); return FRotator::ZeroRotator; }
 
 void APlayerAircraft::SwitchCameras() { if (IsValid(ManagerComp)) ManagerComp->SwitchCamera(); }
 

@@ -130,9 +130,9 @@ void ABaseIRMissile::CheckAndDelete(AActor* OtherActor)
 
 	if (OtherActor->Implements<UTeamInterface>())
 	{
-		EFaction OtherFaction = Owner->Faction;
+		EFaction OtherFaction = Owner->GetFaction();
 		OtherFaction = ITeamInterface::Execute_GetFaction(OtherActor);
-		if (OtherFaction == Owner->Faction) return;
+		if (OtherFaction == Owner->GetFaction()) return;
 	}
 
 	if (OtherActor->Implements<UDamageableInterface>())

@@ -11,7 +11,7 @@ void UBuyButton::NativeConstruct()
 	CancelBuyButton->OnClicked.AddDynamic(this, &UBuyButton::HandleCancelClick);
 }
 
-void UBuyButton::Setup(FName InName, int InCost)
+void UBuyButton::Setup(const FName& InName, const int InCost)
 {
 	Name = InName;
 	Cost = InCost;

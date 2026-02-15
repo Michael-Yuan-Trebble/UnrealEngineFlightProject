@@ -16,5 +16,5 @@ public:
 	TArray<FName> AircraftOwned;
 
 	UPROPERTY(EditAnywhere, Category = "SaveData")
-	int32 Money;
+	int32 Money = 0;
 };

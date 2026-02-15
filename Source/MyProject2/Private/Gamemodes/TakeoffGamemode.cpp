@@ -19,11 +19,10 @@ void ATakeoffGamemode::Tick(float D) {
 	Super::Tick(D);
 }
 
-void ATakeoffGamemode::CheckTakeoff(float D) {
-	if (!IsValid(PlayerSpawn) || !IsValid(PlayerSpawnedIn)) return;
+void ATakeoffGamemode::CheckTakeoff(const float D) {
+	if (!IsValid(PlayerSpawnedIn)) return;
 	FVector PlayerLoc = PlayerSpawnedIn->GetActorLocation();
-	FVector StartLoc = PlayerSpawn->GetActorLocation();
-	float Dist = FVector::Dist(PlayerLoc, StartLoc);
+	float Dist = FVector::Dist(PlayerLoc, PlayerSpawnLoc.GetLocation());
 	if (Distance >= Dist) {
 		TakeoffTimer -= D;
 		if (TakeoffTimer <= 0) {

@@ -25,7 +25,7 @@ public:
 	UAircraftSelectionWidget(const FObjectInitializer& ObjectInitializer);
 
 	UPROPERTY(BlueprintReadWrite)
-	UAircraftDatabase* AircraftDatabase;
+	UAircraftDatabase* AircraftDatabase = nullptr;
 
 	UPROPERTY(BlueprintAssignable,Category = "Events")
 	FAircraftSelectedSignature OnWidgetSelected;
@@ -39,17 +39,17 @@ public:
 		UAircraftSelectionComponent* InSelect);
 
 	UPROPERTY()
-	UMenuManagerComponent* MenuManager;
+	UMenuManagerComponent* MenuManager = nullptr;
 
 	UPROPERTY()
-	UAircraftSelectionComponent* AircraftUI;
+	UAircraftSelectionComponent* AircraftUI = nullptr;
 
 	TArray<FName> Owned;
 
 	UPROPERTY()
 	TMap<FName, UAircraftButtonWidget*> ButtonArray;
 
-	int CurrentMoney;
+	int CurrentMoney = 0;
 
 	void UpdateAircraft(FName AircraftChange);
 
@@ -59,10 +59,10 @@ protected:
 	void HandleAircraftSelected(UAircraftData* Aircraft);
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> AircraftButtonClass;
+	TSubclassOf<UUserWidget> AircraftButtonClass = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
-	UScrollBox* AircraftScrollBox;
+	UScrollBox* AircraftScrollBox = nullptr;
 
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		MenuManager = nullptr;

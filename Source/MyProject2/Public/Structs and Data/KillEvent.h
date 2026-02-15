@@ -10,8 +10,8 @@ struct FKillEvent
 {
 	GENERATED_BODY()
 
-	UPROPERTY() TWeakObjectPtr<AActor> Killer;
-	UPROPERTY() TWeakObjectPtr<AActor> Victim;
-	UPROPERTY() TSubclassOf<AActor> WeaponUsed;
-	UPROPERTY() float Time;
+	UPROPERTY() TWeakObjectPtr<AActor> Killer = nullptr;
+	UPROPERTY() TWeakObjectPtr<AActor> Victim = nullptr;
+	UPROPERTY() TSubclassOf<AActor> WeaponUsed = nullptr;
+	UPROPERTY() float Time = 0.f;
 };

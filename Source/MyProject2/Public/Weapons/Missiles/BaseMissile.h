@@ -19,51 +19,51 @@ public:
 	ABaseMissile();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UNiagaraSystem* SmokeTrailSystem;
+	UNiagaraSystem* SmokeTrailSystem = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UNiagaraComponent* SmokeTrail;
+	UNiagaraComponent* SmokeTrail = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UNiagaraSystem* MissileRocketSystem;
+	UNiagaraSystem* MissileRocketSystem = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	UNiagaraComponent* MissileRocket;
+	UNiagaraComponent* MissileRocket = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	UNiagaraSystem* ExplosionEffect;
+	UNiagaraSystem* ExplosionEffect = nullptr;
 
 	UPROPERTY()
-	UProjectileMovementComponent* ProjectileMovement;
+	UProjectileMovementComponent* ProjectileMovement = nullptr;
 
-	FVector CurrentDirection;
+	FVector CurrentDirection = FVector::ZeroVector;
 
 	UPROPERTY()
-	AActor* Tracking;
+	AActor* Tracking = nullptr;
 
-	float missileAcceleration;
+	float missileAcceleration = 0.f;
 
-	float missileMaxSpeed;
+	float missileMaxSpeed = 0.f;
 
-	float missileVelocity;
+	float missileVelocity = 0.f;
 
-	float turnRate;
+	float turnRate = 0.f;
 
 	bool bAir = false;
 
 	bool bDestroyed = false;
 
-	virtual void LaunchSequence(float Speed);
+	virtual void LaunchSequence(const float Speed);
 
 	float ReturnCooldownTime() { return cooldownTime; };
 
 	void activateSmoke();
 
-	ABaseAircraft* Owner;
+	ABaseAircraft* Owner = nullptr;
 
 	FTimerHandle VFXCheckhandle;
 
-	void ApplyVFXLOD(FVector CameraDistance);
+	void ApplyVFXLOD(const FVector& CameraDistance);
 
 	void NotifyCountermeasure();
 
@@ -76,7 +76,7 @@ protected:
 
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	void DestroyMissile();
 

@@ -5,7 +5,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/AssetManager.h"
 
-void UAircraftDatabase::LoadAllAircraftFromFolder(FString Path) 
+void UAircraftDatabase::LoadAllAircraftFromFolder(const FString& Path) 
 {
     AllAircraft.Empty();
 

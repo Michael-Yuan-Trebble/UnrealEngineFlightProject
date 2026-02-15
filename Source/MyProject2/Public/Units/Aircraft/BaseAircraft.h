@@ -14,6 +14,7 @@
 #include "Enums/FlightMode.h"
 #include "Units/BaseUnit.h"
 #include "Weapons/Missiles/BaseMissile.h"
+#include "Enums/ThrottleStage.h"
 #include "BaseAircraft.generated.h"
 
 class UFlightComponent;
@@ -65,7 +66,7 @@ public:
 
 	TArray<TWeakObjectPtr<ABaseMissile>> IncomingMissiles;
 
-	bool bLocked;
+	bool bLocked = false;
 
 	UPROPERTY(EditAnywhere)
 	int32 NumOfAfterburners;
@@ -188,10 +189,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float ReturnElevator() const;
 
+	EThrottleStage GetThrottleStage() const;
+
+	void ApplySpeed(const float Speed, const float D);
+
 	UPROPERTY(EditAnywhere)
 	float MaxSinkRate = 100.f;
-
-	bool bDestroyed = false;
 
 	void Crash();
 

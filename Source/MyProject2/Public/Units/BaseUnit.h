@@ -26,42 +26,6 @@ public:
 
 	FOnThisDeath OnUnitDeath;
 
-	UPROPERTY(EditAnywhere)
-	UBoxComponent* UnitRoot;
-
-	UPROPERTY(EditAnywhere)
-	EFaction Faction;
-
-	UPROPERTY()
-	UPhysicsConstraintComponent* Constraint;
-
-	UPROPERTY(EditAnywhere)
-	ETargetType UnitType = ETargetType::Unknown;
-
-	UPROPERTY(EditAnywhere)
-	bool bStartsTargetable = true;
-
-	UPROPERTY(EditAnywhere)
-	bool bIsTargetable = false;
-
-	UPROPERTY()
-	UAircraftRegistry* Registry = nullptr;
-
-	bool isAlive = true;
-
-	float health;
-
-	UPROPERTY()
-	UHealthComponent* HealthComp;
-
-	virtual FVector GetTargetLocation() const override { return this->GetActorLocation(); };
-
-	virtual bool IsLockable() const override { return isAlive && bIsTargetable; };
-
-	virtual ETargetType GetTargetType() const override { return UnitType; };
-
-	virtual EFaction GetFaction_Implementation() const override{ return Faction; };
-
 	virtual void OnDamage_Implementation(AActor* Weapon, AActor* Launcher, AActor* Target, float Damage) override;
 
 	virtual void PossessedBy(AController* Controller) override;
@@ -75,12 +39,61 @@ public:
 
 	virtual void HandleLOD(FVector CameraLoc);
 
-	UPROPERTY()
-	AActor* Tracked;
+// Getters/Setters
+public:
+
+	FVector GetTargetLocation() const { return this->GetActorLocation(); };
+
+	bool IsLockable() const { return bAlive && bIsTargetable; };
+
+	ETargetType GetTargetType() const { return UnitType; };
+
+	EFaction GetFaction_Implementation() const { return Faction; };
+
+	void SetTracking(AActor* InTrack) { Tracked = InTrack; };
+
+	AActor* GetTracking() const { return Tracked; };
+
+	float GetHealth() const { return health; };
+
+	EFaction GetFaction() const { return Faction; };
 
 protected:
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* UnitRoot = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	EFaction Faction = EFaction::Ally;
+
+	UPROPERTY(EditAnywhere)
+	ETargetType UnitType = ETargetType::Unknown;
+
+	UPROPERTY()
+	UPhysicsConstraintComponent* Constraint = nullptr;
+
+	UPROPERTY()
+	UAircraftRegistry* Registry = nullptr;
+
+	UPROPERTY()
+	UHealthComponent* HealthComp = nullptr;
+
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	UPROPERTY(EditAnywhere)
+	bool bStartsTargetable = true;
+
+	UPROPERTY(EditAnywhere)
+	bool bIsTargetable = false;
+
+	UPROPERTY(EditAnywhere)
+	float health = 100;
+
+	bool bAlive = true;
+
+	UPROPERTY()
+	AActor* Tracked = nullptr;
 
 };

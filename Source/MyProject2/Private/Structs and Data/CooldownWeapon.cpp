@@ -3,16 +3,9 @@
 
 #include "Structs and Data/CooldownWeapon.h"
 
-FCooldownWeapon::FCooldownWeapon() 
-	: WeaponInstance(nullptr)
-	, WeaponClass(nullptr)
-	, bCanFire(true)
-	, time(0.f)
-	, cooldownTime(5.0f)
-	, SocketName(NAME_None)
-{}
+FCooldownWeapon::FCooldownWeapon() {}
 
-void FCooldownWeapon::UpdateCooldown(float DeltaTime) 
+void FCooldownWeapon::UpdateCooldown(const float DeltaTime) 
 {
 	time = FMath::Max(0, time-DeltaTime);
 	bCanFire = (time <= 0);

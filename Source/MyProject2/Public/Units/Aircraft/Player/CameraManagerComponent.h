@@ -23,20 +23,8 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetHorizontal(float X);
-	void SetVertical(float Y);
-
-	UPROPERTY()
-	USpringArmComponent* FirstPersonSpringArm;
-
-	UPROPERTY()
-	USpringArmComponent* ThirdPersonSpringArm;
-
-	UPROPERTY()
-	USpringArmComponent* MainSpringArm;
-
-	UPROPERTY()
-	UAircraftAudioComponent* AudioComp;
+	void SetHorizontal(const float X);
+	void SetVertical(const float Y);
 
 	void SetControlled(APlayerAircraft* InControl) { Controlled = InControl; };
 
@@ -47,15 +35,6 @@ public:
 	void SwitchCamera();
 
 	ECameraPerspective CurrentMode = ECameraPerspective::ThirdPerson;
-
-	UPROPERTY()
-	APlayerAircraft* Controlled;
-
-	UPROPERTY()
-	APlayerHUD* HUD;
-
-	float LookXLock = 0.f;
-	float LookYLock = 0.f;
 
 	float Sensitivity = 1.f;
 
@@ -70,19 +49,20 @@ public:
 	
 	float InterpSpeed = 1.f;
 
-	void SetInterp(float In) { InterpSpeed = In; };
+	void SetInterp(const float In) { InterpSpeed = In; };
 
-	void SetSpringArm(float Throttle, float D);
-
-protected:
-	virtual void BeginPlay() override;
+	void SetSpringArm(const float Throttle, const float D);
 		
 private:
+	virtual void BeginPlay() override;
+
 	void HandleHorizontal();
 	void HandleVertical();
 
-	void HandleRollLag(float Delta);
+	void HandleRollLag(const float Delta);
 
+	float LookXLock = 0.f;
+	float LookYLock = 0.f;
 	float LookX = 0.f;
 	float LookY = 0.f;
 
@@ -93,5 +73,23 @@ private:
 	float ThirdPersonLength = 0.f;
 
 	void SetFirstPerson();
+
+	UPROPERTY()
+	USpringArmComponent* FirstPersonSpringArm = nullptr;
+
+	UPROPERTY()
+	USpringArmComponent* ThirdPersonSpringArm = nullptr;
+
+	UPROPERTY()
+	USpringArmComponent* MainSpringArm = nullptr;
+
+	UPROPERTY()
+	UAircraftAudioComponent* AudioComp = nullptr;
+
+	UPROPERTY()
+	APlayerAircraft* Controlled = nullptr;
+
+	UPROPERTY()
+	APlayerHUD* HUD = nullptr;
 
 };

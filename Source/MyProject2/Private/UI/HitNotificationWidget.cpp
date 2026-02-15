@@ -3,7 +3,7 @@
 
 #include "UI/HitNotificationWidget.h"
 
-void UHitNotificationWidget::ShowMessage(FText msg) 
+void UHitNotificationWidget::ShowMessage(const FText& msg) 
 {
 	if (msg.IsEmpty() || !Message) return;
 	Message->SetText(msg);

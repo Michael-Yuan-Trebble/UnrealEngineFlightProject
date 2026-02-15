@@ -37,16 +37,16 @@ protected:
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 	UPROPERTY()
-	AActor* Selected;
+	AActor* Selected = nullptr;
 
 	UPROPERTY()
-	AEnemyAircraft* Controlled;
+	AEnemyAircraft* Controlled = nullptr;
 
 	UPROPERTY(Transient)
-	UBlackboardComponent* BlackboardComp;
+	UBlackboardComponent* BlackboardComp = nullptr;
 
 	UPROPERTY()
-	AEnemyAircraftAI* Controller;
+	AEnemyAircraftAI* Controller = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector YawKey;
@@ -68,20 +68,18 @@ protected:
 
 	const float RollGain = 0.015f;
 
-
-
 private:
 	EAIThrottleMode GetThrottleMode(float distance);
 
-	void CalculateAngle(float DeltaSeconds);
+	void CalculateAngle(const float DeltaSeconds);
 
-	float CalculateRollDegrees(FVector LocalDir);
+	float CalculateRollDegrees(const FVector& LocalDir);
 
-	float CalculatePitchDegrees(FVector LocalDir);
+	float CalculatePitchDegrees(const FVector &LocalDir);
 
-	float CalculateYawDegrees(FVector LocalDir);
+	float CalculateYawDegrees(const FVector& LocalDir);
 
-	void CalculateThrust(float DeltaSeconds);
+	void CalculateThrust(const float DeltaSeconds);
 
 	float PursuitThrottle(ABaseAircraft* Target);
 };

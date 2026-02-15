@@ -6,10 +6,11 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Structs and Data/MissionData.h"
 #include "LevelButton.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelPicked, FName, SelectedLevel);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelPicked, FMissionData, SelectedLevel);
 
 UCLASS()
 class MYPROJECT2_API ULevelButton : public UUserWidget
@@ -21,9 +22,9 @@ public:
 	FOnLevelPicked OnLevelPicked;
 
 	UPROPERTY(EditAnywhere)
-	FName LevelName;
+	FMissionData MissionData;
 
-	void SetupLevel(FName InName);
+	void SetupLevel(const FMissionData& InData);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -34,8 +35,8 @@ private:
 	void HandleButtonClick();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* LevelSelectbtn;
+	UButton* LevelSelectbtn = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* LevelText;
+	UTextBlock* LevelText = nullptr;
 };

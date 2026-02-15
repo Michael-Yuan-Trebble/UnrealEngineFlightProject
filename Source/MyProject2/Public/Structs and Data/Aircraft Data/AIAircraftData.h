@@ -14,14 +14,14 @@ class MYPROJECT2_API UAIAircraftData : public UPrimaryDataAsset
 public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	TSubclassOf<APawn> AircraftClass;
+	TSubclassOf<APawn> AircraftClass = nullptr;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	FName AircraftName;
+	FName AircraftName = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText Class;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAircraftStats* Stats;
+	UAircraftStats* Stats = nullptr;
 };

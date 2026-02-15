@@ -6,9 +6,6 @@
 #include "BehaviorTree/BTService.h"
 #include "BTServiceShootGun.generated.h"
 
-#define SHOOTDISTANCE 75000
-#define CONEANGLE 5
-
 class AEnemyAircraft;
 class AEnemyAircraftAI;
 
@@ -32,16 +29,20 @@ private:
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 	UPROPERTY()
-	AActor* Selected;
+	AActor* Selected = nullptr;
 
 	UPROPERTY()
-	AEnemyAircraft* Controlled;
+	AEnemyAircraft* Controlled = nullptr;
 
 	UPROPERTY()
-	AEnemyAircraftAI* Controller;
+	AEnemyAircraftAI* Controller = nullptr;
 
 	UPROPERTY()
-	UBlackboardComponent* BlackboardComp;
+	UBlackboardComponent* BlackboardComp = nullptr;
 
 	bool IsInsideCone();
+
+	static constexpr int ShootDistance = 75000;
+
+	static constexpr int ConeAngle = 5;
 };

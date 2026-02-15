@@ -15,7 +15,7 @@ class MYPROJECT2_API UAircraftData : public UPrimaryDataAsset
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	TSubclassOf<APawn> AircraftClass;
+	TSubclassOf<APawn> AircraftClass = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText Class;
@@ -24,10 +24,10 @@ public:
 	TArray<FPylonLoadout> PylonLoadouts;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int NumOfPylons;
+	int NumOfPylons = 0;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	int price;
+	int price = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText Description;
@@ -36,5 +36,5 @@ public:
 	TArray<TSubclassOf<UBaseSpecial>> Specials;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAircraftStats* AircraftStat;
+	UAircraftStats* AircraftStat = nullptr;
 };

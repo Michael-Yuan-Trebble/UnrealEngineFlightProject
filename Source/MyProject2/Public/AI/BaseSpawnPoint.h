@@ -14,7 +14,7 @@ class MYPROJECT2_API ABaseSpawnPoint : public AActor
 	
 public:	
 	UPROPERTY(EditAnywhere)
-	ETargetType TeamType;
+	ETargetType TeamType = ETargetType::Unknown;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void ActivateSpawn();

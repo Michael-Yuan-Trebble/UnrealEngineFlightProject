@@ -69,13 +69,13 @@ void AEnemyAircraftAI::ShootGun(bool bShoot)
 	bIsFiring = bShoot;
 }
 
-void AEnemyAircraftAI::SetThrust(float Thrust) { if (Controlled) Controlled->SetThrust(Thrust); }
+void AEnemyAircraftAI::SetThrust(const float Thrust) { if (Controlled) Controlled->SetThrust(Thrust); }
 
-void AEnemyAircraftAI::SetPitch(float Pitch) { if (Controlled) Controlled->SetPitch(Pitch); }
+void AEnemyAircraftAI::SetPitch(const float Pitch) { if (Controlled) Controlled->SetPitch(Pitch); }
 
-void AEnemyAircraftAI::SetRoll(float Roll) { if (Controlled) Controlled->SetRoll(Roll); }
+void AEnemyAircraftAI::SetRoll(const float Roll) { if (Controlled) Controlled->SetRoll(Roll); }
 
-void AEnemyAircraftAI::SetYaw(float Yaw) { if (Controlled) Controlled->SetRudder(Yaw); }
+void AEnemyAircraftAI::SetYaw(const float Yaw) { if (Controlled) Controlled->SetRudder(Yaw); }
 
 void AEnemyAircraftAI::SetFlying(bool bIsFlying) { if (Controlled) Controlled->SetFlying(bIsFlying); }
 

@@ -19,7 +19,7 @@ public:
 	virtual void Tick(float D) override;
 
 private:
-	void CheckLanding(float D);
+	void CheckLanding(const float D);
 
 	UPROPERTY(EditAnywhere)
 	float LandingTimeCounter = 3;

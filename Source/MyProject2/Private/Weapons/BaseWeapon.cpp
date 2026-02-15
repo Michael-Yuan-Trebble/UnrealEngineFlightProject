@@ -21,12 +21,12 @@ void ABaseWeapon::Tick(float DeltaTime)
 }
 
 
-void ABaseWeapon::FireStatic(float speed) 
+void ABaseWeapon::FireStatic(const float speed)
 {
 
  }
 
-void ABaseWeapon::FireTracking(float speed, AActor* Target) 
+void ABaseWeapon::FireTracking(const float speed, AActor* Target)
 {
 
  }

@@ -12,5 +12,5 @@ struct MYPROJECT2_API FSpecialInfo
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	FName SpecialName;
+	FName SpecialName = NAME_None;
 };

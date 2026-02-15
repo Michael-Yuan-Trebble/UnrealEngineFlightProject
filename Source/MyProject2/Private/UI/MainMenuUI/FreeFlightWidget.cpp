@@ -10,20 +10,20 @@ void UFreeFlightWidget::InitLevels()
 {
 	for (const FLevelInfo Level : LevelList->Levels) 
 	{
-		if (Level.LevelName.IsNone()) continue;
+		if (Level.LevelData.LevelName.IsNone()) continue;
 
 		ULevelButton* Button = CreateWidget<ULevelButton>(GetWorld(), LevelButtonClass);
 		if (!Button) continue;
 
-		Button->SetupLevel(Level.LevelName);
+		Button->SetupLevel(Level.LevelData);
 		Button->OnLevelPicked.AddDynamic(this, &UFreeFlightWidget::HandleLevelButtonClicked);
 		if (!LevelScrollBox) continue;
 		LevelScrollBox->AddChild(Button);
 	}
 }
 
-void UFreeFlightWidget::HandleLevelButtonClicked(const FName InLevel) 
+void UFreeFlightWidget::HandleLevelButtonClicked(FMissionData InLevel)
 {
-	if (InLevel.IsNone()) return;
+	if (InLevel.LevelName.IsNone()) return;
 	OnLevelSelected.Broadcast(InLevel);
 }

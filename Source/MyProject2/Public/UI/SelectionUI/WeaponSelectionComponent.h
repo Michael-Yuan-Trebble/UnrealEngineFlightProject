@@ -27,22 +27,22 @@ public:
 	void AddAircraft(UAircraftData* Data);
 	
 	UPROPERTY()
-	AAircraftPlayerController* PC;
+	AAircraftPlayerController* PC = nullptr;
 
 	UPROPERTY()
-	AAircraftSelectionGamemode* GM; 
+	AAircraftSelectionGamemode* GM = nullptr;
 
 	UPROPERTY()
-	UMenuManagerComponent* MenuManager;
+	UMenuManagerComponent* MenuManager = nullptr;
 
 	UPROPERTY()
-	UAircraftData* Aircraft;
+	UAircraftData* Aircraft = nullptr;
 
 	UPROPERTY()
-	UWeaponSelectionWidget* WeaponSelectUI;
+	UWeaponSelectionWidget* WeaponSelectUI = nullptr;
 
 	UPROPERTY()
-	TSubclassOf<UUserWidget> SelectionWidget;
+	TSubclassOf<UUserWidget> SelectionWidget = nullptr;
 
 	int32 CurrentPylonIndex = 0;
 

@@ -11,7 +11,7 @@ void ABaseMissionController::StartMission() {
 
 }
 
-void ABaseMissionController::StartWave(int32 WaveIndex) {
+void ABaseMissionController::StartWave(const int32 WaveIndex) {
 
 }
 

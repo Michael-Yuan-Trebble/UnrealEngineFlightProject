@@ -23,20 +23,20 @@ class MYPROJECT2_API UBaseWeaponStats : public UDataAsset
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Damage;
+	float Damage = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float LifeTime;
+	float LifeTime = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Cooldown;
+	float Cooldown = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EWeaponType WeaponType;
+	EWeaponType WeaponType = EWeaponType::Gun;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<ETargetType> SupportedTargetTypes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName InGameName;
+	FName InGameName = NAME_None;
 };

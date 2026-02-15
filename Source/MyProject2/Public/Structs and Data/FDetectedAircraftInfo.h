@@ -14,16 +14,16 @@ public:
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	FVector Location;
+	FVector Location = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator Rotation;
+	FRotator Rotation = FRotator::ZeroRotator;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	APawn* CurrentPawn;
+	APawn* CurrentPawn = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float threatLevel;
+	float threatLevel = 0.f;
 
 	bool operator==(const FDetectedAircraftInfo& Other) const {
 		return CurrentPawn == Other.CurrentPawn;

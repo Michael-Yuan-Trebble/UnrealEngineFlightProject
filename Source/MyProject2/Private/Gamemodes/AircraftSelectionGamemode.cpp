@@ -48,7 +48,7 @@ void AAircraftSelectionGamemode::BeginPlay()
 	});
 }
 
-void AAircraftSelectionGamemode::SpawnInAircraft(TSubclassOf<APawn> SpawnIn) 
+void AAircraftSelectionGamemode::SpawnInAircraft(const TSubclassOf<APawn> SpawnIn) 
 {
 	if (AircraftDisplayed && AircraftDisplayed->GetClass() == SpawnIn) return;
 
@@ -63,7 +63,7 @@ void AAircraftSelectionGamemode::SpawnInAircraft(TSubclassOf<APawn> SpawnIn)
 	AircraftDisplayed = GetWorld()->SpawnActor<APawn>(SpawnIn, PreviewLocation, PreviewRotation, SpawnParams);
 }
 
-void AAircraftSelectionGamemode::SpawnInWeapon(TSubclassOf<ABaseWeapon> Weapon, FName Pylon) 
+void AAircraftSelectionGamemode::SpawnInWeapon(const TSubclassOf<ABaseWeapon> Weapon, const FName& Pylon) 
 {
 	if (!AircraftDisplayed || !Weapon) return;
 
@@ -90,7 +90,7 @@ void AAircraftSelectionGamemode::SpawnInWeapon(TSubclassOf<ABaseWeapon> Weapon, 
 	EquippedWeapons.Add(Pylon, WeaponDisplayed);
 }
 
-void AAircraftSelectionGamemode::ClearWeapons(FName Pylon) 
+void AAircraftSelectionGamemode::ClearWeapons(const FName& Pylon) 
 {
 	if (!IsValid(AircraftDisplayed)) return;
 
@@ -127,10 +127,10 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 	UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
 	if (!GI) return;
 
-	FString LevelNameString = GI->LevelName.ToString();
+	FString LevelNameString = GI->GetLevel().LevelName.ToString();
 
 	// Default to TestHeightmap, might change this later?
-	if (GI->LevelName.IsNone() || LevelNameString.IsEmpty())
+	if (LevelNameString.IsEmpty())
 	{
 		LevelNameString = TEXT("TestHeightmap");
 	}
@@ -156,10 +156,7 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 
 	if (BaseAir) 
 	{
-		GI->SetClass(BaseAir->GetClass());
-
-		// TODO: Maybe get rid of this as once aircraft spawns no need for a dedicated airstats in GI
-		GI->SelectedAircraftStats = BaseAir->AirStats;
+		FullLoadout.AircraftClass = BaseAir->GetClass();
 	}
 
 	// TODO: Change funtions so that they suit this
@@ -177,7 +174,8 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 		Loadout.Add(Pair.Key, Weapon->GetClass());
 	}
 
-	GI->SetWeapons(Loadout);
+	FullLoadout.EquippedWeapons = Loadout;
+	GI->SetLoadout(FullLoadout);
 
 	// TODO: Set Specials HERE
 
@@ -200,6 +198,6 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 	World->GetTimerManager().ClearAllTimersForObject(APC);
 	if (IsValid(APC->MenuManager)) World->GetTimerManager().ClearAllTimersForObject(APC->MenuManager);
 
-	FName LevelToOpen(*LevelNameString);
+	const FName LevelToOpen(*LevelNameString);
 	UGameplayStatics::OpenLevel(World, LevelToOpen);
 }

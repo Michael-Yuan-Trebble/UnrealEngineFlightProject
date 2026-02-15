@@ -14,21 +14,21 @@ struct FCooldownWeapon
 	FCooldownWeapon();
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf <ABaseWeapon> WeaponClass;
+	TSubclassOf <ABaseWeapon> WeaponClass = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	ABaseWeapon* WeaponInstance;
+	ABaseWeapon* WeaponInstance = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	bool bCanFire = true;
 
 	UPROPERTY(EditAnywhere)
-	FName SocketName;
+	FName SocketName = NAME_None;
 
-	float time;
+	float time = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float cooldownTime;
+	float cooldownTime = 0.f;
 
 	bool CanFire() const { return bCanFire; }
 
@@ -36,5 +36,5 @@ struct FCooldownWeapon
 
 	void StartCooldown() { bCanFire = false; time = cooldownTime; }
 
-	void UpdateCooldown(float DeltaTime);
+	void UpdateCooldown(const float DeltaTime);
 };

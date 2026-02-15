@@ -47,68 +47,75 @@ public:
 	UInputMappingContext* MenuInputMapping;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Input")
-	UInputAction* Up;
+	UInputAction* Up = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Input")
-	UInputAction* Down;
+	UInputAction* Down = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Input")
-	UInputAction* IA_Back;
+	UInputAction* IA_Back = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* Throttle;
+	UInputAction* Throttle = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Roll;
+	UInputAction* IA_Roll = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Pitch;
+	UInputAction* IA_Pitch = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Rudder;
+	UInputAction* IA_Rudder = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Special;
+	UInputAction* IA_Special = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Shoot;
+	UInputAction* IA_Shoot = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Weapons;
+	UInputAction* IA_Weapons = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_LookX;
+	UInputAction* IA_LookX = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_LookY;
+	UInputAction* IA_LookY = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Focus;
+	UInputAction* IA_Focus = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Switch;
+	UInputAction* IA_Switch = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Zoom;
+	UInputAction* IA_Zoom = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_NextWeapon;
+	UInputAction* IA_NextWeapon = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_PrevWeapon;
+	UInputAction* IA_PrevWeapon = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Menu;
+	UInputAction* IA_Menu = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_TogglePerspective;
+	UInputAction* IA_TogglePerspective = nullptr;
 
 	// Functions
 
-	void ManageMenuSetting(EMenuState NewState);
+	void ManageMenuSetting(const EMenuState NewState);
 	void SetComponents(UWeaponSystemComponent* InWeapon);
-	void SetControlMode(EControlMode NewMode);
-	void SetFlightMode(EFlightMode FlightMode);
+	void SetControlMode(const EControlMode NewMode);
+	void SetFlightMode(const EFlightMode FlightMode);
+
+	void DeactivateMovement() { bMovementEnabled = false; };
+	void ActivateMovement() { bMovementEnabled = true; };
+	void DeactivateCamera() { bCameraEnabled = false; };
+	void ActivateCamera() { bCameraEnabled = true; };
+	void DeactivateWeapon() { bWeaponEnabled = false; };
+	void ActivateWeapon() { bWeaponEnabled = true; };
 
 	// Vars
 
@@ -125,16 +132,16 @@ public:
 	TArray<EMenuState> MenuHistory;
 
 	UPROPERTY()
-	APlayerAircraft* Controlled;
+	APlayerAircraft* Controlled = nullptr;
 
 	UPROPERTY()
-	UMenuManagerComponent* MenuManager;
+	UMenuManagerComponent* MenuManager = nullptr;
 
 	UPROPERTY()
-	UWeaponSystemComponent* WeaponComp;
+	UWeaponSystemComponent* WeaponComp = nullptr;
 
 	UPROPERTY()
-	APlayerHUD* HUD;
+	APlayerHUD* HUD = nullptr;
 
 private:
 
@@ -176,7 +183,7 @@ private:
 	void HandleWeaponHit(bool bHit);
 
 	UFUNCTION()
-	void HandleHUDLockedOn(float LockPercent);
+	void HandleHUDLockedOn(const float LockPercent);
 
 	UFUNCTION()
 	void HandleWeaponCount(FName WeaponName, int32 CurrentCount, int32 MaxCount);
@@ -200,8 +207,14 @@ private:
 	bool fire = false;
 	bool isThrust = false;
 
-	float thrustPercentage = MIDDLETHRUST;
+	float thrustPercentage = MiddleThrust;
 	int32 WeaponIndex = 0;
 
 	FTimerHandle UpdateVFXHandle;
+
+	static constexpr float MiddleThrust = 0.5f;
+
+	bool bMovementEnabled = true;
+	bool bCameraEnabled = true;
+	bool bWeaponEnabled = true;
 };

@@ -26,13 +26,13 @@ public:
 	FOnFreeFlightPicked OnFreeFlightPicked;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* Settingsbtn;
+	UButton* Settingsbtn = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* FreeFlightbtn;
+	UButton* FreeFlightbtn = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* Exitbtn;
+	UButton* Exitbtn = nullptr;
 
 
 protected:

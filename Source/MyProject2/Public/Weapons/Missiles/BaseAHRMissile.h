@@ -26,7 +26,7 @@ public:
 	float DropTimer = 0;
 
 	UPROPERTY(EditAnywhere)
-	UARHMissileStats* MissileStats;
+	UARHMissileStats* MissileStats = nullptr;
 
 	float DropAcceleration = 40;
 

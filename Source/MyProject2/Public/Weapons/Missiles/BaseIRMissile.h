@@ -22,7 +22,7 @@ public:
 	ABaseIRMissile();
 
 	UPROPERTY(EditAnywhere)
-	UIRMissileStats* MissileStats;
+	UIRMissileStats* MissileStats = nullptr;
 
 	virtual void LaunchSequence(float Speed) override;
 

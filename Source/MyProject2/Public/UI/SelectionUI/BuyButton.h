@@ -23,12 +23,12 @@ public:
 	FOnCancelPicked OnCancelPicked;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName Name;
+	FName Name = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int Cost;
+	int Cost = 0;
 	
-	void Setup(FName Name, int Cost);
+	void Setup(const FName& Name, const int Cost);
 
 	void TurnOffBuy();
 
@@ -41,10 +41,10 @@ protected:
 	void HandleCancelClick();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* AircraftBuyButton;
+	UButton* AircraftBuyButton = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* CancelBuyButton;
+	UButton* CancelBuyButton = nullptr;
 
 	virtual void NativeConstruct() override;
 

@@ -17,10 +17,10 @@ class MYPROJECT2_API UAircraftVisualComponent : public UActorComponent
 public:	
 	UAircraftVisualComponent();
 
-	void SetThrust(float In) { InputThrust = In; };
-	void SetPitch(float In) { InputPitch = In; };
-	void SetYaw(float In) { InputYaw = In; };
-	void SetRoll(float In) { InputRoll = In; };
+	void SetThrust(const float In) { InputThrust = In; };
+	void SetPitch(const float In) { InputPitch = In; };
+	void SetYaw(const float In) { InputYaw = In; };
+	void SetRoll(const float In) { InputRoll = In; };
 
 	float GetRudder() const { return Rudder; };
 	float GetSlat() const { return Slat; };
@@ -32,12 +32,12 @@ public:
 	bool IsCountermeasures() const { return bUsingCountermeasures; };
 
 	UPROPERTY()
-	USkeletalMeshComponent* Mesh;
+	USkeletalMeshComponent* Mesh = nullptr;
 
 	void ActivateFlares();
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ACountermeasureActor> FlareClass;
+	TSubclassOf<ACountermeasureActor> FlareClass = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	bool bUsingCountermeasures;
@@ -48,53 +48,55 @@ public:
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual void PitchCalculation(float D);
+	virtual void PitchCalculation(const float D);
 
-	virtual void RollCalculation(float D);
+	virtual void RollCalculation(const float D);
 
-	virtual void YawCalculation(float D);
+	virtual void YawCalculation(const float D);
 
-	virtual void AirBrakeCalculation(float D);
+	virtual void AirBrakeCalculation(const float D);
 
-	virtual void ThrustCalculation(float D);
+	virtual void ThrustCalculation(const float D);
 
 	UPROPERTY(EditAnywhere)
 	FAircraftAnimationInformation AircraftInfo;
 
 	UPROPERTY(EditAnywhere)
-	bool bCanards;
+	bool bCanards = false;
 
 	UPROPERTY(EditAnywhere)
-	bool bElevators;
+	bool bElevators = false;
 
 	UPROPERTY(EditAnywhere)
-	bool bNozzle;
+	bool bNozzle = false;
 
 	UPROPERTY(EditAnywhere)
-	bool bSlats;
+	bool bSlats = false;
 
 private:
-	float InputThrust;
-	float InputPitch;
-	float InputYaw;
-	float InputRoll;
+	float InputThrust = 0.f;
+	float InputPitch = 0.f;
+	float InputYaw = 0.f;
+	float InputRoll = 0.f;
 
-	float LFlapRoll;
-	float RFlapRoll;
+	float LFlapRoll = 0.f;
+	float RFlapRoll = 0.f;
 
-	float FlapPitch;
+	float FlapPitch = 0.f;
 
-	float ElevatorRoll;
-	float ElevatorPitch;
+	float ElevatorRoll = 0.f;
+	float ElevatorPitch = 0.f;
 
-	float Rudder;
-	float Slat;
-	float Flap;
+	float Rudder = 0.f;
+	float Slat = 0.f;
+	float Flap = 0.f;
 
-	float LFlap;
-	float RFlap;
+	float LFlap = 0.f;
+	float RFlap = 0.f;
 
-	float Nozzle;
-	float AirBrake;
-	float Elevator;
+	float Nozzle = 0.f;
+	float AirBrake = 0.f;
+	float Elevator = 0.f;
+
+	static constexpr int InterpSpeed = 30;
 };

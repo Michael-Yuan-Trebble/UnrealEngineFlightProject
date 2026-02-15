@@ -23,35 +23,25 @@ public:
 
 	virtual void PossessedBy(AController* Controller) override;
 
-	UPROPERTY()
-	AAircraftPlayerController* Controlled;
-
-	UPROPERTY()
-	UCameraManagerComponent* ManagerComp;
-
-	UPROPERTY(EditAnywhere)
-	float CameraSens = 1.f;
-
-	UPROPERTY(EditAnywhere)
-	UAircraftAudioComponent* AudioComp;
-
-	UPROPERTY()
-	UAudioComponent* PersonalAircraftAudio;
-
-	UPROPERTY()
-	UAudioComponent* GunAudio;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USpringArmComponent* FirstPersonSpringArm = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USpringArmComponent* FirstPersonSpringArm;
+	USpringArmComponent* ThirdPersonSpringArm = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USpringArmComponent* ThirdPersonSpringArm;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCameraComponent* ThirdPersonCamera;
+	UCameraComponent* ThirdPersonCamera = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCameraComponent* FirstPersonCamera;
+	UCameraComponent* FirstPersonCamera = nullptr;
+
+	void GunSoundEffect(bool bShoot);
+
+	void WeaponComponentOnUnitDeath();
+
+	FTimerHandle RepeatTimerHandle;
+
+public:
 
 	USpringArmComponent* GetFirstPersonSpringArm() const { return FirstPersonSpringArm; };
 
@@ -59,7 +49,7 @@ public:
 
 	UCameraComponent* GetThirdPersonCamera() const { return ThirdPersonCamera; };
 
-	UCameraComponent* GetFirstPersonCamera() const{ return FirstPersonCamera; };
+	UCameraComponent* GetFirstPersonCamera() const { return FirstPersonCamera; };
 
 	void SetFirstPersonCamera(bool bActive);
 
@@ -70,12 +60,6 @@ public:
 	UAudioComponent* GetGunAudio() const { return GunAudio; };
 
 	float GetCameraLocation() const;
-
-	void GunSoundEffect(bool bShoot);
-
-	void WeaponComponentOnUnitDeath();
-
-	FTimerHandle RepeatTimerHandle;
 
 // Controller Functions
 public:
@@ -92,18 +76,9 @@ public:
 	// Radar Component
 	void CycleTarget();
 
-	UPROPERTY(EditAnywhere)
-	float RollLagStrength = 0.25f;
-
-	UPROPERTY(EditAnywhere)
-	float RollLagSpeed = 4.f;
-
-	UPROPERTY(EditAnywhere)
-	float Interp = 1.f;
-
 	void SetInterp();
 
-	float GetRoll();
+	const FRotator& GetNextRotation();
 
 	// Camera Manager
 	void SetHUD(APlayerHUD* InHUD);
@@ -120,6 +95,33 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaSeconds) override;
+
+	UPROPERTY(EditAnywhere)
+	float CameraSens = 1.f;
+
+	UPROPERTY(EditAnywhere)
+	float RollLagStrength = 0.25f;
+
+	UPROPERTY(EditAnywhere)
+	float RollLagSpeed = 4.f;
+
+	UPROPERTY(EditAnywhere)
+	float Interp = 1.f;
+
+	UPROPERTY()
+	AAircraftPlayerController* Controlled = nullptr;
+
+	UPROPERTY()
+	UCameraManagerComponent* ManagerComp = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	UAircraftAudioComponent* AudioComp = nullptr;
+
+	UPROPERTY()
+	UAudioComponent* PersonalAircraftAudio = nullptr;
+
+	UPROPERTY()
+	UAudioComponent* GunAudio = nullptr;
 
 private:
 	UFUNCTION()

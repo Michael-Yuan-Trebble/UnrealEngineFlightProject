@@ -15,16 +15,16 @@ class MYPROJECT2_API UPitchLadder : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void Update(float InPitch);
+	void Update(const float InPitch);
 
 protected:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
-	UCanvasPanel* LadderCanvas;
+	UCanvasPanel* LadderCanvas = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Pitch Ladder")
-	UMaterialInterface* LineTexture;
+	UMaterialInterface* LineTexture = nullptr;
 
 private:
 	UPROPERTY()

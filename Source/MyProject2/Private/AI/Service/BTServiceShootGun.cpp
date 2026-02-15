@@ -42,11 +42,11 @@ bool UBTServiceShootGun::IsInsideCone()
 	FVector Forward = Controller->GetPawn()->GetActorForwardVector();
 
 	float CosAngle = FVector::DotProduct(Forward, ToPlayer);
-	float Threshold = FMath::Cos(FMath::DegreesToRadians(CONEANGLE));
+	float Threshold = FMath::Cos(FMath::DegreesToRadians(ConeAngle));
 
 	if (APawn* Pawn = Controller->GetPawn())
 	{
-		float HalfAngleRad = FMath::DegreesToRadians(CONEANGLE);
+		float HalfAngleRad = FMath::DegreesToRadians(ConeAngle);
 
 		/*
 		DrawDebugCone(
@@ -67,5 +67,5 @@ bool UBTServiceShootGun::IsInsideCone()
 
 	float Distance = FVector::Dist(Controller->GetPawn()->GetActorLocation(), Selected->GetActorLocation());
 
-	return (CosAngle >= Threshold) && (Distance < SHOOTDISTANCE);
+	return (CosAngle >= Threshold) && (Distance < ShootDistance);
 }

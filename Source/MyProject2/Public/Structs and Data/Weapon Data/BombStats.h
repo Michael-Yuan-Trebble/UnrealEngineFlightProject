@@ -13,8 +13,8 @@ class MYPROJECT2_API UBombStats : public UBaseWeaponStats
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float BlastRadius;
+	float BlastRadius = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MaxSpeed;
+	float MaxSpeed = 0.f;
 };

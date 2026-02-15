@@ -17,5 +17,5 @@ public:
 	TArray<FKillEvent> KillLog;
 
 	UFUNCTION()
-	void RegisterKill(AActor* Killer, AActor* Target, TSubclassOf<AActor> WeaponUsed);
+	void RegisterKill(AActor* Killer, AActor* Target, const TSubclassOf<AActor> WeaponUsed);
 };

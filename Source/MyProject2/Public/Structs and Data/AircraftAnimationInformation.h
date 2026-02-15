@@ -11,32 +11,32 @@ struct FAircraftAnimationInformation
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	float MaxSlats;
+	float MaxSlats = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float MaxPitchFlaps;
+	float MaxPitchFlaps = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float MinPitchFlaps;
+	float MinPitchFlaps = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float MaxRollFlaps;
+	float MaxRollFlaps = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float MaxPitchElevator;
+	float MaxPitchElevator = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float MaxRollElevator;
+	float MaxRollElevator = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float MaxRudder;
+	float MaxRudder = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float MinExhaust;
+	float MinExhaust = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float MaxExhaust;
+	float MaxExhaust = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float MaxAirbrake;
+	float MaxAirbrake = 0.f;
 };

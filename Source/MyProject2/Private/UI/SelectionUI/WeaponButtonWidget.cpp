@@ -6,7 +6,7 @@
 #include "Weapons/BaseWeapon.h"
 #include "Kismet/GameplayStatics.h"
 
-void UWeaponButtonWidget::SetupWeapons(TSubclassOf<ABaseWeapon> WeaponData)
+void UWeaponButtonWidget::SetupWeapons(const TSubclassOf<ABaseWeapon>& WeaponData)
 {
 	ButtonWeapon = WeaponData;
 	if (!WeaponData) 

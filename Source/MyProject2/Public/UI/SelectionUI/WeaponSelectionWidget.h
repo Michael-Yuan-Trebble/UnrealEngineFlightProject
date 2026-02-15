@@ -22,7 +22,7 @@ class MYPROJECT2_API UWeaponSelectionWidget : public UUserWidget
 public:
 	UWeaponSelectionWidget(const FObjectInitializer& ObjectInitializer);
 
-	FPylonLoadout* CurrentLoadout;
+	FPylonLoadout* CurrentLoadout = nullptr;
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FWeaponSelectedSignature OnWeaponSelected;
@@ -30,17 +30,17 @@ public:
 	void GetAllAircraft();
 	
 	UPROPERTY()
-	UWeaponSelectionComponent* WeaponUI;
+	UWeaponSelectionComponent* WeaponUI = nullptr;
 
 protected:
 	UFUNCTION()
 	void HandleWeaponSelected(TSubclassOf<ABaseWeapon> Weapon);
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> WeaponButtonClass;
+	TSubclassOf<UUserWidget> WeaponButtonClass = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
-	UScrollBox* WeaponScrollBox;
+	UScrollBox* WeaponScrollBox = nullptr;
 
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		Super::ReleaseSlateResources(bReleaseChildren);
@@ -54,5 +54,5 @@ protected:
 	}
 
 private:
-	void CreateButtons(TArray<TSubclassOf<ABaseWeapon>> Array);
+	void CreateButtons(const TArray<TSubclassOf<ABaseWeapon>>& Array);
 };

@@ -4,7 +4,7 @@
 #include "UI/SelectionUI/SpecialButtonWidget.h"
 #include "Specials/BaseSpecial.h"
 
-void USpecialButtonWidget::Setup(TSubclassOf<UBaseSpecial> SpecialData)
+void USpecialButtonWidget::Setup(const TSubclassOf<UBaseSpecial>& SpecialData)
 {
 	ContainedData = SpecialData;
 	const UBaseSpecial* DefaultSpecial = ContainedData->GetDefaultObject<UBaseSpecial>();

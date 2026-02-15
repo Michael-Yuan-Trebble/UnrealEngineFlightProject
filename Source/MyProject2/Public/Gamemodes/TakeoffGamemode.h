@@ -14,12 +14,12 @@ class MYPROJECT2_API ATakeoffGamemode : public AFlightGamemode
 public:
 	ATakeoffGamemode();
 
+private:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float D) override;
 
-private:
-	void CheckTakeoff(float D);
+	void CheckTakeoff(const float D);
 
 	UPROPERTY(EditAnywhere)
 	float Distance = 3000.f;

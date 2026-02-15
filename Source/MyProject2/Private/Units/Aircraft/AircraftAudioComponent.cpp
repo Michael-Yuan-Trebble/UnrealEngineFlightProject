@@ -13,7 +13,7 @@ UAircraftAudioComponent::UAircraftAudioComponent()
 
 }
 
-void UAircraftAudioComponent::PlayPerspectiveSound(ECameraPerspective Perspective) 
+void UAircraftAudioComponent::PlayPerspectiveSound(const ECameraPerspective Perspective) 
 {
 	if (!PersonalAircraftAudio) 
 	{

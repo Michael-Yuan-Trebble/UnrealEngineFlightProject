@@ -48,9 +48,9 @@ ABaseAircraft::ABaseAircraft()
 	SpecialComp = CreateDefaultSubobject<USpecialSystemComponent>(TEXT("SpecialComponent"));
 
 	PrimaryActorTick.bCanEverTick = true;
-	bLocked = false;
 
 	UnitType = ETargetType::Air;
+	health = 100;
 }
 
 void ABaseAircraft::BeginPlay()
@@ -144,10 +144,11 @@ void ABaseAircraft::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (IsValid(VisualComp) && IsValid(FlightComponent))
 	{
-		VisualComp->SetPitch(FlightComponent->UserPitch);
-		VisualComp->SetYaw(FlightComponent->UserYaw);
-		VisualComp->SetRoll(FlightComponent->UserRoll);
-		VisualComp->SetThrust(FlightComponent->CurrentThrust);
+		const FRotator& Rotation = FlightComponent->GetUserRotation();
+		VisualComp->SetPitch(Rotation.Pitch);
+		VisualComp->SetYaw(Rotation.Yaw);
+		VisualComp->SetRoll(Rotation.Roll);
+		VisualComp->SetThrust(FlightComponent->GetThrust());
 	}
 }
 
@@ -230,30 +231,30 @@ void ABaseAircraft::SetLandingGearVisiblility(bool b)
 };
 
 void ABaseAircraft::Crash() {
-	bDestroyed = true;
+	bAlive = true;
 }
 
-void ABaseAircraft::SetThrust(float thrust) { if (IsValid(FlightComponent)) FlightComponent->SetThrust(thrust); }
+void ABaseAircraft::SetThrust(const float thrust) { if (IsValid(FlightComponent)) FlightComponent->SetThrust(thrust); }
 
-void ABaseAircraft::SetRoll(float roll) { if (IsValid(FlightComponent)) FlightComponent->SetRoll(roll); }
+void ABaseAircraft::SetRoll(const float roll) { if (IsValid(FlightComponent)) FlightComponent->SetRoll(roll); }
 
-void ABaseAircraft::SetPitch(float pitch) { if (IsValid(FlightComponent)) FlightComponent->SetPitch(pitch); }
+void ABaseAircraft::SetPitch(const float pitch) { if (IsValid(FlightComponent)) FlightComponent->SetPitch(pitch); }
 
-void ABaseAircraft::SetRudder(float rudder) { if (IsValid(FlightComponent)) FlightComponent->SetYaw(rudder); }
+void ABaseAircraft::SetRudder(const float rudder) { if (IsValid(FlightComponent)) FlightComponent->SetYaw(rudder); }
 
-void ABaseAircraft::SetFlying(bool bIsFlying) { if (IsValid(FlightComponent)) FlightComponent->isFlying = bIsFlying; }
+void ABaseAircraft::SetFlying(const bool bIsFlying) { if (IsValid(FlightComponent)) FlightComponent->SetFlying(bIsFlying); }
 
-void ABaseAircraft::SetSpeed(float speed) { if (IsValid(FlightComponent)) FlightComponent->SetInitialSpeed(speed); }
+void ABaseAircraft::SetSpeed(const float speed) { if (IsValid(FlightComponent)) FlightComponent->SetInitialSpeed(speed); }
 
 bool ABaseAircraft::IsLanded() { if (IsValid(FlightComponent)) return FlightComponent->IsLanded(); else return false; }
 
 float ABaseAircraft::GetSpeed() { if (IsValid(FlightComponent)) return FlightComponent->GetCurrentSpeedKMH(); else return 0.f; }
 
-void ABaseAircraft::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) { if (IsValid(WeaponComponent)) WeaponComponent->SetWeapons(In); }
+void ABaseAircraft::SetWeapons(const TMap<FName, TSubclassOf<ABaseWeapon>> In) { if (IsValid(WeaponComponent)) WeaponComponent->SetWeapons(In); }
 
-void ABaseAircraft::SetSpecial(TSubclassOf<UBaseSpecial> In) { if (IsValid(SpecialComp)) SpecialComp->SetSpecial(In); }
+void ABaseAircraft::SetSpecial(const TSubclassOf<UBaseSpecial> In) { if (IsValid(SpecialComp)) SpecialComp->SetSpecial(In); }
 
-void ABaseAircraft::SetFlightMode(EFlightMode FlightMode)
+void ABaseAircraft::SetFlightMode(const EFlightMode FlightMode)
 { 
 	if (IsValid(FlightComponent)) FlightComponent->SetFlightMode(FlightMode); 
 	SetLandingGearVisiblility(FlightMode != EFlightMode::Flight);
@@ -272,3 +273,7 @@ float ABaseAircraft::ReturnNozzle() const { if (IsValid(VisualComp)) return Visu
 float ABaseAircraft::ReturnAirbrake() const { if (IsValid(VisualComp)) return VisualComp->GetAirBrake(); else return 0; }
 
 float ABaseAircraft::ReturnElevator() const { if (IsValid(VisualComp)) return VisualComp->GetElevator(); else return 0; }
+
+EThrottleStage ABaseAircraft::GetThrottleStage() const { if (IsValid(FlightComponent)) return FlightComponent->ReturnThrottleStage(); else return EThrottleStage::Slow; }
+
+void ABaseAircraft::ApplySpeed(const float Speed, const float D) { if (IsValid(FlightComponent)) FlightComponent->AddSpeed(Speed, D); }

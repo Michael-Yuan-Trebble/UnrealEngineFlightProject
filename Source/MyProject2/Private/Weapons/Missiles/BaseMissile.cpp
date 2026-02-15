@@ -45,7 +45,7 @@ void ABaseMissile::BeginPlay()
 	}
 }
 
-void ABaseMissile::EndPlay(EEndPlayReason::Type EndPlayReason) 
+void ABaseMissile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>())
 	{
@@ -60,7 +60,7 @@ void ABaseMissile::Tick(float DeltaTime)
 
 }
 
-void ABaseMissile::LaunchSequence(float speed) 
+void ABaseMissile::LaunchSequence(const float speed)
 {
 }
 
@@ -103,7 +103,7 @@ bool ABaseMissile::CalculateIfOvershoot(FVector ToTarget) {
 	return false;
 }
 
-void ABaseMissile::ApplyVFXLOD(FVector CameraLoc) 
+void ABaseMissile::ApplyVFXLOD(const FVector& CameraLoc)
 {
 	if (!SmokeTrail || !MissileRocket) return;
 	// Make Distance into KM units

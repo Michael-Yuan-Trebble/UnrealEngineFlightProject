@@ -28,23 +28,14 @@ public:
 
 	virtual void OnPossess(APawn* PawnPossess) override;
 
-	UPROPERTY(EditAnywhere,Category = "AI")
-	UBehaviorTree* BehaviorTreeAsset;
-
-	UPROPERTY(EditAnywhere,Category="AI")
-	UBlackboardComponent* BlackboardComp;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite);
-	float currentSpeed;
+	float currentSpeed = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	AEnemyAircraft* Controlled;
+	AEnemyAircraft* Controlled = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FDetectedAircraftInfo Tracking;
-
-	UPROPERTY()
-	UWeaponSystemComponent* WeaponComp;
 
 	bool bIsFiring = false;
 	
@@ -52,11 +43,11 @@ public:
 
 public:
 	// Setting Controller Values
-	void SetThrust(float Thrust);
+	void SetThrust(const float Thrust);
 
-	void SetPitch(float Pitch);
-	void SetRoll(float Raw);
-	void SetYaw(float Yaw);
+	void SetPitch(const float Pitch);
+	void SetRoll(const float Raw);
+	void SetYaw(const float Yaw);
 
 	void SetFlying(bool bIsFlying);
 
@@ -68,4 +59,12 @@ private:
 
 	void SpecialCooldown();
 
+	UPROPERTY()
+	UWeaponSystemComponent* WeaponComp = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "AI")
+	UBehaviorTree* BehaviorTreeAsset = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "AI")
+	UBlackboardComponent* BlackboardComp = nullptr;
 };

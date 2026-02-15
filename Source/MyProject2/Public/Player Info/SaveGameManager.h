@@ -25,9 +25,9 @@ public:
 
 	UPlayerSaveData* GetSaveData() const { return SaveGameData; }
 
-	void AddMoney(int Amount);
+	void AddMoney(const int Amount);
 
-	void AddAircraftOwned(FName AircraftName);
+	void AddAircraftOwned(const FName& AircraftName);
 
 	TArray<FName> GetAircraftOwned();
 
@@ -35,7 +35,7 @@ public:
 
 private:
 	UPROPERTY()
-	UPlayerSaveData* SaveGameData;
+	UPlayerSaveData* SaveGameData = nullptr;
 
 	FString SlotName = "PlayerSave";
 	int32 UserIndex = 0;

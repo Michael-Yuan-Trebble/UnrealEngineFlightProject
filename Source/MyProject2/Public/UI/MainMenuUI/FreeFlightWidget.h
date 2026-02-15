@@ -7,9 +7,10 @@
 #include "UI/MainMenuUI/LevelButton.h"
 #include "Components/ScrollBox.h"
 #include "Structs and Data/LevelListData.h"
+#include "Structs and Data/MissionData.h"
 #include "FreeFlightWidget.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelSelected, FName, LevelName);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelSelected, FMissionData, LevelName);
 
 UCLASS()
 class MYPROJECT2_API UFreeFlightWidget : public UUserWidget
@@ -26,15 +27,15 @@ public:
 protected:
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ULevelButton> LevelButtonClass;
+	TSubclassOf<ULevelButton> LevelButtonClass = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
-	UScrollBox* LevelScrollBox;
+	UScrollBox* LevelScrollBox = nullptr;
 
 	UFUNCTION()
-	void HandleLevelButtonClicked(const FName InLevel);
+	void HandleLevelButtonClicked(FMissionData InLevel);
 
 private:
 	UPROPERTY(EditAnywhere)
-	ULevelListData* LevelList;
+	ULevelListData* LevelList = nullptr;
 };

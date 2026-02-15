@@ -33,13 +33,13 @@ protected:
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 	UPROPERTY()
-	AActor* Selected;
+	AActor* Selected = nullptr;
 
 	UPROPERTY()
-	AEnemyAircraft* Controlled;
+	AEnemyAircraft* Controlled = nullptr;
 	
 	UPROPERTY()
-	UBlackboardComponent* BlackboardComp;
+	UBlackboardComponent* BlackboardComp = nullptr;
 
 private:
 	void WeaponDistance();

@@ -59,7 +59,7 @@ void UMenuManagerComponent::SetupClasses(TSubclassOf<UUserWidget> InAircraftClas
 	SpecialSelectionUI->SelectionWidget = InSpecialClass;
 }
 
-void UMenuManagerComponent::GoBack(EMenuState Current)
+void UMenuManagerComponent::GoBack(const EMenuState Current)
 {
 	switch (Current) 
 	{
@@ -77,7 +77,7 @@ void UMenuManagerComponent::GoBack(EMenuState Current)
 
 }
 
-void UMenuManagerComponent::GetWidgetClassForState(EMenuState State)
+void UMenuManagerComponent::GetWidgetClassForState(const EMenuState State)
 {
 	if (State != EMenuState::BuyPopup && IsValid(CurrentWidget) && CurrentWidget->IsInViewport()) 
 	{
@@ -88,11 +88,8 @@ void UMenuManagerComponent::GetWidgetClassForState(EMenuState State)
 	switch (State) 
 	{
 	case EMenuState::AircraftSelect:
-		if (GM) 
-		{
-			AircraftSelectionUI->AircraftSelectionMenu();
-			CurrentWidget = AircraftSelectionUI->AircraftSelectUI;
-		}
+		AircraftSelectionUI->AircraftSelectionMenu();
+		CurrentWidget = AircraftSelectionUI->AircraftSelectUI;
 		break;
 	case EMenuState::WeaponSelect:
 		if (SelectedAircraft) 
@@ -120,20 +117,20 @@ void UMenuManagerComponent::GetWidgetClassForState(EMenuState State)
 
 void UMenuManagerComponent::ChooseAircraftUI() 
 {
-	PC->ManageMenuSetting(EMenuState::AircraftSelect);
+	if (IsValid(PC)) PC->ManageMenuSetting(EMenuState::AircraftSelect);
 }
 
 void UMenuManagerComponent::ChooseWeaponUI() 
 {
-	PC->ManageMenuSetting(EMenuState::WeaponSelect);
+	if (IsValid(PC)) PC->ManageMenuSetting(EMenuState::WeaponSelect);
 }
 
 void UMenuManagerComponent::ChooseSpecialUI() 
 {
-	PC->ManageMenuSetting(EMenuState::SpecialSelect);
+	if (IsValid(PC)) PC->ManageMenuSetting(EMenuState::SpecialSelect);
 }
 
-void UMenuManagerComponent::SpawnBuy(UAircraftData* AircraftData, int Cost)
+void UMenuManagerComponent::SpawnBuy(UAircraftData* AircraftData, const int Cost)
 {
 	TempAircraft = AircraftData;
 	PC->MenuHistory.Push(EMenuState::BuyPopup);
@@ -142,12 +139,12 @@ void UMenuManagerComponent::SpawnBuy(UAircraftData* AircraftData, int Cost)
 
 void UMenuManagerComponent::EndSelection() 
 {
-	GM->EndSelection(PC);
+	if (IsValid(GM)) GM->EndSelection(PC);
 }
 
 void UMenuManagerComponent::AdvanceToLevel() 
 {
-	GM->TryAdvanceToNextStage();
+	if (IsValid(GM)) GM->TryAdvanceToNextStage();
 }
 
 void UMenuManagerComponent::CloseAll() 

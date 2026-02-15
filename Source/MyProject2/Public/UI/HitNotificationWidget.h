@@ -13,10 +13,10 @@ class MYPROJECT2_API UHitNotificationWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	void ShowMessage(FText msg);
+	void ShowMessage(const FText& msg);
 	
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* Message;
+	UTextBlock* Message = nullptr;
 
 	void HideMessage();
 

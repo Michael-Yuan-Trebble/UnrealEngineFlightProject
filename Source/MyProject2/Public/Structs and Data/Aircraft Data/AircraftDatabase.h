@@ -7,9 +7,6 @@
 #include "AircraftData.h"
 #include "AircraftDatabase.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MYPROJECT2_API UAircraftDatabase : public UDataAsset
 {
@@ -18,5 +15,5 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TArray<UAircraftData*> AllAircraft;
 
-	void LoadAllAircraftFromFolder(FString Path);
+	void LoadAllAircraftFromFolder(const FString& Path);
 };

@@ -10,12 +10,12 @@ UHealthComponent::UHealthComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UHealthComponent::Setup(float Health) 
+void UHealthComponent::Setup(const float Health)
 {
 	CurrentHealth = Health;
 }
 
-void UHealthComponent::ApplyDamage(float Damage, AActor* Weapon, AActor* Launcher, AActor* Target)
+void UHealthComponent::ApplyDamage(const float Damage, AActor* Weapon, AActor* Launcher, AActor* Target)
 {
 	if (!isAlive) return;
 	CurrentHealth -= Damage * GunMultiplier * MissileMultiplier;

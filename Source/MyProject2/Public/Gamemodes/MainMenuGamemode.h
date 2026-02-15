@@ -23,11 +23,11 @@ protected:
 
 private:
 	UPROPERTY()
-	AAircraftPlayerController* APC;
+	AAircraftPlayerController* APC = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UMainMenuWidget> MainMenuClass;
+	TSubclassOf<UMainMenuWidget> MainMenuClass = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UFreeFlightWidget> FreeFlightClass;
+	TSubclassOf<UFreeFlightWidget> FreeFlightClass = nullptr;
 };

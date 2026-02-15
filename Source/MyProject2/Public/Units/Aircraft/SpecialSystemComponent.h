@@ -19,7 +19,7 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetSpecial(TSubclassOf<UBaseSpecial> In);
+	void SetSpecial(const TSubclassOf<UBaseSpecial> In);
 
 	void ActivateSpecial(ABaseAircraft* In);
 
@@ -27,5 +27,5 @@ public:
 
 private:
 	UPROPERTY()
-	UBaseSpecial* Special;
+	UBaseSpecial* Special = nullptr;
 };

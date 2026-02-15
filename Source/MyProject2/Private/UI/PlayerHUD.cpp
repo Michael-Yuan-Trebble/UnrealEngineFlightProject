@@ -148,7 +148,7 @@ void APlayerHUD::PitchLadderUpdate()
     PitchLadderWidget->Update(Pitch);
 }
 
-void APlayerHUD::UpdateLocked(float LockPercent)
+void APlayerHUD::UpdateLocked(const float LockPercent)
 {
     if (!IsValid(Target)) return;
     ULockBoxWidget** FoundWidget = ActiveWidgets.Find(Target);
@@ -231,7 +231,7 @@ void APlayerHUD::HandleRadarScan(const TArray<FDetectedAircraftInfo>& InEnemies)
     for (FDetectedAircraftInfo T : InEnemies) 
     {
         ABaseUnit* Unit = Cast<ABaseUnit>(T.CurrentPawn);
-        if (!IsValid(Unit) || Unit->Faction == Controlled->Faction) continue;
+        if (!IsValid(Unit) || Unit->GetFaction() == Controlled->GetFaction()) continue;
         Array.Add(Unit);
     }
     Targets = Array;

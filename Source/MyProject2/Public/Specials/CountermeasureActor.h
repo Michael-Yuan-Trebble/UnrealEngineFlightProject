@@ -20,13 +20,13 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
-	class UNiagaraComponent* FlareComponent;
+	class UNiagaraComponent* FlareComponent = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Events")
-	class UNiagaraSystem* FlareEffect;
+	class UNiagaraSystem* FlareEffect = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* RootMesh;
+	UStaticMeshComponent* RootMesh = nullptr;
 
 	FTimerHandle LifetimeTimer;
 

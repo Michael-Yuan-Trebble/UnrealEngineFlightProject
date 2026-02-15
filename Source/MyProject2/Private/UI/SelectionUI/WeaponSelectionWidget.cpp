@@ -37,7 +37,7 @@ void UWeaponSelectionWidget::GetAllAircraft()
     CreateButtons(CurrentLoadout->AllowedMisc);
 }
 
-void UWeaponSelectionWidget::CreateButtons(TArray<TSubclassOf<ABaseWeapon>> Array) 
+void UWeaponSelectionWidget::CreateButtons(const TArray<TSubclassOf<ABaseWeapon>>& Array) 
 {
     for (TSubclassOf<ABaseWeapon> SingleWeapon : Array)
     {

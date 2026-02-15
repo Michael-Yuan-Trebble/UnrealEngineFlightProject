@@ -15,18 +15,18 @@ class MYPROJECT2_API UMinimapWidget : public UUserWidget
 	
 public:
 	UPROPERTY(meta=(BindWidget))
-	UImage* MapImage;
+	UImage* MapImage = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
-	UImage* PlayerIcon;
+	UImage* PlayerIcon = nullptr;
 
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	void InitializeBounds(const FVector2D& InWorldMin, const FVector2D& InWorldMax);
 
 private:
-	FVector2D WorldMin;
-	FVector2D WorldMax;
+	FVector2D WorldMin = FVector2D::ZeroVector;
+	FVector2D WorldMax = FVector2D::ZeroVector;
 
 	FVector2D WorldToMap(const FVector& WorldLocation) const;
 };

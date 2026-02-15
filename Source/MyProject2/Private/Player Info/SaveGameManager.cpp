@@ -58,7 +58,7 @@ void USaveGameManager::LoadGame()
 	}
 }
 
-void USaveGameManager::AddMoney(int Amount) 
+void USaveGameManager::AddMoney(const int Amount) 
 {
 	SaveGameData->Money += Amount;
 	if (SaveGameData->Money < 0) 
@@ -67,17 +67,20 @@ void USaveGameManager::AddMoney(int Amount)
 	}
 }
 
-void USaveGameManager::AddAircraftOwned(FName AircraftAdd) 
+void USaveGameManager::AddAircraftOwned(const FName& AircraftAdd) 
 {
 	SaveGameData->AircraftOwned.Add(AircraftAdd);
 }
 
 TArray<FName> USaveGameManager::GetAircraftOwned() 
 {
-	return SaveGameData->AircraftOwned;
+	TArray<FName> A;
+	if (IsValid(SaveGameData)) return SaveGameData->AircraftOwned;
+	return A;
 }
 
 int USaveGameManager::ReturnMoney()
 {
-	return SaveGameData->Money;
+	if (IsValid(SaveGameData)) return SaveGameData->Money;
+	return 0;
 }

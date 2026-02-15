@@ -30,9 +30,10 @@ protected:
 	FDetectedAircraftInfo Selected;
 
 	UPROPERTY()
-	AEnemyAircraft* Controlled;
+	AEnemyAircraft* Controlled = nullptr;
 
-	float timeSinceLastPick;
+	float timeSinceLastPick = 0.f;
 
-	float PickInterval;
+	// TODO: Make the pick interval based on pilot skill, what they are currently doing, and random chance
+	float PickInterval = 3.f;
 };

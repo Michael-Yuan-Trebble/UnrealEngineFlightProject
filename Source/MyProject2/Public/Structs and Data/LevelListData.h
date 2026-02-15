@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Structs and Data/MissionData.h"
 #include "LevelListData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -11,13 +12,13 @@ struct FLevelInfo {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	FName LevelName;
+	FMissionData LevelData{};
 
 	UPROPERTY(EditAnywhere)
-	FText DisplayName;
+	FText DisplayName = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere)
-	UTexture2D* PreviewImage;
+	UTexture2D* PreviewImage = nullptr;
 };
 
 UCLASS()

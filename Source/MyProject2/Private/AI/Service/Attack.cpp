@@ -40,7 +40,7 @@ void UBTServiceAttack::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 	CalculateThrust(DeltaSeconds);
 }
 
-void UBTServiceAttack::CalculateAngle(float DeltaSeconds)
+void UBTServiceAttack::CalculateAngle(const float DeltaSeconds)
 {
 	FVector ToTargetWorld = (Selected->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
 	if (ToTargetWorld.IsNearlyZero()) return;
@@ -65,7 +65,7 @@ void UBTServiceAttack::CalculateAngle(float DeltaSeconds)
 	BlackboardComp->SetValueAsFloat(YawKey.SelectedKeyName, DesiredYawInput);
 }
 
-float UBTServiceAttack::CalculateRollDegrees(FVector LocalDir)
+float UBTServiceAttack::CalculateRollDegrees(const FVector& LocalDir)
 {
 	float YawErrorRad = FMath::Atan2(LocalDir.Y, LocalDir.X);
 
@@ -77,7 +77,7 @@ float UBTServiceAttack::CalculateRollDegrees(FVector LocalDir)
 	return DesiredRollInput;
 }
 
-float UBTServiceAttack::CalculatePitchDegrees(FVector LocalDir)
+float UBTServiceAttack::CalculatePitchDegrees(const FVector& LocalDir)
 {
 	float PitchErrorRad = FMath::Atan2(LocalDir.Z, LocalDir.X);
 
@@ -91,7 +91,7 @@ float UBTServiceAttack::CalculatePitchDegrees(FVector LocalDir)
 	return DesiredPitchInput;
 }
 
-float UBTServiceAttack::CalculateYawDegrees(FVector LocalDir)
+float UBTServiceAttack::CalculateYawDegrees(const FVector& LocalDir)
 {
 	float YawErrorRad = FMath::Atan2(LocalDir.Y, LocalDir.X);
 
@@ -105,7 +105,7 @@ float UBTServiceAttack::CalculateYawDegrees(FVector LocalDir)
 	return DesiredYawInput;
 }
 
-void UBTServiceAttack::CalculateThrust(float DeltaSeconds) 
+void UBTServiceAttack::CalculateThrust(const float DeltaSeconds) 
 {
 	ABaseAircraft* Target = Cast<ABaseAircraft>(Selected);
 	if (Target) 

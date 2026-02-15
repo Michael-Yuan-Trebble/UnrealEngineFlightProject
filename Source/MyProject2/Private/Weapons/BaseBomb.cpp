@@ -51,7 +51,7 @@ void ABaseBomb::Tick(float DeltaSeconds)
 	AddActorWorldOffset(Velocity, true);
 }
 
-void ABaseBomb::FireStatic(float launchSpeed)
+void ABaseBomb::FireStatic(const float launchSpeed)
 {
 	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	isAir = true;
@@ -115,9 +115,9 @@ void ABaseBomb::CheckAndDelete()
 		{
 			if (Actor->Implements<UTeamInterface>()) 
 			{
-				EFaction OtherFaction = Owner->Faction;
+				EFaction OtherFaction = Owner->GetFaction();
 				OtherFaction = ITeamInterface::Execute_GetFaction(Actor);
-				if (OtherFaction == Owner->Faction) continue;
+				if (OtherFaction == Owner->GetFaction()) continue;
 			}
 
 			if (Actor->Implements<UDamageableInterface>()) 

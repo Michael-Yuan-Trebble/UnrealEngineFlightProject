@@ -23,23 +23,23 @@ public:
 	UBuyPopupWidget(const FObjectInitializer& ObjectInitializer);
 
 	UPROPERTY()
-	UAircraftData* Aircraft;
+	UAircraftData* Aircraft = nullptr;
 
 	UFUNCTION(BlueprintCallable)
 	void Setup(UAircraftData* AircraftData);
 
-	int CurrentCurrency;
+	int CurrentCurrency = 0;
 
 	UPROPERTY()
-	UBuySelectionComponent* BuyUI;
+	UBuySelectionComponent* BuyUI = nullptr;
 
 protected:
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> BuyButtonClass;
+	TSubclassOf<UUserWidget> BuyButtonClass = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
-	USizeBox* SizeBox;
+	USizeBox* SizeBox = nullptr;
 
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		BuyUI = nullptr;

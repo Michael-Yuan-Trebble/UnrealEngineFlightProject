@@ -37,28 +37,28 @@ public:
 	void CloseAll();
 
 	UPROPERTY()
-	AAircraftPlayerController* PC;
+	AAircraftPlayerController* PC = nullptr;
 
 	UPROPERTY()
-	UPlayerGameInstance* GI;
+	UPlayerGameInstance* GI = nullptr;
 	
 	UPROPERTY()
-	UAircraftData* Aircraft;
+	UAircraftData* Aircraft = nullptr;
 
 	UPROPERTY()
-	UAircraftSelectionComponent* AircraftUI;
+	UAircraftSelectionComponent* AircraftUI = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UUserWidget> BuyPopupClass;
+	TSubclassOf<UUserWidget> BuyPopupClass = nullptr;
 
 	UPROPERTY()
-	UBuyPopupWidget* BuyWidget;
+	UBuyPopupWidget* BuyWidget = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> GreyOutClass;
+	TSubclassOf<UUserWidget> GreyOutClass = nullptr;
 
 	UPROPERTY()
-	UUserWidget* GreyOut;
+	UUserWidget* GreyOut = nullptr;
 
 protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override {

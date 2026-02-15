@@ -14,53 +14,53 @@ class MYPROJECT2_API UAircraftStats : public UDataAsset
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName AircraftName;
+	FName AircraftName = NAME_None;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	float MaxSpeed;
+	float MaxSpeed = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Acceleration;
+	float Acceleration = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float TurnRate;
+	float TurnRate = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AOARecoverySpeed;
+	float AOARecoverySpeed = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RudderRate;
+	float RudderRate = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RollRate;
+	float RollRate = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SpringArmLength;
+	float SpringArmLength = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int NumOfPylons;
+	int NumOfPylons = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMesh* Pylon;
+	UStaticMesh* Pylon = nullptr;
 
 	// TODO: Flesh this out, plan is to have two types of planes, one-circle and two-circle performers aka rate vs instant turn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MaxAOA;
+	float MaxAOA = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DragCoefficient;
+	float DragCoefficient = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int MinSpeedRangeTurn;
+	int MinSpeedRangeTurn = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int MaxSpeedRangeTurn;
+	int MaxSpeedRangeTurn = 0;
 
 	// TODO: Might just make this one curve and call it like turn curve or something
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* DragCurve;
+	UCurveFloat* DragCurve = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* CompressionCurve;
+	UCurveFloat* CompressionCurve = nullptr;
 };

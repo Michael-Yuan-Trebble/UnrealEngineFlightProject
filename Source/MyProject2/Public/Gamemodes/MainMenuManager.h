@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Structs and Data/LevelListData.h"
+#include "Structs and Data/MissionData.h"
 #include "MainMenuManager.generated.h"
 
 class UMainMenuWidget;
@@ -42,38 +43,38 @@ public:
 	void Init(AAircraftPlayerController* InAPC);
 
 	UFUNCTION()
-	void OnLevelPicked(FName LevelName);
+	void OnLevelPicked(FMissionData LevelName);
 
-	bool OpenLevel(FName LevelName);
-
-	UPROPERTY()
-	AAircraftPlayerController* APC;
+	bool OpenLevel(const FName& LevelName);
 
 	UPROPERTY()
-	TSubclassOf<UMainMenuWidget> MainMenuClass;
+	AAircraftPlayerController* APC = nullptr;
 
 	UPROPERTY()
-	TSubclassOf<UFreeFlightWidget> FreeFlightClass;
+	TSubclassOf<UMainMenuWidget> MainMenuClass = nullptr;
 
 	UPROPERTY()
-	TSubclassOf<UUserWidget> TransitionScreenClass;
+	TSubclassOf<UFreeFlightWidget> FreeFlightClass = nullptr;
 
 	UPROPERTY()
-	UPlayerGameInstance* PlayerInstance;
+	TSubclassOf<UUserWidget> TransitionScreenClass = nullptr;
+
+	UPROPERTY()
+	UPlayerGameInstance* PlayerInstance = nullptr;
 
 private:
 	UPROPERTY()
-	UMainMenuWidget* MainMenuWidget;
+	UMainMenuWidget* MainMenuWidget = nullptr;
 
 	UPROPERTY()
-	UFreeFlightWidget* FreeFlightWidget;
+	UFreeFlightWidget* FreeFlightWidget = nullptr;
 
 	UPROPERTY()
-	UUserWidget* TransitionScreenWidget;
+	UUserWidget* TransitionScreenWidget = nullptr;
 
 	UPROPERTY()
 	TArray<UUserWidget*> MenuStack;
 
 	UPROPERTY()
-	UUserWidget* CurrentMenu;
+	UUserWidget* CurrentMenu = nullptr;
 };

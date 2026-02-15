@@ -15,13 +15,13 @@ void USpecialSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	if (IsValid(Special) && !Special->CanActivate()) Special->UpdateCooldown(DeltaTime);
 }
 
-void USpecialSystemComponent::SetSpecial(TSubclassOf<UBaseSpecial> In) {
+void USpecialSystemComponent::SetSpecial(const TSubclassOf<UBaseSpecial> In) {
 	Special = NewObject<UBaseSpecial>(this, In);
 }
 
 void USpecialSystemComponent::ActivateSpecial(ABaseAircraft* In)
 {
-	if (Special && Special->CanActivate()) { Special->ActivateSpecial(In); }
+	if (IsValid(Special) && Special->CanActivate()) { Special->ActivateSpecial(In); }
 }
 
 void USpecialSystemComponent::DeactivateSpecial() {

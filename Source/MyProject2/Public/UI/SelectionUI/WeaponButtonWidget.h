@@ -26,9 +26,9 @@ public:
 	FOnWeaponPicked OnWeaponPicked;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<ABaseWeapon> ButtonWeapon;
+	TSubclassOf<ABaseWeapon> ButtonWeapon = nullptr;
 
-	void SetupWeapons(TSubclassOf<ABaseWeapon> WeaponData);
+	void SetupWeapons(const TSubclassOf<ABaseWeapon>& WeaponData);
 
 protected:
 
@@ -41,10 +41,10 @@ protected:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* WeaponSelectButton;
+	UButton* WeaponSelectButton = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* WeaponNameText;
+	UTextBlock* WeaponNameText = nullptr;
 
 	virtual void NativeDestruct() override {
 		OnWeaponSelected.Clear();

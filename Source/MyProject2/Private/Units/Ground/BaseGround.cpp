@@ -10,6 +10,7 @@ ABaseGround::ABaseGround()
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	UnitType = ETargetType::Ground;
+	health = 100;
 }
 
 void ABaseGround::BeginPlay()

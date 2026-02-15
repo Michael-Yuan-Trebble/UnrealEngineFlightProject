@@ -19,7 +19,7 @@ void ULockBoxWidget::NativeConstruct()
 	}
 }
 
-void ULockBoxWidget::UpdateLockProgress(float Percent) 
+void ULockBoxWidget::UpdateLockProgress(const float Percent) 
 {
 	if (Percent <= 0.f)
 	{

@@ -3,12 +3,12 @@
 
 #include "UI/MainMenuUI/LevelButton.h"
 
-void ULevelButton::SetupLevel(FName InLevel) 
+void ULevelButton::SetupLevel(const FMissionData& InLevel) 
 {
-	if (InLevel.IsNone()) return;
-	LevelName = InLevel;
+	if (InLevel.LevelName.IsNone()) return;
+	MissionData = InLevel;
 
-	LevelText->SetText(FText::FromName(LevelName));
+	LevelText->SetText(FText::FromName(MissionData.LevelName));
 }
 
 void ULevelButton::NativeConstruct() 
@@ -21,6 +21,6 @@ void ULevelButton::NativeConstruct()
 
 void ULevelButton::HandleButtonClick() 
 {
-	if (LevelName.IsNone()) return;
-	OnLevelPicked.Broadcast(LevelName);
+	if (MissionData.LevelName.IsNone()) return;
+	OnLevelPicked.Broadcast(MissionData);
 }
