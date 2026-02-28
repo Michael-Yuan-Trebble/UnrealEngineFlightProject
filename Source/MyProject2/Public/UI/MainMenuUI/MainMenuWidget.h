@@ -25,25 +25,24 @@ public:
 	FOnSettingsPicked OnSettingsPicked;
 	FOnFreeFlightPicked OnFreeFlightPicked;
 
-	UPROPERTY(meta = (BindWidget))
-	UButton* Settingsbtn = nullptr;
+private:
 
-	UPROPERTY(meta = (BindWidget))
-	UButton* FreeFlightbtn = nullptr;
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* Exitbtn = nullptr;
-
-
-protected:
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		Super::ReleaseSlateResources(bReleaseChildren);
 	}
 
-private:
 	UFUNCTION()
 	void HandleSettingsbtnClicked();
 
 	UFUNCTION()
 	void HandleFreeFlightbtnClicked();
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> Settingsbtn = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> FreeFlightbtn = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> Exitbtn = nullptr;
 };

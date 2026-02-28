@@ -4,15 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Weapons/BaseWeapon.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
 #include "WeaponSelectionComponent.generated.h"
 
 class AAircraftPlayerController;
 class AAircraftSelectionGamemode;
-class UPlayerGameInstance;
 class UMenuManagerComponent;
 class UWeaponSelectionWidget;
+class ABaseWeapon;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UWeaponSelectionComponent : public UActorComponent
@@ -25,29 +24,6 @@ public:
 	void Setup(AAircraftPlayerController* InPlayer, AAircraftSelectionGamemode* InGM, UMenuManagerComponent* InMenu);
 	
 	void AddAircraft(UAircraftData* Data);
-	
-	UPROPERTY()
-	AAircraftPlayerController* PC = nullptr;
-
-	UPROPERTY()
-	AAircraftSelectionGamemode* GM = nullptr;
-
-	UPROPERTY()
-	UMenuManagerComponent* MenuManager = nullptr;
-
-	UPROPERTY()
-	UAircraftData* Aircraft = nullptr;
-
-	UPROPERTY()
-	UWeaponSelectionWidget* WeaponSelectUI = nullptr;
-
-	UPROPERTY()
-	TSubclassOf<UUserWidget> SelectionWidget = nullptr;
-
-	int32 CurrentPylonIndex = 0;
-
-	UPROPERTY()
-	TMap<FName, TSubclassOf<ABaseWeapon>> WeaponSelection;
 
 	void WeaponSelectionMenu();
 
@@ -61,7 +37,35 @@ public:
 
 	void CloseAll();
 
-protected:
+	UWeaponSelectionWidget* GetWeaponUI() const { return WeaponSelectUI; };
+
+	void SetWeaponWidgetClass(TSubclassOf<UUserWidget> InUI) { SelectionWidget = InUI; };
+
+private:
+
+	int32 CurrentPylonIndex = 0;
+
+	UPROPERTY()
+	TMap<FName, TSubclassOf<ABaseWeapon>> WeaponSelection;
+
+	UPROPERTY()
+	TObjectPtr<AAircraftPlayerController> PC = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<AAircraftSelectionGamemode> GM = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UMenuManagerComponent> MenuManager = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UAircraftData> Aircraft = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UWeaponSelectionWidget> WeaponSelectUI = nullptr;
+
+	UPROPERTY()
+	TSubclassOf<UUserWidget> SelectionWidget = nullptr;
+
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override {
 		CloseAll();
 		Super::EndPlay(EndPlayReason);

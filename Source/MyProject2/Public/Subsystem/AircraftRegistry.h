@@ -22,7 +22,7 @@ public:
 	FOnAnyUnitHit OnAnyUnitHit;
 	FOnAnyUnitDeath OnAnyUnitDeath;
 
-	TArray<TWeakObjectPtr<ABaseUnit>> RegisteredUnits;
+	TArray<TWeakObjectPtr<ABaseUnit>> RegisteredUnits{};
 
 	void Register(ABaseUnit* Aircraft);
 	void Unregister(ABaseUnit* Aircraft);

@@ -6,14 +6,11 @@
 #include "Components/ActorComponent.h"
 #include "Specials/BaseSpecial.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
-#include "Components/Button.h"
-#include "Components/TextBlock.h"
 #include "SpecialSelectionComponent.generated.h"
 
 class AAircraftPlayerController;
-class AAircraftSelectionGamemode;
-class UPlayerGameInstance;
 class UMenuManagerComponent;
+class UBaseSpecial;
 class USpecialSelectionWidget;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -36,27 +33,32 @@ public:
 
 	void SetAir(UAircraftData* InAir);
 
+	void CloseAll();
+
+	void SetWidget(const TSubclassOf<UUserWidget>& InWidget) { SelectionWidget = InWidget; };
+
+	USpecialSelectionWidget* GetWidget() const { return SpecialSelectUI; };
+
+private:
+
 	UPROPERTY()
 	TSubclassOf<UUserWidget> SelectionWidget = nullptr;
 
 	UPROPERTY()
-	AAircraftPlayerController* PC = nullptr;
+	TObjectPtr<AAircraftPlayerController> PC = nullptr;
 
 	UPROPERTY()
-	UPlayerGameInstance* GameInstance = nullptr;
+	TObjectPtr<class UPlayerGameInstance> GameInstance = nullptr;
 
 	UPROPERTY()
-	USpecialSelectionWidget* SpecialSelectUI = nullptr;
+	TObjectPtr<USpecialSelectionWidget> SpecialSelectUI = nullptr;
 
 	UPROPERTY()
-	UMenuManagerComponent* MenuManager = nullptr;
+	TObjectPtr<UMenuManagerComponent> MenuManager = nullptr;
 
 	UPROPERTY()
-	UAircraftData* SelectedAircraft = nullptr;
+	TObjectPtr<UAircraftData> SelectedAircraft = nullptr;
 
-	void CloseAll();
-
-protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override 
 	{
 		CloseAll();

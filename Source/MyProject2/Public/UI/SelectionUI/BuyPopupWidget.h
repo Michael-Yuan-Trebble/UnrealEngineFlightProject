@@ -4,9 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/TextBlock.h"
-#include "Components/SizeBox.h"
-#include "Components/Button.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
 #include "BuyPopupWidget.generated.h"
 
@@ -22,24 +19,26 @@ public:
 
 	UBuyPopupWidget(const FObjectInitializer& ObjectInitializer);
 
-	UPROPERTY()
-	UAircraftData* Aircraft = nullptr;
-
 	UFUNCTION(BlueprintCallable)
 	void Setup(UAircraftData* AircraftData);
+
+	void SetComp(UBuySelectionComponent* InComp) { BuyUI = InComp; };
+
+private:
 
 	int CurrentCurrency = 0;
 
 	UPROPERTY()
-	UBuySelectionComponent* BuyUI = nullptr;
+	TObjectPtr<UAircraftData> Aircraft = nullptr;
 
-protected:
+	UPROPERTY()
+	TObjectPtr<UBuySelectionComponent> BuyUI = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> BuyButtonClass = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
-	USizeBox* SizeBox = nullptr;
+	TObjectPtr<class USizeBox> SizeBox = nullptr;
 
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		BuyUI = nullptr;

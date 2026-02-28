@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/SizeBox.h"
-#include "Components/Image.h"
 #include "LockBoxWidget.generated.h"
 
 class UImage;
@@ -37,30 +35,28 @@ public:
 
 	void ResetLockAnimation();
 
-	UPROPERTY(meta=(BindWidgetAnim), Transient)
-	UWidgetAnimation* LockApproachAnim = nullptr;
+private:
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> ReticleImage = nullptr;
 
-	UPROPERTY(meta=(BindWidgetAnim), Transient)
-	UWidgetAnimation* LockConfirm = nullptr;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> SmallReticleImage = nullptr;
 
-	UPROPERTY(BlueprintReadOnly)
-	AActor* TrackedTarget = nullptr;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class USizeBox> SizeBox_Reticle = nullptr;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	TObjectPtr<UWidgetAnimation> LockApproachAnim = nullptr;
+
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	TObjectPtr<UWidgetAnimation> LockConfirm = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<AActor> TrackedTarget = nullptr;
+
 	bool isLockedOn = false;
 
 	bool bIsLocking = false;
 
-protected:
-	UPROPERTY(meta = (BindWidget))
-	UImage* ReticleImage = nullptr;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* SmallReticleImage = nullptr;
-
-	UPROPERTY(meta = (BindWidget))
-	USizeBox* SizeBox_Reticle = nullptr;
-
-private:
 	void ResetAnimation(UWidgetAnimation* Animation);
 };

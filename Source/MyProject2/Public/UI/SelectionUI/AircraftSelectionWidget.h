@@ -7,8 +7,6 @@
 #include "Structs and Data/Aircraft Data/AircraftData.h"
 #include "AircraftSelectionWidget.generated.h"
 
-class UAircraftButtonWidget;
-class UScrollBox;
 class UMenuManagerComponent;
 class UAircraftDatabase;
 class UAircraftSelectionComponent;
@@ -24,9 +22,6 @@ public:
 
 	UAircraftSelectionWidget(const FObjectInitializer& ObjectInitializer);
 
-	UPROPERTY(BlueprintReadWrite)
-	UAircraftDatabase* AircraftDatabase = nullptr;
-
 	UPROPERTY(BlueprintAssignable,Category = "Events")
 	FAircraftSelectedSignature OnWidgetSelected;
 
@@ -38,22 +33,23 @@ public:
 		UMenuManagerComponent* InMenu, 
 		UAircraftSelectionComponent* InSelect);
 
-	UPROPERTY()
-	UMenuManagerComponent* MenuManager = nullptr;
+	void UpdateAircraft(const FName& AircraftChange);
+
+private:
 
 	UPROPERTY()
-	UAircraftSelectionComponent* AircraftUI = nullptr;
+	TObjectPtr<UMenuManagerComponent> MenuManager = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UAircraftDatabase> AircraftDatabase = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UAircraftSelectionComponent> AircraftUI = nullptr;
 
 	TArray<FName> Owned;
 
 	UPROPERTY()
-	TMap<FName, UAircraftButtonWidget*> ButtonArray;
-
-	int CurrentMoney = 0;
-
-	void UpdateAircraft(FName AircraftChange);
-
-protected:
+	TMap<FName, class UAircraftButtonWidget*> ButtonArray;
 
 	UFUNCTION()
 	void HandleAircraftSelected(UAircraftData* Aircraft);
@@ -62,7 +58,7 @@ protected:
 	TSubclassOf<UUserWidget> AircraftButtonClass = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
-	UScrollBox* AircraftScrollBox = nullptr;
+	class UScrollBox* AircraftScrollBox = nullptr;
 
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		MenuManager = nullptr;

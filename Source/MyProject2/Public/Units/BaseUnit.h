@@ -4,15 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "Components/BoxComponent.h"
 #include "Interfaces/LockableTarget.h"
 #include "Interfaces/DamageableInterface.h"
 #include "Interfaces/TeamInterface.h"
-#include "Subsystem/AircraftRegistry.h"
-#include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "BaseUnit.generated.h"
 
 class UHealthComponent;
+class UBoxComponent;
+class UPhysicsConstraintComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnThisDeath);
 
@@ -61,7 +60,7 @@ public:
 protected:
 
 	UPROPERTY(EditAnywhere)
-	UBoxComponent* UnitRoot = nullptr;
+	TObjectPtr<UBoxComponent> UnitRoot = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	EFaction Faction = EFaction::Ally;
@@ -70,13 +69,13 @@ protected:
 	ETargetType UnitType = ETargetType::Unknown;
 
 	UPROPERTY()
-	UPhysicsConstraintComponent* Constraint = nullptr;
+	TObjectPtr<UPhysicsConstraintComponent> Constraint = nullptr;
 
 	UPROPERTY()
-	UAircraftRegistry* Registry = nullptr;
+	TObjectPtr<class UAircraftRegistry> Registry = nullptr;
 
 	UPROPERTY()
-	UHealthComponent* HealthComp = nullptr;
+	TObjectPtr<UHealthComponent> HealthComp = nullptr;
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -94,6 +93,6 @@ protected:
 	bool bAlive = true;
 
 	UPROPERTY()
-	AActor* Tracked = nullptr;
+	TObjectPtr<AActor> Tracked = nullptr;
 
 };

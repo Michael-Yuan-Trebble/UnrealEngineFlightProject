@@ -12,10 +12,10 @@ struct FMissionWave
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	TArray<ABaseSpawnPoint*> SpawnPoints;
+	TArray<ABaseSpawnPoint*> SpawnPoints{};
 
 	UPROPERTY(EditAnywhere)
-	FString ObjectiveName;
+	FString ObjectiveName = TEXT("");
 
 	UPROPERTY(EditAnywhere)
 	bool bWaitForCompletion = true;

@@ -45,10 +45,14 @@ public:
 	UFUNCTION()
 	void OnLevelPicked(FMissionData LevelName);
 
-	bool OpenLevel(const FName& LevelName);
+	void SetMainMenuClass(const TSubclassOf<UMainMenuWidget> InMenu) { MainMenuClass = InMenu; };
+
+	void SetFreeFlightClass(const TSubclassOf<UFreeFlightWidget> InFlight) { FreeFlightClass = InFlight; };
+
+private:
 
 	UPROPERTY()
-	AAircraftPlayerController* APC = nullptr;
+	TObjectPtr<AAircraftPlayerController> APC = nullptr;
 
 	UPROPERTY()
 	TSubclassOf<UMainMenuWidget> MainMenuClass = nullptr;
@@ -60,21 +64,20 @@ public:
 	TSubclassOf<UUserWidget> TransitionScreenClass = nullptr;
 
 	UPROPERTY()
-	UPlayerGameInstance* PlayerInstance = nullptr;
-
-private:
-	UPROPERTY()
-	UMainMenuWidget* MainMenuWidget = nullptr;
+	TObjectPtr<UPlayerGameInstance> PlayerInstance = nullptr;
 
 	UPROPERTY()
-	UFreeFlightWidget* FreeFlightWidget = nullptr;
+	TObjectPtr<UMainMenuWidget> MainMenuWidget = nullptr;
 
 	UPROPERTY()
-	UUserWidget* TransitionScreenWidget = nullptr;
+	TObjectPtr<UFreeFlightWidget> FreeFlightWidget = nullptr;
 
 	UPROPERTY()
-	TArray<UUserWidget*> MenuStack;
+	TObjectPtr<UUserWidget> TransitionScreenWidget = nullptr;
 
 	UPROPERTY()
-	UUserWidget* CurrentMenu = nullptr;
+	TArray<UUserWidget*> MenuStack{};
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> CurrentMenu = nullptr;
 };

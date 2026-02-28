@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Units/BaseNaval.h"
+#include "Units/Naval/BaseNaval.h"
 #include "Carrier.generated.h"
 
 UCLASS()
@@ -19,11 +19,8 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-	USceneComponent* SpawnPoint = nullptr;
+	TObjectPtr<USceneComponent> SpawnPoint = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* CarrierMesh = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	UBoxComponent* Collision = nullptr;
+	TObjectPtr<UBoxComponent> Collision = nullptr;
 };

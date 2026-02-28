@@ -17,7 +17,7 @@ class MYPROJECT2_API UBTServiceChooseTarget : public UBTService
 public:
 	UBTServiceChooseTarget();
 
-protected:
+private:
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
 	void PickTarget();
@@ -30,7 +30,7 @@ protected:
 	FDetectedAircraftInfo Selected;
 
 	UPROPERTY()
-	AEnemyAircraft* Controlled = nullptr;
+	TObjectPtr<AEnemyAircraft> Controlled = nullptr;
 
 	float timeSinceLastPick = 0.f;
 

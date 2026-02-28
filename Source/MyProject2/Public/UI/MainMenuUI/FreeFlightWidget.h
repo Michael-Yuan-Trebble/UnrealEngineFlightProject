@@ -30,12 +30,12 @@ protected:
 	TSubclassOf<ULevelButton> LevelButtonClass = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
-	UScrollBox* LevelScrollBox = nullptr;
+	TObjectPtr<UScrollBox> LevelScrollBox = nullptr;
 
 	UFUNCTION()
 	void HandleLevelButtonClicked(FMissionData InLevel);
 
 private:
 	UPROPERTY(EditAnywhere)
-	ULevelListData* LevelList = nullptr;
+	TObjectPtr<ULevelListData> LevelList = nullptr;
 };

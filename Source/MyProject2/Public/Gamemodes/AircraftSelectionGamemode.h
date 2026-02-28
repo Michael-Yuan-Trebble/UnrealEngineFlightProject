@@ -7,6 +7,7 @@
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
 #include "Structs and Data/AircraftLoadoutData.h"
+#include "Enums/ControlModeTypes.h"
 #include "AircraftSelectionGamemode.generated.h"
 
 class UAircraftSelectionWidget;
@@ -35,7 +36,7 @@ public:
 
 private:
 	UPROPERTY()
-	APawn* AircraftDisplayed = nullptr;
+	TObjectPtr<APawn> AircraftDisplayed = nullptr;
 
 	UPROPERTY()
 	TMap<FName, AActor*> EquippedWeapons;
@@ -53,16 +54,16 @@ private:
 	TSubclassOf<UUserWidget> SpecialSelectionClass = nullptr;
 
 	UPROPERTY()
-	UAircraftData* ChosenAircraft = nullptr;
+	TObjectPtr<UAircraftData> ChosenAircraft = nullptr;
 
 	UPROPERTY()
-	AAircraftPlayerController* APC = nullptr;
+	TObjectPtr<AAircraftPlayerController> APC = nullptr;
 
 	UPROPERTY()
-	UMenuManagerComponent* MenuManager = nullptr;
+	TObjectPtr<UMenuManagerComponent> MenuManager = nullptr;
 
 	UPROPERTY()
-	TSet<AAircraftPlayerController*> ReadyPlayers;
+	TSet<AAircraftPlayerController*> ReadyPlayers{};
 
 	FAircraftLoadoutData FullLoadout{};
 

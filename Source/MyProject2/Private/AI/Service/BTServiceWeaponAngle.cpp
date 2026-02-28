@@ -6,6 +6,8 @@
 #include "Units/Aircraft/FlightComponent.h"
 #include "Units/Aircraft/AI/EnemyAircraft.h"
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"
+#include "Units/Aircraft/BaseAircraft.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Weapons/BaseWeapon.h"
 
 UBTServiceWeaponAngle::UBTServiceWeaponAngle() 
@@ -21,11 +23,11 @@ void UBTServiceWeaponAngle::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, 
 	BlackboardComp = OwnerComp.GetBlackboardComponent();
 	Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
 
-	for (const TPair<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon* >>& GroupPair : Controlled->WeaponComponent->WeaponGroups)
+	for (const TPair<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon* >>& GroupPair : Controlled->GetWeaponComp()->GetWeaponGroups())
 	{
 		TSubclassOf<ABaseWeapon> WeaponClass = GroupPair.Key;
 		const TArray<FCooldownWeapon*>& WeaponArray = GroupPair.Value;
-		float WeaponRange = WeaponArray[0]->WeaponInstance->range;
+		float WeaponRange = WeaponArray[0]->WeaponInstance->GetRange();
 
 		if (WeaponRange > greatestRange)
 		{
@@ -36,7 +38,7 @@ void UBTServiceWeaponAngle::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, 
 
 void UBTServiceWeaponAngle::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
-	if (!Controlled || !Controlled->WeaponComponent || !BlackboardComp || !Selected) return;
+	if (!Controlled || !Controlled->GetWeaponComp() || !BlackboardComp || !Selected) return;
 	WeaponDistance();
 }
 
@@ -45,20 +47,20 @@ void UBTServiceWeaponAngle::WeaponDistance()
 	float Distance = FVector::Dist(Controlled->GetActorLocation(), Selected->GetActorLocation());
 	if (Distance > greatestRange) return;
 
-	if (!Controlled->WeaponComponent->bLocked) return;
+	if (!Controlled->GetWeaponComp()->GetLocked()) return;
 
-	ABaseWeapon* CurrentWeapon = Controlled->WeaponComponent->CurrentWeapon;
+	ABaseWeapon* CurrentWeapon = Controlled->GetWeaponComp()->GetWeapon();
 	if (!CurrentWeapon) return;
 
 	TSubclassOf<ABaseWeapon> FiringWeapon = nullptr;
 	float smallestRange = Distance;
 
-	for (const TPair<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon* >> &GroupPair : Controlled->WeaponComponent->WeaponGroups)
+	for (const TPair<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon* >> &GroupPair : Controlled->GetWeaponComp()->GetWeaponGroups())
 	{
 		TSubclassOf<ABaseWeapon> WeaponClass = GroupPair.Key;
 		const TArray<FCooldownWeapon*>& WeaponArray = GroupPair.Value;
 
-		float WeaponRange = WeaponArray[0]->WeaponInstance->range;
+		float WeaponRange = WeaponArray[0]->WeaponInstance->GetRange();
 
 		if (WeaponRange <= Distance)
 		{

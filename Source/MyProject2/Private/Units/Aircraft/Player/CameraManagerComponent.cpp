@@ -6,6 +6,8 @@
 #include "Units/Aircraft/AircraftAudioComponent.h"
 #include "UI/PlayerHUD.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 
 UCameraManagerComponent::UCameraManagerComponent()
 {

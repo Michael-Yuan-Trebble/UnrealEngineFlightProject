@@ -7,8 +7,6 @@
 #include "Structs and Data/Weapon Data/BombStats.h"
 #include "BaseBomb.generated.h"
 
-class ABaseAircraft;
-
 UCLASS()
 class MYPROJECT2_API ABaseBomb : public ABaseWeapon
 {
@@ -22,11 +20,12 @@ public:
 	float ReturnCooldownTime() const { return cooldownTime; }
 
 	UPROPERTY(EditAnywhere)
-	UBombStats* BombStats = nullptr;
+	TSoftObjectPtr<UBombStats> BombStats = nullptr;
 
 	FVector Velocity = FVector::ZeroVector;
 
-	ABaseAircraft* Owner = nullptr;
+	UPROPERTY()
+	TWeakObjectPtr<class ABaseAircraft> AircraftOwner = nullptr;
 
 	bool isAir = false;
 	
@@ -60,4 +59,10 @@ private:
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	void CheckAndDelete();
+
+	float MaxSpeed = 0.f;
+
+	float BlastRadius = 0.f;
+
+	float Damage = 0.f;
 };

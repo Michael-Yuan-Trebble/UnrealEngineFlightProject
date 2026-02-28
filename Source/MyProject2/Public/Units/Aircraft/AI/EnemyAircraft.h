@@ -5,12 +5,12 @@
 #include "CoreMinimal.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Structs and Data/FDetectedAircraftInfo.h"
-#include "Units/Aircraft/AI/AIFlightComponent.h"
 #include "Structs and Data/Aircraft Data/AIAircraftData.h"
 #include "EnemyAircraft.generated.h"
 
 class AEnemyAircraftAI;
 class ABaseWeapon;
+class UAIFlightComponent;
 
 UCLASS()
 class MYPROJECT2_API AEnemyAircraft : public ABaseAircraft
@@ -21,7 +21,7 @@ public:
 
 	AEnemyAircraft();
 
-	AEnemyAircraftAI* Controller = nullptr;
+	TObjectPtr<AEnemyAircraftAI> Controller = nullptr;
 
 	virtual void PossessedBy(AController* Controller) override;
 

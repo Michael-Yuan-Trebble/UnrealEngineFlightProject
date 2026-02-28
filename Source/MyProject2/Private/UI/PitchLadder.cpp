@@ -3,6 +3,9 @@
 
 #include "UI/PitchLadder.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Components/CanvasPanel.h"
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
 
 void UPitchLadder::NativeConstruct() 
 {

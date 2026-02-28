@@ -37,30 +37,35 @@ public:
 	UFUNCTION()
 	void SetAircraft(UAircraftData* Aircraft);
 
+	UAircraftSelectionWidget* GetWidget() const { return AircraftSelectUI; };
+
+	void SetWidget(const TSubclassOf<UUserWidget> InWidget) { SelectionWidget = InWidget; };
+
+	void CloseAll();
+
+private:
+
 	UPROPERTY()
 	TSubclassOf<UUserWidget> SelectionWidget = nullptr;
 
 	UPROPERTY()
-	AAircraftPlayerController* PC = nullptr;
+	TObjectPtr<AAircraftPlayerController> PC = nullptr;
 
 	UPROPERTY()
-	AAircraftSelectionGamemode* GM = nullptr;
+	TObjectPtr<AAircraftSelectionGamemode> GM = nullptr;
 
 	UPROPERTY()
-	UAircraftDatabase* AircraftDatabase = nullptr;
+	TObjectPtr<UAircraftDatabase> AircraftDatabase = nullptr;
 
 	UPROPERTY()
-	UPlayerGameInstance* GameInstance = nullptr;
+	TObjectPtr<UPlayerGameInstance> GameInstance = nullptr;
 
 	UPROPERTY()
-	UAircraftSelectionWidget* AircraftSelectUI;
+	TObjectPtr<UAircraftSelectionWidget> AircraftSelectUI = nullptr;
 
 	UPROPERTY()
-	UMenuManagerComponent* MenuManager = nullptr;
+	TObjectPtr<UMenuManagerComponent> MenuManager = nullptr;
 
-	void CloseAll();
-
-protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override {
 		CloseAll();
 		Super::EndPlay(EndPlayReason);

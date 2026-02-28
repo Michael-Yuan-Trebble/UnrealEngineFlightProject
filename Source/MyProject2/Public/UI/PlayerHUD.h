@@ -9,11 +9,12 @@
 #include "MinimapWidget.h"
 #include "Structs and Data/FDetectedAircraftInfo.h"
 #include "PitchLadder.h"
-#include "Player Info/AircraftPlayerController.h"
 #include "PlayerHUD.generated.h"
 
 class APlayerAircraft;
 class ABaseUnit;
+class ABaseMissile;
+class AAircraftPlayerController;
 
 UCLASS()
 class MYPROJECT2_API APlayerHUD : public AHUD
@@ -22,63 +23,6 @@ class MYPROJECT2_API APlayerHUD : public AHUD
 public:
 
 	APlayerHUD();
-
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<ULockBoxWidget> LockBoxWidgetClass = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UMinimapWidget> MiniMapClass = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> AimReticleClass = nullptr;
-
-	UPROPERTY()
-	UUserWidget* AimReticleWidget = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> AOAReticleClass = nullptr;
-
-	UPROPERTY()
-	UUserWidget* AOAReticleWidget = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UPitchLadder> PitchLadderClass = nullptr;
-
-	UPROPERTY()
-	UPitchLadder* PitchLadderWidget = nullptr;
-
-	UPROPERTY()
-	UMinimapWidget* MiniMap = nullptr;
-
-	UPROPERTY()
-	AAircraftPlayerController* PC = nullptr;
-
-	UPROPERTY()
-	TArray<ABaseUnit*> Targets;
-
-	UPROPERTY()
-	ULockBoxWidget* SelectedAircraftWidget = nullptr;
-
-	UPROPERTY()
-	APlayerAircraft* Controlled = nullptr;
-
-	TWeakObjectPtr<ABaseUnit> LastActor = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UHitNotificationWidget> HitNotiClass = nullptr;
-
-	UPROPERTY()
-	UHitNotificationWidget* HitNotiWidget = nullptr;
-
-	UPROPERTY()
-	TMap<ABaseUnit*, ULockBoxWidget*> ActiveWidgets;
-
-	UPROPERTY()
-	ABaseUnit* Target = nullptr;
 
 	void UpdateLocked(const float LockPercent);
 
@@ -118,6 +62,64 @@ public:
 	void HandleRadarScan(const TArray<FDetectedAircraftInfo>& InEnemies);
 
 private:
+
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ULockBoxWidget> LockBoxWidgetClass = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UMinimapWidget> MiniMapClass = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> AimReticleClass = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> AimReticleWidget = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> AOAReticleClass = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> AOAReticleWidget = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UPitchLadder> PitchLadderClass = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UPitchLadder> PitchLadderWidget = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UMinimapWidget> MiniMap = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<AAircraftPlayerController> PC = nullptr;
+
+	UPROPERTY()
+	TArray<TWeakObjectPtr<ABaseUnit>> Targets;
+
+	UPROPERTY()
+	TObjectPtr<ULockBoxWidget> SelectedAircraftWidget = nullptr;
+
+	UPROPERTY()
+	TWeakObjectPtr<APlayerAircraft> Controlled = nullptr;
+
+	UPROPERTY()
+	TWeakObjectPtr<ABaseUnit> LastActor = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UHitNotificationWidget> HitNotiClass = nullptr;
+
+	UPROPERTY()
+	UHitNotificationWidget* HitNotiWidget = nullptr;
+
+	UPROPERTY()
+	TMap<TWeakObjectPtr<ABaseUnit>, TObjectPtr<ULockBoxWidget>> ActiveWidgets;
+
+	UPROPERTY()
+	TWeakObjectPtr<ABaseUnit> Target = nullptr;
 
 	void UpdateTargetWidgets();
 

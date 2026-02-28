@@ -7,6 +7,9 @@
 #include "UI/MainMenuUI/MainMenuWidget.h"
 #include "UI/MainMenuUI/FreeFlightWidget.h"
 #include "Gamemodes/MainMenuManager.h"
+#include "Subsystem/LevelTransitionSubsystem.h"
+#include "Subsystem/MissionManagerSubsystem.h"
+#include "Player Info/PlayerGameInstance.h"
 
 AMainMenuGamemode::AMainMenuGamemode() 
 {
@@ -28,10 +31,26 @@ void AMainMenuGamemode::BeginPlay()
 	UMainMenuManager* MenuManager = GetWorld()->GetGameInstance()->GetSubsystem<UMainMenuManager>();
 	if (!MenuManager) return;
 
-	if (!MainMenuClass || !FreeFlightClass) return;
+	if (!IsValid(MainMenuClass) || !IsValid(FreeFlightClass)) return;
 
-	MenuManager->MainMenuClass = MainMenuClass;
-	MenuManager->FreeFlightClass = FreeFlightClass;
+	MenuManager->SetMainMenuClass(MainMenuClass);
+	MenuManager->SetFreeFlightClass(FreeFlightClass);
 	MenuManager->ShowMainMenu();
 
+}
+
+void AMainMenuGamemode::LevelSelected(FMissionData Level) {
+
+	UWorld* World = GetWorld();
+	if (!IsValid(World)) return;
+
+	UPlayerGameInstance* GI = World->GetGameInstance<UPlayerGameInstance>();
+	if (!IsValid(GI)) return;
+	ULevelTransitionSubsystem* LevelSystem = GI->GetSubsystem<ULevelTransitionSubsystem>();
+	UMissionManagerSubsystem* MissionSystem = GI->GetSubsystem<UMissionManagerSubsystem>();
+	if (!IsValid(LevelSystem) || !IsValid(MissionSystem)) return;
+
+	GI->SetLevel(Level);
+
+	LevelSystem->LoadMission(MissionSystem->GetAircraftSelectMap());
 }

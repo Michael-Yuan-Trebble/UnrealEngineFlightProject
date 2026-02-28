@@ -4,21 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "InputActionValue.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "Enums/MenuState.h"
 #include "Enums/ControlModeTypes.h"
 #include "Enums/FlightMode.h"
+#include "Structs and Data/FlightInputConfig.h"
+#include "Structs and Data/WeaponInputConfig.h"
+#include "Structs and Data/MenuInputConfig.h"
 #include "AircraftPlayerController.generated.h"
-
-#define MIDDLETHRUST 0.5f
 
 class APlayerAircraft;
 class UInputMappingContext;
 class UEnhancedInputComponent;
 class UMenuManagerComponent;
-class UWeaponSystemComponent;
 class APlayerHUD;
 class ABaseMissile;
 
@@ -27,86 +24,29 @@ class MYPROJECT2_API AAircraftPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
-protected:
-
-	virtual void Tick(float DeltaTime) override;
-	virtual void BeginPlay() override;
-	virtual void SetupInputComponent() override;
-	virtual void OnPossess(APawn* InPawn) override;
-
-	AAircraftPlayerController();
-
 public:
 
 	//UInputs
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputMappingContext* Mapping;
+	TSoftObjectPtr<UInputMappingContext> Mapping = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Input")
-	UInputMappingContext* MenuInputMapping;
+	TSoftObjectPtr<UInputMappingContext> MenuInputMapping = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Input")
-	UInputAction* Up = nullptr;
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UFlightInputConfig> FlightInputs = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Input")
-	UInputAction* Down = nullptr;
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UWeaponInputConfig> WeaponInputs = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Input")
-	UInputAction* IA_Back = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* Throttle = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Roll = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Pitch = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Rudder = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Special = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Shoot = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Weapons = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_LookX = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_LookY = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Focus = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Switch = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Zoom = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_NextWeapon = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_PrevWeapon = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_Menu = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* IA_TogglePerspective = nullptr;
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UMenuInputConfig> MenuInputs = nullptr;
 
 	// Functions
 
 	void ManageMenuSetting(const EMenuState NewState);
-	void SetComponents(UWeaponSystemComponent* InWeapon);
+	void SetComponents(class UWeaponSystemComponent* InWeapon);
 	void SetControlMode(const EControlMode NewMode);
 	void SetFlightMode(const EFlightMode FlightMode);
 
@@ -117,33 +57,17 @@ public:
 	void DeactivateWeapon() { bWeaponEnabled = false; };
 	void ActivateWeapon() { bWeaponEnabled = true; };
 
-	// Vars
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool isFlying = false;
-
-	int SelectedIndex = -1;
-	bool bIsPaused = false;
-
-	int32 AircraftMappingPriority = 0;
-	int32 MenuMappingPriority = 1;
-
-	EControlMode CurrentMode = EControlMode::Null;
-	TArray<EMenuState> MenuHistory;
-
-	UPROPERTY()
-	APlayerAircraft* Controlled = nullptr;
-
-	UPROPERTY()
-	UMenuManagerComponent* MenuManager = nullptr;
-
-	UPROPERTY()
-	UWeaponSystemComponent* WeaponComp = nullptr;
-
-	UPROPERTY()
-	APlayerHUD* HUD = nullptr;
+	UMenuManagerComponent* GetMenuManager() const { return MenuManager; };
+	TArray<EMenuState> GetMenuHistory() const { return MenuHistory; };
 
 private:
+
+	virtual void Tick(float DeltaTime) override;
+	virtual void BeginPlay() override;
+	virtual void SetupInputComponent() override;
+	virtual void OnPossess(APawn* InPawn) override;
+
+	AAircraftPlayerController();
 
 	void BindAircraftInputs(UEnhancedInputComponent* EnhancedInputComp);
 	void BindMenuInputs(UEnhancedInputComponent* EnhancedInputComp);
@@ -204,15 +128,31 @@ private:
 
 	//Variables
 
-	bool fire = false;
-	bool isThrust = false;
+	bool bFire = false;
+	bool bThrust = false;
 
 	float thrustPercentage = MiddleThrust;
 	int32 WeaponIndex = 0;
 
-	FTimerHandle UpdateVFXHandle;
+	FTimerHandle UpdateVFXHandle{};
+
+	int32 AircraftMappingPriority = 0;
+	int32 MenuMappingPriority = 1;
+
+	EControlMode CurrentMode = EControlMode::Null;
+	TArray<EMenuState> MenuHistory{};
+
+	UPROPERTY()
+	TObjectPtr<APlayerAircraft> Controlled = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UMenuManagerComponent> MenuManager = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<APlayerHUD> HUD = nullptr;
 
 	static constexpr float MiddleThrust = 0.5f;
+	static constexpr float ScanTime = 0.15f;
 
 	bool bMovementEnabled = true;
 	bool bCameraEnabled = true;

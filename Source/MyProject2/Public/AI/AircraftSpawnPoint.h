@@ -11,7 +11,7 @@ class MYPROJECT2_API AAircraftSpawnPoint : public ABaseSpawnPoint
 {
 	GENERATED_BODY()
 	
-protected:
+private:
 
 	// TEMPORARY, just to test things easier spawn points should be triggered by gamemode not just automatically on its own
 	virtual void BeginPlay() override;
@@ -21,8 +21,6 @@ protected:
 	void StressTest();
 
 	void SetInitialSpeed(APawn* Spawn);
-
-private:
 
 	// TODO: Do formations later, for now they just spawn in a line
 	UPROPERTY(EditAnywhere)

@@ -5,7 +5,9 @@
 #include "Units/Aircraft/AI/EnemyAircraft.h"
 #include "Units/Aircraft/FlightComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
+#include "Units/Aircraft/BaseAircraft.h"
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "DrawDebugHelpers.h"
 
 EAIThrottleMode UBTServiceAttack::GetThrottleMode(float distance) 
@@ -35,7 +37,7 @@ void UBTServiceAttack::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8
 
 void UBTServiceAttack::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
-	if (!Controlled || !Controlled->FlightComponent ||!BlackboardComp || !Selected) return;
+	if (!Controlled || !Controlled->GetFlightComp() ||!BlackboardComp || !Selected) return;
 	CalculateAngle(DeltaSeconds);
 	CalculateThrust(DeltaSeconds);
 }
@@ -45,7 +47,7 @@ void UBTServiceAttack::CalculateAngle(const float DeltaSeconds)
 	FVector ToTargetWorld = (Selected->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
 	if (ToTargetWorld.IsNearlyZero()) return;
 
-	FTransform AirframeTransform = Controlled->Airframe->GetComponentTransform();
+	FTransform AirframeTransform = Controlled->GetAirframe()->GetComponentTransform();
 	FVector LocalDir = AirframeTransform.InverseTransformVectorNoScale(ToTargetWorld);
 
 	float DesiredRollInput = CalculateRollDegrees(LocalDir);
@@ -145,15 +147,16 @@ void UBTServiceAttack::CalculateThrust(const float DeltaSeconds)
 
 float UBTServiceAttack::PursuitThrottle(ABaseAircraft* Target)
 {
-	float targetSpeed = Target->FlightComponent->currentSpeed;
-	float currentSpeed = Controlled->FlightComponent->currentSpeed;
+	if (!IsValid(Target) || !IsValid(Controlled)) return 0.f;
+	float targetSpeed = UFlightMathLibrary::SpeedToKMH(Target->GetSpeed());
+	float currentSpeed = UFlightMathLibrary::SpeedToKMH(Controlled->GetSpeed());
 	float speedDif = targetSpeed - currentSpeed;
 	float absSpeedDif = FMath::Abs(speedDif);
 
 	// Maybe make these ranges dependent based on pilot skill
 	if (absSpeedDif <= 100) 
 	{
-		return 0.5;
+		return 0.5f;
 	}
 	// These are temporary setting speeds, plan is to make it more dynamic use more ranges of throttle percentages.
 	if (speedDif < 0)

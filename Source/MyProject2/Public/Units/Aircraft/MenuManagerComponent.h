@@ -6,8 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "Enums/MenuState.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
-#include "Specials/BaseSpecial.h"
-#include "Blueprint/UserWidget.h"
 #include "MenuManagerComponent.generated.h"
 
 class AAircraftPlayerController;
@@ -33,19 +31,19 @@ public:
 	void GetWidgetClassForState(const EMenuState State);
 
 	UPROPERTY()
-	AAircraftPlayerController* PC = nullptr;
+	TObjectPtr<AAircraftPlayerController> PC = nullptr;
 
 	UPROPERTY()
-	AAircraftSelectionGamemode* GM = nullptr;
+	TObjectPtr<AAircraftSelectionGamemode> GM = nullptr;
 
 	UPROPERTY()
-	UPlayerGameInstance* GameInstance = nullptr;
+	TObjectPtr<UPlayerGameInstance> GameInstance = nullptr;
 
 	UPROPERTY()
-	UAircraftData* SelectedAircraft = nullptr;
+	TObjectPtr<UAircraftData> SelectedAircraft = nullptr;
 
 	UPROPERTY()
-	UAircraftData* TempAircraft = nullptr;
+	TObjectPtr<UAircraftData> TempAircraft = nullptr;
 
 	UPROPERTY()
 	TSubclassOf<UBaseSpecial> SelectedSpecial = nullptr;
@@ -63,19 +61,19 @@ public:
 	TSubclassOf<UUserWidget> SpecialSelectionClass = nullptr;
 
 	UPROPERTY()
-	UUserWidget* CurrentWidget = nullptr;
+	TObjectPtr<UUserWidget> CurrentWidget = nullptr;
 
 	UPROPERTY()
-	UAircraftSelectionComponent* AircraftSelectionUI = nullptr;
+	TObjectPtr<UAircraftSelectionComponent> AircraftSelectionUI = nullptr;
 
 	UPROPERTY()
-	UWeaponSelectionComponent* WeaponSelectionUI = nullptr;
+	TObjectPtr<UWeaponSelectionComponent> WeaponSelectionUI = nullptr;
 
 	UPROPERTY()
-	UBuySelectionComponent* BuySelectionUI = nullptr;
+	TObjectPtr<UBuySelectionComponent> BuySelectionUI = nullptr;
 
 	UPROPERTY()
-	USpecialSelectionComponent* SpecialSelectionUI = nullptr;
+	TObjectPtr<USpecialSelectionComponent> SpecialSelectionUI = nullptr;
 
 	void ChooseAircraftUI();
 

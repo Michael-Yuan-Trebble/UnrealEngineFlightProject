@@ -27,5 +27,5 @@ public:
 
 private:
 	UPROPERTY()
-	UBaseSpecial* Special = nullptr;
+	TObjectPtr<UBaseSpecial> Special = nullptr;
 };

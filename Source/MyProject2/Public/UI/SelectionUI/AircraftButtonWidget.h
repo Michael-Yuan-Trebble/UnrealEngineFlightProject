@@ -29,16 +29,11 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAircraftBuyPicked OnBuyCreate;
 
-	UPROPERTY()
-	UAircraftData* ContainedData = nullptr;
-
-	TArray<FName> Owned;
-
 	void Setup(UAircraftData* AircraftData, TArray<FName> Owned);
 
 	void AdjustButtons();
 
-protected:
+private:
 
 	UFUNCTION()
 	void HandleButtonHover();
@@ -50,8 +45,13 @@ protected:
 	void HandleBuyCreate();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* AircraftSelectButton = nullptr;
+	TObjectPtr<UButton> AircraftSelectButton = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* AircraftNameText = nullptr;
+	TObjectPtr<UTextBlock> AircraftNameText = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UAircraftData> ContainedData = nullptr;
+
+	TArray<FName> Owned;
 };

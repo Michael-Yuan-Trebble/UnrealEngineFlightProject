@@ -4,10 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "Units/Aircraft/FlightComponent.h"
 #include "FlightTaskNode.generated.h"
-
-class AEnemyAircraftAI;
 
 UCLASS(Blueprintable)
 class MYPROJECT2_API UBTTaskFlightTaskNode : public UBTTaskNode
@@ -36,8 +33,8 @@ protected:
 	FBlackboardKeySelector bFireGun;
 
 	UPROPERTY()
-	UBlackboardComponent* BlackboardComp;
+	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
 
 	UPROPERTY()
-	AEnemyAircraftAI* Controller;
+	TObjectPtr<class AEnemyAircraftAI> Controller = nullptr;
 };

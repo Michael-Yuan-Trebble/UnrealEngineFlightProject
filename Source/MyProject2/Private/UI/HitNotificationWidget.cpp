@@ -2,6 +2,7 @@
 
 
 #include "UI/HitNotificationWidget.h"
+#include "Components/TextBlock.h"
 
 void UHitNotificationWidget::ShowMessage(const FText& msg) 
 {

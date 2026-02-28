@@ -4,7 +4,6 @@
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"
 #include "Engine/World.h"
 #include "Units/Aircraft/AI/EnemyAircraft.h"
-#include "GameFramework/PlayerController.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Units/Aircraft/WeaponSystemComponent.h"
@@ -42,7 +41,7 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 	Controlled = Cast<AEnemyAircraft>(GetPawn());
 	if (!Controlled) return;
 
-	WeaponComp = Controlled->WeaponComponent;
+	WeaponComp = Controlled->GetWeaponComp();
 }
 
 void AEnemyAircraftAI::Tick(float DeltaTime) 

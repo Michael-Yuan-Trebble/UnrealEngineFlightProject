@@ -45,10 +45,10 @@ private:
 	bool bStatic = true;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ACarrier> CarrierClass;
+	TSubclassOf<ACarrier> CarrierClass = nullptr;
 
 	UPROPERTY()
-	ACarrier* Carrier;
+	TObjectPtr<ACarrier> Carrier = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	FVector SpawnVector = FVector(0,0,150);
@@ -58,4 +58,6 @@ private:
 	void CatapultTakeoff(const float D);
 
 	void TransitionLevel();
+
+	FTimerHandle TimerHandle;
 };

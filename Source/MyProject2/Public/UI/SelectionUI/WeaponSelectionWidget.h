@@ -7,10 +7,7 @@
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
 #include "WeaponSelectionWidget.generated.h"
 
-class UWeaponButtonWidget;
-class UScrollBox;
 class UWeaponSelectionComponent;
-class UMenuManagerComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponSelectedSignature, TSubclassOf<ABaseWeapon>, SelectedWeapon);
 
@@ -22,17 +19,26 @@ class MYPROJECT2_API UWeaponSelectionWidget : public UUserWidget
 public:
 	UWeaponSelectionWidget(const FObjectInitializer& ObjectInitializer);
 
-	FPylonLoadout* CurrentLoadout = nullptr;
-
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FWeaponSelectedSignature OnWeaponSelected;
 
 	void GetAllAircraft();
-	
-	UPROPERTY()
-	UWeaponSelectionComponent* WeaponUI = nullptr;
 
-protected:
+	void SetLoadout(const FPylonLoadout& In) { CurrentLoadout = In; };
+
+	FPylonLoadout GetLoadout() const { return CurrentLoadout; };
+
+	UWeaponSelectionComponent* GetWeaponUI() const { return WeaponUI; };
+
+	void SetWeaponUI(UWeaponSelectionComponent* InUI) { WeaponUI = InUI; };
+
+private:
+
+	FPylonLoadout CurrentLoadout;
+
+	UPROPERTY()
+	TObjectPtr<UWeaponSelectionComponent> WeaponUI = nullptr;
+
 	UFUNCTION()
 	void HandleWeaponSelected(TSubclassOf<ABaseWeapon> Weapon);
 
@@ -40,7 +46,7 @@ protected:
 	TSubclassOf<UUserWidget> WeaponButtonClass = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
-	UScrollBox* WeaponScrollBox = nullptr;
+	TObjectPtr<class UScrollBox> WeaponScrollBox = nullptr;
 
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		Super::ReleaseSlateResources(bReleaseChildren);
@@ -52,7 +58,5 @@ protected:
 		OnWeaponSelected.Clear();
 		Super::NativeDestruct();
 	}
-
-private:
 	void CreateButtons(const TArray<TSubclassOf<ABaseWeapon>>& Array);
 };

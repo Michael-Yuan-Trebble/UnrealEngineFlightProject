@@ -29,10 +29,13 @@ public:
 
 	FOnDamage OnDamage;
 
-	UPROPERTY()
-	ABaseUnit* Controller = nullptr;
+	void SetController(ABaseUnit* In) { Controller = In; };
 
 private:
+
+	UPROPERTY()
+	TObjectPtr<ABaseUnit> Controller = nullptr;
+
 	float CurrentHealth = 100.f;
 
 	// TODO: If there's any differences in all guns, like a flat out 2x damage mode, change it here

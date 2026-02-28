@@ -14,14 +14,10 @@
 
 UAircraftSelectionWidget::UAircraftSelectionWidget(const FObjectInitializer & ObjectInitializer) : Super(ObjectInitializer)
 {
-    static ConstructorHelpers::FClassFinder<UUserWidget> AircraftButtonBPClass(TEXT("/Game/Widgets/BPAircraftButton"));
-    if (AircraftButtonBPClass.Succeeded())
-    {
-        AircraftButtonClass = AircraftButtonBPClass.Class;
-    }
 }
 
-void UAircraftSelectionWidget::Setup(UAircraftDatabase* Database, 
+void UAircraftSelectionWidget::Setup(
+    UAircraftDatabase* Database, 
     TArray<FName> InOwn, 
     UMenuManagerComponent* InMenu, 
     UAircraftSelectionComponent* InSelect)
@@ -34,14 +30,12 @@ void UAircraftSelectionWidget::Setup(UAircraftDatabase* Database,
 
 void UAircraftSelectionWidget::GetAllAircraft() 
 {
-	if (!AircraftButtonClass || !AircraftScrollBox || !AircraftDatabase || AircraftDatabase->AllAircraft.Num() <= 0) return;
+    if (!IsValid(AircraftButtonClass) || !IsValid(AircraftScrollBox) || !IsValid(AircraftDatabase) || AircraftDatabase->AllAircraft.Num() <= 0) return;
 
     AircraftScrollBox->ClearChildren();
 
     AAircraftSelectionGamemode* Gamemode = Cast<AAircraftSelectionGamemode>(UGameplayStatics::GetGameMode(this));
-    if (!Gamemode) return;
-
-    if (!MenuManager) return;
+    if (!IsValid(Gamemode) || !IsValid(MenuManager)) return;
 
     for (UAircraftData* Data : AircraftDatabase->AllAircraft)
     {
@@ -73,7 +67,7 @@ void UAircraftSelectionWidget::GetAllAircraft()
     }
 }
 
-void UAircraftSelectionWidget::UpdateAircraft(FName AircraftChange) 
+void UAircraftSelectionWidget::UpdateAircraft(const FName& AircraftChange) 
 {
     if (ButtonArray.Contains(AircraftChange)) 
     {
@@ -87,6 +81,5 @@ void UAircraftSelectionWidget::UpdateAircraft(FName AircraftChange)
 
 void UAircraftSelectionWidget::HandleAircraftSelected(UAircraftData* Aircraft)
 {
-    if (!Aircraft) return;
-    OnWidgetSelected.Broadcast(Aircraft);
+    if (IsValid(Aircraft)) OnWidgetSelected.Broadcast(Aircraft);
 }

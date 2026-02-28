@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Units/Ground/BaseGround.h"
+#include "Components/BoxComponent.h"
 
 ABaseGround::ABaseGround()
 {

@@ -6,6 +6,7 @@
 #include "Units/Aircraft/WeaponSystemComponent.h"
 #include "Units/Aircraft/FlightComponent.h"
 #include "Units/Aircraft/AI/EnemyAircraft.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"
 
 UBTServiceShootGun::UBTServiceShootGun() {

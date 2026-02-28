@@ -18,10 +18,10 @@ public:
 	TSubclassOf<APawn> AircraftClass = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText Class;
+	FText Class = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	TArray<FPylonLoadout> PylonLoadouts;
+	TArray<FPylonLoadout> PylonLoadouts{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int NumOfPylons = 0;
@@ -30,11 +30,11 @@ public:
 	int price = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText Description;
+	FText Description = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<UBaseSpecial>> Specials;
+	TArray<TSubclassOf<UBaseSpecial>> Specials{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAircraftStats* AircraftStat = nullptr;
+	TObjectPtr<UAircraftStats> AircraftStat = nullptr;
 };

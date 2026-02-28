@@ -18,7 +18,7 @@ struct FLevelInfo {
 	FText DisplayName = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere)
-	UTexture2D* PreviewImage = nullptr;
+	TObjectPtr<UTexture2D> PreviewImage = nullptr;
 };
 
 UCLASS()
@@ -28,5 +28,5 @@ class MYPROJECT2_API ULevelListData : public UDataAsset
 	
 public:
 	UPROPERTY(EditAnywhere)
-	TArray<FLevelInfo> Levels;
+	TArray<FLevelInfo> Levels{};
 };

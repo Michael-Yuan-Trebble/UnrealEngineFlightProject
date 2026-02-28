@@ -3,6 +3,8 @@
 #include "UI/SelectionUI/SpecialSelectionComponent.h"
 #include "UI/SelectionUI/SpecialSelectionWidget.h"
 #include "Player Info/AircraftPlayerController.h"
+#include "Components/Button.h"
+#include "Components/TextBlock.h"
 #include "Player Info/PlayerGameInstance.h"
 #include "Units/Aircraft/MenuManagerComponent.h"
 
@@ -24,11 +26,11 @@ void USpecialSelectionComponent::SetAir(UAircraftData* InAir)
 
 void USpecialSelectionComponent::SpecialSelectionMenu() 
 {
-	if (PC == nullptr) return;
+	if (!IsValid(PC)) return;
 
 	SpecialSelectUI = CreateWidget<USpecialSelectionWidget>(PC, SelectionWidget);
 
-	if (!SpecialSelectUI) return;
+	if (!IsValid(SpecialSelectUI)) return;
 
 	SpecialSelectUI->Setup(SelectedAircraft, MenuManager, this);
 	SpecialSelectUI->GetAllSpecials();
@@ -48,8 +50,7 @@ void USpecialSelectionComponent::SpecialSelectionMenu()
 
 void USpecialSelectionComponent::SetSpecial(TSubclassOf<UBaseSpecial> Special)
 {
-	if (!Special) return;
-	MenuManager->SelectedSpecial = Special;
+	if (IsValid(Special)) MenuManager->SelectedSpecial = Special;
 }
 
 void USpecialSelectionComponent::AdvanceLevel() 

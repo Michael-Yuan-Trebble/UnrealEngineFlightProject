@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Weapons/BaseWeapon.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "BaseMissile.generated.h"
 
 class ABaseAircraft;
+class UProjectileMovementComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 UCLASS()
 class MYPROJECT2_API ABaseMissile : public ABaseWeapon
@@ -18,28 +20,31 @@ public:
 
 	ABaseMissile();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UNiagaraSystem* SmokeTrailSystem = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UNiagaraComponent* SmokeTrail = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UNiagaraSystem* MissileRocketSystem = nullptr;
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UNiagaraSystem> SmokeTrailSystem = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	UNiagaraComponent* MissileRocket = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> MissileRocketSystem = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	UNiagaraSystem* ExplosionEffect = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> ExplosionEffect = nullptr;
 
 	UPROPERTY()
-	UProjectileMovementComponent* ProjectileMovement = nullptr;
+	TWeakObjectPtr<UNiagaraComponent> MissileRocket = nullptr;
+
+	UPROPERTY()
+	TWeakObjectPtr<UNiagaraComponent> SmokeTrail = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UProjectileMovementComponent> ProjectileMovement = nullptr;
 
 	FVector CurrentDirection = FVector::ZeroVector;
 
 	UPROPERTY()
-	AActor* Tracking = nullptr;
+	TWeakObjectPtr<AActor> Tracking = nullptr;
+
+	UPROPERTY()
+	TWeakObjectPtr<ABaseAircraft> AircraftOwner = nullptr;
 
 	float missileAcceleration = 0.f;
 
@@ -47,7 +52,11 @@ public:
 
 	float missileVelocity = 0.f;
 
+	float damage = 0.f;
+
 	float turnRate = 0.f;
+
+	float lifeTime = 0.f;
 
 	bool bAir = false;
 
@@ -58,8 +67,6 @@ public:
 	float ReturnCooldownTime() { return cooldownTime; };
 
 	void activateSmoke();
-
-	ABaseAircraft* Owner = nullptr;
 
 	FTimerHandle VFXCheckhandle;
 

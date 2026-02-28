@@ -29,7 +29,7 @@ void UBTServiceChooseTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 	timeSinceLastPick += DeltaSeconds;
 
 	// TODO: Add a system where its not just the highest threat is picked, some sort of internal timer for changing targets
-	AllAircraft = Controlled->RadarComponent->Enemies;
+	AllAircraft = Controlled->GetRadarComp()->GetEnemies();
 	if (!Selected.CurrentPawn || timeSinceLastPick >= PickInterval) 
 	{
 		PickTarget();

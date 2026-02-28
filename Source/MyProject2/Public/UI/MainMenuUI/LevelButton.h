@@ -21,9 +21,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Events")
 	FOnLevelPicked OnLevelPicked;
 
-	UPROPERTY(EditAnywhere)
-	FMissionData MissionData;
-
 	void SetupLevel(const FMissionData& InData);
 
 protected:
@@ -31,12 +28,15 @@ protected:
 
 private:
 
+	UPROPERTY(EditAnywhere)
+	FMissionData MissionData{};
+
 	UFUNCTION()
 	void HandleButtonClick();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* LevelSelectbtn = nullptr;
+	TObjectPtr<UButton> LevelSelectbtn = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* LevelText = nullptr;
+	TObjectPtr<UTextBlock> LevelText = nullptr;
 };

@@ -16,16 +16,14 @@ public:
 	FName PylonName = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<ABaseWeapon>> AllowedMissiles;
+	TArray<TSubclassOf<ABaseWeapon>> AllowedMissiles{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<ABaseWeapon>> AllowedBombs;
+	TArray<TSubclassOf<ABaseWeapon>> AllowedBombs{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<ABaseWeapon>> AllowedMisc;
+	TArray<TSubclassOf<ABaseWeapon>> AllowedMisc{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 MaxWeapons = 0;
-
-	FPylonLoadout() {};
 };

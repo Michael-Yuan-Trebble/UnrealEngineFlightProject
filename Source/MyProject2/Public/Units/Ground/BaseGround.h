@@ -15,7 +15,7 @@ public:
 	ABaseGround();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* Mesh = nullptr;
+	TObjectPtr<UStaticMeshComponent> Mesh = nullptr;
 
 protected:
 	virtual void BeginPlay() override;

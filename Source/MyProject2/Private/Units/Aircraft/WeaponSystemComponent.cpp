@@ -5,6 +5,8 @@
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Weapons/AircraftBullet.h"
 #include "Units/Aircraft/RadarComponent.h"
+#include "Components/BoxComponent.h"
+#include "Units/BaseUnit.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/PlayerHUD.h"
 #include "Interfaces/LockableTarget.h"
@@ -15,34 +17,41 @@ UWeaponSystemComponent::UWeaponSystemComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStats) 
+void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStats)
 {
 	Controlled = InBase;
-	AirStats = InStats;
+	if (IsValid(Controlled)) {
+		BulletStats = Controlled->GetBulletStats();
+		Airframe = Controlled->GetAirframe();
+		InGameAirStats = Controlled->GetAirStats()->InGameAirStats;
+	}
 }
 
 void UWeaponSystemComponent::FireBullets()
 {
 	//Spawns a bullet actor whilst firing at socket
-	if (!Controlled || !Controlled->BulletStats->BulletClass || !Controlled->Airframe) return;
+	if (!IsValid(Controlled)
+		|| !IsValid(BulletStats)
+		|| !IsValid(BulletStats->BulletClass)
+		|| !IsValid(Airframe)) return;
 	
-	int32 GunI = 0;
+	int8 GunI = 0;
 	while (true) 
 	{
 		const FName SocketName = FName(*FString::Printf(TEXT("Gun%d"), GunI));
 
-		if (!Controlled->Airframe->DoesSocketExist(SocketName)) break;
+		if (!IsValid(Airframe) || !Airframe->DoesSocketExist(SocketName)) break;
 
 		GunI++;
 
-		FVector MuzzleLocation = Controlled->Airframe->GetSocketLocation(SocketName);
-		FRotator MuzzleRotation = Controlled->Airframe->GetSocketRotation(SocketName);
+		FVector MuzzleLocation = Airframe->GetSocketLocation(SocketName);
+		FRotator MuzzleRotation = Airframe->GetSocketRotation(SocketName);
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = Controlled;
 		SpawnParams.Instigator = Controlled;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-		AAircraftBullet* SpawnBullet = GetWorld()->SpawnActor<AAircraftBullet>(Controlled->BulletStats->BulletClass, MuzzleLocation, MuzzleRotation, SpawnParams);
+		AAircraftBullet* SpawnBullet = GetWorld()->SpawnActor<AAircraftBullet>(BulletStats->BulletClass, MuzzleLocation, MuzzleRotation, SpawnParams);
 		if (!SpawnBullet) return;
 		SpawnBullet->FireInDirection(MuzzleRotation.Vector());
 	}
@@ -52,7 +61,7 @@ void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (!Controlled || !AirStats) return;
+	if (!IsValid(Controlled)) return;
 
 	// ====================================
 	// Weapon refresh to check respawning conditions
@@ -69,12 +78,11 @@ void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 			}
 		}
 	}
-	UpdateLockedOn(DeltaTime, Controlled->RadarComponent->Selected);
+	UpdateLockedOn(DeltaTime, Controlled->GetRadarComp()->GetSelected());
 }
 
 void UWeaponSystemComponent::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) 
 {
-	if (!AirStats || !Controlled || !Controlled->Airframe) return;
 	Loadout = In;
 	AddPylons();
 	EquipWeapons();
@@ -82,19 +90,20 @@ void UWeaponSystemComponent::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In
 
 void UWeaponSystemComponent::AddPylons() 
 {
-	for (int i = 0; i < AirStats->NumOfPylons; i++)
+	for (int i = 0; i < InGameAirStats.NumOfPylons; i++)
 	{
 		UStaticMeshComponent* TempPylon = NewObject<UStaticMeshComponent>(this);
-		FName SocketName = FName(*FString::Printf(TEXT("Pylon%d"), i));
-		if (TempPylon && AirStats->Pylon)
+		FName SocketName = FName(*FString::Printf(TEXT("Pylon_%d"), i));
+		if (TempPylon && IsValid(InGameAirStats.Pylon))
 		{
-			FTransform SocketTransform = Controlled->Airframe->GetSocketTransform(SocketName, RTS_World);
+			if (!IsValid(Controlled) || !IsValid(Airframe)) return;
+			FTransform SocketTransform = Airframe->GetSocketTransform(SocketName, RTS_World);
 			SocketTransform.SetScale3D(FVector(1.f));
-			TempPylon->SetStaticMesh(AirStats->Pylon);
+			TempPylon->SetStaticMesh(InGameAirStats.Pylon);
 			TempPylon->SetWorldTransform(SocketTransform);
 			TempPylon->RegisterComponent();
-			TempPylon->AttachToComponent(Controlled->Airframe, FAttachmentTransformRules::KeepWorldTransform);
-			TempPylon->AddLocalOffset(FVector(0, 0, -20));
+			TempPylon->AttachToComponent(Airframe, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+			TempPylon->AddLocalOffset(FVector(0, -80, -50));
 			PylonSockets.Add(SocketName, TempPylon);
 		}
 	}
@@ -105,22 +114,18 @@ void UWeaponSystemComponent::EquipWeapons()
 	for (const TPair<FName, TSubclassOf<ABaseWeapon>>&Pair : Loadout)
 	{
 		UStaticMeshComponent* PylonComp = PylonSockets.FindRef(Pair.Key);
-		if (!PylonComp)  continue;
+		if (!IsValid(PylonComp))  continue;
 		FTransform SocketTransform = PylonComp->GetSocketTransform(FName("Socket"));
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = Controlled;
 		ABaseWeapon* SpawnIn = GetWorld()->SpawnActor<ABaseWeapon>(Pair.Value, SocketTransform, SpawnParams);
-		if (!SpawnIn) continue;
+		if (!IsValid(SpawnIn)) continue;
 		SpawnIn->Collision->SetSimulatePhysics(false);
 		SpawnIn->AttachToComponent(PylonComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Socket"));
 
 		FCooldownWeapon tempCool;
-		tempCool.WeaponClass = Pair.Value;
-		tempCool.WeaponInstance = SpawnIn;
-		tempCool.bCanFire = true;
-		tempCool.cooldownTime = SpawnIn->cooldownTime;
-		tempCool.time = 0;
-		tempCool.SocketName = Pair.Key;
+		tempCool.Init(Pair.Value, SpawnIn, Pair.Key, SpawnIn->GetCooldown());
+		tempCool.ResetFire();
 		AvailableWeapons.Add(tempCool);
 	}
 	// Defer this, would be 0 otherwise, let BeginPlay go through
@@ -139,8 +144,7 @@ void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace)
 	if (!Replace.WeaponInstance) return;
 	FTransform SocketTransform = PylonComp->GetSocketTransform(FName("Socket"));
 	Replace.WeaponInstance->AttachToComponent(PylonComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Socket"));
-	Replace.bCanFire = true;
-	Replace.time = 0;
+	Replace.ResetFire();
 	GetCount();
 }
 
@@ -157,7 +161,7 @@ void UWeaponSystemComponent::BuildWeaponGroups()
 		if (!WeaponGroups.Contains(WeaponClass)) 
 		{
 			WeaponGroups.Add(WeaponClass, TArray<FCooldownWeapon*>());
-			EquippedWeaponNames.Add(CW.WeaponInstance->WeaponName);
+			EquippedWeaponNames.Add(CW.WeaponInstance->GetName());
 		}
 		WeaponGroups[WeaponClass].Add(&CW);
 	}
@@ -172,14 +176,12 @@ void UWeaponSystemComponent::FireWeaponSelected(const TSubclassOf<ABaseWeapon> W
 		if (!Weapon->WeaponInstance || !Weapon->CanFire()) continue;
 
 		Weapon->WeaponInstance->OnWeaponResult.AddDynamic(this, &UWeaponSystemComponent::OnWeaponResult);
+
 		if (Target && bLocked)
-		{
 			Weapon->WeaponInstance->FireTracking(Speed, Target);
-		}
 		else 
-		{
 			Weapon->WeaponInstance->FireStatic(Speed);
-		}
+
 		Weapon->StartCooldown();
 		GetCount();
 		return;
@@ -204,7 +206,7 @@ void UWeaponSystemComponent::SelectWeapon(const int WeaponIndex)
 	if (!WeaponArray || WeaponArray->Num() == 0) return;
 
 	const FCooldownWeapon* WeaponData = (*WeaponArray)[0];
-	if (!WeaponData || !WeaponData->WeaponInstance) return;
+	if (!WeaponData || !IsValid(WeaponData->WeaponInstance)) return;
 
 	ResetLockedOn();
 
@@ -229,7 +231,7 @@ void UWeaponSystemComponent::SearchAndEquipWeapon(const TSubclassOf<ABaseWeapon>
 
 void UWeaponSystemComponent::GetCount() 
 {
-	if (!CurrentWeapon) return;
+	if (!IsValid(CurrentWeapon)) return;
 
 	MaxWeaponCountSelected = 0;
 	CurrentWeaponCount = 0;
@@ -244,27 +246,22 @@ void UWeaponSystemComponent::GetCount()
 	for (const FCooldownWeapon* Weapon : *WeaponArray)
 	{
 		if (Weapon && Weapon->WeaponInstance && Weapon->bCanFire)
-		{
 			CurrentWeaponCount++;
-		}
 	}
 
-	OnWeaponCountUpdated.Broadcast(CurrentWeapon->WeaponName, CurrentWeaponCount, MaxWeaponCountSelected);
+	OnWeaponCountUpdated.Broadcast(CurrentWeapon->GetName(), CurrentWeaponCount, MaxWeaponCountSelected);
 	if (CurrentWeaponCount <= 0) ResetLockedOn();
 }
 
-void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, AActor* Target)
+void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit* Target)
 {
-	if (!CurrentWeapon || !IsValid(Target)) 
+	if (!IsValid(CurrentWeapon) || !IsValid(Target))
 	{
 		if (bLocked || LockTime > 0.f) 
-		{
 			ResetLockedOn();
-		}
 		else 
-		{
 			OnHUDLockedOn.Broadcast(false);
-		}
+
 		return;
 	}
 
@@ -274,12 +271,10 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, AActor* Ta
 		return;
 	}
 
-	if (!CurrentWeapon->canLock || CurrentWeaponCount <= 0)
+	if (!CurrentWeapon->GetCanLock() || CurrentWeaponCount <= 0)
 	{
 		if (bLocked || LockTime > 0.f) 
-		{
 			ResetLockedOn();
-		}
 		return;
 	}
 
@@ -297,23 +292,25 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, AActor* Ta
 		return;
 	}
 
+	if (!IsValid(Target) || !IsValid(Controlled)) return;
+
 	FVector ToTarget = Target->GetActorLocation() - Controlled->GetActorLocation();
 	float Distance = ToTarget.Size();
 	ToTarget.Normalize();
-	if (Distance > CurrentWeapon->range) 
+	if (Distance > CurrentWeapon->GetRange()) 
 	{
 		ResetLockedOn();
 		return;
 	}
 
-	float Dot = FVector::DotProduct(Controlled->Airframe->GetForwardVector(), ToTarget);
-	bool bInCone = Dot > FMath::Cos(FMath::DegreesToRadians(CONE_ANGLE));
+	float Dot = FVector::DotProduct(Controlled->GetAirframe()->GetForwardVector(), ToTarget);
+	bool bInCone = Dot > FMath::Cos(FMath::DegreesToRadians(ConeAngle));
 	if (bInCone)
 	{
 		LockTime += DeltaSeconds;
 
 		// TODO: Make it variable
-		bLocked = LockTime >= LOCKTIME;
+		bLocked = LockTime >= MaxLockTime;
 	}
 	else
 	{
@@ -323,8 +320,10 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, AActor* Ta
 	if (bLocked) if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Target)) Aircraft->OnLockedOnByEnemy.Broadcast();
 
 	float LockPercent;
-	if (LOCKTIME == 0) LockPercent = 1.f;
-	else LockPercent = FMath::Clamp(LockTime / LOCKTIME, 0.f, 1.f);
+	if (MaxLockTime == 0) 
+		LockPercent = 1.f;
+	else 
+		LockPercent = FMath::Clamp(LockTime / MaxLockTime, 0.f, 1.f);
 	OnHUDLockedOn.Broadcast(LockPercent);
 }
 

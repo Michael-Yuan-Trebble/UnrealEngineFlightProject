@@ -13,7 +13,7 @@ class MYPROJECT2_API UAircraftDatabase : public UDataAsset
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	TArray<UAircraftData*> AllAircraft;
+	TArray<UAircraftData*> AllAircraft{};
 
 	void LoadAllAircraftFromFolder(const FString& Path);
 };

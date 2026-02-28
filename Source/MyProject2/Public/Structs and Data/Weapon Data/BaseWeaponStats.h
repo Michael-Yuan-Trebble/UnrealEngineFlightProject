@@ -35,7 +35,7 @@ public:
 	EWeaponType WeaponType = EWeaponType::Gun;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<ETargetType> SupportedTargetTypes;
+	TArray<ETargetType> SupportedTargetTypes{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName InGameName = NAME_None;

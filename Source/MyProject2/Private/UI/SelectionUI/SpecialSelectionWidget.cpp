@@ -6,16 +6,14 @@
 #include "Player Info/AircraftPlayerController.h"
 #include "Units/Aircraft/MenuManagerComponent.h"
 #include "UI/SelectionUI/SpecialSelectionComponent.h"
+#include "Components/Button.h"
+#include "Components/TextBlock.h"
+#include "Components/ScrollBox.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/SelectionUI/SpecialButtonWidget.h"
 
 USpecialSelectionWidget::USpecialSelectionWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> SpecialButtonBPClass(TEXT("/Game/Widgets/BPSpecialButton"));
-	if (SpecialButtonBPClass.Succeeded())
-	{
-		SpecialButtonClass = SpecialButtonBPClass.Class;
-	}
 }
 
 void USpecialSelectionWidget::Setup(UAircraftData* InAircraft, UMenuManagerComponent* InMenu, USpecialSelectionComponent* InSelect) 
@@ -27,22 +25,22 @@ void USpecialSelectionWidget::Setup(UAircraftData* InAircraft, UMenuManagerCompo
 
 void USpecialSelectionWidget::GetAllSpecials() 
 {
-	if (!SpecialButtonClass || !SpecialScrollBox) return;
+	if (!IsValid(SpecialButtonClass) || !IsValid(SpecialScrollBox)) return;
 	SpecialScrollBox->ClearChildren();
 
-	if (!MenuManager) return;
+	if (!IsValid(MenuManager)) return;
 
 	for (TSubclassOf<UBaseSpecial> Data : AircraftSelected->Specials)
 	{
-		if (!Data) continue;
+		if (!IsValid(Data)) continue;
 
 		USpecialButtonWidget* Card = CreateWidget<USpecialButtonWidget>(GetWorld(), SpecialButtonClass);
-		if (!Card) continue;
+		if (!IsValid(Card)) continue;
 		Card->Setup(Data);
 		Card->OnSpecialPicked.AddDynamic(SpecialUI, &USpecialSelectionComponent::SetSpecial);
 		SpecialScrollBox->AddChild(Card);
 	}
-	if (!Advancebtn) return;
+	if (!IsValid(Advancebtn)) return;
 	Advancebtn->OnClicked.AddDynamic(this, &USpecialSelectionWidget::OnAdvancePicked);
 }
 
@@ -53,6 +51,6 @@ void USpecialSelectionWidget::OnAdvancePicked()
 
 void USpecialSelectionWidget::HandleSpecialSelected(TSubclassOf<UBaseSpecial> Special)
 {
-	if (!Special) return;
+	if (!IsValid(Special)) return;
 	OnWidgetSelected.Broadcast(Special);
 }

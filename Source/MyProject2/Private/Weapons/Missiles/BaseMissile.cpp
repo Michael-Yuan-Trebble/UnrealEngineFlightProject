@@ -4,6 +4,10 @@
 #include "Weapons/Missiles/BaseMissile.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Subsystem/MissileManagerSubsystem.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+#include "Components/BoxComponent.h"
 #include "Interfaces/ApproachingMissileInterface.h"
 
 ABaseMissile::ABaseMissile() 
@@ -37,7 +41,7 @@ void ABaseMissile::BeginPlay()
 	if (GetOwner()) 
 	{
 		Collision->IgnoreActorWhenMoving(GetOwner(), true);
-		Owner = Cast<ABaseAircraft>(GetOwner());
+		AircraftOwner = Cast<ABaseAircraft>(GetOwner());
 	}
 	if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>()) 
 	{
@@ -66,14 +70,19 @@ void ABaseMissile::LaunchSequence(const float speed)
 
 void ABaseMissile::activateSmoke() 
 {
-	if (!WeaponMesh || !WeaponMesh->DoesSocketExist(TEXT("ExhaustSocket"))) return;
+	if (!IsValid(WeaponMesh) || !WeaponMesh->DoesSocketExist(TEXT("ExhaustSocket"))) return;
 
-	if (SmokeTrail != nullptr && !SmokeTrailSystem) return;
-	if (MissileRocket != nullptr && !MissileRocketSystem) return;
+	if (SmokeTrail.IsValid()|| MissileRocket.IsValid()) return;
+
+	UNiagaraSystem* LoadedSmoke = SmokeTrailSystem.LoadSynchronous();
+	if (!IsValid(LoadedSmoke)) return;
+
+	UNiagaraSystem* LoadedRocket = MissileRocketSystem.LoadSynchronous();
+	if (!IsValid(LoadedRocket)) return;
 
 	SmokeTrail = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		GetWorld(),
-		SmokeTrailSystem,
+		LoadedSmoke,
 		WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")),
 		WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")),
 		FVector(1.f),
@@ -83,7 +92,7 @@ void ABaseMissile::activateSmoke()
 
 	MissileRocket = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		GetWorld(),
-		MissileRocketSystem,
+		LoadedRocket,
 		WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")),
 		WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")),
 		FVector(1.f),
@@ -105,7 +114,7 @@ bool ABaseMissile::CalculateIfOvershoot(FVector ToTarget) {
 
 void ABaseMissile::ApplyVFXLOD(const FVector& CameraLoc)
 {
-	if (!SmokeTrail || !MissileRocket) return;
+	if (!SmokeTrail.IsValid() || !MissileRocket.IsValid()) return;
 	// Make Distance into KM units
 	float Distance = FVector::Dist(CameraLoc, GetActorLocation()) * 0.00001;
 
@@ -125,18 +134,20 @@ void ABaseMissile::ApplyVFXLOD(const FVector& CameraLoc)
 
 void ABaseMissile::NotifyCountermeasure() 
 {
-	if (IsValid(Tracking) && ProjectileMovement)
-	{
-		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Tracking)) {
-			if (Aircraft->Implements<UApproachingMissileInterface>()) 
-			{
-				IApproachingMissileInterface::Execute_UnregisterIncomingMissile(Aircraft,this);
+	if (AActor* LoadedTracking = Tracking.Get()) {
+		if (IsValid(ProjectileMovement))
+		{
+			if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(LoadedTracking)) {
+				if (Aircraft->Implements<UApproachingMissileInterface>())
+				{
+					IApproachingMissileInterface::Execute_UnregisterIncomingMissile(Aircraft, this);
+				}
 			}
+			ProjectileMovement->bIsHomingProjectile = false;
+			ProjectileMovement->HomingTargetComponent = nullptr;
+			ProjectileMovement->Velocity = GetActorForwardVector() * missileAcceleration;
+			Tracking = nullptr;
 		}
-		ProjectileMovement->bIsHomingProjectile = false;
-		ProjectileMovement->HomingTargetComponent = nullptr;
-		ProjectileMovement->Velocity = GetActorForwardVector() * missileAcceleration;
-		Tracking = nullptr;
 	}
 }
 
@@ -169,17 +180,17 @@ void ABaseMissile::DestroyMissile()
 	if (bDestroyed) return;
 	bDestroyed = true;
 
-	if (ExplosionEffect) {
+	if (UNiagaraSystem* LoadedExplosion = ExplosionEffect.LoadSynchronous()) {
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 			GetWorld(),
-			ExplosionEffect,
+			LoadedExplosion,
 			GetActorLocation(),
 			GetActorRotation()
 		);
 	}
 
-	if (SmokeTrail) SmokeTrail->Deactivate();
-	if (MissileRocket) MissileRocket->Deactivate();
+	if (SmokeTrail.IsValid()) SmokeTrail->Deactivate();
+	if (MissileRocket.IsValid()) MissileRocket->Deactivate();
 
 	if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>())
 	{

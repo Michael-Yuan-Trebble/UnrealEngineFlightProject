@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "Structs and Data/Weapon Data/BulletStats.h"
+#include "Structs and Data/InGameAirStats.h"
 #include "AircraftStats.generated.h"
 
 UCLASS()
@@ -41,7 +42,7 @@ public:
 	int NumOfPylons = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMesh* Pylon = nullptr;
+	TObjectPtr<UStaticMesh> Pylon = nullptr;
 
 	// TODO: Flesh this out, plan is to have two types of planes, one-circle and two-circle performers aka rate vs instant turn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -59,8 +60,11 @@ public:
 	// TODO: Might just make this one curve and call it like turn curve or something
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* DragCurve = nullptr;
+	TObjectPtr<UCurveFloat> DragCurve = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* CompressionCurve = nullptr;
+	TObjectPtr<UCurveFloat> CompressionCurve = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	FInGameAirStats InGameAirStats{};
 };

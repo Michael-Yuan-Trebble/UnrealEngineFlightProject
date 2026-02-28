@@ -3,15 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/BoxComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Structs and Data/Weapon Data/BulletStats.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
-#include "NiagaraSystem.h"
 #include "Interfaces/ApproachingMissileInterface.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "Enums/FlightMode.h"
+#include "Structs and Data/AircraftAnimationValues.h"
 #include "Units/BaseUnit.h"
 #include "Weapons/Missiles/BaseMissile.h"
 #include "Enums/ThrottleStage.h"
@@ -22,8 +18,12 @@ class URadarComponent;
 class UWeaponSystemComponent;
 class UAircraftVisualComponent;
 class USpecialSystemComponent;
-class ABaseWeapon;
 class UBaseSpecial;
+class ABaseMissile;
+class UNiagaraComponent;
+class UNiagaraSystem;
+class USkeletalMeshComponent;
+class UBoxComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissileLaunchedAtSelf, ABaseMissile*, IncomingMissile);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLockedOnByEnemy);
@@ -40,95 +40,8 @@ public:
 
 	FOnLockedOnByEnemy OnLockedOnByEnemy;
 
-	UPROPERTY(EditAnywhere)
-	UAircraftStats* AirStats;
-
-	UPROPERTY(EditAnywhere)
-	UBulletStats* BulletStats;
-
-	UPROPERTY(BlueprintReadWrite)
-	UFlightComponent* FlightComponent;
-
-	UPROPERTY(BlueprintReadWrite)
-	UWeaponSystemComponent* WeaponComponent;
-
-	UPROPERTY()
-	URadarComponent* RadarComponent;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UAircraftVisualComponent> VisualCompClass;
-
-	UPROPERTY(BlueprintReadOnly)
-	UAircraftVisualComponent* VisualComp;
-
-	UPROPERTY()
-	USpecialSystemComponent* SpecialComp;
-
-	TArray<TWeakObjectPtr<ABaseMissile>> IncomingMissiles;
-
-	bool bLocked = false;
-
-	UPROPERTY(EditAnywhere)
-	int32 NumOfAfterburners;
-
-	UPROPERTY(EditAnywhere)
-	int32 NumOfVortices;
-
-	UPROPERTY(EditANywhere)
-	int32 NumOfMainWingVapors;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="VFX")
-	TArray<UStaticMeshComponent*> AllMainWingVapors;
-
 	UFUNCTION(BlueprintCallable, Category="Vapors")
 	void SetWingVapors(const TArray<UStaticMeshComponent*>& Vapors) { AllMainWingVapors = Vapors; }
-
-	UPROPERTY()
-	AActor* Tracking;
-
-	//UObjects
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USkeletalMeshComponent* Airframe;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* BodyCollision;
-
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	UBoxComponent* LeftWingCollision;
-
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	UBoxComponent* RightWingCollision;
-
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	UBoxComponent* RudderCollision;
-
-	UPROPERTY(EditAnywhere)
-	UBoxComponent* LandingGearCollision;
-
-	UPROPERTY(EditAnywhere)
-	UNiagaraSystem* AfterburnerSystem;
-
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* LandingGear;
-
-	UPROPERTY()
-	TArray<UNiagaraComponent*> AllAfterburners;
-
-	UPROPERTY(EditAnywhere)
-	UNiagaraSystem* WingVortexSystem;
-
-	UPROPERTY()
-	TArray<UNiagaraComponent*> AllVortices;
-
-	UPROPERTY()
-	float AddedGearHeight;
-
-	UPROPERTY()
-	FVector OriginalCollOffset;
-
-	UPROPERTY()
-	FVector OriginalExtent;
 
 	virtual void PossessedBy(AController* Controller) override;
 
@@ -151,6 +64,8 @@ public:
 
 	void SetFlying(bool bIsFlying);
 
+	void SetRestrained(bool bIsRestrained);
+
 	void SetLandingGearVisiblility(bool b);
 
 	void SetSpeed(float speed);
@@ -169,32 +84,34 @@ public:
 	USkeletalMeshComponent* GetMesh() const { return Airframe; };
 
 	UFUNCTION(BlueprintCallable)
-	float ReturnRudder() const;
+	const FAircraftAnimationValues& GetAircraftAnimationValues();
+
+	USkeletalMeshComponent* GetAirframe() const { return Airframe; };
+
+	UBulletStats* GetBulletStats() const { return BulletStats; };
+
+	UAircraftStats* GetAirStats() const { return AirStats; };
+
+	URadarComponent* GetRadarComp() const { return RadarComponent; };
+
+	UWeaponSystemComponent* GetWeaponComp() const { return WeaponComponent; };
+
+	UFlightComponent* GetFlightComp() const { return FlightComponent; };
 
 	UFUNCTION(BlueprintCallable)
-	float ReturnSlat() const;
+	float GetGForce();
 
 	UFUNCTION(BlueprintCallable)
-	float ReturnRFlap() const;
+	float GetMaxWeaponCount();
 
 	UFUNCTION(BlueprintCallable)
-	float ReturnLFlap() const;
+	float GetCurrentWeaponCount();
 
-	UFUNCTION(BlueprintCallable)
-	float ReturnNozzle() const;
-
-	UFUNCTION(BlueprintCallable)
-	float ReturnAirbrake() const;
-
-	UFUNCTION(BlueprintCallable)
-	float ReturnElevator() const;
+	UBoxComponent* GetLandingGearCollision() const { return LandingGearCollision; };
 
 	EThrottleStage GetThrottleStage() const;
 
 	void ApplySpeed(const float Speed, const float D);
-
-	UPROPERTY(EditAnywhere)
-	float MaxSinkRate = 100.f;
 
 	void Crash();
 
@@ -210,12 +127,102 @@ public:
 
 	bool IsLanded();
 
+	UFUNCTION(BlueprintCallable)
 	float GetSpeed();
 
 protected:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UAircraftStats> AirStats = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBulletStats> BulletStats = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UFlightComponent> FlightComponent = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UWeaponSystemComponent> WeaponComponent = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<URadarComponent> RadarComponent = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UAircraftVisualComponent> VisualCompClass = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UAircraftVisualComponent> VisualComp = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<USpecialSystemComponent> SpecialComp = nullptr;
+
+	UPROPERTY()
+	FAircraftAnimationValues DefaultAnimVal{};
+
+	UPROPERTY()
+	TArray<TWeakObjectPtr<ABaseMissile>> IncomingMissiles{};
+
+	bool bLocked = false;
+
+	UPROPERTY(EditAnywhere)
+	int32 NumOfAfterburners = 0;
+
+	UPROPERTY(EditAnywhere)
+	int32 NumOfVortices = 0;
+
+	UPROPERTY(EditAnywhere)
+	int32 NumOfMainWingVapors = 0;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VFX")
+	TArray<UStaticMeshComponent*> AllMainWingVapors{};
+
+	UPROPERTY()
+	TArray<UNiagaraComponent*> AllAfterburners;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UNiagaraSystem> WingVortexSystem = nullptr;
+
+	UPROPERTY()
+	TArray<UNiagaraComponent*> AllVortices{};
+
+	float AddedGearHeight = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	float MaxSinkRate = 100.f;
+
+	FVector OriginalCollOffset = FVector::ZeroVector;
+
+	FVector OriginalExtent = FVector::ZeroVector;
+
+	UPROPERTY()
+	TObjectPtr<AActor> Tracking = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USkeletalMeshComponent> Airframe = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBoxComponent> BodyCollision = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBoxComponent> LeftWingCollision = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBoxComponent> RightWingCollision = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBoxComponent> RudderCollision = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBoxComponent> LandingGearCollision = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UNiagaraSystem> AfterburnerSystem = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UStaticMeshComponent> LandingGear = nullptr;
 
 private:
 

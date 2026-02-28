@@ -4,6 +4,7 @@
 #include "Weapons/BaseBomb.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 ABaseBomb::ABaseBomb() 
@@ -31,23 +32,26 @@ void ABaseBomb::BeginPlay()
 	Super::BeginPlay();
 	if (GetOwner()) {
 		Collision->IgnoreActorWhenMoving(GetOwner(), true);
-		Owner = Cast<ABaseAircraft>(GetOwner());
+		AircraftOwner = Cast<ABaseAircraft>(GetOwner());
 	}
-	if (!BombStats) return;
-	WeaponName = BombStats->InGameName;
-	cooldownTime = BombStats->Cooldown;
-	SupportedTargetTypes = BombStats->SupportedTargetTypes;
+	UBombStats* LoadedStats = BombStats.LoadSynchronous();
+	if (!IsValid(LoadedStats)) return;
+	WeaponName = LoadedStats->InGameName;
+	cooldownTime = LoadedStats->Cooldown;
+	SupportedTargetTypes = LoadedStats->SupportedTargetTypes;
+	MaxSpeed = LoadedStats->MaxSpeed;
+	BlastRadius = LoadedStats->BlastRadius;
+	Damage = LoadedStats->Damage;
 }
 
 void ABaseBomb::Tick(float DeltaSeconds) 
 {
 	Super::Tick(DeltaSeconds);
-	if (!Owner || !Owner->IsValidLowLevelFast()) return;
 
 	if (!isAir) return;
 	
 	Velocity += FVector(0.f, 0.f, GetWorld()->GetGravityZ()) * DeltaSeconds;
-	Velocity.Z = -FMath::Clamp(FMath::Abs(Velocity.Z), 0, BombStats->MaxSpeed);
+	Velocity.Z = -FMath::Clamp(FMath::Abs(Velocity.Z), 0, MaxSpeed);
 	AddActorWorldOffset(Velocity, true);
 }
 
@@ -102,27 +106,29 @@ void ABaseBomb::CheckAndDelete()
 	bool bHit = UKismetSystemLibrary::SphereOverlapActors(
 		GetWorld(),
 		GetActorLocation(),
-		BombStats->BlastRadius,
+		BlastRadius,
 		ObjectTypes,
 		AActor::StaticClass(),
 		ActorsToIgnore,
 		OverlappedActors
 	);
 
-	if (bHit)
-	{
-		for (AActor* Actor : OverlappedActors) 
+	if (ABaseAircraft* LoadedOwner = AircraftOwner.Get()) {
+		if (bHit)
 		{
-			if (Actor->Implements<UTeamInterface>()) 
+			for (AActor* Actor : OverlappedActors)
 			{
-				EFaction OtherFaction = Owner->GetFaction();
-				OtherFaction = ITeamInterface::Execute_GetFaction(Actor);
-				if (OtherFaction == Owner->GetFaction()) continue;
-			}
+				if (Actor->Implements<UTeamInterface>())
+				{
+					EFaction OtherFaction = LoadedOwner->GetFaction();
+					OtherFaction = ITeamInterface::Execute_GetFaction(Actor);
+					if (OtherFaction == LoadedOwner->GetFaction()) continue;
+				}
 
-			if (Actor->Implements<UDamageableInterface>()) 
-			{
-				IDamageableInterface::Execute_OnDamage(Actor, this, Owner, Actor, BombStats->Damage);
+				if (Actor->Implements<UDamageableInterface>())
+				{
+					IDamageableInterface::Execute_OnDamage(Actor, this, LoadedOwner, Actor, Damage);
+				}
 			}
 		}
 	}

@@ -19,11 +19,11 @@ public:
 
 protected:
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* AircraftPriceText = nullptr;
+	TObjectPtr<UTextBlock> AircraftPriceText = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* AircraftNameText = nullptr;
+	TObjectPtr<UTextBlock> AircraftNameText = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* AircraftDescriptionText = nullptr;
+	TObjectPtr<UTextBlock> AircraftDescriptionText = nullptr;
 };

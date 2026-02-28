@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
 #include "Enums/CameraPerspective.h"
 #include "CameraManagerComponent.generated.h"
 
 class APlayerAircraft;
 class APlayerHUD;
 class UAircraftAudioComponent;
+class USpringArmComponent;
+class UCameraComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UCameraManagerComponent : public UActorComponent
@@ -75,21 +75,21 @@ private:
 	void SetFirstPerson();
 
 	UPROPERTY()
-	USpringArmComponent* FirstPersonSpringArm = nullptr;
+	TObjectPtr<USpringArmComponent> FirstPersonSpringArm = nullptr;
 
 	UPROPERTY()
-	USpringArmComponent* ThirdPersonSpringArm = nullptr;
+	TObjectPtr<USpringArmComponent> ThirdPersonSpringArm = nullptr;
 
 	UPROPERTY()
-	USpringArmComponent* MainSpringArm = nullptr;
+	TObjectPtr<USpringArmComponent> MainSpringArm = nullptr;
 
 	UPROPERTY()
-	UAircraftAudioComponent* AudioComp = nullptr;
+	TObjectPtr<UAircraftAudioComponent> AudioComp = nullptr;
 
 	UPROPERTY()
-	APlayerAircraft* Controlled = nullptr;
+	TObjectPtr<APlayerAircraft> Controlled = nullptr;
 
 	UPROPERTY()
-	APlayerHUD* HUD = nullptr;
+	TObjectPtr<APlayerHUD> HUD = nullptr;
 
 };

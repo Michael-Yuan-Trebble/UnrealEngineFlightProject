@@ -35,27 +35,30 @@ public:
 	UFUNCTION()
 	void HandleSelectedDestroyed();
 
-	TArray<FDetectedAircraftInfo> Enemies;
+	const TArray<FDetectedAircraftInfo>& GetEnemies() const { return Enemies; };
 
-	UPROPERTY()
-	ABaseUnit* Controlled = nullptr;
+	ABaseUnit* GetSelected() const { return Selected; };
 
-	UPROPERTY()
-	ABaseUnit* Selected = nullptr;
-
-	UPROPERTY()
-	APlayerHUD* HUD = nullptr;
-
-	FTimerHandle RadarScanTimer;
-	
-	UPROPERTY()
-	ABaseUnit* LastSelected = nullptr;
-
-protected:
+private:
 	virtual void BeginPlay() override;
 
-public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	TArray<FDetectedAircraftInfo> Enemies{};
+
+	UPROPERTY()
+	TObjectPtr<ABaseUnit> Controlled = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<ABaseUnit> Selected = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<APlayerHUD> HUD = nullptr;
+
+	FTimerHandle RadarScanTimer;
+
+	UPROPERTY()
+	TObjectPtr<ABaseUnit> LastSelected = nullptr;
 
 		
 };

@@ -3,20 +3,12 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("WeaponSelect!"));
 #include "UI/SelectionUI/WeaponSelectionWidget.h"
 #include "Components/ScrollBox.h"
-#include "Gamemodes/AircraftSelectionGamemode.h"
 #include "Kismet/GameplayStatics.h"
-#include "Player Info/AircraftPlayerController.h"
-#include "Units/Aircraft/MenuManagerComponent.h"
 #include "UI/SelectionUI/WeaponSelectionComponent.h"
 #include "UI/SelectionUI/WeaponButtonWidget.h"
 
 UWeaponSelectionWidget::UWeaponSelectionWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-    static ConstructorHelpers::FClassFinder<UUserWidget> WeaponButtonBPClass(TEXT("/Game/Widgets/BPWeaponSelectButton.BPWeaponSelectButton_C"));
-    if (WeaponButtonBPClass.Succeeded())
-    {
-        WeaponButtonClass = WeaponButtonBPClass.Class;
-    }
 }
 
 void UWeaponSelectionWidget::GetAllAircraft() 
@@ -29,16 +21,17 @@ void UWeaponSelectionWidget::GetAllAircraft()
     UWeaponButtonWidget* NoneButton = CreateWidget<UWeaponButtonWidget>(GetWorld(), WeaponButtonClass);
     NoneButton->SetupWeapons(nullptr);
     NoneButton->OnWeaponSelected.AddDynamic(this, &UWeaponSelectionWidget::HandleWeaponSelected);
-    NoneButton->OnWeaponPicked.AddDynamic(WeaponUI, &UWeaponSelectionComponent::AddWeapon);
+    if (IsValid(WeaponUI)) NoneButton->OnWeaponPicked.AddDynamic(WeaponUI, &UWeaponSelectionComponent::AddWeapon);
     WeaponScrollBox->AddChild(NoneButton);
 
-    CreateButtons(CurrentLoadout->AllowedMissiles);
-    CreateButtons(CurrentLoadout->AllowedBombs);
-    CreateButtons(CurrentLoadout->AllowedMisc);
+    CreateButtons(CurrentLoadout.AllowedMissiles);
+    CreateButtons(CurrentLoadout.AllowedBombs);
+    CreateButtons(CurrentLoadout.AllowedMisc);
 }
 
-void UWeaponSelectionWidget::CreateButtons(const TArray<TSubclassOf<ABaseWeapon>>& Array) 
+void UWeaponSelectionWidget::CreateButtons(const TArray<TSubclassOf<ABaseWeapon>>&Array) 
 {
+    if (Array.Num() <= 0) return;
     for (TSubclassOf<ABaseWeapon> SingleWeapon : Array)
     {
         if (!SingleWeapon) continue;

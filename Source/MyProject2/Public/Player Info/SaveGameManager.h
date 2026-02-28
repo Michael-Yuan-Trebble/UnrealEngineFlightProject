@@ -35,7 +35,7 @@ public:
 
 private:
 	UPROPERTY()
-	UPlayerSaveData* SaveGameData = nullptr;
+	TObjectPtr<UPlayerSaveData> SaveGameData = nullptr;
 
 	FString SlotName = "PlayerSave";
 	int32 UserIndex = 0;

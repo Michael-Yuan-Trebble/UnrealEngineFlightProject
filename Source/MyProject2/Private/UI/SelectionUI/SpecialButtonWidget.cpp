@@ -3,18 +3,20 @@
 
 #include "UI/SelectionUI/SpecialButtonWidget.h"
 #include "Specials/BaseSpecial.h"
+#include "Components/TextBlock.h"
+#include "Components/Button.h"
 
 void USpecialButtonWidget::Setup(const TSubclassOf<UBaseSpecial>& SpecialData)
 {
 	ContainedData = SpecialData;
+	if (!IsValid(ContainedData)) return;
 	const UBaseSpecial* DefaultSpecial = ContainedData->GetDefaultObject<UBaseSpecial>();
 	SpecialNameText->SetText(FText::FromName(DefaultSpecial->SpecialName));
-	if (!SpecialSelectButton) return;
+	if (!IsValid(SpecialSelectButton)) return;
 	SpecialSelectButton->OnClicked.AddDynamic(this, &USpecialButtonWidget::HandleButtonClick);
 }
 
 void USpecialButtonWidget::HandleButtonClick() 
 {
-	if (!ContainedData) return;
-	OnSpecialPicked.Broadcast(ContainedData);
+	if (IsValid(ContainedData)) OnSpecialPicked.Broadcast(ContainedData);
 }

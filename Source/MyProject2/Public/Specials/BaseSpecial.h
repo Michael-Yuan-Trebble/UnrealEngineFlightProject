@@ -14,7 +14,7 @@ class MYPROJECT2_API UBaseSpecial : public UObject
 	GENERATED_BODY()
 	
 public:
-	FName SpecialName;
+	FName SpecialName = NAME_None;
 
 	UPROPERTY(EditAnywhere)
 	float CooldownTime = 0.f;

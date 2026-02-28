@@ -3,30 +3,21 @@
 
 #include "UI/SelectionUI/BuyPopupWidget.h"
 #include "UI/SelectionUI/BuyButton.h"
-#include "Gamemodes/AircraftSelectionGamemode.h"
-#include "Kismet/GameplayStatics.h"
-#include "Player Info/AircraftPlayerController.h"
-#include "Units/Aircraft/MenuManagerComponent.h"
+#include "Components/SizeBox.h"
 #include "UI/SelectionUI/BuySelectionComponent.h"
 
 UBuyPopupWidget::UBuyPopupWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) 
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> BuyButtonBPClass(TEXT("/Game/Widgets/BPBuyButton"));
-	if (BuyButtonBPClass.Succeeded()) 
-	{
-		BuyButtonClass = BuyButtonBPClass.Class;
-	}
 }
 
 void UBuyPopupWidget::Setup(UAircraftData* AircraftData)
 {
 	Aircraft = AircraftData;
-	
-	AAircraftSelectionGamemode* Gamemode = Cast<AAircraftSelectionGamemode>(UGameplayStatics::GetGameMode(this));
-	if (!Gamemode) return;
+
+	if (!IsValid(BuyButtonClass)) return;
 
 	UBuyButton* Button = CreateWidget<UBuyButton>(GetWorld(), BuyButtonClass);
-	if (!Button) return;
+	if (!IsValid(Button) || !IsValid(Aircraft) || !IsValid(Aircraft->AircraftStat)) return;
 
 	Button->Setup(Aircraft->AircraftStat->AircraftName, Aircraft->price);
 	Button->OnBuyPicked.AddDynamic(BuyUI, &UBuySelectionComponent::BuyAircraft);
@@ -36,5 +27,6 @@ void UBuyPopupWidget::Setup(UAircraftData* AircraftData)
 	{
 		Button->TurnOffBuy();
 	}
+	if (!IsValid(SizeBox)) return;
 	SizeBox->AddChild(Button);
 } 

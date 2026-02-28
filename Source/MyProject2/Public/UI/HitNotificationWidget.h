@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/TextBlock.h"
 #include "HitNotificationWidget.generated.h"
 
 UCLASS()
@@ -14,13 +13,14 @@ class MYPROJECT2_API UHitNotificationWidget : public UUserWidget
 	
 public:
 	void ShowMessage(const FText& msg);
-	
-	UPROPERTY(meta = (BindWidget))
-	UTextBlock* Message = nullptr;
 
 	void HideMessage();
 
 private:
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> Message = nullptr;
+
 	FTimerHandle HideTimerHandle;
 
 	float DisplayDuration = 5.f;

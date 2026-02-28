@@ -17,12 +17,12 @@ public:
 	TSubclassOf<AActor> WeaponMesh = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText DisplayName;
+	FText DisplayName = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText Description;
+	FText Description = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBaseWeaponStats* WeaponStat = nullptr;
+	TObjectPtr<UBaseWeaponStats> WeaponStat = nullptr;
 
 };

@@ -6,7 +6,10 @@
 #include "Player Info/AircraftPlayerController.h"
 #include "GameFramework/PlayerStart.h"
 #include "Player Info/PlayerGameInstance.h"
-#include "Units/Carrier.h"
+#include "Units/Naval/Carrier.h"
+#include "Subsystem/LevelTransitionSubsystem.h"
+#include "Subsystem/MissionManagerSubsystem.h"
+#include "Kismet/GameplayStatics.h"
 #include "Enums/ThrottleStage.h"
 
 ANavalTakeoffGamemode::ANavalTakeoffGamemode() {
@@ -36,6 +39,7 @@ void ANavalTakeoffGamemode::HandlePlayerSpawnPoint()
 		Carrier = GetWorld()->SpawnActor<ACarrier>(CarrierClass, SpawnTransform, Params);
 
 		if (IsValid(Carrier)) PlayerSpawnLoc = Carrier->GetCarrierSpawnPoint();
+		if (IsValid(PC)) PC->DeactivateWeapon();
 
 		PlayerSpawnSpeed = 0.f;
 	}
@@ -48,16 +52,21 @@ void ANavalTakeoffGamemode::CatapultTakeoff(const float D) {
 		EThrottleStage Throttle = PlayerSpawnedIn->GetThrottleStage();
 		if (Throttle == EThrottleStage::Afterburner) {
 			CurrentCatapultTime -= D;
-
+			if (IsValid(PC)) {
+				PC->DeactivateMovement();
+			}
 		}
 		else CurrentCatapultTime = CatapultTimer;
-	}
 
-	if (CurrentCatapultTime <= 0 && LaunchTime > 0) {
-		LaunchTime -= D;
-		PlayerSpawnedIn->ApplySpeed(AddedSpeed, D);
-		if (LaunchTime <= 0) {
-			PlayerSpawnedIn->SetFlying(true);
+		if (CurrentCatapultTime <= 0 && LaunchTime > 0) {
+			LaunchTime -= D;
+			PlayerSpawnedIn->ApplySpeed(AddedSpeed, D);
+			PlayerSpawnedIn->SetRestrained(false);
+			if (LaunchTime <= 0) {
+				bStatic = false;
+				PlayerSpawnedIn->SetFlying(true);
+				PC->ActivateMovement();
+			}
 		}
 	}
 }

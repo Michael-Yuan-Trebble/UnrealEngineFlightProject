@@ -4,13 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Specials/BaseSpecial.h"
-#include "Components/TextBlock.h"
-#include "Components/Button.h"
 #include "SpecialButtonWidget.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpecialPicked, TSubclassOf<UBaseSpecial>, SelectedSpecial);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSpecialSelected);
+
+class UBaseSpecial;
 
 UCLASS()
 class MYPROJECT2_API USpecialButtonWidget : public UUserWidget
@@ -22,20 +21,21 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnSpecialPicked OnSpecialPicked;
 
+	void Setup(const TSubclassOf<UBaseSpecial>& SpecialData);
+
+private:
+
 	UPROPERTY()
 	TSubclassOf<UBaseSpecial> ContainedData = nullptr;
 
-	void Setup(const TSubclassOf<UBaseSpecial>& SpecialData);
-
-protected:
 	UFUNCTION()
 	void HandleButtonClick();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* SpecialSelectButton = nullptr;
+	TObjectPtr<class UButton> SpecialSelectButton = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* SpecialNameText = nullptr;
+	TObjectPtr<class UTextBlock> SpecialNameText = nullptr;
 
 	virtual void NativeDestruct() override {
 		OnSpecialPicked.Clear();

@@ -4,9 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Components/BoxComponent.h"
-#include "NiagaraSystem.h"
-#include "Components/StaticMeshComponent.h"
 #include "Structs and Data/Weapon Data/BaseWeaponStats.h"
 #include "Interfaces/LockableTarget.h"
 #include "BaseWeapon.generated.h"
@@ -26,31 +23,39 @@ public:
 	ABaseWeapon();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* WeaponMesh = nullptr;
+	TObjectPtr<class UStaticMeshComponent> WeaponMesh = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* Collision = nullptr;
-
-	TArray<ETargetType> SupportedTargetTypes;
+	TObjectPtr<class UBoxComponent> Collision = nullptr;
 
 	bool CanLockTarget(ETargetType TargetType) const { return SupportedTargetTypes.Contains(TargetType); }
 
-	UPROPERTY(EditAnywhere)
-	FName WeaponName;
-
-	float cooldownTime = 0.f;
-
 	float timeTilDelt = 0.f;
-
-	bool canLock = false;
-
-	float range = 0.f;
 
 	virtual void FireStatic(const float speed);
 
 	virtual void FireTracking(const float speed, AActor* Target);
 
+	const FName& GetName() const { return WeaponName; };
+
+	const float& GetRange() const { return range; };
+
+	const float& GetCooldown() const { return cooldownTime; };
+
+	const bool& GetCanLock() const { return canLock; };
+
 protected:
+
+	bool canLock = false;
+
+	float range = 0.f;
+
+	float cooldownTime = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	FName WeaponName = NAME_None;
+
+	TArray<ETargetType> SupportedTargetTypes{};
 	
 	virtual void BeginPlay() override;
 

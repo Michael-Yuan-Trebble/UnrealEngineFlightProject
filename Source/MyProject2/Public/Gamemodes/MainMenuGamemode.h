@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Structs and Data/MissionData.h"
 #include "MainMenuGamemode.generated.h"
 
 class AAircraftPlayerController;
@@ -18,12 +19,14 @@ class MYPROJECT2_API AMainMenuGamemode : public AGameModeBase
 public:
 	AMainMenuGamemode();
 
+	void LevelSelected(FMissionData Level);
+
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	UPROPERTY()
-	AAircraftPlayerController* APC = nullptr;
+	TObjectPtr<AAircraftPlayerController> APC = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UMainMenuWidget> MainMenuClass = nullptr;

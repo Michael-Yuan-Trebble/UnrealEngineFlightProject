@@ -21,7 +21,10 @@ AFlightGamemode::AFlightGamemode()
 void AFlightGamemode::BeginPlay() 
 {
 	Super::BeginPlay();
-
+	// TOOD: It works with transition but starting on a level doesn't do fade in so delete later 
+	UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
+	if (!IsValid(GI)) return;
+	GI->FadeOut();
 	SpawnInController();
 }
 
@@ -54,7 +57,11 @@ void AFlightGamemode::SpawnInController()
 // Tells flight comp which mode to be set on
 void AFlightGamemode::SetFlightMode() 
 {
-	if (IsValid(PlayerSpawnedIn)) PlayerSpawnedIn->SetFlightMode(FlightMode);
+	if (!IsValid(PlayerSpawnedIn)) return; 
+	PlayerSpawnedIn->SetFlightMode(FlightMode);
+
+	if (FlightMode == EFlightMode::Naval)
+		PlayerSpawnedIn->SetRestrained(true);
 }
 
 // TODO: Move this logic into actual AI spawn points and just move them around in the editor
@@ -168,14 +175,14 @@ TMap<FName, TSubclassOf<ABaseWeapon>> AFlightGamemode::TemporaryLoadout()
 
 	for (int i = 0; i < 2; i++) 
 	{
-		FString PylonName = FString::Printf(TEXT("Pylon%d"), i);
+		FString PylonName = FString::Printf(TEXT("Pylon_%d"), i);
 		FName Pylon(*PylonName);
 		Loadout.Add(Pylon, Bomb);
 	}
 
 	for (int i = 2; i < AircraftSelected->AircraftStat->NumOfPylons; i++) 
 	{
-		FString PylonName = FString::Printf(TEXT("Pylon%d"), i);
+		FString PylonName = FString::Printf(TEXT("Pylon_%d"), i);
 		FName Pylon(*PylonName);
 		Loadout.Add(Pylon, Missile);
 	}

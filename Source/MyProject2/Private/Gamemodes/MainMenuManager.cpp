@@ -7,6 +7,7 @@
 #include "UI/MainMenuUI/FreeFlightWidget.h"
 #include "Player Info/PlayerGameInstance.h"
 #include "UI/MainMenuUI/MainMenuWidget.h"
+#include "Gamemodes/MainMenuGamemode.h"
 
 UMainMenuManager::UMainMenuManager() 
 {
@@ -77,7 +78,6 @@ void UMainMenuManager::ShowFreeFlight()
 
 void UMainMenuManager::OnLevelPicked(FMissionData LevelName)
 {
-	PlayerInstance->SetLevel(LevelName);
 	if (TransitionScreenClass)
 	{
 		TransitionScreenWidget = CreateWidget<UUserWidget>(GetWorld(), TransitionScreenClass);
@@ -87,30 +87,9 @@ void UMainMenuManager::OnLevelPicked(FMissionData LevelName)
 		}
 	}
 
-	UWorld* World = GetWorld();
-	if (!World) return;
-
-	FTimerHandle TimerHandle;
-	FName AircraftSelect = "AircraftSelect";
-
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, AircraftSelect]() 
-	{
-		OpenLevel(AircraftSelect);
-	}, 0.5f, false);
-}
-
-bool UMainMenuManager::OpenLevel(const FName& LevelName)
-{
-	UWorld* World = GetWorld();
-	if (!World) return false;
-
-	if (LevelName.IsNone()) return false;
-
-	FString MapPath = FString::Printf(TEXT("/Game/Maps/%s"), *LevelName.ToString());
-	if (!FPackageName::DoesPackageExist(MapPath)) return false;
-
-	UGameplayStatics::OpenLevel(World, LevelName);
-	return true;
+	AMainMenuGamemode* GM = Cast<AMainMenuGamemode>(GetWorld()->GetAuthGameMode());
+	if (!IsValid(GM)) return;
+	GM->LevelSelected(LevelName);
 }
 
 

@@ -33,16 +33,16 @@ protected:
 	FTimerHandle TimerHandle;
 	
 	UPROPERTY()
-	UAircraftData* AircraftSelected = nullptr;
+	TObjectPtr<UAircraftData> AircraftSelected = nullptr;
 
 	UPROPERTY()
-	UAircraftDatabase* Database = nullptr;
+	TObjectPtr<UAircraftDatabase> Database = nullptr;
 
 	UPROPERTY()
-	APlayerAircraft* PlayerSpawnedIn = nullptr;
+	TObjectPtr<APlayerAircraft> PlayerSpawnedIn = nullptr;
 
 	UPROPERTY()
-	AAircraftPlayerController* PC = nullptr;
+	TObjectPtr<AAircraftPlayerController> PC = nullptr;
 
 	FTimerHandle TempHandle;
 

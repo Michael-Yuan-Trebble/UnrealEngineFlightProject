@@ -8,10 +8,7 @@
 #include "BuySelectionComponent.generated.h"
 
 class AAircraftPlayerController;
-class AAircraftSelectionGamemode;
 class UPlayerGameInstance;
-class UMenuManagerComponent;
-class UBuyPopupWidget;
 class UAircraftSelectionComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -36,31 +33,34 @@ public:
 
 	void CloseAll();
 
-	UPROPERTY()
-	AAircraftPlayerController* PC = nullptr;
+	void SetWidget(const TSubclassOf<UUserWidget>& InWidget) { BuyPopupClass = InWidget; };
+
+private:
 
 	UPROPERTY()
-	UPlayerGameInstance* GI = nullptr;
-	
-	UPROPERTY()
-	UAircraftData* Aircraft = nullptr;
+	TObjectPtr<AAircraftPlayerController> PC = nullptr;
 
 	UPROPERTY()
-	UAircraftSelectionComponent* AircraftUI = nullptr;
+	TObjectPtr<UPlayerGameInstance> GI = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY()
+	TObjectPtr<UAircraftData> Aircraft = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UAircraftSelectionComponent> AircraftUI = nullptr;
+
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> BuyPopupClass = nullptr;
 
 	UPROPERTY()
-	UBuyPopupWidget* BuyWidget = nullptr;
+	class UBuyPopupWidget* BuyWidget = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> GreyOutClass = nullptr;
 
 	UPROPERTY()
-	UUserWidget* GreyOut = nullptr;
+	TObjectPtr<UUserWidget> GreyOut = nullptr;
 
-protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override {
 		CloseAll();
 		Super::EndPlay(EndPlayReason);

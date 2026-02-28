@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Button.h"
 #include "BuyButton.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBuyPicked, FName, PurchasedAircraft, int, cost);
@@ -21,18 +20,18 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnCancelPicked OnCancelPicked;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName Name = NAME_None;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int Cost = 0;
 	
 	void Setup(const FName& Name, const int Cost);
 
 	void TurnOffBuy();
 
-protected:
+private:
+
+	UPROPERTY(EditAnywhere)
+	FName Name = NAME_None;
+
+	UPROPERTY(EditAnywhere)
+	int Cost = 0;
 	
 	UFUNCTION()
 	void HandleButtonClick();
@@ -41,10 +40,10 @@ protected:
 	void HandleCancelClick();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* AircraftBuyButton = nullptr;
+	TObjectPtr<class UButton> AircraftBuyButton = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* CancelBuyButton = nullptr;
+	TObjectPtr<class UButton> CancelBuyButton = nullptr;
 
 	virtual void NativeConstruct() override;
 

@@ -53,10 +53,10 @@ void UMenuManagerComponent::SetupClasses(TSubclassOf<UUserWidget> InAircraftClas
 	BuySelectionClass = InBuyClass;
 	SpecialSelectionClass = InSpecialClass;
 
-	AircraftSelectionUI->SelectionWidget = InAircraftClass;
-	WeaponSelectionUI->SelectionWidget = InWeaponClass;
-	BuySelectionUI->BuyPopupClass = InBuyClass;
-	SpecialSelectionUI->SelectionWidget = InSpecialClass;
+	AircraftSelectionUI->SetWidget(InAircraftClass);
+	WeaponSelectionUI->SetWeaponWidgetClass(InWeaponClass);
+	BuySelectionUI->SetWidget(InBuyClass);
+	SpecialSelectionUI->SetWidget(InSpecialClass);
 }
 
 void UMenuManagerComponent::GoBack(const EMenuState Current)
@@ -89,21 +89,21 @@ void UMenuManagerComponent::GetWidgetClassForState(const EMenuState State)
 	{
 	case EMenuState::AircraftSelect:
 		AircraftSelectionUI->AircraftSelectionMenu();
-		CurrentWidget = AircraftSelectionUI->AircraftSelectUI;
+		CurrentWidget = AircraftSelectionUI->GetWidget();
 		break;
 	case EMenuState::WeaponSelect:
 		if (SelectedAircraft) 
 		{
 			WeaponSelectionUI->AddAircraft(SelectedAircraft);
 			WeaponSelectionUI->WeaponSelectionMenu();
-			CurrentWidget = WeaponSelectionUI->WeaponSelectUI;
+			CurrentWidget = WeaponSelectionUI->GetWeaponUI();
 		}
 		break;
 	case EMenuState::SpecialSelect:
 		if (SelectedAircraft) {
 			SpecialSelectionUI->SetAir(SelectedAircraft);
 			SpecialSelectionUI->SpecialSelectionMenu();
-			CurrentWidget = SpecialSelectionUI->SpecialSelectUI;
+			CurrentWidget = SpecialSelectionUI->GetWidget();
 		}
 		break;
 	case EMenuState::BuyPopup:
@@ -133,7 +133,7 @@ void UMenuManagerComponent::ChooseSpecialUI()
 void UMenuManagerComponent::SpawnBuy(UAircraftData* AircraftData, const int Cost)
 {
 	TempAircraft = AircraftData;
-	PC->MenuHistory.Push(EMenuState::BuyPopup);
+	PC->GetMenuHistory().Push(EMenuState::BuyPopup);
 	GetWidgetClassForState(EMenuState::BuyPopup);
 }
 

@@ -16,7 +16,7 @@ public:
 	UBaseAudioComponent();
 
 	UPROPERTY(VisibleAnywhere)
-	UAudioComponent* PrimaryLoop = nullptr;
+	TObjectPtr<UAudioComponent> PrimaryLoop = nullptr;
 
 	void Init();
 

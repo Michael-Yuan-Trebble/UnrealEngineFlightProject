@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataAsset.h"
+#include "Structs and Data/InGameMissileStats.h"
 #include "Structs and Data/Weapon Data/BaseWeaponStats.h"
 #include "IRMissileStats.generated.h"
 
@@ -24,4 +24,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float LockOnRange = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	FInGameMissileStats InGameMissileStats{};
 };

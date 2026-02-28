@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
-#include "Units/Aircraft/BaseAircraft.h"
 #include "Attack.generated.h"
 
 class AEnemyAircraftAI;
 class AEnemyAircraft;
+class ABaseAircraft;
 
 UENUM(BlueprintType)
 enum class EAIThrottleMode : uint8 
@@ -27,7 +27,7 @@ public:
 
 	UBTServiceAttack();
 
-protected:
+private:
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector TargetActorKey;
@@ -37,16 +37,16 @@ protected:
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 	UPROPERTY()
-	AActor* Selected = nullptr;
+	TObjectPtr<AActor> Selected = nullptr;
 
 	UPROPERTY()
-	AEnemyAircraft* Controlled = nullptr;
+	TObjectPtr<AEnemyAircraft> Controlled = nullptr;
 
 	UPROPERTY(Transient)
-	UBlackboardComponent* BlackboardComp = nullptr;
+	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
 
 	UPROPERTY()
-	AEnemyAircraftAI* Controller = nullptr;
+	TObjectPtr<AEnemyAircraftAI> Controller = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector YawKey;
@@ -68,7 +68,6 @@ protected:
 
 	const float RollGain = 0.015f;
 
-private:
 	EAIThrottleMode GetThrottleMode(float distance);
 
 	void CalculateAngle(const float DeltaSeconds);

@@ -15,11 +15,11 @@ struct FAircraftLoadoutData
 	GENERATED_BODY()
 
 	UPROPERTY()
-	TSubclassOf<ABaseAircraft> AircraftClass;
+	TSubclassOf<ABaseAircraft> AircraftClass = nullptr;
 
 	UPROPERTY()
-	TMap<FName, TSubclassOf<ABaseWeapon>> EquippedWeapons;
+	TMap<FName, TSubclassOf<ABaseWeapon>> EquippedWeapons{};
 
 	UPROPERTY()
-	TSubclassOf<UBaseSpecial> SelectedSpecial;
+	TSubclassOf<UBaseSpecial> SelectedSpecial = nullptr;
 };

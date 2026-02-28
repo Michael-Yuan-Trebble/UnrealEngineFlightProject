@@ -2,11 +2,12 @@
 
 
 #include "UI/SelectionUI/BuyButton.h"
+#include "Components/Button.h"
 
 void UBuyButton::NativeConstruct() 
 {
 	Super::NativeConstruct();
-	if (!AircraftBuyButton) return;
+	if (!IsValid(AircraftBuyButton)) return;
 	AircraftBuyButton->OnClicked.AddDynamic(this, &UBuyButton::HandleButtonClick);
 	CancelBuyButton->OnClicked.AddDynamic(this, &UBuyButton::HandleCancelClick);
 }

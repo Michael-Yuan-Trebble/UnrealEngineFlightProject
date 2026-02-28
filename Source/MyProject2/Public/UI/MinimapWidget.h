@@ -14,17 +14,19 @@ class MYPROJECT2_API UMinimapWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(meta=(BindWidget))
-	UImage* MapImage = nullptr;
-
-	UPROPERTY(meta=(BindWidget))
-	UImage* PlayerIcon = nullptr;
 
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	void InitializeBounds(const FVector2D& InWorldMin, const FVector2D& InWorldMax);
 
 private:
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> MapImage = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> PlayerIcon = nullptr;
+
 	FVector2D WorldMin = FVector2D::ZeroVector;
 	FVector2D WorldMax = FVector2D::ZeroVector;
 

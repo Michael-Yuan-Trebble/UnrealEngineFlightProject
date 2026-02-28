@@ -6,9 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "Specials/BaseSpecial.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
-#include "Components/Button.h"
-#include "Components/TextBlock.h"
-#include "Components/ScrollBox.h"
 #include "SpecialSelectionWidget.generated.h"
 
 class UMenuManagerComponent;
@@ -31,27 +28,28 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAdvanceWidget OnAdvance;
 
-	UPROPERTY()
-	UAircraftData* AircraftSelected = nullptr;
-
 	UFUNCTION(BlueprintCallable)
 	void GetAllSpecials();
 
 	void Setup(UAircraftData* InAircraft, UMenuManagerComponent* InMenu, USpecialSelectionComponent* InSelect);
 
-	UPROPERTY()
-	UMenuManagerComponent* MenuManager = nullptr;
+private:
 
 	UPROPERTY()
-	USpecialSelectionComponent* SpecialUI = nullptr;
+	TObjectPtr<UAircraftData> AircraftSelected = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UMenuManagerComponent> MenuManager = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<USpecialSelectionComponent> SpecialUI = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* Advancebtn = nullptr;
+	TObjectPtr<class UButton> Advancebtn = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* AdvanceText = nullptr;
+	TObjectPtr<class UTextBlock> AdvanceText = nullptr;
 
-protected:
 	UFUNCTION()
 	void HandleSpecialSelected(TSubclassOf<UBaseSpecial> SpecialSelected);
 
@@ -59,7 +57,7 @@ protected:
 	TSubclassOf<UUserWidget> SpecialButtonClass = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
-	UScrollBox* SpecialScrollBox = nullptr;
+	TObjectPtr<class UScrollBox> SpecialScrollBox = nullptr;
 
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		Super::ReleaseSlateResources(bReleaseChildren);
@@ -73,7 +71,6 @@ protected:
 		Super::NativeDestruct();
 	}
 
-private:
 	UFUNCTION()
 	void OnAdvancePicked();
 };

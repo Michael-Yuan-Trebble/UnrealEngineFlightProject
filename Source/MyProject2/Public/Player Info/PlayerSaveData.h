@@ -13,7 +13,7 @@ class MYPROJECT2_API UPlayerSaveData : public USaveGame
 	
 public:
 	UPROPERTY(EditAnywhere, Category = "SaveData")
-	TArray<FName> AircraftOwned;
+	TArray<FName> AircraftOwned{};
 
 	UPROPERTY(EditAnywhere, Category = "SaveData")
 	int32 Money = 0;

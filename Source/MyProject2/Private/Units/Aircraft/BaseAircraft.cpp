@@ -6,9 +6,15 @@
 #include "Units/Aircraft/FlightComponent.h"
 #include "Units/Aircraft/WeaponSystemComponent.h"
 #include "Units/Aircraft/AircraftVisualComponent.h"
+#include "Weapons/Missiles/BaseMissile.h"
 #include "Units/Aircraft/RadarComponent.h"
 #include "Units/Aircraft/SpecialSystemComponent.h"
-#include "Weapons/Missiles/BaseMissile.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/BoxComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
+#include "PhysicsEngine/PhysicsConstraintComponent.h"
 
 ABaseAircraft::ABaseAircraft()
 {
@@ -69,15 +75,18 @@ void ABaseAircraft::BeginPlay()
 
 	if (!IsValid(Airframe) || !IsValid(RadarComponent) || !IsValid(FlightComponent)) return;
 
+	UAircraftStats* LoadedStats = AirStats.LoadSynchronous();
+	if (!IsValid(LoadedStats)) return;
+
 	OriginalCollOffset = UnitRoot->GetRelativeLocation();
 	OriginalExtent = UnitRoot->GetUnscaledBoxExtent();
 
 	RadarComponent->Setup(this);
 	FlightComponent->SetLanded(bLanded);
-	FlightComponent->Setup(this, AirStats);
+	FlightComponent->Setup(this);
 	FlightComponent->SetDropSpeed(DropSpeed);
 	FlightComponent->SetStallSpeed(StallSpeed);
-	WeaponComponent->Setup(this, AirStats);
+	WeaponComponent->Setup(this, LoadedStats);
 
 	if (IsValid(AfterburnerSystem))
 	{
@@ -244,11 +253,13 @@ void ABaseAircraft::SetRudder(const float rudder) { if (IsValid(FlightComponent)
 
 void ABaseAircraft::SetFlying(const bool bIsFlying) { if (IsValid(FlightComponent)) FlightComponent->SetFlying(bIsFlying); }
 
+void ABaseAircraft::SetRestrained(bool bIsRestrained) { if (IsValid(FlightComponent)) FlightComponent->SetRestrained(bIsRestrained); }
+
 void ABaseAircraft::SetSpeed(const float speed) { if (IsValid(FlightComponent)) FlightComponent->SetInitialSpeed(speed); }
 
 bool ABaseAircraft::IsLanded() { if (IsValid(FlightComponent)) return FlightComponent->IsLanded(); else return false; }
 
-float ABaseAircraft::GetSpeed() { if (IsValid(FlightComponent)) return FlightComponent->GetCurrentSpeedKMH(); else return 0.f; }
+float ABaseAircraft::GetSpeed() { if (IsValid(FlightComponent)) return FlightComponent->GetSpeed(); else return 0.f; }
 
 void ABaseAircraft::SetWeapons(const TMap<FName, TSubclassOf<ABaseWeapon>> In) { if (IsValid(WeaponComponent)) WeaponComponent->SetWeapons(In); }
 
@@ -260,20 +271,26 @@ void ABaseAircraft::SetFlightMode(const EFlightMode FlightMode)
 	SetLandingGearVisiblility(FlightMode != EFlightMode::Flight);
 }
 
-float ABaseAircraft::ReturnRudder() const { if (IsValid(VisualComp)) return VisualComp->GetRudder(); else return 0; }
-
-float ABaseAircraft::ReturnSlat() const { if (IsValid(VisualComp)) return VisualComp->GetSlat(); else return 0; }
-
-float ABaseAircraft::ReturnRFlap() const { if (IsValid(VisualComp)) return VisualComp->GetRFlap(); else return 0; }
-
-float ABaseAircraft::ReturnLFlap() const { if (IsValid(VisualComp)) return VisualComp->GetLFlap(); else return 0; }
-
-float ABaseAircraft::ReturnNozzle() const { if (IsValid(VisualComp)) return VisualComp->GetNozzle(); else return 0; }
-
-float ABaseAircraft::ReturnAirbrake() const { if (IsValid(VisualComp)) return VisualComp->GetAirBrake(); else return 0; }
-
-float ABaseAircraft::ReturnElevator() const { if (IsValid(VisualComp)) return VisualComp->GetElevator(); else return 0; }
+const FAircraftAnimationValues& ABaseAircraft::GetAircraftAnimationValues() {
+	if (IsValid(VisualComp)) return VisualComp->GetAircraftAnimationValues();
+	return DefaultAnimVal;
+}
 
 EThrottleStage ABaseAircraft::GetThrottleStage() const { if (IsValid(FlightComponent)) return FlightComponent->ReturnThrottleStage(); else return EThrottleStage::Slow; }
 
 void ABaseAircraft::ApplySpeed(const float Speed, const float D) { if (IsValid(FlightComponent)) FlightComponent->AddSpeed(Speed, D); }
+
+float ABaseAircraft::GetGForce() {
+	if (IsValid(FlightComponent)) return FlightComponent->GetGForce();
+	return 0.f;
+}
+
+float ABaseAircraft::GetMaxWeaponCount() {
+	if (IsValid(WeaponComponent)) return WeaponComponent->GetMaxWeaponCount();
+	return 0.f;
+}
+
+float ABaseAircraft::GetCurrentWeaponCount() {
+	if (IsValid(WeaponComponent)) return WeaponComponent->GetCurrentWeaponCount();
+	return 0.f;
+}

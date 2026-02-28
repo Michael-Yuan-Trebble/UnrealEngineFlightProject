@@ -3,7 +3,6 @@
 
 #include "UI/MinimapWidget.h"
 #include "Components/Image.h"
-#include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"

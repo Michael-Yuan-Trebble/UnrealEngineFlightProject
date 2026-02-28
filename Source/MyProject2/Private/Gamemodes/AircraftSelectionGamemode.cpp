@@ -7,10 +7,11 @@
 #include "Player Info/AircraftPlayerController.h"
 #include "Units/Aircraft/Player/PlayerAircraft.h"
 #include "Units/Aircraft/MenuManagerComponent.h"
-#include "Enums/ControlModeTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Enums/MenuState.h"
 #include "Player Info/PlayerGameInstance.h"
+#include "Subsystem/LevelTransitionSubsystem.h"
+#include "Subsystem/MissionManagerSubsystem.h"
 #include "Units/Aircraft/BaseAircraft.h"
 
 FActorSpawnParameters SpawnParams;
@@ -42,9 +43,9 @@ void AAircraftSelectionGamemode::BeginPlay()
 	{
 		if (!WeakAPC.IsValid()) return;
 		AAircraftPlayerController* PC = WeakAPC.Get();
-		if (!IsValid(PC) || !IsValid(PC->MenuManager)) return;
-		PC->MenuManager->SetupClasses(AircraftSelectClass, WeaponSelectClass, BuySelectionClass, SpecialSelectionClass);
-		PC->MenuManager->ChooseAircraftUI();
+		if (!IsValid(PC) || !IsValid(PC->GetMenuManager())) return;
+		PC->GetMenuManager()->SetupClasses(AircraftSelectClass, WeaponSelectClass, BuySelectionClass, SpecialSelectionClass);
+		PC->GetMenuManager()->ChooseAircraftUI();
 	});
 }
 
@@ -59,8 +60,29 @@ void AAircraftSelectionGamemode::SpawnInAircraft(const TSubclassOf<APawn> SpawnI
 	}
 
 	FVector PreviewLocation = FVector::ZeroVector;
+
+	FHitResult HitResult;
+
+	FCollisionQueryParams Params;
+	Params.bTraceComplex = true;
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		PreviewLocation + FVector(0, 0, 10000),
+		PreviewLocation - FVector(0, 0, 10000),
+		ECC_WorldStatic,
+		Params
+	);
+
+	float SpawnOffset = 150.f;
+
+	FVector SpawnLocation = bHit ? HitResult.Location + FVector(0, 0, SpawnOffset) : PreviewLocation;
+
 	FRotator PreviewRotation = FRotator::ZeroRotator;
-	AircraftDisplayed = GetWorld()->SpawnActor<APawn>(SpawnIn, PreviewLocation, PreviewRotation, SpawnParams);
+	AircraftDisplayed = GetWorld()->SpawnActor<APawn>(SpawnIn, SpawnLocation, PreviewRotation, SpawnParams);
+	ABaseAircraft* Preview = Cast<ABaseAircraft>(AircraftDisplayed);
+	Preview->SetLandingGearVisiblility(true);
+	
 }
 
 void AAircraftSelectionGamemode::SpawnInWeapon(const TSubclassOf<ABaseWeapon> Weapon, const FName& Pylon) 
@@ -70,7 +92,7 @@ void AAircraftSelectionGamemode::SpawnInWeapon(const TSubclassOf<ABaseWeapon> We
 	ABaseAircraft* BaseAircraft = Cast<ABaseAircraft>(AircraftDisplayed);
 	if (!BaseAircraft) return;
 
-	USkeletalMeshComponent* Mesh = BaseAircraft->Airframe;
+	USkeletalMeshComponent* Mesh = BaseAircraft->GetAirframe();
 	if (!IsValid(Mesh) || !Mesh->DoesSocketExist(Pylon)) return;
 
 	AActor* WeaponDisplayed;
@@ -127,27 +149,24 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 	UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
 	if (!GI) return;
 
-	FString LevelNameString = GI->GetLevel().LevelName.ToString();
+	TSoftObjectPtr<UWorld> LoadWorld = GI->GetLevel().Level;
 
 	// Default to TestHeightmap, might change this later?
-	if (LevelNameString.IsEmpty())
+	if (LoadWorld.IsNull())
 	{
-		LevelNameString = TEXT("TestHeightmap");
+		// TODO: Do some fallback, for now return
+		return;
 	}
-
-	FString MapPath = FString::Printf(TEXT("/Game/Maps/%s"), *LevelNameString);
-
-	if (!FPackageName::DoesPackageExist(MapPath)) return;
 
 	APlayerController* PC = World->GetFirstPlayerController();
 	if (!PC) return;
 
-	AAircraftPlayerController* LocalAPC = IsValid(APC) ? APC : Cast<AAircraftPlayerController>(PC);
+	AAircraftPlayerController* LocalAPC = IsValid(APC) ? APC.Get() : Cast<AAircraftPlayerController>(PC);
 
-	if (IsValid(LocalAPC) && IsValid(LocalAPC->MenuManager)) 
+	if (IsValid(LocalAPC) && IsValid(LocalAPC->GetMenuManager())) 
 	{ 
 		LocalAPC->DisableInput(Cast<APlayerController>(PC));
-		if (IsValid(LocalAPC->MenuManager)) LocalAPC->MenuManager->CloseAll();
+		if (IsValid(LocalAPC->GetMenuManager())) LocalAPC->GetMenuManager()->CloseAll();
 	}
 
 	ABaseAircraft* BaseAir = Cast<ABaseAircraft>(AircraftDisplayed);
@@ -196,8 +215,11 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 
 	World->GetTimerManager().ClearAllTimersForObject(this);
 	World->GetTimerManager().ClearAllTimersForObject(APC);
-	if (IsValid(APC->MenuManager)) World->GetTimerManager().ClearAllTimersForObject(APC->MenuManager);
+	if (IsValid(APC->GetMenuManager())) World->GetTimerManager().ClearAllTimersForObject(APC->GetMenuManager());
 
-	const FName LevelToOpen(*LevelNameString);
-	UGameplayStatics::OpenLevel(World, LevelToOpen);
+	UMissionManagerSubsystem* MissionManager = GI->GetSubsystem<UMissionManagerSubsystem>();
+	ULevelTransitionSubsystem* LevelTransition = GI->GetSubsystem<ULevelTransitionSubsystem>();
+
+	const FMissionData& Mission = MissionManager->GetCurrentMission();
+	LevelTransition->LoadIntermission(Mission.TakeoffType);
 }

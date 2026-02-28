@@ -4,11 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "Units/Aircraft/WeaponSystemComponent.h"
-#include "Units/Aircraft/FlightComponent.h"
 #include "BTTaskFireMissiles.generated.h"
-
-class AEnemyAircraftAI;
 
 UCLASS(Blueprintable)
 class MYPROJECT2_API UBTTaskFireMissiles : public UBTTaskNode
@@ -31,16 +27,16 @@ protected:
 	FBlackboardKeySelector MissileClass;
 
 	UPROPERTY()
-	UBlackboardComponent* BlackboardComp;
+	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
 
 	UPROPERTY()
-	AEnemyAircraftAI* Controller;
+	TObjectPtr<class AEnemyAircraftAI> Controller = nullptr;
 
 	UPROPERTY()
-	UFlightComponent* FlightComp;
+	TObjectPtr<class UFlightComponent> FlightComp = nullptr;
 
 	UPROPERTY()
-	AActor* Selected;
+	TObjectPtr<AActor> Selected = nullptr;
 
 private:
 	void EquipAppropriateWeapon();

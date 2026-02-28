@@ -29,16 +29,16 @@ private:
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 	UPROPERTY()
-	AActor* Selected = nullptr;
+	TObjectPtr<AActor> Selected = nullptr;
 
 	UPROPERTY()
-	AEnemyAircraft* Controlled = nullptr;
+	TObjectPtr<AEnemyAircraft> Controlled = nullptr;
 
 	UPROPERTY()
-	AEnemyAircraftAI* Controller = nullptr;
+	TObjectPtr<AEnemyAircraftAI> Controller = nullptr;
 
 	UPROPERTY()
-	UBlackboardComponent* BlackboardComp = nullptr;
+	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
 
 	bool IsInsideCone();
 

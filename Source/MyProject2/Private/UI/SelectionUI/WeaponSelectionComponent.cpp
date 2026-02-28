@@ -4,18 +4,12 @@
 #include "UI/SelectionUI/WeaponSelectionComponent.h"
 #include "UI/SelectionUI/WeaponSelectionWidget.h"
 #include "Player Info/SaveGameManager.h"
-#include "Player Info/PlayerGameInstance.h"
 #include "Units/Aircraft/MenuManagerComponent.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "Player Info/AircraftPlayerController.h"
 
 UWeaponSelectionComponent::UWeaponSelectionComponent()
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> WeaponBPClass(TEXT("/Game/UI/BPWeaponSelectWidget"));
-	if (WeaponBPClass.Succeeded())
-	{
-		SelectionWidget = WeaponBPClass.Class;
-	}
 }
 
 void UWeaponSelectionComponent::Setup(AAircraftPlayerController* InPlayer, AAircraftSelectionGamemode* InGM, UMenuManagerComponent* InMenu)
@@ -43,8 +37,11 @@ void UWeaponSelectionComponent::WeaponSelectionMenu()
 
 	// TODO: Make it so the structs contain how many pylons are in a group, like 2, and then just loop twice for the pylons
 
-	WeaponSelectUI->CurrentLoadout = &(Aircraft->PylonLoadouts[CurrentPylonIndex]);
-	WeaponSelectUI->WeaponUI = this;
+	if (Aircraft->PylonLoadouts.Num() > 0) {
+		WeaponSelectUI->SetLoadout(Aircraft->PylonLoadouts[CurrentPylonIndex]);
+	}
+
+	WeaponSelectUI->SetWeaponUI(this);
 	WeaponSelectUI->GetAllAircraft();
 	WeaponSelectUI->AddToViewport();
 	InputMode.SetWidgetToFocus(WeaponSelectUI->TakeWidget());
@@ -56,7 +53,7 @@ void UWeaponSelectionComponent::WeaponSelectionMenu()
 void UWeaponSelectionComponent::HandleWeaponPicked(TSubclassOf<ABaseWeapon> Weapon)
 {
 	if (!PC || !GM) return;
-	FString PylonString = FString::Printf(TEXT("Pylon%d"), CurrentPylonIndex);
+	FString PylonString = FString::Printf(TEXT("Pylon_%d"), CurrentPylonIndex);
 	FName PylonName = FName(*PylonString);
 	if (!Weapon)
 	{

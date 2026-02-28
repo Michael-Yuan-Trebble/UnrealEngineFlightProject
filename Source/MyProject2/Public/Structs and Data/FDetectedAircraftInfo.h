@@ -20,7 +20,7 @@ public:
 	FRotator Rotation = FRotator::ZeroRotator;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	APawn* CurrentPawn = nullptr;
+	TObjectPtr<APawn> CurrentPawn = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float threatLevel = 0.f;

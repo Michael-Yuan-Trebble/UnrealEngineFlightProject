@@ -14,7 +14,7 @@ class MYPROJECT2_API APlayerGameState : public AGameStateBase
 	
 public:
 	UPROPERTY(BlueprintReadOnly)
-	TArray<FKillEvent> KillLog;
+	TArray<FKillEvent> KillLog{};
 
 	UFUNCTION()
 	void RegisterKill(AActor* Killer, AActor* Target, const TSubclassOf<AActor> WeaponUsed);

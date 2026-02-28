@@ -5,11 +5,15 @@
 #include "Player Info/AircraftPlayerController.h"
 #include "Units/Aircraft/FlightComponent.h"
 #include "Units/Aircraft/RadarComponent.h"
+#include "Components/SceneComponent.h"
 #include "Units/HealthComponent.h"
 #include "Units/Aircraft/AircraftAudioComponent.h"
 #include "Units/Aircraft/WeaponSystemComponent.h"
 #include "Components/AudioComponent.h"
 #include "Units/Aircraft/Player/CameraManagerComponent.h"
+#include "Components/BoxComponent.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 APlayerAircraft::APlayerAircraft() 
 {
@@ -105,10 +109,10 @@ void APlayerAircraft::SelectWeapon(float index) { if (WeaponComponent) WeaponCom
 
 int32 APlayerAircraft::AdvanceWeapon(int32 index, bool bForward) 
 {
-	if (!IsValid(WeaponComponent) || WeaponComponent->WeaponGroups.Num() == 0) return 0;
+	if (!IsValid(WeaponComponent) || WeaponComponent->GetWeaponGroups().Num() == 0) return 0;
 
 	TArray<TSubclassOf<ABaseWeapon>> Keys;
-	WeaponComponent->WeaponGroups.GetKeys(Keys);
+	WeaponComponent->GetWeaponGroups().GetKeys(Keys);
 
 	int32 CurrentIndex = Keys.IndexOfByKey(WeaponComponent->GetWeapon()->GetClass());
 	if (bForward) CurrentIndex = (CurrentIndex + 1) % Keys.Num();

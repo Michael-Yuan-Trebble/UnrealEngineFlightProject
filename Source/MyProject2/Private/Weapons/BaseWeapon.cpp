@@ -2,6 +2,8 @@
 
 
 #include "Weapons/BaseWeapon.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/BoxComponent.h"
 
 ABaseWeapon::ABaseWeapon()
 {

@@ -5,7 +5,11 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Interfaces/DamageableInterface.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 #include "Interfaces/TeamInterface.h"
+#include "Components/BoxComponent.h"
 #include "Interfaces/ApproachingMissileInterface.h"
 
 ABaseAHRMissile::ABaseAHRMissile()
@@ -17,53 +21,55 @@ ABaseAHRMissile::ABaseAHRMissile()
 void ABaseAHRMissile::BeginPlay() 
 {
 	Super::BeginPlay();
-	if (!MissileStats) return;
-	WeaponName = MissileStats->InGameName;
-	missileAcceleration = MissileStats->Acceleration;
-	missileMaxSpeed = MissileStats->MaxSpeed;
-	cooldownTime = MissileStats->Cooldown;
-	range = MissileStats->LockOnRange;
-	turnRate = MissileStats->TurnRate;
-	ProjectileMovement->MaxSpeed = MissileStats->MaxSpeed;
-	SupportedTargetTypes = MissileStats->SupportedTargetTypes;
-}
 
-#define DROPTIME 0.2f
+	UARHMissileStats* LoadedStats = MissileStats.LoadSynchronous();
+
+	if (!IsValid(LoadedStats)) return;
+	WeaponName = LoadedStats->InGameName;
+	missileAcceleration = LoadedStats->Acceleration;
+	missileMaxSpeed = LoadedStats->MaxSpeed;
+	cooldownTime = LoadedStats->Cooldown;
+	range = LoadedStats->LockOnRange;
+	turnRate = LoadedStats->TurnRate;
+	damage = LoadedStats->Damage;
+	ProjectileMovement->MaxSpeed = LoadedStats->MaxSpeed;
+	SupportedTargetTypes = LoadedStats->SupportedTargetTypes;
+}
 
 void ABaseAHRMissile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!Owner || !Owner->IsValidLowLevelFast()) return;
-
 	if (!bAir) return;
 	if (isDropPhase)
 	{
-		DropTimer += DeltaTime;
+		if (ABaseAircraft* LoadedAircraft = AircraftOwner.Get()) {
+			DropTimer += DeltaTime;
 
-		// Drop Sequence: "Launch" downwards
-		dropVelocity += DropAcceleration * DeltaTime;
-		FVector DropMove = -Owner->GetActorUpVector() * dropVelocity;
-		FVector Forward = Owner->GetActorForwardVector() * missileVelocity * DeltaTime;
-		FVector TotalMove = DropMove + Forward;
+			// Drop Sequence: "Launch" downwards
+			dropVelocity += DropAcceleration * DeltaTime;
+			FVector DropMove = -LoadedAircraft->GetActorUpVector() * dropVelocity;
+			FVector Forward = LoadedAircraft->GetActorForwardVector() * missileVelocity * DeltaTime;
+			FVector TotalMove = DropMove + Forward;
 
-		AddActorWorldOffset(TotalMove, true);
-		isDropPhase = DropTimer < DROPTIME;
-		return;
+			AddActorWorldOffset(TotalMove, true);
+			isDropPhase = DropTimer < DropTime;
+			return;
+		}
 	}
 
-	if (!SmokeTrail || !MissileRocket) activateSmoke();
+	if (!SmokeTrail.IsValid() || !MissileRocket.IsValid()) activateSmoke();
 
 	ProjectileMovement->Velocity += GetActorForwardVector() * missileAcceleration * DeltaTime;
 	ProjectileMovement->Velocity = ProjectileMovement->Velocity.GetClampedToMaxSize(ProjectileMovement->MaxSpeed);
 
-	if (SmokeTrail)
+	if (SmokeTrail.IsValid())
 	{
 		SmokeTrail->SetWorldLocation(WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")));
 		SmokeTrail->SetWorldRotation(WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")));
 	}
 
-	if (MissileRocket)
+	if (MissileRocket.IsValid())
 	{
 		MissileRocket->SetWorldLocation(WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")));
 		MissileRocket->SetWorldRotation(WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")));
@@ -71,16 +77,16 @@ void ABaseAHRMissile::Tick(float DeltaTime)
 
 	timeTilDelt += DeltaTime;
 
-	if (IsValid(Tracking))
+	if (AActor* LoadedTracking = Tracking.Get())
 	{
-		if (CalculateIfOvershoot(Tracking->GetActorLocation() - GetActorLocation())) 
+		if (CalculateIfOvershoot(LoadedTracking->GetActorLocation() - GetActorLocation()))
 		{
 			OnWeaponResult.Broadcast(false);
 			ProjectileMovement->HomingTargetComponent = nullptr;
 			ProjectileMovement->bIsHomingProjectile = false;
 			bMissed = true;
 
-			if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Tracking))
+			if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(LoadedTracking))
 			{
 				if (Aircraft->Implements<UApproachingMissileInterface>())
 				{
@@ -105,12 +111,12 @@ void ABaseAHRMissile::FireStatic(float launchSpeed)
 void ABaseAHRMissile::FireTracking(float launchSpeed, AActor* Target)
 {
 	Tracking = Target;
-	if (IsValid(Tracking))
+	if (Target)
 	{
 		ProjectileMovement->bIsHomingProjectile = true;
-		ProjectileMovement->HomingTargetComponent = Tracking->GetRootComponent();
+		ProjectileMovement->HomingTargetComponent = Target->GetRootComponent();
 		ProjectileMovement->HomingAccelerationMagnitude = turnRate;
-		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Tracking))
+		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Target))
 		{
 			Aircraft->OnMissileLaunchedAtSelf.Broadcast(this);
 			if (Aircraft->Implements<UApproachingMissileInterface>()) 
@@ -138,32 +144,33 @@ void ABaseAHRMissile::LaunchSequence(float Speed)
 
 void ABaseAHRMissile::CheckAndDelete(AActor* OtherActor) 
 {
-	if (!OtherActor || OtherActor == this || OtherActor == Owner || !bAir) return;
-	if (!Owner || !Owner->IsValidLowLevelFast()) return;
+	if (!bAir || !OtherActor || OtherActor == this || !AircraftOwner.IsValid() || OtherActor == AircraftOwner.Get()) return;
 
-	if (IsValid(Tracking)) {
-		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Tracking))
+	if (AActor* LoadedTracking = Tracking.Get()) {
+		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(LoadedTracking))
 		{
 			if (Aircraft->Implements<UApproachingMissileInterface>())
 			{
-				IApproachingMissileInterface::Execute_UnregisterIncomingMissile(Aircraft,this);
+				IApproachingMissileInterface::Execute_UnregisterIncomingMissile(Aircraft, this);
 			}
 		}
 	}
 
-	if (OtherActor->Implements<UTeamInterface>())
-	{
-		EFaction OtherFaction = Owner->GetFaction();
-		OtherFaction = ITeamInterface::Execute_GetFaction(OtherActor);
-		if (OtherFaction == Owner->GetFaction()) return;
-	}
+	if (ABaseAircraft* LoadedOwner = AircraftOwner.Get()) {
+		if (OtherActor->Implements<UTeamInterface>())
+		{
+			EFaction OtherFaction = LoadedOwner->GetFaction();
+			OtherFaction = ITeamInterface::Execute_GetFaction(OtherActor);
+			if (OtherFaction == LoadedOwner->GetFaction()) return;
+		}
 
-	if (OtherActor->Implements<UDamageableInterface>())
-	{
-		IDamageableInterface::Execute_OnDamage(OtherActor, this, Owner, OtherActor, MissileStats->Damage);
-		OnWeaponResult.Broadcast(true);
+		if (OtherActor->Implements<UDamageableInterface>())
+		{
+			IDamageableInterface::Execute_OnDamage(OtherActor, this, LoadedOwner, OtherActor, damage);
+			OnWeaponResult.Broadcast(true);
+		}
+		else OnWeaponResult.Broadcast(false);
 	}
-	else OnWeaponResult.Broadcast(false);
 
 	DestroyMissile();
 }

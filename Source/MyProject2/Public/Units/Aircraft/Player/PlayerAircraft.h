@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Units/Aircraft/BaseAircraft.h"
-#include "Camera/CameraComponent.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "PlayerAircraft.generated.h"
 
 class AAircraftPlayerController;
@@ -13,6 +11,8 @@ class UCameraManagerComponent;
 class UAircraftAudioComponent;
 class ABaseWeapon;
 class APlayerHUD;
+class UCameraComponent;
+class USpringArmComponent;
 
 UCLASS()
 class MYPROJECT2_API APlayerAircraft : public ABaseAircraft
@@ -24,16 +24,16 @@ public:
 	virtual void PossessedBy(AController* Controller) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USpringArmComponent* FirstPersonSpringArm = nullptr;
+	TObjectPtr<USpringArmComponent> FirstPersonSpringArm = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USpringArmComponent* ThirdPersonSpringArm = nullptr;
+	TObjectPtr<USpringArmComponent> ThirdPersonSpringArm = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCameraComponent* ThirdPersonCamera = nullptr;
+	TObjectPtr<UCameraComponent> ThirdPersonCamera = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCameraComponent* FirstPersonCamera = nullptr;
+	TObjectPtr<UCameraComponent> FirstPersonCamera = nullptr;
 
 	void GunSoundEffect(bool bShoot);
 
@@ -109,19 +109,19 @@ protected:
 	float Interp = 1.f;
 
 	UPROPERTY()
-	AAircraftPlayerController* Controlled = nullptr;
+	TObjectPtr<AAircraftPlayerController> Controlled = nullptr;
 
 	UPROPERTY()
-	UCameraManagerComponent* ManagerComp = nullptr;
+	TObjectPtr<UCameraManagerComponent> ManagerComp = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	UAircraftAudioComponent* AudioComp = nullptr;
+	TObjectPtr<UAircraftAudioComponent> AudioComp = nullptr;
 
 	UPROPERTY()
-	UAudioComponent* PersonalAircraftAudio = nullptr;
+	TObjectPtr<UAudioComponent> PersonalAircraftAudio = nullptr;
 
 	UPROPERTY()
-	UAudioComponent* GunAudio = nullptr;
+	TObjectPtr<UAudioComponent> GunAudio = nullptr;
 
 private:
 	UFUNCTION()

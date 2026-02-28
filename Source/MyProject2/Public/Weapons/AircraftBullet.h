@@ -22,21 +22,22 @@ public:
 protected:
 
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* BulletMesh = nullptr;
+	TObjectPtr<UStaticMeshComponent> BulletMesh = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	class UBoxComponent* Collision = nullptr;
+	TObjectPtr<class UBoxComponent> Collision = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	UBulletStats* BulletStat = nullptr;
+	TSoftObjectPtr<UBulletStats> BulletStat = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	UNiagaraSystem* ExplosionEffect = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> ExplosionEffect = nullptr;
 
 	UPROPERTY()
-	UProjectileMovementComponent* ProjectileMovement = nullptr;
+	TObjectPtr<UProjectileMovementComponent> ProjectileMovement = nullptr;
 
-	TWeakObjectPtr<ABaseAircraft> Owner = nullptr;
+	UPROPERTY()
+	TWeakObjectPtr<ABaseAircraft> AircraftOwner = nullptr;
 
 	float BulletSpeed = 75000.f;
 

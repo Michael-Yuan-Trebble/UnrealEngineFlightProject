@@ -13,6 +13,11 @@ class MYPROJECT2_API ABaseNaval : public ABaseUnit
 	
 public:
 
+	ABaseNaval();
+
 protected:
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UStaticMeshComponent> Mesh = nullptr;
 
 };

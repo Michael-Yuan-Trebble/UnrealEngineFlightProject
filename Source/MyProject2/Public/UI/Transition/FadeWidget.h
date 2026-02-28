@@ -6,13 +6,21 @@
 #include "Blueprint/UserWidget.h"
 #include "FadeWidget.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FFadeInFinishedSignature);
+
 UCLASS()
 class MYPROJECT2_API UFadeWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
 public:
+
+	FFadeInFinishedSignature OnFadeFinished;
+
 	virtual void NativeConstruct() override;
+
+	UFUNCTION()
+	void HandleFadeFinished();
 
 	UFUNCTION(BlueprintCallable)
 	void PlayFadeIn();
@@ -22,8 +30,8 @@ public:
 
 protected:
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
-	UWidgetAnimation* FadeInAnimation = nullptr;
+	TObjectPtr<UWidgetAnimation> FadeInAnimation = nullptr;
 
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
-	UWidgetAnimation* FadeOutAnimation = nullptr;
+	TObjectPtr<UWidgetAnimation> FadeOutAnimation = nullptr;
 };

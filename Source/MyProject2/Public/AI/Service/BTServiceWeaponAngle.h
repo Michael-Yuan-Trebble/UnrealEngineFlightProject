@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
-#include "Units/Aircraft/BaseAircraft.h"
 #include "BTServiceWeaponAngle.generated.h"
 
 class AEnemyAircraft;
+class ABaseAircraft;
 
 UCLASS(Blueprintable, BlueprintType, meta = (DisplayName = "Weapon Angle Service"))
 class MYPROJECT2_API UBTServiceWeaponAngle : public UBTService
@@ -18,7 +18,7 @@ public:
 
 	UBTServiceWeaponAngle();
 
-protected:
+private:
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector TargetActorKey;
 
@@ -33,15 +33,14 @@ protected:
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 	UPROPERTY()
-	AActor* Selected = nullptr;
+	TObjectPtr<AActor> Selected = nullptr;
 
 	UPROPERTY()
-	AEnemyAircraft* Controlled = nullptr;
+	TObjectPtr<AEnemyAircraft> Controlled = nullptr;
 	
 	UPROPERTY()
-	UBlackboardComponent* BlackboardComp = nullptr;
+	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
 
-private:
 	void WeaponDistance();
 
 	float greatestRange = 0.f;

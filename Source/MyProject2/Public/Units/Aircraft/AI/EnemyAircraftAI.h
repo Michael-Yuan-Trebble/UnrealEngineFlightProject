@@ -3,16 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/SphereComponent.h"
 #include "AIController.h"
-#include "BehaviorTree/BehaviorTree.h"
-#include "BehaviorTree/BlackboardComponent.h"
 #include "Structs and Data/FDetectedAircraftInfo.h"
 #include "EnemyAircraftAI.generated.h"
 
 class AEnemyAircraft;
 class ABaseWeapon;
 class UWeaponSystemComponent;
+class UBehaviorTree;
+class UBlackboardComponent;
 
 UCLASS()
 class MYPROJECT2_API AEnemyAircraftAI : public AAIController
@@ -32,7 +31,7 @@ public:
 	float currentSpeed = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	AEnemyAircraft* Controlled = nullptr;
+	TObjectPtr<AEnemyAircraft> Controlled = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FDetectedAircraftInfo Tracking;
@@ -60,10 +59,10 @@ private:
 	void SpecialCooldown();
 
 	UPROPERTY()
-	UWeaponSystemComponent* WeaponComp = nullptr;
+	TObjectPtr<UWeaponSystemComponent> WeaponComp = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "AI")
-	UBehaviorTree* BehaviorTreeAsset = nullptr;
+	TObjectPtr<UBehaviorTree> BehaviorTreeAsset = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "AI")
 	UBlackboardComponent* BlackboardComp = nullptr;

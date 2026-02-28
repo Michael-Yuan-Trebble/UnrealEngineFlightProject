@@ -41,10 +41,10 @@ protected:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* WeaponSelectButton = nullptr;
+	TObjectPtr<UButton> WeaponSelectButton = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* WeaponNameText = nullptr;
+	TObjectPtr<UTextBlock> WeaponNameText = nullptr;
 
 	virtual void NativeDestruct() override {
 		OnWeaponSelected.Clear();

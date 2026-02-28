@@ -4,6 +4,9 @@
 #include "AI/Task/BTTaskFireMissiles.h"
 #include "Units/Aircraft/AI/EnemyAircraft.h"
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"
+#include "Units/Aircraft/WeaponSystemComponent.h"
+#include "Units/Aircraft/FlightComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Weapons/BaseWeapon.h"
 
 UBTTaskFireMissiles::UBTTaskFireMissiles()
@@ -22,7 +25,7 @@ EBTNodeResult::Type UBTTaskFireMissiles::ExecuteTask(UBehaviorTreeComponent& Own
 	AEnemyAircraft* Controlled = Cast<AEnemyAircraft>(Controller->Controlled);
 	if (!Controlled) return EBTNodeResult::Aborted;
 
-	FlightComp = Controlled->FlightComponent;
+	FlightComp = Controlled->GetFlightComp();
 
 	Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
 
@@ -36,5 +39,5 @@ void UBTTaskFireMissiles::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Nod
 
 	// TODO: Make it first select the class if not selected then fire, ithout using FlightComp
 	if (!Class) return;
-	Controller->Weapons(Class, Selected, FlightComp->currentSpeed);
+	//Controller->Weapons(Class, Selected, FlightComp->currentSpeed);
 }

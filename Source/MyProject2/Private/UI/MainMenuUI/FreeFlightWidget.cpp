@@ -10,7 +10,7 @@ void UFreeFlightWidget::InitLevels()
 {
 	for (const FLevelInfo Level : LevelList->Levels) 
 	{
-		if (Level.LevelData.LevelName.IsNone()) continue;
+		if (Level.LevelData.Level.IsNull()) continue;
 
 		ULevelButton* Button = CreateWidget<ULevelButton>(GetWorld(), LevelButtonClass);
 		if (!Button) continue;
@@ -24,6 +24,6 @@ void UFreeFlightWidget::InitLevels()
 
 void UFreeFlightWidget::HandleLevelButtonClicked(FMissionData InLevel)
 {
-	if (InLevel.LevelName.IsNone()) return;
+	if (InLevel.Level.IsNull()) return;
 	OnLevelSelected.Broadcast(InLevel);
 }

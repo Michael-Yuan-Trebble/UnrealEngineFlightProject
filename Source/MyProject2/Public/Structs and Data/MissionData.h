@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Enums/TakeoffType.h"
 #include "MissionData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -11,8 +12,8 @@ struct FMissionData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	FName LevelName = NAME_None;
+	TSoftObjectPtr<UWorld> Level = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	bool bNaval;
+	ETakeoffType TakeoffType = ETakeoffType::Airborne;
 };

@@ -20,8 +20,8 @@ public:
 	FName AircraftName = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText Class;
+	FText Class = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAircraftStats* Stats = nullptr;
+	TObjectPtr<UAircraftStats> Stats = nullptr;
 };

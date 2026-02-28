@@ -2,8 +2,8 @@
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Flight Component!"));
 #include "Units/Aircraft/FlightComponent.h"
-#include "Units/Aircraft/Player/PlayerAircraft.h"
-
+#include "Units/Aircraft/BaseAircraft.h"
+#include "Components/BoxComponent.h"
 
 EThrottleStage UFlightComponent::getThrottleStage(const float throttle)
 {
@@ -17,10 +17,13 @@ UFlightComponent::UFlightComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UFlightComponent::Setup(ABaseAircraft* InControl, UAircraftStats* InStats)
+void UFlightComponent::Setup(ABaseAircraft* InControl)
 {
 	Controlled = InControl;
-	AircraftStats = InStats;
+	if (IsValid(Controlled)) {
+		AircraftStats = Controlled->GetAirStats();
+		Airframe = Controlled->GetAirframe();
+	}
 }
 
 void UFlightComponent::SetFlightMode(const EFlightMode InFlight) 
@@ -47,7 +50,6 @@ void UFlightComponent::SetFlightMode(const EFlightMode InFlight)
 void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (IsAirframeValid() || !AircraftStats) return;
 
 	// ====================================
 	// Movement Application Components
@@ -62,7 +64,7 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	RollAOA(DeltaTime);
 	ApplyRot(DeltaTime);
 
-	if (GetCurrentSpeedKMH() <= DropSpeed) 
+	if (UFlightMathLibrary::SpeedToKMH(currentSpeed) <= DropSpeed) 
 	{
 		if (!bDropping) bDropping = true;
 		AddDropSpeed(DeltaTime);
@@ -71,7 +73,7 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 			Landed(DeltaTime);
 			bCanTakeOff = false;
 		}
-		else if (GetCurrentSpeedKMH() <= StallSpeed) 
+		else if (UFlightMathLibrary::SpeedToKMH(currentSpeed) <= StallSpeed)
 		{
 			// TODO: Stall should enter a state where it goes down, but also skips that drop speed process because it feels clunky
 			Stall(DeltaTime);
@@ -79,7 +81,7 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	}
 	else if (bDropping) bDropping = false;
 
-	if (!bCanTakeOff && GetCurrentSpeedKMH() > DropSpeed)
+	if (!bCanTakeOff && UFlightMathLibrary::SpeedToKMH(currentSpeed) > DropSpeed)
 	{
 		bCanTakeOff = true;
 		bLanded = false;
@@ -107,7 +109,7 @@ void UFlightComponent::ApplySpeed(const float ThrottlePercentage, const float De
 
 	prevStage = currentStage;
 
-	if (FlightMode == EFlightMode::Naval && bLanded) return;
+	if (FlightMode == EFlightMode::Naval && bRestrained) return;
 
 	float speedDrag = CalculateSpeedDrag();
 	float AOADrag = 0;
@@ -124,59 +126,42 @@ void UFlightComponent::ApplySpeed(const float ThrottlePercentage, const float De
 	currentSpeed += trueAcceleration;
 	currentSpeed = FMath::FInterpTo(currentSpeed, Velocity.Size(), DeltaSeconds, 5.f);
 
-	if (!FMath::IsFinite(currentSpeed) || currentSpeed < 0.f) currentSpeed = 0;
+	if (!FMath::IsFinite(currentSpeed)) currentSpeed = 0;
 	currentSpeed = FMath::Clamp(currentSpeed, 0, 1000000);
 
 	PreviousVelocity = Velocity;
-	if (bLanded && IsValid(Controlled->Airframe)) Velocity = Controlled->Airframe->GetForwardVector() * currentSpeed;
+	if (bLanded && IsValid(Airframe)) Velocity = Airframe->GetForwardVector() * currentSpeed;
 	else Velocity = Controlled->GetActorForwardVector() * currentSpeed;
 
 	if (Velocity.ContainsNaN() || Velocity.Size() > 1e6f) Velocity = FVector::ZeroVector;
-
-	if (IsControlledValid()) return;
 
 	if (bLanded && !bCanTakeOff) { 
 		Velocity.Z = 0; 
 	}
 
-	Controlled->AddActorWorldOffset(Velocity * DeltaSeconds, true);
+	if (IsValid(Controlled)) Controlled->AddActorWorldOffset(Velocity * DeltaSeconds, true);
 	CalculateGForce(DeltaSeconds);
 }
 
+void UFlightComponent::SetInitialSpeed(const float Speed)
+{
+	currentSpeed = Speed;
+	if (IsValid(Controlled)) Velocity = Controlled->GetActorForwardVector() * Speed;
+}
+
 void UFlightComponent::AddSpeed(const float Speed, const float D) {
-	currentStage = getThrottleStage(CurrentThrust);
-	switch (currentStage)
-	{
-		case EThrottleStage::Slow: SlowSpeed(CurrentThrust); break;
-		case EThrottleStage::Normal: NormalSpeed(CurrentThrust); break;
-		case EThrottleStage::Afterburner: AfterburnerSpeed(CurrentThrust); break;
-	}
 
-	currentSpeed += ConvertKMHToSpeed(Speed) + Acceleration;
-	if (!FMath::IsFinite(currentSpeed) || currentSpeed < 0.f) currentSpeed = 0;
-	currentSpeed = FMath::Clamp(currentSpeed, 0, 1000000);
 
-	PreviousVelocity = Velocity;
-	if (bLanded && IsValid(Controlled->Airframe)) Velocity = Controlled->Airframe->GetForwardVector() * currentSpeed;
-	else Velocity = Controlled->GetActorForwardVector() * currentSpeed;
-	if (Velocity.ContainsNaN() || Velocity.Size() > 1e6f) Velocity = FVector::ZeroVector;
+	currentSpeed += UFlightMathLibrary::ConvertKMHToSpeed(Speed) + Acceleration;
 
-	if (IsControlledValid()) return;
-
-	if (bLanded && !bCanTakeOff) {
-		Velocity.Z = 0;
-	}
-
-	Controlled->AddActorWorldOffset(Velocity * D, true);
-	CalculateGForce(D);
 }
 
 void UFlightComponent::CheckLanding(const float D)
 {
-	if (!IsValid(Controlled->LandingGearCollision)) return;
+	if (!IsValid(Controlled) || !IsValid(Controlled->GetLandingGearCollision())) return;
 	if (bLanded && !bCanTakeOff) return;
 	FHitResult Hit;
-	FVector Start = Controlled->LandingGearCollision->GetComponentLocation();
+	FVector Start = Controlled->GetLandingGearCollision()->GetComponentLocation();
 	FVector End = Start - Controlled->GetActorUpVector() * 110;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(Controlled);
@@ -188,13 +173,11 @@ void UFlightComponent::CheckLanding(const float D)
 void UFlightComponent::AddDropSpeed(const float D) {
 
 	// It doesn't have to go to 90! it can go to something like 30 or 40, once stalling then push it to 90 for the user to gain speed then exit stall
-
-	if (IsAirframeValid()) return;
-	if (GetCurrentSpeedKMH() <= StallSpeed) return;
+	if (UFlightMathLibrary::SpeedToKMH(currentSpeed) <= StallSpeed) return;
 
 	float MaxDropAngle = 30.f;
 
-	float Speed = GetCurrentSpeedKMH();
+	float Speed = UFlightMathLibrary::SpeedToKMH(currentSpeed);
 	float Percent = FMath::Clamp(Speed / DropSpeed, 0.f, 1.f);
 	
 	float CurrentMaxAngleDrop = MaxDropAngle * (1 - Percent);
@@ -204,27 +187,27 @@ void UFlightComponent::AddDropSpeed(const float D) {
 
 void UFlightComponent::Stall(const float D)
 {
-	if (!IsValid(Controlled) || !IsValid(Controlled->Airframe)) return;
-	FQuat AirframeCurrentRelQuat = Controlled->Airframe->GetRelativeRotation().Quaternion();
+	if (!IsValid(Airframe) || !IsValid(AircraftStats)) return;
+	FQuat AirframeCurrentRelQuat = Airframe->GetRelativeRotation().Quaternion();
 	FQuat IdentityQuat = FQuat::Identity;
 	float NoseAlpha = FMath::Clamp(AircraftStats->AOARecoverySpeed * D, 0.f, 1.f);
 	FQuat NewRelQuat = FQuat::Slerp(AirframeCurrentRelQuat, IdentityQuat, NoseAlpha);
-	if (IsValid(Controlled) && IsValid(Controlled->Airframe)) Controlled->Airframe->SetRelativeRotation(NewRelQuat.Rotator());
+	if (IsValid(Airframe)) Airframe->SetRelativeRotation(NewRelQuat.Rotator());
 }
 
 void UFlightComponent::Landed(const float D)
 {
-	if (!IsValid(Controlled) || !IsValid(Controlled->Airframe)) return;
-	FRotator Rot = Controlled->Airframe->GetComponentRotation();
+	if (!IsValid(Airframe)) return;
+	FRotator Rot = Airframe->GetComponentRotation();
 	if (FMath::Abs(Rot.Pitch) > 0.f || !bCanTakeOff) 
 	{
 		Rot.Pitch = FMath::FInterpTo(Rot.Pitch, 0.f, D, 4.f);
-		Controlled->Airframe->SetWorldRotation(Rot);
+		Airframe->SetWorldRotation(Rot);
 	}
 	if (FMath::Abs(Rot.Roll) > 0.f) 
 	{
 		Rot.Roll = FMath::FInterpTo(Rot.Roll, 0.f, D, 4.f);
-		Controlled->Airframe->SetWorldRotation(Rot);
+		Airframe->SetWorldRotation(Rot);
 	}
 }
 
@@ -253,7 +236,8 @@ void UFlightComponent::CalculateGForce(const float DeltaSeconds)
 	float alpha = 0.15f;
 	FVector accel = FMath::Lerp(accel, vectorAccel, alpha);
 
-	FVector LocalAccel = Controlled->Airframe->GetComponentTransform().InverseTransformVector(vectorAccel);
+	if (!IsValid(Airframe)) return;
+	FVector LocalAccel = Airframe->GetComponentTransform().InverseTransformVector(vectorAccel);
 	FVector Gs = LocalAccel / 9.81f;
 
 	// Starts at 0 G, so just adding one because of gravity
@@ -327,9 +311,9 @@ void UFlightComponent::ApplyRot(const float DeltaSeconds)
 void UFlightComponent::ReturnAOA(const float DeltaSeconds)
 {
 	// Rotates the Root vector toward Airframe's vector
-	if (IsControlledValid()) return;
+	if (!IsValid(Controlled) || !IsValid(Airframe)) return;
 	FQuat CurrentQuat = Controlled->GetActorQuat();
-	FQuat TargetQuat = Controlled->Airframe->GetComponentQuat();
+	FQuat TargetQuat = Airframe->GetComponentQuat();
 	float RootTurnSpeed = 2.0f;
 	float RootAlpha = FMath::Clamp(RootTurnSpeed * DeltaSeconds, 0.f, 1.f);
 	FQuat NewRootQuat = FQuat::Slerp(CurrentQuat, TargetQuat, RootAlpha);
@@ -337,19 +321,19 @@ void UFlightComponent::ReturnAOA(const float DeltaSeconds)
 	if (IsValid(Controlled)) Controlled->SetActorRotation(NewRootQuat);
 
 	// Resets the Airframe's vector 
-	FQuat AirframeCurrentRelQuat = Controlled->Airframe->GetRelativeRotation().Quaternion();
+	FQuat AirframeCurrentRelQuat = Airframe->GetRelativeRotation().Quaternion();
 	FQuat IdentityQuat = FQuat::Identity;
 	float NoseAlpha = FMath::Clamp(AircraftStats->AOARecoverySpeed * DeltaSeconds, 0.f, 1.f);
 	FQuat NewRelQuat = FQuat::Slerp(AirframeCurrentRelQuat, IdentityQuat, NoseAlpha);
-	if (IsValid(Controlled) && IsValid(Controlled->Airframe)) Controlled->Airframe->SetRelativeRotation(NewRelQuat.Rotator());
+	if (IsValid(Airframe)) Airframe->SetRelativeRotation(NewRelQuat.Rotator());
 }
 
 void UFlightComponent::TempRecovery(const float D, const float Deg)
 {
-	if (IsAirframeValid()) return;
+	if (!IsValid(Controlled) || !IsValid(Airframe) || !IsValid(AircraftStats)) return;
 
 	FQuat CurrentRootQuat = Controlled->GetActorQuat();
-	FQuat AirframeQuat = Controlled->Airframe->GetComponentQuat();
+	FQuat AirframeQuat = Airframe->GetComponentQuat();
 
 	FVector WorldForward = FVector::ForwardVector;
 	FVector PitchAxis = FVector::CrossProduct(WorldForward, FVector::UpVector).GetSafeNormal();
@@ -359,22 +343,22 @@ void UFlightComponent::TempRecovery(const float D, const float Deg)
 
 	float RootAlpha = FMath::Clamp(2.0f * D, 0.f, 1.f);
 	FQuat NewRootQuat = FQuat::Slerp(CurrentRootQuat, TargetRootQuat, RootAlpha);
-	Controlled->SetActorRotation(NewRootQuat);
+	if (IsValid(Controlled)) Controlled->SetActorRotation(NewRootQuat);
 
-	FQuat AirframeCurrentRelQuat = Controlled->Airframe->GetRelativeRotation().Quaternion();
+	FQuat AirframeCurrentRelQuat = Airframe->GetRelativeRotation().Quaternion();
 
 	FQuat DesiredRelQuat = DownOffset.Inverse();
 
 	float NoseAlpha = FMath::Clamp(AircraftStats->AOARecoverySpeed * D, 0.f, 1.f);
 	FQuat NewAirframeRelQuat = FQuat::Slerp(AirframeCurrentRelQuat, DesiredRelQuat, NoseAlpha);
 
-	Controlled->Airframe->SetRelativeRotation(NewAirframeRelQuat);
+	if (IsValid(Airframe)) Airframe->SetRelativeRotation(NewAirframeRelQuat);
 }
 
 float UFlightComponent::GetAOA() 
 {
-	if (!IsValid(Controlled)) return 0.f;
-	FVector Forward = Controlled->Airframe->GetForwardVector().GetSafeNormal();
+	if (!IsValid(Airframe)) return 0.f;
+	FVector Forward = Airframe->GetForwardVector().GetSafeNormal();
 	FVector VelocityDir = Velocity.GetSafeNormal();
 	if (Velocity.IsNearlyZero()) VelocityDir = Forward;
 	float CosTheta = FVector::DotProduct(Forward, VelocityDir);
@@ -393,8 +377,9 @@ float UFlightComponent::GetAOA()
 
 float UFlightComponent::DragAOA()
 {
-	float dragCo = Controlled->AirStats->DragCoefficient;
-	float drag = FMath::Abs(GetAOA()) * dragCo * (GetCurrentSpeedKMH() / 4);
+	if (!IsValid(AircraftStats)) return 0.f;
+	float dragCo = AircraftStats->DragCoefficient;
+	float drag = FMath::Abs(GetAOA()) * dragCo * (UFlightMathLibrary::SpeedToKMH(currentSpeed) / 4);
 
 	//GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
 
@@ -409,8 +394,10 @@ void UFlightComponent::RollAOA(const float DeltaSeconds)
 
 	// TODO: Make this do it on root not airframe
 
-	FVector Forward = Controlled->Airframe->GetForwardVector();
-	FVector Up = Controlled->Airframe->GetUpVector();
+	if (!IsValid(Airframe)) return;
+
+	FVector Forward = Airframe->GetForwardVector();
+	FVector Up = Airframe->GetUpVector();
 
 	float PitchAngle = FMath::RadiansToDegrees(
 		FMath::Atan2(Forward.Z, FVector(Forward.X, Forward.Y, 0.f).Size())
@@ -420,7 +407,7 @@ void UFlightComponent::RollAOA(const float DeltaSeconds)
 
 	float DownPitchStrength = FMath::Clamp(1.f - UpDot, 0.f, 2.f) * 2.f;
 
-	DownPitch = -DownPitchStrength * DeltaSeconds;
+	float DownPitch = -DownPitchStrength * DeltaSeconds;
 
 	FVector WorldPitchAxis = FVector::CrossProduct(Forward, FVector::UpVector).GetSafeNormal();
 
@@ -428,15 +415,15 @@ void UFlightComponent::RollAOA(const float DeltaSeconds)
 	if (PitchAngle > -85.f)
 	{
 		FQuat Rotate = FQuat(WorldPitchAxis, FMath::DegreesToRadians(DownPitch));
-		Controlled->Airframe->AddWorldRotation(Rotate);
+		Airframe->AddWorldRotation(Rotate);
 	}
 }
 
 float UFlightComponent::PitchDrag() 
 {
-	if (!IsValid(Controlled) || !IsValid(Controlled->Airframe)) return 0.f;
-	FVector Up = Controlled->Airframe->GetUpVector();
-	FVector Forward = Controlled->Airframe->GetForwardVector();
+	if (!IsValid(Airframe)) return 0.f;
+	FVector Up = Airframe->GetUpVector();
+	FVector Forward = Airframe->GetForwardVector();
 
 	float PitchAngle = FMath::RadiansToDegrees(
 		FMath::Atan2(Forward.Z, FVector(Forward.X, Forward.Y, 0.f).Size())
@@ -456,16 +443,16 @@ float UFlightComponent::PitchDrag()
 
 void UFlightComponent::ApplyPitch(const float DeltaSeconds)
 {
-	if (!IsValid(Controlled)) return;
+	if (!IsValid(AircraftStats)) return;
 	if (bLanded && bCanTakeOff && UserRotation.Pitch < 0) return;
-	float CurveTurn = Controlled->AirStats->DragCurve->GetFloatValue(GetCurrentSpeedKMH());
-	float CompressionTurn = Controlled->AirStats->CompressionCurve->GetFloatValue(GetCurrentSpeedKMH());
+	float CurveTurn = AircraftStats->DragCurve->GetFloatValue(UFlightMathLibrary::SpeedToKMH(currentSpeed));
+	float CompressionTurn = AircraftStats->CompressionCurve->GetFloatValue(UFlightMathLibrary::SpeedToKMH(currentSpeed));
 	//GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Curve: %.2f"), CurveTurn));
 	if (UserRotation.Pitch == 0)
 	{
 		NextRotation.Pitch = FMath::FInterpTo(NextRotation.Pitch, 0, DeltaSeconds, 3.f);
 		FRotator DeltaRot(NextRotation.Pitch * DeltaSeconds, 0.f, 0.f);
-		Controlled->Airframe->AddLocalRotation(DeltaRot);
+		Airframe->AddLocalRotation(DeltaRot);
 		return;
 	}
 		
@@ -476,38 +463,38 @@ void UFlightComponent::ApplyPitch(const float DeltaSeconds)
 	NextRotation.Pitch = FMath::FInterpTo(NextRotation.Pitch, TargetPitchRate, DeltaSeconds, 5.f);
 
 	FRotator DeltaRot(NextRotation.Pitch * DeltaSeconds, 0.f, 0.f);
-	if (IsValid(Controlled) && IsValid(Controlled->Airframe))
-		Controlled->Airframe->AddLocalRotation(DeltaRot);
+	if (IsValid(Airframe))
+		Airframe->AddLocalRotation(DeltaRot);
 }
 
 void UFlightComponent::ApplyYaw(const float DeltaSeconds)
 {
-	if (IsControlledValid()) return;
+	if (!IsValid(AircraftStats)) return;
 	if (UserRotation.Yaw == 0) {
 		NextRotation.Yaw = FMath::FInterpTo(NextRotation.Yaw, 0, DeltaSeconds, 3.f);
 		FRotator DeltaRot(0.f, NextRotation.Yaw * DeltaSeconds,0.f);
-		Controlled->Airframe->AddLocalRotation(DeltaRot);
+		Airframe->AddLocalRotation(DeltaRot);
 		return;
 	}
 	float TargetYawRate = UserRotation.Yaw * AircraftStats->RudderRate;
 	NextRotation.Yaw = FMath::FInterpTo(NextRotation.Yaw, TargetYawRate, DeltaSeconds, 2.f);
 
 	FRotator DeltaRot(0.f, NextRotation.Yaw * DeltaSeconds,0.f);
-	if (IsValid(Controlled) && IsValid(Controlled->Airframe)) Controlled->Airframe->AddLocalRotation(DeltaRot);
+	if (IsValid(Airframe)) Airframe->AddLocalRotation(DeltaRot);
 }
 
 void UFlightComponent::ApplyRoll(const float DeltaSeconds)
 {
-	if (IsControlledValid()) return;
+	if (!IsValid(AircraftStats)) return;
 	if (UserRotation.Roll == 0)
 	{
 		NextRotation.Roll = FMath::FInterpTo(NextRotation.Roll, 0, DeltaSeconds, 3.f);
 		FRotator DeltaRot(0.f, 0.f, NextRotation.Roll * DeltaSeconds);
-		Controlled->Airframe->AddLocalRotation(DeltaRot);
+		Airframe->AddLocalRotation(DeltaRot);
 		return;
 	}
 	float TargetRollRate = UserRotation.Roll * AircraftStats->RollRate;
 	NextRotation.Roll = FMath::FInterpTo(NextRotation.Roll, TargetRollRate, DeltaSeconds, 5.f);
 	FRotator DeltaRot(0.f, 0.f, NextRotation.Roll * DeltaSeconds);
-	if (IsValid(Controlled) && IsValid(Controlled->Airframe)) Controlled->Airframe->AddLocalRotation(DeltaRot);
+	if (IsValid(Airframe)) Airframe->AddLocalRotation(DeltaRot);
 }

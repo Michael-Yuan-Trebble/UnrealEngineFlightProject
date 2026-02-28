@@ -9,9 +9,10 @@ void UAircraftButtonWidget::Setup(UAircraftData* AircraftData, TArray<FName> Tem
 {
 	ContainedData = AircraftData;
 	Owned = TempOwned;
+	if (!IsValid(ContainedData) || !IsValid(ContainedData->AircraftStat)) return;
 	AircraftNameText->SetText(FText::FromName(ContainedData->AircraftStat->AircraftName));
 
-	if (!AircraftSelectButton) return;
+	if (!IsValid(AircraftSelectButton)) return;
 
 	AircraftSelectButton->OnHovered.AddDynamic(this, &UAircraftButtonWidget::HandleButtonHover);
 	if (Owned.Contains(AircraftData->AircraftStat->AircraftName))
@@ -32,20 +33,20 @@ void UAircraftButtonWidget::AdjustButtons()
 
 void UAircraftButtonWidget::HandleButtonHover() 
 {
-	if (!(ContainedData->AircraftClass)) return;
+	if (!IsValid(ContainedData->AircraftClass)) return;
 	
 	OnAircraftSelected.Broadcast(ContainedData);
 }
 
 void UAircraftButtonWidget::HandleButtonClick() 
 {
-	if (!(ContainedData->AircraftClass)) return;
+	if (!IsValid(ContainedData->AircraftClass)) return;
 	
 	OnAircraftPicked.Broadcast(ContainedData);
 }
 
 void UAircraftButtonWidget::HandleBuyCreate() 
 {
-	if (!ContainedData) return;
+	if (!IsValid(ContainedData)) return;
 	OnBuyCreate.Broadcast(ContainedData, ContainedData->price);
 }

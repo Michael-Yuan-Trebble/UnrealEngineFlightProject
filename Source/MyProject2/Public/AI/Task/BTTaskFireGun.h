@@ -15,6 +15,8 @@ class MYPROJECT2_API UBTTaskFireGun : public UBTTaskNode
 public:
 	UBTTaskFireGun();
 
+private:
+
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector TargetActorKey;
 
@@ -25,11 +27,11 @@ public:
 	bool CanShotHit(AActor* Player);
 
 	UPROPERTY()
-	UBlackboardComponent* BlackboardComp;
+	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
 
 	UPROPERTY()
-	AEnemyAircraftAI* Controller;
+	TObjectPtr<AEnemyAircraftAI> Controller = nullptr;
 
 	UPROPERTY()
-	AActor* Selected;
+	TObjectPtr<AActor> Selected = nullptr;
 };

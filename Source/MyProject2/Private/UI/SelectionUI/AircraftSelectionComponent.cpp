@@ -23,9 +23,9 @@ void UAircraftSelectionComponent::Setup(AAircraftPlayerController* InPlayer,
 	SelectionWidget = InClass;
 	GameInstance = Cast<UPlayerGameInstance>(GetWorld()->GetGameInstance());
 	
-	if (!PC) return;
-	AircraftDatabase = NewObject<UAircraftDatabase>(PC->GetGameInstance());
-	if (!AircraftDatabase) return;
+	if (!IsValid(PC)) return;
+	AircraftDatabase = NewObject<UAircraftDatabase>(GameInstance);
+	if (!IsValid(AircraftDatabase)) return;
 
 	FString Path = "/Game/Aircraft/AircraftData";
 	AircraftDatabase->LoadAllAircraftFromFolder(Path);
@@ -33,11 +33,11 @@ void UAircraftSelectionComponent::Setup(AAircraftPlayerController* InPlayer,
 
 void UAircraftSelectionComponent::AircraftSelectionMenu() 
 {
-	if (!PC || !SelectionWidget) return;
+	if (!IsValid(PC) || !IsValid(SelectionWidget)) return;
 
 	AircraftSelectUI = CreateWidget<UAircraftSelectionWidget>(PC, SelectionWidget);
 
-	if (!AircraftSelectUI || !AircraftDatabase) return;
+	if (!IsValid(AircraftSelectUI) || !IsValid(AircraftDatabase)) return;
 
 	AircraftSelectUI->Setup(AircraftDatabase, GameInstance->SaveManager->GetAircraftOwned(), MenuManager, this);
 	AircraftSelectUI->GetAllAircraft();
@@ -56,14 +56,14 @@ void UAircraftSelectionComponent::AircraftSelectionMenu()
 
 void UAircraftSelectionComponent::HandleAircraftPicked(UAircraftData* Aircraft) 
 {
-	if (!Aircraft) return;
+	if (!IsValid(Aircraft)) return;
 	GM->SpawnInAircraft(Aircraft->AircraftClass);
 	MenuManager->TempAircraft = Aircraft;
 }
 
 void UAircraftSelectionComponent::SetAircraft(UAircraftData* Aircraft)
 {
-	if (!Aircraft) return;
+	if (!IsValid(Aircraft)) return;
 	MenuManager->SelectedAircraft = Aircraft;
 	MenuManager->ChooseWeaponUI();
 }

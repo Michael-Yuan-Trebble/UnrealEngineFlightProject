@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Structs and Data/Weapon Data/BaseWeaponStats.h"
+#include "Structs and Data/InGameMissileStats.h"
 #include "ARHMissileStats.generated.h"
 
 UCLASS()
@@ -22,4 +23,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float LockOnRange = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	FInGameMissileStats InGameMissileStats{};
 };

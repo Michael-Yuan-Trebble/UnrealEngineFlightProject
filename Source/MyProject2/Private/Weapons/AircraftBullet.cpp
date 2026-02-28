@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Structs and Data/Weapon Data/BulletStats.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Interfaces/TeamInterface.h"
 #include "Interfaces/DamageableInterface.h"
 #include "DrawDebugHelpers.h"
@@ -36,10 +37,15 @@ AAircraftBullet::AAircraftBullet()
 void AAircraftBullet::BeginPlay()
 {
 	Super::BeginPlay();
-	damage = BulletStat->Damage;
+
+	UBulletStats* LoadedStats = BulletStat.LoadSynchronous();
+	if (LoadedStats) {
+		damage = BulletStat->Damage;
+	}
+
 	if (IsValid(GetOwner())) 
 	{
-		Owner = Cast<ABaseAircraft>(GetOwner());
+		AircraftOwner = Cast<ABaseAircraft>(GetOwner());
 		Collision->IgnoreActorWhenMoving(GetOwner(), true);
 	}
 	SetLifeSpan(LifeTime);
@@ -60,7 +66,7 @@ void AAircraftBullet::BeginPlay()
 
 void AAircraftBullet::EnableCollision() 
 {
-	if (!IsValid(this) || bDestroyed) return;
+	if (bDestroyed) return;
 	Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Collision->SetGenerateOverlapEvents(true);
 }
@@ -94,26 +100,27 @@ void AAircraftBullet::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 void AAircraftBullet::DestroyBullet(AActor* OtherActor)
 {
 	if (bDestroyed) return;
-	if (!Owner.IsValid()) return;
-	if (!OtherActor  || OtherActor == Owner.Get() || OtherActor->IsA(AAircraftBullet::StaticClass())) return;
+	if (!OtherActor || !AircraftOwner.IsValid() || OtherActor == AircraftOwner.Get() || OtherActor->IsA(AAircraftBullet::StaticClass())) return;
 	bDestroyed = true;
 
-	if (OtherActor->Implements<UTeamInterface>())
-	{
-		EFaction OtherFaction = Owner.Get()->GetFaction();
-		OtherFaction = ITeamInterface::Execute_GetFaction(OtherActor);
-		if (OtherFaction == Owner.Get()->GetFaction()) return;
+	if (ABaseAircraft* LoadedOwner = AircraftOwner.Get()) {
+		if (OtherActor->Implements<UTeamInterface>())
+		{
+			EFaction OtherFaction = AircraftOwner.Get()->GetFaction();
+			OtherFaction = ITeamInterface::Execute_GetFaction(OtherActor);
+			if (OtherFaction == AircraftOwner.Get()->GetFaction()) return;
+		}
+
+		if (OtherActor->Implements<UDamageableInterface>())
+		{
+			IDamageableInterface::Execute_OnDamage(OtherActor, this, LoadedOwner, OtherActor, damage);
+		}
 	}
 
-	if (OtherActor->Implements<UDamageableInterface>())
-	{
-		IDamageableInterface::Execute_OnDamage(OtherActor, this, Owner.Get(), OtherActor, damage);
-	}
-
-	if (ExplosionEffect) {
+	if (UNiagaraSystem* LoadedEffect = ExplosionEffect.LoadSynchronous()) {
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 			GetWorld(),
-			ExplosionEffect,
+			LoadedEffect,
 			GetActorLocation(),
 			GetActorRotation()
 		);

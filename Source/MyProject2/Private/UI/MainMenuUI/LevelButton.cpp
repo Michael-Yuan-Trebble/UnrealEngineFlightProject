@@ -5,10 +5,10 @@
 
 void ULevelButton::SetupLevel(const FMissionData& InLevel) 
 {
-	if (InLevel.LevelName.IsNone()) return;
+	if (InLevel.Level.IsNull()) return;
 	MissionData = InLevel;
 
-	LevelText->SetText(FText::FromName(MissionData.LevelName));
+	LevelText->SetText(FText::FromString(MissionData.Level.GetAssetName()));
 }
 
 void ULevelButton::NativeConstruct() 
@@ -21,6 +21,6 @@ void ULevelButton::NativeConstruct()
 
 void ULevelButton::HandleButtonClick() 
 {
-	if (MissionData.LevelName.IsNone()) return;
+	if (MissionData.Level.IsNull()) return;
 	OnLevelPicked.Broadcast(MissionData);
 }

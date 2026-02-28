@@ -5,10 +5,12 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
-#include "Units/Aircraft/BaseAircraft.h"
+#include "Structs and Data/FlightMathLibrary.h"
 #include "Enums/ThrottleStage.h"
 #include "Enums/FlightMode.h"
 #include "FlightComponent.generated.h"
+
+class ABaseAircraft;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAfterburnerEngaged, bool, isActive);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVortexActivate, bool, isVortex);
@@ -40,7 +42,7 @@ public:
 
 	void ReturnAOA(const float DeltaSeconds);
 
-	void Setup(ABaseAircraft* InControl, UAircraftStats* InStats);
+	void Setup(ABaseAircraft* InControl);
 	
 	void AddDropSpeed(const float D);
 
@@ -49,12 +51,6 @@ public:
 	void Landed(const float D);
 
 	void CheckLanding(const float D);
-
-	UPROPERTY(BlueprintReadOnly)
-	int displayG = 1;
-
-	UPROPERTY(BlueprintReadOnly)
-	float currentSpeed = 0.f;
 
 // Getters/Setters
 public:
@@ -67,6 +63,8 @@ public:
 
 	float GetThrottle() const { return CurrentThrust; };
 
+	float GetGForce() const { return displayG; };
+
 	void SetDropSpeed(float Speed) { DropSpeed = Speed; };
 
 	void SetFlightMode(const EFlightMode InMode);
@@ -77,15 +75,7 @@ public:
 
 	EThrottleStage ReturnPrevThrottleStage() const { return prevStage; };
 
-	void SetInitialSpeed(const float Speed)
-	{
-		currentSpeed = Speed;
-		if (IsValid(Controlled)) Velocity = Controlled->GetActorForwardVector() * Speed;
-	}
-
-	float GetCurrentSpeedKMH() const { return FMath::Max((currentSpeed * 0.036f), 0.f); };
-
-	float ConvertKMHToSpeed(const float Speed) const { return FMath::Max((Speed / 0.036f), 0.f); };
+	void SetInitialSpeed(const float Speed);
 
 	EThrottleStage getThrottleStage(const float throttle);
 
@@ -107,7 +97,18 @@ public:
 
 	void AddSpeed(const float Speed, const float D);
 
+	const float GetSpeed() { return currentSpeed; };
+
+	void SetRestrained(const bool InRest) { bRestrained = InRest; };
+
 private:
+
+	int displayG = 1;
+
+	bool bRestrained = false;
+
+	float currentSpeed = 0.f;
+
 	float FlightDrag = 0.f;
 	
 	FQuat PrevQuat = FQuat::Identity;
@@ -125,8 +126,6 @@ private:
 	float targetSpeed = 0.f;
 
 	float Acceleration = 0.f;
-
-	float DownPitch = 0.f;
 
 	bool bLanded = false;
 
@@ -151,10 +150,13 @@ private:
 	bool switchingPhase = false;
 
 	UPROPERTY()
-	UAircraftStats* AircraftStats = nullptr;
+	TObjectPtr<UAircraftStats> AircraftStats = nullptr;
 
 	UPROPERTY()
-	ABaseAircraft* Controlled = nullptr;
+	TObjectPtr<ABaseAircraft> Controlled = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<USkeletalMeshComponent> Airframe = nullptr;
 
 	bool isFlying = false;
 
@@ -185,12 +187,4 @@ private:
 	void TempRecovery(const float D, const float Deg);
 
 	void CalculateVortex();
-
-	FORCEINLINE bool IsControlledValid() const {
-		return !IsValid(Controlled);
-	}
-
-	FORCEINLINE bool IsAirframeValid() const {
-		return !IsValid(Controlled) || !IsValid(Controlled->Airframe);
-	}
 };

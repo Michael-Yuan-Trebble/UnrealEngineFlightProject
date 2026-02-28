@@ -5,9 +5,8 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Structs and Data/AircraftAnimationInformation.h"
+#include "Structs and Data/AircraftAnimationValues.h"
 #include "AircraftVisualComponent.generated.h"
-
-class ACountermeasureActor;
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UAircraftVisualComponent : public UActorComponent
@@ -21,31 +20,15 @@ public:
 	void SetPitch(const float In) { InputPitch = In; };
 	void SetYaw(const float In) { InputYaw = In; };
 	void SetRoll(const float In) { InputRoll = In; };
-
-	float GetRudder() const { return Rudder; };
-	float GetSlat() const { return Slat; };
-	float GetLFlap() const { return LFlap; };
-	float GetRFlap() const { return RFlap; };
-	float GetNozzle() const { return Nozzle; };
-	float GetAirBrake() const { return AirBrake; };
-	float GetElevator() const { return Elevator; };
 	bool IsCountermeasures() const { return bUsingCountermeasures; };
-
-	UPROPERTY()
-	USkeletalMeshComponent* Mesh = nullptr;
 
 	void ActivateFlares();
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<ACountermeasureActor> FlareClass = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	bool bUsingCountermeasures;
-
-public:
 	void SetMesh(USkeletalMeshComponent* In) { Mesh = In; };
 
-protected:
+	const FAircraftAnimationValues& GetAircraftAnimationValues() const { return AircraftValues; };
+
+private:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void PitchCalculation(const float D);
@@ -59,7 +42,18 @@ protected:
 	virtual void ThrustCalculation(const float D);
 
 	UPROPERTY(EditAnywhere)
-	FAircraftAnimationInformation AircraftInfo;
+	FAircraftAnimationInformation AircraftInfo{};
+	
+	FAircraftAnimationValues AircraftValues{};
+
+	UPROPERTY()
+	TObjectPtr<USkeletalMeshComponent> Mesh = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ACountermeasureActor> FlareClass = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	bool bUsingCountermeasures;
 
 	UPROPERTY(EditAnywhere)
 	bool bCanards = false;
@@ -73,7 +67,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	bool bSlats = false;
 
-private:
 	float InputThrust = 0.f;
 	float InputPitch = 0.f;
 	float InputYaw = 0.f;
@@ -86,17 +79,6 @@ private:
 
 	float ElevatorRoll = 0.f;
 	float ElevatorPitch = 0.f;
-
-	float Rudder = 0.f;
-	float Slat = 0.f;
-	float Flap = 0.f;
-
-	float LFlap = 0.f;
-	float RFlap = 0.f;
-
-	float Nozzle = 0.f;
-	float AirBrake = 0.f;
-	float Elevator = 0.f;
 
 	static constexpr int InterpSpeed = 30;
 };

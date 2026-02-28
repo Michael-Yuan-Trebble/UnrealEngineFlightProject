@@ -16,21 +16,21 @@ void UAircraftVisualComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	AirBrakeCalculation(DeltaTime);
 
 	// In order to account for both pitch and roll playing a roll
-	Elevator = ElevatorPitch + ElevatorRoll;
-	RFlap = FlapPitch + RFlapRoll;
-	LFlap = FlapPitch + LFlapRoll;
+	AircraftValues.Elevator = ElevatorPitch + ElevatorRoll;
+	AircraftValues.RFlap = FlapPitch + RFlapRoll;
+	AircraftValues.LFlap = FlapPitch + LFlapRoll;
 }
 
 void UAircraftVisualComponent::ActivateFlares() 
 {
-	if (!FlareClass || !Mesh) return;
+	if (!IsValid(FlareClass) || !IsValid(Mesh)) return;
 	FName SocketName = FName(*FString::Printf(TEXT("CountermeasureSocket")));
 	if (!Mesh->DoesSocketExist(SocketName)) return;
 	ACountermeasureActor* FlareActor = GetWorld()->SpawnActor<ACountermeasureActor>(
 		FlareClass,
 		Mesh->GetSocketTransform(SocketName)
 	);
-	if (FlareActor) FlareActor->Activate();
+	if (IsValid(FlareActor)) FlareActor->Activate();
 }
 
 void UAircraftVisualComponent::PitchCalculation(const float D) 
@@ -39,9 +39,9 @@ void UAircraftVisualComponent::PitchCalculation(const float D)
 
 	if (bSlats) 
 	{
-		if (InputPitch <= 0) Slat = FMath::FInterpTo(Slat, 0, D, 4);
-		else Slat = FMath::FInterpTo(Slat, FMath::Clamp(
-			Slat + InputPitch, 
+		if (InputPitch <= 0) AircraftValues.Slat = FMath::FInterpTo(AircraftValues.Slat, 0, D, 4);
+		else AircraftValues.Slat = FMath::FInterpTo(AircraftValues.Slat, FMath::Clamp(
+			AircraftValues.Slat + InputPitch,
 			0, 
 			AircraftInfo.MaxSlats), 
 			D, 
@@ -79,10 +79,10 @@ void UAircraftVisualComponent::PitchCalculation(const float D)
 void UAircraftVisualComponent::YawCalculation(const float D) 
 {
 	// Rudder
-	if (InputYaw == 0) Rudder = FMath::FInterpTo(Rudder, 0, D, InterpSpeed);
-	else Rudder = FMath::FInterpTo(
-		Rudder, 
-		FMath::Clamp(Rudder + InputYaw, -AircraftInfo.MaxRudder, AircraftInfo.MaxRudder), 
+	if (InputYaw == 0) AircraftValues.Rudder = FMath::FInterpTo(AircraftValues.Rudder, 0, D, InterpSpeed);
+	else AircraftValues.Rudder = FMath::FInterpTo(
+		AircraftValues.Rudder,
+		FMath::Clamp(AircraftValues.Rudder + InputYaw, -AircraftInfo.MaxRudder, AircraftInfo.MaxRudder),
 		D, 
 		InterpSpeed);
 }
@@ -128,8 +128,8 @@ void UAircraftVisualComponent::ThrustCalculation(const float D)
 		if (InputThrust <= 0.8)
 		{
 			float reverse = InputThrust / 2;
-			Nozzle = FMath::FInterpTo(
-				Nozzle, 
+			AircraftValues.Nozzle = FMath::FInterpTo(
+				AircraftValues.Nozzle,
 				FMath::Clamp(1 - reverse, AircraftInfo.MinExhaust, AircraftInfo.MaxExhaust), 
 				D, 
 				InterpSpeed);
@@ -137,8 +137,8 @@ void UAircraftVisualComponent::ThrustCalculation(const float D)
 		else 
 		{
 			float Ratio = (InputThrust - 0.8) / (1 - 0.8);
-			Nozzle = FMath::FInterpTo(
-				Nozzle, 
+			AircraftValues.Nozzle = FMath::FInterpTo(
+				AircraftValues.Nozzle,
 				FMath::Clamp(AircraftInfo.MaxExhaust * Ratio, AircraftInfo.MinExhaust, AircraftInfo.MaxExhaust), 
 				D, 
 				InterpSpeed);
@@ -150,9 +150,9 @@ void UAircraftVisualComponent::AirBrakeCalculation(const float D)
 {
 	// Might move this also into thrust, depends if it doesn't make too much sense when expanded
 
-	if (InputThrust > 0.4) AirBrake = FMath::FInterpTo(AirBrake, 0, D, InterpSpeed);
-	else AirBrake = FMath::FInterpTo(
-		AirBrake, 
+	if (InputThrust > 0.4) AircraftValues.AirBrake = FMath::FInterpTo(AircraftValues.AirBrake, 0, D, InterpSpeed);
+	else AircraftValues.AirBrake = FMath::FInterpTo(
+		AircraftValues.AirBrake,
 		AircraftInfo.MaxAirbrake, 
 		D, 
 		InterpSpeed);

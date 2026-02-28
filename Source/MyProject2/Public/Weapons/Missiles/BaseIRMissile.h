@@ -5,13 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Weapons/Missiles/BaseMissile.h"
-#include "NiagaraFunctionLibrary.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "Structs and Data/Weapon Data/IRMissileStats.h"
-#include "NiagaraComponent.h"
 #include "BaseIRMissile.generated.h"
 
 class ABaseAircraft;
+class UProjectileMovementComponent;
 
 UCLASS()
 class MYPROJECT2_API ABaseIRMissile : public ABaseMissile
@@ -21,12 +19,12 @@ class MYPROJECT2_API ABaseIRMissile : public ABaseMissile
 public:	
 	ABaseIRMissile();
 
-	UPROPERTY(EditAnywhere)
-	UIRMissileStats* MissileStats = nullptr;
-
 	virtual void LaunchSequence(float Speed) override;
 
-protected:
+private:
+
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UIRMissileStats> MissileStats = nullptr;
 
 	virtual void BeginPlay() override;
 
@@ -36,6 +34,5 @@ protected:
 
 	virtual void FireStatic(float launchSpeed);
 
-private:
 	virtual void CheckAndDelete(AActor* OtherActor) override;
 };

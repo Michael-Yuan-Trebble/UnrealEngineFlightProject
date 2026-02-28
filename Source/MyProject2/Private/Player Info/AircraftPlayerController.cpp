@@ -5,10 +5,13 @@
 #include "InputMappingContext.h"
 #include "Units/Aircraft/MenuManagerComponent.h"
 #include "Units/Aircraft/WeaponSystemComponent.h"
+#include "Subsystem/AircraftRegistry.h"
+#include "EnhancedInputSubsystems.h"
 #include "UI/PlayerHUD.h"
 #include "TimerManager.h"
 #include "Weapons/Missiles/BaseMissile.h"
 #include "Subsystem/MissileManagerSubsystem.h"
+#include "Player Info/PlayerGameInstance.h"
 #include "Units/Aircraft/Player/PlayerAircraft.h"
 
 AAircraftPlayerController::AAircraftPlayerController() 
@@ -16,25 +19,17 @@ AAircraftPlayerController::AAircraftPlayerController()
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 	MenuManager = CreateDefaultSubobject<UMenuManagerComponent>(TEXT("MenuManager"));
-
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> AircraftMapFinder(TEXT("/Game/Controls/Mapping.Mapping"));
-	if (AircraftMapFinder.Succeeded()) { Mapping = AircraftMapFinder.Object; }
-
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> MenuMapFinder(TEXT("/Game/Controls/MenuInputMapping.MenuInputMapping"));
-	if (MenuMapFinder.Succeeded()) { MenuInputMapping = MenuMapFinder.Object; }
 }
 
 void AAircraftPlayerController::BeginPlay() 
 {
 	Super::BeginPlay();
-	if (!IsValid(MenuManager)) return;
-	MenuManager->InitializePC(this);
+	if (IsValid(MenuManager)) MenuManager->InitializePC(this);
 	if (UAircraftRegistry* Reg = UAircraftRegistry::Get(GetWorld()))
 	{
 		Reg->OnAnyUnitHit.AddUObject(this, &AAircraftPlayerController::OnUnitHit);
 		Reg->OnAnyUnitDeath.AddUObject(this, &AAircraftPlayerController::OnUnitDestroyed);
 	}
-	const float ScanTime = 0.15f;
 	GetWorld()->GetTimerManager().SetTimer(
 		UpdateVFXHandle,
 		this,
@@ -60,11 +55,10 @@ void AAircraftPlayerController::OnPossess(APawn* InPawn)
 
 void AAircraftPlayerController::SetComponents(UWeaponSystemComponent* InWeapon) 
 {
-	WeaponComp = InWeapon;
-	if (!IsValid(WeaponComp)) return;
-	WeaponComp->OnWeaponHit.AddDynamic(this, &AAircraftPlayerController::HandleWeaponHit);
-	WeaponComp->OnHUDLockedOn.AddDynamic(this, &AAircraftPlayerController::HandleHUDLockedOn);
-	WeaponComp->OnWeaponCountUpdated.AddDynamic(this, &AAircraftPlayerController::HandleWeaponCount);
+	if (!IsValid(InWeapon)) return;
+	InWeapon->OnWeaponHit.AddDynamic(this, &AAircraftPlayerController::HandleWeaponHit);
+	InWeapon->OnHUDLockedOn.AddDynamic(this, &AAircraftPlayerController::HandleHUDLockedOn);
+	InWeapon->OnWeaponCountUpdated.AddDynamic(this, &AAircraftPlayerController::HandleWeaponCount);
 }
 
 void AAircraftPlayerController::UpdateLODs()
@@ -137,154 +131,116 @@ void AAircraftPlayerController::HandleMissileLockedAtPlayer()
 void AAircraftPlayerController::BindAircraftInputs(UEnhancedInputComponent* EnhancedInputComp) 
 {
 	if (!IsValid(EnhancedInputComp)) return;
-	FSoftObjectPath ThrottlePath(TEXT("/Game/Controls/Inputs/Throttle.Throttle"));
-	TSoftObjectPtr<UInputAction> SoftThrottle(ThrottlePath);
-	Throttle = SoftThrottle.LoadSynchronous();
-	if (Throttle)
+
+	UFlightInputConfig* FlightConfig = FlightInputs.LoadSynchronous();
+	if (!IsValid(FlightConfig)) return;
+
+	// TODO: Maybe do a fallback to these if FlightInputs->IA stuff is null
+	//FSoftObjectPath ThrottlePath(TEXT("/Game/Controls/Inputs/Throttle.Throttle"));
+	//TSoftObjectPtr<UInputAction> SoftThrottle(ThrottlePath);
+	//FlightInputs->IA_Throttle = SoftThrottle.LoadSynchronous();
+	if (IsValid(FlightConfig->IA_Throttle))
 	{
-		EnhancedInputComp->BindAction(Throttle, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Thrust);
-		EnhancedInputComp->BindAction(Throttle, ETriggerEvent::Completed, this, &AAircraftPlayerController::Thrust);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Throttle, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Thrust);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Throttle, ETriggerEvent::Completed, this, &AAircraftPlayerController::Thrust);
 	}
-	FSoftObjectPath RollPath(TEXT("/Game/Controls/Inputs/IA_Roll.IA_Roll"));
-	TSoftObjectPtr<UInputAction> SoftRoll(RollPath);
-	IA_Roll = SoftRoll.LoadSynchronous();
-	if (IA_Roll)
+	if (IsValid(FlightConfig->IA_Roll))
 	{
-		EnhancedInputComp->BindAction(IA_Roll, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Roll);
-		EnhancedInputComp->BindAction(IA_Roll, ETriggerEvent::Completed, this, &AAircraftPlayerController::Roll);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Roll, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Roll);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Roll, ETriggerEvent::Completed, this, &AAircraftPlayerController::Roll);
 	}
-	FSoftObjectPath PitchPath(TEXT("/Game/Controls/Inputs/IA_Pitch.IA_Pitch"));
-	TSoftObjectPtr<UInputAction> SoftPitch(PitchPath);
-	IA_Pitch = SoftPitch.LoadSynchronous();
-	if (IA_Pitch)
+	if (IsValid(FlightConfig->IA_Pitch))
 	{
-		EnhancedInputComp->BindAction(IA_Pitch, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Pitch);
-		EnhancedInputComp->BindAction(IA_Pitch, ETriggerEvent::Completed, this, &AAircraftPlayerController::Pitch);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Pitch, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Pitch);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Pitch, ETriggerEvent::Completed, this, &AAircraftPlayerController::Pitch);
 	}
-	FSoftObjectPath RudderPath(TEXT("/Game/Controls/Inputs/IA_Rudder.IA_Rudder"));
-	TSoftObjectPtr<UInputAction> SoftRudder(RudderPath);
-	IA_Rudder = SoftRudder.LoadSynchronous();
-	if (IA_Rudder)
+	if (IsValid(FlightConfig->IA_Yaw))
 	{
-		EnhancedInputComp->BindAction(IA_Rudder, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Rudder);
-		EnhancedInputComp->BindAction(IA_Rudder, ETriggerEvent::Completed, this, &AAircraftPlayerController::Rudder);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Yaw, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Rudder);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Yaw, ETriggerEvent::Completed, this, &AAircraftPlayerController::Rudder);
 	}
-	FSoftObjectPath SpecialPath(TEXT("/Game/Controls/Inputs/IA_Special.IA_Special"));
-	TSoftObjectPtr<UInputAction> SoftSpecial(SpecialPath);
-	IA_Special = SoftSpecial.LoadSynchronous();
-	if (IA_Special)
+	if (IsValid(FlightConfig->IA_LookX))
 	{
-		EnhancedInputComp->BindAction(IA_Special, ETriggerEvent::Started, this, &AAircraftPlayerController::Special);
+		EnhancedInputComp->BindAction(FlightInputs->IA_LookX, ETriggerEvent::Triggered, this, &AAircraftPlayerController::LookHor);
+		EnhancedInputComp->BindAction(FlightInputs->IA_LookX, ETriggerEvent::Completed, this, &AAircraftPlayerController::LookHor);
 	}
-	FSoftObjectPath LookXPath(TEXT("/Game/Controls/Inputs/IA_LookX.IA_LookX"));
-	TSoftObjectPtr<UInputAction> SoftLookX(LookXPath);
-	IA_LookX = SoftLookX.LoadSynchronous();
-	if (IA_LookX)
+	if (IsValid(FlightConfig->IA_LookY))
 	{
-		EnhancedInputComp->BindAction(IA_LookX, ETriggerEvent::Triggered, this, &AAircraftPlayerController::LookHor);
-		EnhancedInputComp->BindAction(IA_LookX, ETriggerEvent::Completed, this, &AAircraftPlayerController::LookHor);
+		EnhancedInputComp->BindAction(FlightInputs->IA_LookY, ETriggerEvent::Triggered, this, &AAircraftPlayerController::LookVer);
+		EnhancedInputComp->BindAction(FlightInputs->IA_LookY, ETriggerEvent::Completed, this, &AAircraftPlayerController::LookVer);
 	}
-	FSoftObjectPath LookYPath(TEXT("/Game/Controls/Inputs/IA_LookY.IA_LookY"));
-	TSoftObjectPtr<UInputAction> SoftLookY(LookYPath);
-	IA_LookY = SoftLookY.LoadSynchronous();
-	if (IA_LookY)
+	if (IsValid(FlightConfig->IA_Focus))
 	{
-		EnhancedInputComp->BindAction(IA_LookY, ETriggerEvent::Triggered, this, &AAircraftPlayerController::LookVer);
-		EnhancedInputComp->BindAction(IA_LookY, ETriggerEvent::Completed, this, &AAircraftPlayerController::LookVer);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Focus, ETriggerEvent::Started, this, &AAircraftPlayerController::Focus);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Focus, ETriggerEvent::Ongoing, this, &AAircraftPlayerController::Focus);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Focus, ETriggerEvent::Completed, this, &AAircraftPlayerController::FocusStop);
 	}
-	FSoftObjectPath FocusPath(TEXT("/Game/Controls/Inputs/IA_Focus.IA_Focus"));
-	TSoftObjectPtr<UInputAction> SoftFocus(FocusPath);
-	IA_Focus = SoftFocus.LoadSynchronous();
-	if (IA_Focus)
+	if (IsValid(FlightConfig->IA_Switch))
 	{
-		EnhancedInputComp->BindAction(IA_Focus, ETriggerEvent::Started, this, &AAircraftPlayerController::Focus);
-		EnhancedInputComp->BindAction(IA_Focus, ETriggerEvent::Ongoing, this, &AAircraftPlayerController::Focus);
-		EnhancedInputComp->BindAction(IA_Focus, ETriggerEvent::Completed, this, &AAircraftPlayerController::FocusStop);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Switch, ETriggerEvent::Started, this, &AAircraftPlayerController::Switch);
 	}
-	FSoftObjectPath SwitchPath(TEXT("/Game/Controls/Inputs/IA_Switch.IA_Switch"));
-	TSoftObjectPtr<UInputAction> SoftSwitch(SwitchPath);
-	IA_Switch = SoftSwitch.LoadSynchronous();
-	if (IA_Switch)
+	if (IsValid(FlightConfig->IA_Zoom))
 	{
-		EnhancedInputComp->BindAction(IA_Switch, ETriggerEvent::Started, this, &AAircraftPlayerController::Switch);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Zoom, ETriggerEvent::Started, this, &AAircraftPlayerController::MapZoom);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Zoom, ETriggerEvent::Ongoing, this, &AAircraftPlayerController::MapZoom);
+		EnhancedInputComp->BindAction(FlightInputs->IA_Zoom, ETriggerEvent::Completed, this, &AAircraftPlayerController::StopMapZoom);
 	}
-	FSoftObjectPath ZoomPath(TEXT("/Game/Controls/Inputs/IA_Zoom.IA_Zoom"));
-	TSoftObjectPtr<UInputAction> SoftZoom(ZoomPath);
-	IA_Zoom = SoftZoom.LoadSynchronous();
-	if (IA_Zoom)
+	if (IsValid(FlightConfig->IA_TogglePerspective))
 	{
-		EnhancedInputComp->BindAction(IA_Zoom, ETriggerEvent::Started, this, &AAircraftPlayerController::MapZoom);
-		EnhancedInputComp->BindAction(IA_Zoom, ETriggerEvent::Ongoing, this, &AAircraftPlayerController::MapZoom);
-		EnhancedInputComp->BindAction(IA_Zoom, ETriggerEvent::Completed, this, &AAircraftPlayerController::StopMapZoom);
-	}
-	FSoftObjectPath PerspectivePath(TEXT("/Game/Controls/Inputs/IA_Perspective.IA_Perspective"));
-	TSoftObjectPtr<UInputAction> SoftPerspective(PerspectivePath);
-	IA_TogglePerspective = SoftPerspective.LoadSynchronous();
-	if (IA_TogglePerspective) 
-	{
-		EnhancedInputComp->BindAction(IA_TogglePerspective, ETriggerEvent::Started, this, &AAircraftPlayerController::TogglePerspective);
+		EnhancedInputComp->BindAction(FlightInputs->IA_TogglePerspective, ETriggerEvent::Started, this, &AAircraftPlayerController::TogglePerspective);
 	}
 }
 
 void AAircraftPlayerController::BindWeaponInputs(UEnhancedInputComponent* EnhancedInputComp) 
 {
-	if (!EnhancedInputComp) return;
-	FSoftObjectPath ShootPath(TEXT("/Game/Controls/Inputs/IA_Shoot.IA_Shoot"));
-	TSoftObjectPtr<UInputAction> SoftShoot(ShootPath);
-	IA_Shoot = SoftShoot.LoadSynchronous();
-	if (IA_Shoot)
+	if (!IsValid(EnhancedInputComp)) return;
+	
+	UWeaponInputConfig* WeaponConfig = WeaponInputs.LoadSynchronous();
+	if (!IsValid(WeaponConfig)) return;
+
+	if (IsValid(WeaponConfig->IA_Shoot))
 	{
-		EnhancedInputComp->BindAction(IA_Shoot, ETriggerEvent::Started, this, &AAircraftPlayerController::ShootStart);
-		EnhancedInputComp->BindAction(IA_Shoot, ETriggerEvent::Completed, this, &AAircraftPlayerController::ShootEnd);
+		EnhancedInputComp->BindAction(WeaponInputs->IA_Shoot, ETriggerEvent::Started, this, &AAircraftPlayerController::ShootStart);
+		EnhancedInputComp->BindAction(WeaponInputs->IA_Shoot, ETriggerEvent::Completed, this, &AAircraftPlayerController::ShootEnd);
 	}
-	FSoftObjectPath WeaponsPath(TEXT("/Game/Controls/Inputs/IA_Weapons.IA_Weapons"));
-	TSoftObjectPtr<UInputAction> SoftWeapons(WeaponsPath);
-	IA_Weapons = SoftWeapons.LoadSynchronous();
-	if (IA_Weapons)
+	if (IsValid(WeaponConfig->IA_Weapons))
 	{
-		EnhancedInputComp->BindAction(IA_Weapons, ETriggerEvent::Started, this, &AAircraftPlayerController::Weapons);
+		EnhancedInputComp->BindAction(WeaponInputs->IA_Weapons, ETriggerEvent::Started, this, &AAircraftPlayerController::Weapons);
 	}
-	FSoftObjectPath NextWeaponPath(TEXT("/Game/Controls/Inputs/IA_NextWeapon.IA_NextWeapon"));
-	TSoftObjectPtr<UInputAction> SoftNext(NextWeaponPath);
-	IA_NextWeapon = SoftNext.LoadSynchronous();
-	if (IA_NextWeapon) 
+	if (IsValid(WeaponConfig->IA_NextWeapon))
 	{
-		EnhancedInputComp->BindAction(IA_NextWeapon, ETriggerEvent::Started, this, &AAircraftPlayerController::NextWeapon);
+		EnhancedInputComp->BindAction(WeaponInputs->IA_NextWeapon, ETriggerEvent::Started, this, &AAircraftPlayerController::NextWeapon);
 	}
-	FSoftObjectPath PrevWeaponPath(TEXT("/Game/Controls/Inputs/IA_PrevWeapon.IA_PrevWeapon"));
-	TSoftObjectPtr<UInputAction> SoftPrev(PrevWeaponPath);
-	IA_PrevWeapon = SoftPrev.LoadSynchronous();
-	if (IA_PrevWeapon) 
+	if (IsValid(WeaponConfig->IA_PrevWeapon))
 	{
-		EnhancedInputComp->BindAction(IA_PrevWeapon, ETriggerEvent::Started, this, &AAircraftPlayerController::PreviousWeapon);
+		EnhancedInputComp->BindAction(WeaponInputs->IA_PrevWeapon, ETriggerEvent::Started, this, &AAircraftPlayerController::PreviousWeapon);
+	}
+	if (IsValid(WeaponConfig->IA_Special))
+	{
+		EnhancedInputComp->BindAction(WeaponInputs->IA_Special, ETriggerEvent::Started, this, &AAircraftPlayerController::Special);
 	}
 }
 
 void AAircraftPlayerController::BindMenuInputs(UEnhancedInputComponent* EnhancedInputComp) 
 {
-	if (!EnhancedInputComp) return;
-	FSoftObjectPath UpPath(TEXT("/Game/Controls/MenuInputs/Up.Up"));
-	TSoftObjectPtr<UInputAction> SoftUp(UpPath);
-	Up = SoftUp.LoadSynchronous();
-	if (Up)
+	if (!IsValid(EnhancedInputComp)) return;
+
+	UMenuInputConfig* MenuConfig = MenuInputs.LoadSynchronous();
+	if (!IsValid(MenuConfig)) return;
+
+	if (IsValid(MenuConfig->IA_Up))
 	{
-		//EnhancedInputComp->BindAction(Up, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Thrust);
-		//EnhancedInputComp->BindAction(Up, ETriggerEvent::Completed, this, &AAircraftPlayerController::Thrust);
+		//EnhancedInputComp->BindAction(MenuInputs->IA_Up, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Thrust);
+		//EnhancedInputComp->BindAction(MenuInputs->IA_Up, ETriggerEvent::Completed, this, &AAircraftPlayerController::Thrust);
 	}
-	FSoftObjectPath DownPath(TEXT("/Game/Controls/MenuInputs/Down.Down"));
-	TSoftObjectPtr<UInputAction> SoftDown(DownPath);
-	Down = SoftDown.LoadSynchronous();
-	if (Down)
+	if (IsValid(MenuConfig->IA_Down))
 	{
-		//EnhancedInputComp->BindAction(Up, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Thrust);
-		//EnhancedInputComp->BindAction(Up, ETriggerEvent::Completed, this, &AAircraftPlayerController::Thrust);
+		//EnhancedInputComp->BindAction(MenuInputs->IA_Down, ETriggerEvent::Triggered, this, &AAircraftPlayerController::Thrust);
+		//EnhancedInputComp->BindAction(MenuInputs->IA_Down, ETriggerEvent::Completed, this, &AAircraftPlayerController::Thrust);
 	}
-	FSoftObjectPath BackPath(TEXT("/Game/Controls/MenuInputs/Back.Back"));
-	TSoftObjectPtr<UInputAction> SoftBack(BackPath);
-	IA_Back = SoftBack.LoadSynchronous();
-	if (IA_Back)
+	if (IsValid(MenuConfig->IA_Back))
 	{
-		EnhancedInputComp->BindAction(IA_Back, ETriggerEvent::Completed, this, &AAircraftPlayerController::MenuBack);
+		EnhancedInputComp->BindAction(MenuInputs->IA_Back, ETriggerEvent::Completed, this, &AAircraftPlayerController::MenuBack);
 	}
 }
 
@@ -317,18 +273,25 @@ void AAircraftPlayerController::SetControlMode(const EControlMode NewMode)
 	UEnhancedInputComponent* EnhancedInputComp = Cast<UEnhancedInputComponent>(InputComponent);
 	if (!IsValid(EnhancedInputComp)) return;
 
+	UInputMappingContext* MenuInputConfig = MenuInputMapping.LoadSynchronous();
+	UInputMappingContext* MappingConfig = Mapping.LoadSynchronous();
+
+	if (!IsValid(MenuInputConfig) || !IsValid(MappingConfig)) return;
+
 	Subsystem->ClearAllMappings();
-	if (NewMode == EControlMode::Menu) 
-	{
-		Subsystem->AddMappingContext(MenuInputMapping, MenuMappingPriority);
-		SetInputMode(FInputModeUIOnly());
-		bShowMouseCursor = true;
-	}
-	else if (NewMode == EControlMode::Aircraft) 
-	{
-		Subsystem->AddMappingContext(Mapping, AircraftMappingPriority);
-		SetInputMode(FInputModeGameOnly());
-		bShowMouseCursor = false;
+	switch (NewMode) {
+		case EControlMode::Menu:
+			Subsystem->AddMappingContext(MenuInputConfig, MenuMappingPriority);
+			SetInputMode(FInputModeUIOnly());
+			bShowMouseCursor = true;
+			break;
+		case EControlMode::Aircraft:
+			Subsystem->AddMappingContext(MappingConfig, AircraftMappingPriority);
+			SetInputMode(FInputModeGameOnly());
+			bShowMouseCursor = false;
+			break;
+		default:
+			break;
 	}
 }
 
@@ -341,6 +304,7 @@ void AAircraftPlayerController::MenuBack()
 
 void AAircraftPlayerController::ManageMenuSetting(const EMenuState NewMenu) 
 {
+	if (!IsValid(MenuManager)) return;
 	MenuHistory.Push(NewMenu);
 	MenuManager->GetWidgetClassForState(NewMenu);
 }
@@ -351,27 +315,39 @@ void AAircraftPlayerController::Thrust(const FInputActionValue& Value)
 	if (!bMovementEnabled) return;
 	float thrustNeeded = FMath::Clamp(thrustPercentage + (Value.Get<float>() / 2.f), 0, 1.f);
 	thrustPercentage = FMath::FInterpTo(thrustPercentage, thrustNeeded, GetWorld()->GetDeltaSeconds(), 2.f);
-	isThrust = Value.Get<float>() != 0;
+	bThrust = Value.Get<float>() != 0;
 } 
 
 //Movement Functions
 
 void AAircraftPlayerController::Roll(const FInputActionValue& Value) 
 {
-	if (!bMovementEnabled && IsValid(Controlled)) Controlled->SetRoll(0.f);
-	if (IsValid(Controlled)) Controlled->SetRoll(Value.Get<float>());
+	if (!IsValid(Controlled)) return;
+	if (!bMovementEnabled) {
+		Controlled->SetRoll(0.f);
+		return;
+	}
+	Controlled->SetRoll(Value.Get<float>());
 }
 
 void AAircraftPlayerController::Pitch(const FInputActionValue& Value)
 {
-	if (!bMovementEnabled && IsValid(Controlled)) Controlled->SetPitch(0.f);
-	if (IsValid(Controlled)) Controlled->SetPitch(Value.Get<float>());
+	if (!IsValid(Controlled)) return;
+	if (!bMovementEnabled) {
+		Controlled->SetPitch(0.f);
+		return;
+	}
+	Controlled->SetPitch(Value.Get<float>());
 }
 
 void AAircraftPlayerController::Rudder(const FInputActionValue& Value) 
 {
-	if (!bMovementEnabled && IsValid(Controlled)) Controlled->SetRudder(0.f);
-	if (IsValid(Controlled)) Controlled->SetRudder(Value.Get<float>());
+	if (!IsValid(Controlled)) return;
+	if (!bMovementEnabled) {
+		Controlled->SetRudder(0.f);
+		return;
+	}
+	Controlled->SetRudder(Value.Get<float>());
 }
 
 //Specials
@@ -405,15 +381,15 @@ void AAircraftPlayerController::Special()
 void AAircraftPlayerController::ShootStart() 
 {
 	if (!bWeaponEnabled) ShootEnd();
-	if (fire) return;
-	fire = true;
+	if (bFire) return;
+	bFire = true;
 	if (IsValid(Controlled)) Controlled->StartBullets();
 }
 
 void AAircraftPlayerController::ShootEnd() 
 {
-	if (!fire) return;
-	fire = false;
+	if (!bFire) return;
+	bFire = false;
 	if (IsValid(Controlled)) Controlled->EndBullets();
 }
 
@@ -427,7 +403,7 @@ void AAircraftPlayerController::Bullets()
 
 void AAircraftPlayerController::Switch() 
 {
-	if (!bCameraEnabled) return;
+	if (!bWeaponEnabled) return;
 	if (IsValid(Controlled)) Controlled->CycleTarget();
 }
 
@@ -476,6 +452,6 @@ void AAircraftPlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	if (CurrentMode == EControlMode::Menu) return;
-	if (!isThrust) thrustPercentage = FMath::FInterpTo(thrustPercentage, MiddleThrust, DeltaSeconds, 2.f);
+	if (!bThrust) thrustPercentage = FMath::FInterpTo(thrustPercentage, MiddleThrust, DeltaSeconds, 2.f);
 	if (IsValid(Controlled)) Controlled->SetThrust(thrustPercentage);
 }

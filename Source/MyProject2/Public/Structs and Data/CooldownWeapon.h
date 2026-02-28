@@ -17,7 +17,7 @@ struct FCooldownWeapon
 	TSubclassOf <ABaseWeapon> WeaponClass = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	ABaseWeapon* WeaponInstance = nullptr;
+	TObjectPtr<ABaseWeapon> WeaponInstance = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	bool bCanFire = true;
@@ -37,4 +37,16 @@ struct FCooldownWeapon
 	void StartCooldown() { bCanFire = false; time = cooldownTime; }
 
 	void UpdateCooldown(const float DeltaTime);
+
+	void Init(TSubclassOf <ABaseWeapon> InWeapon, ABaseWeapon* InInstance, FName InSocket, float InCooldown) {
+		WeaponClass = InWeapon;
+		WeaponInstance = InInstance;
+		SocketName = InSocket;
+		cooldownTime = InCooldown;
+	}
+
+	void ResetFire() {
+		bCanFire = true;
+		time = 0.f;
+	};
 };

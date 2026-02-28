@@ -16,7 +16,7 @@ void UWeaponButtonWidget::SetupWeapons(const TSubclassOf<ABaseWeapon>& WeaponDat
 	}
 
 	const ABaseWeapon* DefaultWeapon = WeaponData->GetDefaultObject<ABaseWeapon>();
-	FName WeaponName = DefaultWeapon->WeaponName;
+	FName WeaponName = DefaultWeapon->GetName();
 	WeaponNameText->SetText(FText::FromName(WeaponName));
 }
 

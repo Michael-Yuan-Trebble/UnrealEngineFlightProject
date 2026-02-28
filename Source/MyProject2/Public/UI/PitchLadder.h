@@ -4,9 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/CanvasPanel.h"
-#include "Components/Image.h"
-#include "Components/TextBlock.h"
 #include "PitchLadder.generated.h"
 
 UCLASS()
@@ -17,21 +14,20 @@ class MYPROJECT2_API UPitchLadder : public UUserWidget
 public:
 	void Update(const float InPitch);
 
-protected:
+private:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
-	UCanvasPanel* LadderCanvas = nullptr;
+	TObjectPtr<class UCanvasPanel> LadderCanvas = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Pitch Ladder")
-	UMaterialInterface* LineTexture = nullptr;
-
-private:
-	UPROPERTY()
-	TArray<UImage*> LadderLines;
+	UPROPERTY(EditAnywhere, Category="Pitch Ladder")
+	TObjectPtr<UMaterialInterface> LineTexture = nullptr;
 
 	UPROPERTY()
-	TArray<UTextBlock*> LadderLabels;
+	TArray<class UImage*> LadderLines{};
+
+	UPROPERTY()
+	TArray<class UTextBlock*> LadderLabels{};
 
 	float CurrentPitch = 0.f;
 
