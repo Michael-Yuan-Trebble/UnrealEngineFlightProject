@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Player!"));
 #include "Units/Aircraft/Player/PlayerAircraft.h"
 #include "Player Info/AircraftPlayerController.h"
 #include "Units/Aircraft/FlightComponent.h"

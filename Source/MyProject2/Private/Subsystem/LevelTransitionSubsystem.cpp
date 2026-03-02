@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("LEVEL NOT FOUND!"));
 #include "Subsystem/LevelTransitionSubsystem.h"
 #include "Subsystem/MissionManagerSubsystem.h"
 #include "Engine/AssetManager.h"
@@ -14,20 +13,18 @@ void ULevelTransitionSubsystem::LoadMission(const TSoftObjectPtr<UWorld> Level)
 {
 	UWorld* World = GetWorld();
 	if (!IsValid(World)) return;
-	FName LevelName;
-	if (Level.IsNull()) 
-	{
+	
+	// Default Map Fallback
+	if (Level.IsNull()) {
 		if (UMissionManagerSubsystem* Sub = GetGameInstance()->GetSubsystem<UMissionManagerSubsystem>()) {
-			if (Sub->GetDefaultMap().IsValid()) {
-				LevelName = FName(*Level.GetAssetName());
-			}
+			const TSoftObjectPtr<UWorld>& Map = Sub->GetDefaultMap();
+			if (Map.IsNull()) return;
+			UGameplayStatics::OpenLevelBySoftObjectPtr(World, Map);
 		}
 	}
 	else {
-		LevelName = FName(*Level.GetAssetName());
+		UGameplayStatics::OpenLevelBySoftObjectPtr(World, Level);
 	}
-	
-	UGameplayStatics::OpenLevel(World, LevelName);
 }
 
 void ULevelTransitionSubsystem::RestartMission() {

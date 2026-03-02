@@ -113,7 +113,7 @@ private:
 	TSubclassOf<UHitNotificationWidget> HitNotiClass = nullptr;
 
 	UPROPERTY()
-	UHitNotificationWidget* HitNotiWidget = nullptr;
+	TObjectPtr<UHitNotificationWidget> HitNotiWidget = nullptr;
 
 	UPROPERTY()
 	TMap<TWeakObjectPtr<ABaseUnit>, TObjectPtr<ULockBoxWidget>> ActiveWidgets;

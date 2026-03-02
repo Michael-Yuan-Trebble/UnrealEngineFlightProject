@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Gamemode!"));
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "UI/SelectionUI/AircraftSelectionWidget.h"
@@ -219,6 +218,8 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 
 	UMissionManagerSubsystem* MissionManager = GI->GetSubsystem<UMissionManagerSubsystem>();
 	ULevelTransitionSubsystem* LevelTransition = GI->GetSubsystem<ULevelTransitionSubsystem>();
+
+	if (!IsValid(MissionManager) || !IsValid(LevelTransition)) return;
 
 	const FMissionData& Mission = MissionManager->GetCurrentMission();
 	LevelTransition->LoadIntermission(Mission.TakeoffType);

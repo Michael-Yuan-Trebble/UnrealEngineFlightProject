@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
+#include "Structs and Data/InGameAirStats.h"
 #include "Structs and Data/FlightMathLibrary.h"
 #include "Enums/ThrottleStage.h"
 #include "Enums/FlightMode.h"
@@ -42,7 +43,7 @@ public:
 
 	void ReturnAOA(const float DeltaSeconds);
 
-	void Setup(ABaseAircraft* InControl);
+	void Setup(ABaseAircraft* InControl, const UAircraftStats* InStats);
 	
 	void AddDropSpeed(const float D);
 
@@ -149,8 +150,7 @@ private:
 
 	bool switchingPhase = false;
 
-	UPROPERTY()
-	TObjectPtr<UAircraftStats> AircraftStats = nullptr;
+	FInGameAirStats AirStats{};
 
 	UPROPERTY()
 	TObjectPtr<ABaseAircraft> Controlled = nullptr;

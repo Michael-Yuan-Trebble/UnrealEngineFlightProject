@@ -23,16 +23,16 @@ public:
 
 	virtual void PossessedBy(AController* Controller) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<USpringArmComponent> FirstPersonSpringArm = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<USpringArmComponent> ThirdPersonSpringArm = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<UCameraComponent> ThirdPersonCamera = nullptr;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<UCameraComponent> FirstPersonCamera = nullptr;
 
 	void GunSoundEffect(bool bShoot);

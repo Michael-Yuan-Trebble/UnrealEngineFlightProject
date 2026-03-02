@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Hit!"));
 #include "Weapons/Missiles/BaseAHRMissile.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Units/Aircraft/BaseAircraft.h"
@@ -26,13 +25,13 @@ void ABaseAHRMissile::BeginPlay()
 
 	if (!IsValid(LoadedStats)) return;
 	WeaponName = LoadedStats->InGameName;
-	missileAcceleration = LoadedStats->Acceleration;
-	missileMaxSpeed = LoadedStats->MaxSpeed;
+	//missileAcceleration = LoadedStats->Acceleration;
+	//missileMaxSpeed = LoadedStats->MaxSpeed;
 	cooldownTime = LoadedStats->Cooldown;
-	range = LoadedStats->LockOnRange;
-	turnRate = LoadedStats->TurnRate;
+	//range = LoadedStats->LockOnRange;
+	//turnRate = LoadedStats->TurnRate;
 	damage = LoadedStats->Damage;
-	ProjectileMovement->MaxSpeed = LoadedStats->MaxSpeed;
+	//ProjectileMovement->MaxSpeed = LoadedStats->MaxSpeed;
 	SupportedTargetTypes = LoadedStats->SupportedTargetTypes;
 }
 

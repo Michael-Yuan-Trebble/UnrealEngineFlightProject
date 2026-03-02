@@ -28,10 +28,10 @@ public:
 
 	//UInputs
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UPROPERTY(EditAnywhere, Category = "Input")
 	TSoftObjectPtr<UInputMappingContext> Mapping = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Input")
+	UPROPERTY(EditAnywhere, Category = "Menu Input")
 	TSoftObjectPtr<UInputMappingContext> MenuInputMapping = nullptr;
 
 	UPROPERTY(EditAnywhere)

@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Weapon Component!"));
 #include "Units/Aircraft/WeaponSystemComponent.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Weapons/AircraftBullet.h"
@@ -17,13 +16,13 @@ UWeaponSystemComponent::UWeaponSystemComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, UAircraftStats* InStats)
+void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, const UAircraftStats* InStats)
 {
 	Controlled = InBase;
 	if (IsValid(Controlled)) {
 		BulletStats = Controlled->GetBulletStats();
 		Airframe = Controlled->GetAirframe();
-		InGameAirStats = Controlled->GetAirStats()->InGameAirStats;
+		AirWeaponInfo = InStats->WeaponInfo;
 	}
 }
 
@@ -90,16 +89,16 @@ void UWeaponSystemComponent::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In
 
 void UWeaponSystemComponent::AddPylons() 
 {
-	for (int i = 0; i < InGameAirStats.NumOfPylons; i++)
+	for (int i = 0; i < AirWeaponInfo.NumOfPylons; i++)
 	{
 		UStaticMeshComponent* TempPylon = NewObject<UStaticMeshComponent>(this);
 		FName SocketName = FName(*FString::Printf(TEXT("Pylon_%d"), i));
-		if (TempPylon && IsValid(InGameAirStats.Pylon))
+		if (TempPylon && IsValid(AirWeaponInfo.Pylon))
 		{
 			if (!IsValid(Controlled) || !IsValid(Airframe)) return;
 			FTransform SocketTransform = Airframe->GetSocketTransform(SocketName, RTS_World);
 			SocketTransform.SetScale3D(FVector(1.f));
-			TempPylon->SetStaticMesh(InGameAirStats.Pylon);
+			TempPylon->SetStaticMesh(AirWeaponInfo.Pylon);
 			TempPylon->SetWorldTransform(SocketTransform);
 			TempPylon->RegisterComponent();
 			TempPylon->AttachToComponent(Airframe, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);

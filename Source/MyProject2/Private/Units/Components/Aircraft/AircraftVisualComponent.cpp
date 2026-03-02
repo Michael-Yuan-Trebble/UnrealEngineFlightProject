@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Visual Comp!"));
 #include "Units/Aircraft/AircraftVisualComponent.h"
 #include "Specials/CountermeasureActor.h"
 

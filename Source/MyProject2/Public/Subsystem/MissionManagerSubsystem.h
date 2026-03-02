@@ -25,7 +25,7 @@ public:
 
 	void SetGroundTakeoffMap(TSoftObjectPtr<UWorld> InWorld) { GroundTakeoffMap = InWorld; };
 
-	void SetDefaultMap(TSoftObjectPtr<UWorld> InWorld) { DefaultMap = InWorld; };
+	void SetDefaultMap(TSoftObjectPtr<UWorld> InWorld) { DefaultMap = InWorld;};
 
 	TSoftObjectPtr<UWorld> GetAircraftSelectMap() const { return AircraftSelectMap; };
 

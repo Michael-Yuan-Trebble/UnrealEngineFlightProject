@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("MenuManager!"));
 #include "Units/Aircraft/MenuManagerComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player Info/PlayerGameInstance.h"

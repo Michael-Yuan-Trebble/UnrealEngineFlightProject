@@ -90,8 +90,6 @@ public:
 
 	UBulletStats* GetBulletStats() const { return BulletStats; };
 
-	UAircraftStats* GetAirStats() const { return AirStats; };
-
 	URadarComponent* GetRadarComp() const { return RadarComponent; };
 
 	UWeaponSystemComponent* GetWeaponComp() const { return WeaponComponent; };
@@ -138,6 +136,8 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<UAircraftStats> AirStats = nullptr;
 
+	// TODO: Make this softobjectptr
+
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UBulletStats> BulletStats = nullptr;
 
@@ -177,16 +177,16 @@ protected:
 	int32 NumOfMainWingVapors = 0;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VFX")
-	TArray<UStaticMeshComponent*> AllMainWingVapors{};
+	TArray<TObjectPtr<UStaticMeshComponent>> AllMainWingVapors{};
 
 	UPROPERTY()
-	TArray<UNiagaraComponent*> AllAfterburners;
+	TArray<TObjectPtr<UNiagaraComponent>> AllAfterburners{};
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UNiagaraSystem> WingVortexSystem = nullptr;
 
 	UPROPERTY()
-	TArray<UNiagaraComponent*> AllVortices{};
+	TArray<TObjectPtr<UNiagaraComponent>> AllVortices{};
 
 	float AddedGearHeight = 0.f;
 
@@ -198,7 +198,7 @@ protected:
 	FVector OriginalExtent = FVector::ZeroVector;
 
 	UPROPERTY()
-	TObjectPtr<AActor> Tracking = nullptr;
+	TWeakObjectPtr<AActor> Tracking = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USkeletalMeshComponent> Airframe = nullptr;

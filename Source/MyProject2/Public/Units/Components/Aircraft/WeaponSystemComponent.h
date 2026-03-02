@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "Structs and Data/CooldownWeapon.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
+#include "Structs and Data/AircraftWeaponInfo.h"
+#include "Structs and Data/Weapon Data/BulletStats.h"
 #include "Structs and Data/InGameAirStats.h"
 #include "WeaponSystemComponent.generated.h"
 
@@ -36,7 +38,7 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void Setup(ABaseAircraft* InBase, UAircraftStats* InStats);
+	void Setup(ABaseAircraft* InBase, const UAircraftStats* InStats);
 
 	void FireBullets();
 
@@ -107,7 +109,7 @@ private:
 	TMap<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon*>> WeaponGroups{};
 
 	UPROPERTY()
-	TMap<FName, UStaticMeshComponent*> PylonSockets{};
+	TMap<FName, TObjectPtr<UStaticMeshComponent>> PylonSockets{};
 
 	UPROPERTY()
 	TArray<FName> EquippedWeaponNames{};
@@ -118,5 +120,5 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AAircraftBullet> Bullet = nullptr;
 
-	FInGameAirStats InGameAirStats;
+	FAircraftWeaponInfo AirWeaponInfo{};
 };

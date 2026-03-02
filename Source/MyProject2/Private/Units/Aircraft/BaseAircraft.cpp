@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Base!"));
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Subsystem/AircraftRegistry.h"
 #include "Units/Aircraft/FlightComponent.h"
@@ -83,7 +82,7 @@ void ABaseAircraft::BeginPlay()
 
 	RadarComponent->Setup(this);
 	FlightComponent->SetLanded(bLanded);
-	FlightComponent->Setup(this);
+	FlightComponent->Setup(this,LoadedStats);
 	FlightComponent->SetDropSpeed(DropSpeed);
 	FlightComponent->SetStallSpeed(StallSpeed);
 	WeaponComponent->Setup(this, LoadedStats);

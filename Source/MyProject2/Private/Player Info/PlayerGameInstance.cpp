@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Instance!"));
 #include "Player Info/PlayerGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Gamemodes/MainMenuManager.h"
@@ -19,14 +18,10 @@ void UPlayerGameInstance::Init()
 	);
 	SaveManager = NewObject<USaveGameManager>(this, USaveGameManager::StaticClass());
 	SaveManager->LoadGame();
-	UMissionManagerSubsystem* Sub = GetSubsystem<UMissionManagerSubsystem>();
-	if (IsValid(Sub)) 
-	{
-		Sub->SetNavalCarrierMap(NavalCarrierMap);
-		Sub->SetDefaultMap(DefaultMap);
-		Sub->SetAircraftSelectMap(AircraftSelectMap);
-		Sub->SetGroundTakeoffMap(GroundTakeoffMap);
-	}
+	SetAircraftSelectMap();
+	SetNavalCarrierMap();
+	SetGroundTakeoffMap();
+	SetDefaultMap();
 }
 
 void UPlayerGameInstance::FadeIn() 
@@ -47,7 +42,7 @@ void UPlayerGameInstance::HandleFadeFinished() {
 }
 
 void UPlayerGameInstance::HandlePostLoad(UWorld* LoadedWorld) {
-	if (FadeWidget) FadeWidget->AddToViewport(9999);
+	if (IsValid(FadeWidget)) FadeWidget->AddToViewport(9999);
 	else CreateFade();
 	FadeOut();
 }
@@ -62,9 +57,9 @@ void UPlayerGameInstance::FadeOut()
 }
 
 void UPlayerGameInstance::CreateFade() {
-	if (!FadeWidgetClass) return;
+	if (!IsValid(FadeWidgetClass)) return;
 	FadeWidget = CreateWidget<UFadeWidget>(this, FadeWidgetClass);
-	if (FadeWidget) 
+	if (IsValid(FadeWidget))
 	{
 		FadeWidget->AddToViewport(1000);
 		FadeWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
@@ -109,10 +104,9 @@ void UPlayerGameInstance::GoToLevel() {
 }
 
 void UPlayerGameInstance::SetLevel(const FMissionData& InLevel) {
-	UMissionManagerSubsystem* MissionSubsystem = GetSubsystem<UMissionManagerSubsystem>();
-
-	if (!IsValid(MissionSubsystem)) return;
-	MissionSubsystem->SetCurrentMission(Level);
+	if (UMissionManagerSubsystem* MissionSubsystem = GetSubsystem<UMissionManagerSubsystem>()) {
+		MissionSubsystem->SetCurrentMission(Level);
+	}
 }
 
 bool UPlayerGameInstance::DoesTransitionExist() const {

@@ -49,6 +49,7 @@ void AFlightGamemode::SpawnInController()
 	if (IsValid(PlayerSpawnedIn))
 	{
 		PC->SetControlMode(EControlMode::Aircraft);
+		
 		SetPlayerSpeed();
 	}
 }
@@ -171,7 +172,7 @@ TMap<FName, TSubclassOf<ABaseWeapon>> AFlightGamemode::TemporaryLoadout()
 
 	if (!IsValid(AircraftSelected) || !IsValid(AircraftSelected->AircraftStat)) return Loadout;
 
-	if (AircraftSelected->AircraftStat->NumOfPylons < 2) return Loadout;
+	if (AircraftSelected->AircraftStat->WeaponInfo.NumOfPylons < 2) return Loadout;
 
 	for (int i = 0; i < 2; i++) 
 	{
@@ -180,7 +181,7 @@ TMap<FName, TSubclassOf<ABaseWeapon>> AFlightGamemode::TemporaryLoadout()
 		Loadout.Add(Pylon, Bomb);
 	}
 
-	for (int i = 2; i < AircraftSelected->AircraftStat->NumOfPylons; i++) 
+	for (int i = 2; i < AircraftSelected->AircraftStat->WeaponInfo.NumOfPylons; i++)
 	{
 		FString PylonName = FString::Printf(TEXT("Pylon_%d"), i);
 		FName Pylon(*PylonName);

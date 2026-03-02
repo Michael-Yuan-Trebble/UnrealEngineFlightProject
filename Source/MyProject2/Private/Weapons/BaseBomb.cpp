@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Bomb!"));
 #include "Weapons/BaseBomb.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -39,8 +38,8 @@ void ABaseBomb::BeginPlay()
 	WeaponName = LoadedStats->InGameName;
 	cooldownTime = LoadedStats->Cooldown;
 	SupportedTargetTypes = LoadedStats->SupportedTargetTypes;
-	MaxSpeed = LoadedStats->MaxSpeed;
-	BlastRadius = LoadedStats->BlastRadius;
+	MaxSpeed = LoadedStats->InGameBombStats.MaxSpeed;
+	BlastRadius = LoadedStats->InGameBombStats.BlastRadius;
 	Damage = LoadedStats->Damage;
 }
 

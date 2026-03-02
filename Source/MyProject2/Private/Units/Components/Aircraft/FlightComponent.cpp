@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Flight Component!"));
 #include "Units/Aircraft/FlightComponent.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Components/BoxComponent.h"
+#include "DebugHelper.h"
 
 EThrottleStage UFlightComponent::getThrottleStage(const float throttle)
 {
@@ -17,13 +17,12 @@ UFlightComponent::UFlightComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UFlightComponent::Setup(ABaseAircraft* InControl)
+void UFlightComponent::Setup(ABaseAircraft* InControl, const UAircraftStats* InStats)
 {
 	Controlled = InControl;
-	if (IsValid(Controlled)) {
-		AircraftStats = Controlled->GetAirStats();
-		Airframe = Controlled->GetAirframe();
-	}
+	if (!IsValid(Controlled)) return;
+	Airframe = Controlled->GetAirframe();
+	AirStats = InStats->InGameAirStats;
 }
 
 void UFlightComponent::SetFlightMode(const EFlightMode InFlight) 
@@ -36,7 +35,7 @@ void UFlightComponent::SetFlightMode(const EFlightMode InFlight)
 		isFlying = true;
 		break;
 	case EFlightMode::Gears:
-		if (IsValid(AircraftStats)) FlightDrag = AircraftStats->Acceleration * 0.5;
+		FlightDrag = AirStats.Acceleration * 0.5;
 		break;
 	case EFlightMode::Naval:
 		bLanded = true;
@@ -123,8 +122,8 @@ void UFlightComponent::ApplySpeed(const float ThrottlePercentage, const float De
 
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
 
-	currentSpeed += trueAcceleration;
-	currentSpeed = FMath::FInterpTo(currentSpeed, Velocity.Size(), DeltaSeconds, 5.f);
+	// Convert to meters
+	currentSpeed += (trueAcceleration / 0.01) * DeltaSeconds;
 
 	if (!FMath::IsFinite(currentSpeed)) currentSpeed = 0;
 	currentSpeed = FMath::Clamp(currentSpeed, 0, 1000000);
@@ -150,10 +149,7 @@ void UFlightComponent::SetInitialSpeed(const float Speed)
 }
 
 void UFlightComponent::AddSpeed(const float Speed, const float D) {
-
-
-	currentSpeed += UFlightMathLibrary::ConvertKMHToSpeed(Speed) + Acceleration;
-
+	currentSpeed += UFlightMathLibrary::ConvertKMHToSpeed(Speed) + ((Acceleration / 0.01) * D);
 }
 
 void UFlightComponent::CheckLanding(const float D)
@@ -187,12 +183,12 @@ void UFlightComponent::AddDropSpeed(const float D) {
 
 void UFlightComponent::Stall(const float D)
 {
-	if (!IsValid(Airframe) || !IsValid(AircraftStats)) return;
+	if (!IsValid(Airframe)) return;
 	FQuat AirframeCurrentRelQuat = Airframe->GetRelativeRotation().Quaternion();
 	FQuat IdentityQuat = FQuat::Identity;
-	float NoseAlpha = FMath::Clamp(AircraftStats->AOARecoverySpeed * D, 0.f, 1.f);
+	float NoseAlpha = FMath::Clamp(AirStats.AOARecoverySpeed * D, 0.f, 1.f);
 	FQuat NewRelQuat = FQuat::Slerp(AirframeCurrentRelQuat, IdentityQuat, NoseAlpha);
-	if (IsValid(Airframe)) Airframe->SetRelativeRotation(NewRelQuat.Rotator());
+	Airframe->SetRelativeRotation(NewRelQuat.Rotator());
 }
 
 void UFlightComponent::Landed(const float D)
@@ -266,25 +262,25 @@ void UFlightComponent::SlowSpeed(const float ThrottlePercentage)
 	targetSpeed = 0;
 
 	float scale = (ThrottlePercentage <= 0.1) ? 3.f : 1.25f;
-	Acceleration = -(AircraftStats->Acceleration * negation * scale);
+	Acceleration = -(AirStats.Acceleration * negation * scale);
 }
 
 void UFlightComponent::NormalSpeed(const float ThrottlePercentage)
 {
-	Acceleration = AircraftStats->Acceleration * ThrottlePercentage;
-	targetSpeed = AircraftStats->MaxSpeed * 0.5f;
+	Acceleration = AirStats.Acceleration * ThrottlePercentage;
+	targetSpeed = AirStats.MaxSpeed * 0.5f;
 }
 
 void UFlightComponent::AfterburnerSpeed(const float ThrottlePercentage)
 {
 	if (ThrottlePercentage >= 0.9f)
 	{
-		Acceleration = AircraftStats->Acceleration * ThrottlePercentage * 2.f;
-		targetSpeed = AircraftStats->MaxSpeed;
+		Acceleration = AirStats.Acceleration * ThrottlePercentage * 2.f;
+		targetSpeed = AirStats.MaxSpeed;
 		return;
 	}
-	Acceleration = AircraftStats->Acceleration * ThrottlePercentage * 1.25f;
-	targetSpeed = AircraftStats->MaxSpeed * 0.9f;
+	Acceleration = AirStats.Acceleration * ThrottlePercentage * 1.25f;
+	targetSpeed = AirStats.MaxSpeed * 0.9f;
 }
 
 // ====================================
@@ -323,14 +319,14 @@ void UFlightComponent::ReturnAOA(const float DeltaSeconds)
 	// Resets the Airframe's vector 
 	FQuat AirframeCurrentRelQuat = Airframe->GetRelativeRotation().Quaternion();
 	FQuat IdentityQuat = FQuat::Identity;
-	float NoseAlpha = FMath::Clamp(AircraftStats->AOARecoverySpeed * DeltaSeconds, 0.f, 1.f);
+	float NoseAlpha = FMath::Clamp(AirStats.AOARecoverySpeed * DeltaSeconds, 0.f, 1.f);
 	FQuat NewRelQuat = FQuat::Slerp(AirframeCurrentRelQuat, IdentityQuat, NoseAlpha);
 	if (IsValid(Airframe)) Airframe->SetRelativeRotation(NewRelQuat.Rotator());
 }
 
 void UFlightComponent::TempRecovery(const float D, const float Deg)
 {
-	if (!IsValid(Controlled) || !IsValid(Airframe) || !IsValid(AircraftStats)) return;
+	if (!IsValid(Controlled) || !IsValid(Airframe)) return;
 
 	FQuat CurrentRootQuat = Controlled->GetActorQuat();
 	FQuat AirframeQuat = Airframe->GetComponentQuat();
@@ -349,7 +345,7 @@ void UFlightComponent::TempRecovery(const float D, const float Deg)
 
 	FQuat DesiredRelQuat = DownOffset.Inverse();
 
-	float NoseAlpha = FMath::Clamp(AircraftStats->AOARecoverySpeed * D, 0.f, 1.f);
+	float NoseAlpha = FMath::Clamp(AirStats.AOARecoverySpeed * D, 0.f, 1.f);
 	FQuat NewAirframeRelQuat = FQuat::Slerp(AirframeCurrentRelQuat, DesiredRelQuat, NoseAlpha);
 
 	if (IsValid(Airframe)) Airframe->SetRelativeRotation(NewAirframeRelQuat);
@@ -377,8 +373,7 @@ float UFlightComponent::GetAOA()
 
 float UFlightComponent::DragAOA()
 {
-	if (!IsValid(AircraftStats)) return 0.f;
-	float dragCo = AircraftStats->DragCoefficient;
+	float dragCo = AirStats.DragCoefficient;
 	float drag = FMath::Abs(GetAOA()) * dragCo * (UFlightMathLibrary::SpeedToKMH(currentSpeed) / 4);
 
 	//GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
@@ -443,10 +438,10 @@ float UFlightComponent::PitchDrag()
 
 void UFlightComponent::ApplyPitch(const float DeltaSeconds)
 {
-	if (!IsValid(AircraftStats)) return;
-	if (bLanded && bCanTakeOff && UserRotation.Pitch < 0) return;
-	float CurveTurn = AircraftStats->DragCurve->GetFloatValue(UFlightMathLibrary::SpeedToKMH(currentSpeed));
-	float CompressionTurn = AircraftStats->CompressionCurve->GetFloatValue(UFlightMathLibrary::SpeedToKMH(currentSpeed));
+	if (bLanded && !bCanTakeOff) return;
+	if (!IsValid(AirStats.DragCurve) || !IsValid(Airframe)) return;
+	float CurveTurn = AirStats.DragCurve->GetFloatValue(UFlightMathLibrary::SpeedToKMH(currentSpeed));
+	float CompressionTurn = AirStats.CompressionCurve->GetFloatValue(UFlightMathLibrary::SpeedToKMH(currentSpeed));
 	//GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Curve: %.2f"), CurveTurn));
 	if (UserRotation.Pitch == 0)
 	{
@@ -456,36 +451,35 @@ void UFlightComponent::ApplyPitch(const float DeltaSeconds)
 		return;
 	}
 		
-	float InterpSpeed = AircraftStats->TurnRate * CurveTurn * CompressionTurn;
+	float InterpSpeed = AirStats.TurnRate * CurveTurn * CompressionTurn;
 	InterpSpeed = UserRotation.Pitch < 0 ? InterpSpeed * 0.5 : InterpSpeed;
 
 	float TargetPitchRate = UserRotation.Pitch * InterpSpeed;
 	NextRotation.Pitch = FMath::FInterpTo(NextRotation.Pitch, TargetPitchRate, DeltaSeconds, 5.f);
 
 	FRotator DeltaRot(NextRotation.Pitch * DeltaSeconds, 0.f, 0.f);
-	if (IsValid(Airframe))
-		Airframe->AddLocalRotation(DeltaRot);
+	Airframe->AddLocalRotation(DeltaRot);
 }
 
 void UFlightComponent::ApplyYaw(const float DeltaSeconds)
 {
-	if (!IsValid(AircraftStats)) return;
+	if (!IsValid(Airframe)) return;
 	if (UserRotation.Yaw == 0) {
 		NextRotation.Yaw = FMath::FInterpTo(NextRotation.Yaw, 0, DeltaSeconds, 3.f);
 		FRotator DeltaRot(0.f, NextRotation.Yaw * DeltaSeconds,0.f);
 		Airframe->AddLocalRotation(DeltaRot);
 		return;
 	}
-	float TargetYawRate = UserRotation.Yaw * AircraftStats->RudderRate;
+	float TargetYawRate = UserRotation.Yaw * AirStats.RudderRate;
 	NextRotation.Yaw = FMath::FInterpTo(NextRotation.Yaw, TargetYawRate, DeltaSeconds, 2.f);
 
 	FRotator DeltaRot(0.f, NextRotation.Yaw * DeltaSeconds,0.f);
-	if (IsValid(Airframe)) Airframe->AddLocalRotation(DeltaRot);
+	Airframe->AddLocalRotation(DeltaRot);
 }
 
 void UFlightComponent::ApplyRoll(const float DeltaSeconds)
 {
-	if (!IsValid(AircraftStats)) return;
+	if (!IsValid(Airframe)) return;
 	if (UserRotation.Roll == 0)
 	{
 		NextRotation.Roll = FMath::FInterpTo(NextRotation.Roll, 0, DeltaSeconds, 3.f);
@@ -493,8 +487,8 @@ void UFlightComponent::ApplyRoll(const float DeltaSeconds)
 		Airframe->AddLocalRotation(DeltaRot);
 		return;
 	}
-	float TargetRollRate = UserRotation.Roll * AircraftStats->RollRate;
+	float TargetRollRate = UserRotation.Roll * AirStats.RollRate;
 	NextRotation.Roll = FMath::FInterpTo(NextRotation.Roll, TargetRollRate, DeltaSeconds, 5.f);
 	FRotator DeltaRot(0.f, 0.f, NextRotation.Roll * DeltaSeconds);
-	if (IsValid(Airframe)) Airframe->AddLocalRotation(DeltaRot);
+	Airframe->AddLocalRotation(DeltaRot);
 }

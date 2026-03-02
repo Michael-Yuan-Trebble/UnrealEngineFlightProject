@@ -33,9 +33,6 @@ public:
 	float SpringArmLength = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float NumOfPylons = 0.f;
-
-	UPROPERTY(EditAnywhere)
 	float DragCoefficient = 0.f;
 
 	UPROPERTY(EditAnywhere)
@@ -44,13 +41,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	int MaxSpeedRangeTurn = 0;
 
+	// TODO: Might just make this one curve and call it like turn curve or something
+
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UCurveFloat> DragCurve = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UCurveFloat> CompressionCurve = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UStaticMesh> Pylon = nullptr;
-
 };
