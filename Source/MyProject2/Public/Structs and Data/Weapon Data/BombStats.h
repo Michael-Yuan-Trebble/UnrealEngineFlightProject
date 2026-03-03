@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Structs and Data/Weapon Data/BaseWeaponStats.h"
-#include "Structs and Data/InGameBombStats.h"
+#include "Structs and Data/InGame/InGameBombStats.h"
 #include "BombStats.generated.h"
 
 UCLASS()

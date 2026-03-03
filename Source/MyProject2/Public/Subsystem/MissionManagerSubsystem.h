@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Enums/TakeoffType.h"
-#include "Structs and Data/MissionData.h"
+#include "Structs and Data/MissionInfo/MissionData.h"
 #include "MissionManagerSubsystem.generated.h"
 
 UCLASS()

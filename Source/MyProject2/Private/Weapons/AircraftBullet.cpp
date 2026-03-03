@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Bullet!"));
 #include "Weapons/AircraftBullet.h"
 #include "Components/BoxComponent.h"
 #include "Units/Aircraft/BaseAircraft.h"
+#include "NiagaraSystem.h"
 #include "Structs and Data/Weapon Data/BulletStats.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Interfaces/TeamInterface.h"

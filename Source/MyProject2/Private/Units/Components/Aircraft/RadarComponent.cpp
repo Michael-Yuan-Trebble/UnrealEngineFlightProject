@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Radar!"));
-#include "Units/Aircraft/RadarComponent.h"
+#include "Units/Components/Aircraft/RadarComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Units/BaseUnit.h"
 #include "Subsystem/AircraftRegistry.h"

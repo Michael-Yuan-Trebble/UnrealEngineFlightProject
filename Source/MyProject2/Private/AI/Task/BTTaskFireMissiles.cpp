@@ -1,11 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "AI/Task/BTTaskFireMissiles.h"
 #include "Units/Aircraft/AI/EnemyAircraft.h"
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"
-#include "Units/Aircraft/WeaponSystemComponent.h"
-#include "Units/Aircraft/FlightComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Weapons/BaseWeapon.h"
 

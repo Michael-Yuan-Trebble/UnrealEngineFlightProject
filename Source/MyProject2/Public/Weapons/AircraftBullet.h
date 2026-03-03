@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "NiagaraSystem.h"
 #include "Structs and Data/Weapon Data/BulletStats.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "AircraftBullet.generated.h"
 
 class ABaseAircraft;
+class UNiagaraSystem;
 
 UCLASS()
 class MYPROJECT2_API AAircraftBullet : public AActor

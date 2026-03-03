@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Unit!"));
 #include "Units/BaseUnit.h"
 #include "Player Info/PlayerGameState.h"
 #include "Subsystem/AircraftRegistry.h"
@@ -8,7 +7,7 @@
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "UI/PlayerHUD.h"
 #include "Kismet/GameplayStatics.h"
-#include "Units/HealthComponent.h"
+#include "Units/Components/Standard/HealthComponent.h"
 
 ABaseUnit::ABaseUnit() 
 {

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
-#include "Structs and Data/FDetectedAircraftInfo.h"
+#include "Structs and Data/InGame/FDetectedAircraftInfo.h"
 #include "ChooseTarget.generated.h"
 
 class AEnemyAircraft;

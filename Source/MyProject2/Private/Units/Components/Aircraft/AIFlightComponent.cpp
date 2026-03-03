@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Units/Aircraft/AI/AIFlightComponent.h"
+#include "Units/Components/Aircraft/AIFlightComponent.h"
 
 UAIFlightComponent::UAIFlightComponent()
 {

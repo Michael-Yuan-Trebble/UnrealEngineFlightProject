@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "Structs and Data/MissionData.h"
+#include "Structs and Data/MissionInfo/MissionData.h"
 #include "LevelListData.generated.h"
 
 USTRUCT(BlueprintType)

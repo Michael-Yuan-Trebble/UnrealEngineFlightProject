@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Structs and Data/InGameMissileStats.h"
+#include "Structs and Data/InGame/InGameMissileStats.h"
 #include "Structs and Data/Weapon Data/BaseWeaponStats.h"
 #include "IRMissileStats.generated.h"
 

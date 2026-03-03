@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Structs and Data/CooldownWeapon.h"
+#include "Structs and Data/InGame/CooldownWeapon.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
-#include "Structs and Data/AircraftWeaponInfo.h"
+#include "Structs and Data/LoadoutInfo/AircraftWeaponInfo.h"
 #include "Structs and Data/Weapon Data/BulletStats.h"
-#include "Structs and Data/InGameAirStats.h"
+#include "Structs and Data/InGame/InGameAirStats.h"
 #include "WeaponSystemComponent.generated.h"
 
 class ABaseAircraft;

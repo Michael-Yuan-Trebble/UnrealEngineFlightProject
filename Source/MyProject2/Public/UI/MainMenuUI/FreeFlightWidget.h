@@ -6,8 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "UI/MainMenuUI/LevelButton.h"
 #include "Components/ScrollBox.h"
-#include "Structs and Data/LevelListData.h"
-#include "Structs and Data/MissionData.h"
+#include "Structs and Data/MissionInfo/LevelListData.h"
+#include "Structs and Data/MissionInfo/MissionData.h"
 #include "FreeFlightWidget.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelSelected, FMissionData, LevelName);

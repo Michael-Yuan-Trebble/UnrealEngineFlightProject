@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Structs and Data/MissionData.h"
+#include "Structs and Data/MissionInfo/MissionData.h"
 #include "MainMenuGamemode.generated.h"
 
 class AAircraftPlayerController;

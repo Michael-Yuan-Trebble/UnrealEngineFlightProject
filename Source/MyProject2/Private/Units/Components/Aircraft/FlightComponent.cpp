@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Units/Aircraft/FlightComponent.h"
+#include "Units/Components/Aircraft/FlightComponent.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Components/BoxComponent.h"
-#include "DebugHelper.h"
+#include "Debug/DebugHelper.h"
 
 EThrottleStage UFlightComponent::getThrottleStage(const float throttle)
 {

@@ -1,10 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Task Fire Gun!"));
-#define printFalse(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Yellow, TEXT("Not Firing!"));
 #include "AI/Task/BTTaskFireGun.h"
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Debug/DebugHelper.h"
 
 UBTTaskFireGun::UBTTaskFireGun() 
 {
@@ -31,11 +30,11 @@ void UBTTaskFireGun::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemo
 	if (IsInsideCone(Selected, 8.0f) && CanShotHit(Selected)) 
 	{
 		Controller->ShootGun(true);
-		print()
+		AIR_DEBUG_KEY(1, FColor::Red, "FIRING");
 	}
 	else 
 	{
-		printFalse()
+		AIR_DEBUG_KEY(1, FColor::Red, "NOT FIRING");
 		Controller->ShootGun(false);
 	}
 }

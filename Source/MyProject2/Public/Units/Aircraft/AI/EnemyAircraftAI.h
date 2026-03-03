@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "Structs and Data/FDetectedAircraftInfo.h"
+#include "Structs and Data/InGame/FDetectedAircraftInfo.h"
 #include "EnemyAircraftAI.generated.h"
 
 class AEnemyAircraft;

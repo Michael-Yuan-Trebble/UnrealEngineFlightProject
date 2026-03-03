@@ -6,7 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
-#include "Structs and Data/AircraftLoadoutData.h"
+#include "Structs and Data/LoadoutInfo/AircraftLoadoutData.h"
+#include "Structs and Data/MissionInfo/MissionData.h"
 #include "Enums/ControlModeTypes.h"
 #include "AircraftSelectionGamemode.generated.h"
 

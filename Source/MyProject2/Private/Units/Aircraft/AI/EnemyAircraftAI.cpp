@@ -1,12 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("AI CONTROL!"));
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"
 #include "Engine/World.h"
 #include "Units/Aircraft/AI/EnemyAircraft.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "Units/Aircraft/BaseAircraft.h"
-#include "Units/Aircraft/WeaponSystemComponent.h"
+#include "Units/Components/Aircraft/WeaponSystemComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Weapons/BaseWeapon.h"
 #include "BehaviorTree/BlackboardComponent.h"

@@ -7,7 +7,7 @@
 #include "LockBoxWidget.h"
 #include "UI/HitNotificationWidget.h"
 #include "MinimapWidget.h"
-#include "Structs and Data/FDetectedAircraftInfo.h"
+#include "Structs and Data/InGame/FDetectedAircraftInfo.h"
 #include "PitchLadder.h"
 #include "PlayerHUD.generated.h"
 

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Structs and Data/CooldownWeapon.h"
+#include "Structs and Data/InGame/CooldownWeapon.h"
 
 FCooldownWeapon::FCooldownWeapon() {}
 

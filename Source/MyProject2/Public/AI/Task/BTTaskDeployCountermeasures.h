@@ -6,9 +6,6 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTTaskDeployCountermeasures.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MYPROJECT2_API UBTTaskDeployCountermeasures : public UBTTaskNode
 {

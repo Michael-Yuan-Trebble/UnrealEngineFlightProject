@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("CONTROL!"));
 #include "Gamemodes/FlightGamemode.h"
 #include "UObject/ConstructorHelpers.h"
 #include "GameFramework/PlayerStart.h"
@@ -8,10 +7,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Units/Aircraft/Player/PlayerAircraft.h"
 #include "Player Info/PlayerGameInstance.h"
-#include "UI/PlayerHUD.h"
 #include "EngineUtils.h"
 #include "Subsystem/AircraftRegistry.h"
-#include "Structs and Data/AircraftLoadoutData.h"
+#include "Structs and Data/LoadoutInfo/AircraftLoadoutData.h"
 #include "Weapons/BaseWeapon.h"
 
 AFlightGamemode::AFlightGamemode() 

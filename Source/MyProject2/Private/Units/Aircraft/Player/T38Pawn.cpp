@@ -2,12 +2,6 @@
 
 
 #include "Units/Aircraft/Player/T38Pawn.h"
-#include "Camera/CameraComponent.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Components/SkeletalMeshComponent.h"
-#include "Units/Aircraft/FlightComponent.h"
-#include "Animation/AnimInstance.h"
-#include "Player Info/AircraftPlayerController.h"
 
 AT38Pawn::AT38Pawn() 
 {

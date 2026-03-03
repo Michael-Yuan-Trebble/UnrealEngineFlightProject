@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "AI/BaseSpawnPoint.h"
-#include "Structs and Data/MissionWave.h"
+#include "Structs and Data/MissionInfo/MissionWave.h"
 #include "BaseMissionController.generated.h"
 
 UCLASS()

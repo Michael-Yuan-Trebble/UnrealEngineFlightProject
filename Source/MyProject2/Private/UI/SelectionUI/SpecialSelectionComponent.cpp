@@ -6,7 +6,7 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Player Info/PlayerGameInstance.h"
-#include "Units/Aircraft/MenuManagerComponent.h"
+#include "Units/Components/Player/MenuManagerComponent.h"
 
 USpecialSelectionComponent::USpecialSelectionComponent()
 {

@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Sound Manager!"));
-#include "Units/Aircraft/AircraftAudioComponent.h"
+#include "Units/Components/Aircraft/AircraftAudioComponent.h"
 #include "Sound/SoundWave.h"
 #include "Sound/SoundAttenuation.h"
 #include "Units/Aircraft/BaseAircraft.h"

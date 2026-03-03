@@ -1,10 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Service Fire Gun!"));
 #include "AI/Service/BTServiceShootGun.h"
 #include "DrawDebugHelpers.h"
-#include "Units/Aircraft/WeaponSystemComponent.h"
-#include "Units/Aircraft/FlightComponent.h"
 #include "Units/Aircraft/AI/EnemyAircraft.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"

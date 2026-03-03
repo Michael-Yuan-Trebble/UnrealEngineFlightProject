@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "AI/Service/BTServiceWeaponAngle.h"
-#include "Units/Aircraft/WeaponSystemComponent.h"
-#include "Units/Aircraft/FlightComponent.h"
+#include "Units/Components/Aircraft/FlightComponent.h"
+#include "Units/Components/Aircraft/WeaponSystemComponent.h"
+#include "Structs and Data/InGame/CooldownWeapon.h"
 #include "Units/Aircraft/AI/EnemyAircraft.h"
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"
 #include "Units/Aircraft/BaseAircraft.h"

@@ -6,7 +6,6 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "StandardFlight.generated.h"
 
-
 UCLASS()
 class MYPROJECT2_API UStandardFlight : public UBTTaskNode
 {

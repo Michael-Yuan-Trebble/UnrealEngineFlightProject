@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "Structs and Data/MissionData.h"
+#include "Structs and Data/MissionInfo/MissionData.h"
 #include "Enums/TakeoffType.h"
 #include "LevelTransitionSubsystem.generated.h"
 

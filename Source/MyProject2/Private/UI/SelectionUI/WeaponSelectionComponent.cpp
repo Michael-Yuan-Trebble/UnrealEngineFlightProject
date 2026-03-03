@@ -4,7 +4,7 @@
 #include "UI/SelectionUI/WeaponSelectionComponent.h"
 #include "UI/SelectionUI/WeaponSelectionWidget.h"
 #include "Player Info/SaveGameManager.h"
-#include "Units/Aircraft/MenuManagerComponent.h"
+#include "Units/Components/Player/MenuManagerComponent.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "Player Info/AircraftPlayerController.h"
 

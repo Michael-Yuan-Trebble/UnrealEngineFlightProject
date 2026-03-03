@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AI/BaseSpawnPoint.h"
 #include "MissionWave.generated.h"
 
 USTRUCT(BlueprintType)
@@ -12,7 +11,7 @@ struct FMissionWave
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	TArray<ABaseSpawnPoint*> SpawnPoints{};
+	TArray<class ABaseSpawnPoint*> SpawnPoints{};
 
 	UPROPERTY(EditAnywhere)
 	FString ObjectiveName = TEXT("");

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Structs and Data/FDetectedAircraftInfo.h"
+#include "Structs and Data/InGame/FDetectedAircraftInfo.h"
 #include "RadarComponent.generated.h"
 
 class ABaseUnit;

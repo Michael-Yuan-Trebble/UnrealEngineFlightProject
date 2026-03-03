@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
-#include "Structs and Data/MissionData.h"
+#include "Structs and Data/MissionInfo/MissionData.h"
 #include "LevelButton.generated.h"
 
 

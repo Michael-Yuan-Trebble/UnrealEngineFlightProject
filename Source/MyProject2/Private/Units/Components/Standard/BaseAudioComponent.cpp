@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Units/BaseAudioComponent.h"
+#include "Units/Components/Standard/BaseAudioComponent.h"
 #include "Sound/SoundBase.h"
 #include "Sound/SoundAttenuation.h"
 #include "Components/AudioComponent.h"

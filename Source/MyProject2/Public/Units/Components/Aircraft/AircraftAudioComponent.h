@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Units/BaseAudioComponent.h"
+#include "Units/Components/Standard/BaseAudioComponent.h"
 #include "Enums/CameraPerspective.h"
 #include "AircraftAudioComponent.generated.h"
 

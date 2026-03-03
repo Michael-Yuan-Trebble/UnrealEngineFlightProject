@@ -1,11 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Widget!"));
 #include "UI/SelectionUI/AircraftSelectionWidget.h"
 #include "Components/ScrollBox.h"
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
 #include "Player Info/AircraftPlayerController.h"
-#include "Units/Aircraft/MenuManagerComponent.h"
+#include "Units/Components/Player/MenuManagerComponent.h"
 #include "UI/SelectionUI/AircraftSelectionComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"

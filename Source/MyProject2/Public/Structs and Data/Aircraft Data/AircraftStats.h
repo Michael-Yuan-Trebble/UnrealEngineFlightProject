@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "Structs and Data/InGameAirStats.h"
-#include "Structs and Data/AircraftWeaponInfo.h"
+#include "Structs and Data/InGame/InGameAirStats.h"
+#include "Structs and Data/LoadoutInfo/AircraftWeaponInfo.h"
 #include "AircraftStats.generated.h"
 
 UCLASS()

@@ -1,10 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Attack!"));
 #include "AI/Service/Attack.h"
 #include "Units/Aircraft/AI/EnemyAircraft.h"
-#include "Units/Aircraft/FlightComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
+#include "Structs and Data/MathLib/FlightMathLibrary.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -60,7 +59,7 @@ void UBTServiceAttack::CalculateAngle(const float DeltaSeconds)
 	}
 	float DesiredYawInput = CalculateYawDegrees(LocalDir);
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan,FString::Printf(TEXT("Pitch: %.2f Roll: %.2f"), DesiredPitchInput, DesiredRollInput));
+	// GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan,FString::Printf(TEXT("Pitch: %.2f Roll: %.2f"), DesiredPitchInput, DesiredRollInput));
 
 	BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, -DesiredRollInput);
 	BlackboardComp->SetValueAsFloat(PitchKey.SelectedKeyName, DesiredPitchInput);

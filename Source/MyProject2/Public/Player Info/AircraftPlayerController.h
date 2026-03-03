@@ -7,9 +7,9 @@
 #include "Enums/MenuState.h"
 #include "Enums/ControlModeTypes.h"
 #include "Enums/FlightMode.h"
-#include "Structs and Data/FlightInputConfig.h"
-#include "Structs and Data/WeaponInputConfig.h"
-#include "Structs and Data/MenuInputConfig.h"
+#include "Structs and Data/InputConfig/FlightInputConfig.h"
+#include "Structs and Data/InputConfig/WeaponInputConfig.h"
+#include "Structs and Data/InputConfig/MenuInputConfig.h"
 #include "AircraftPlayerController.generated.h"
 
 class APlayerAircraft;

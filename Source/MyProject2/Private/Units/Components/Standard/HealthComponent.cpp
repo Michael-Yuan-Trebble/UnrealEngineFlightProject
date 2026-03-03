@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Health Component!"));
-#include "Units/HealthComponent.h"
+#include "Units/Components/Standard/HealthComponent.h"
 #include "Units/BaseUnit.h"
 #include "Subsystem/AircraftRegistry.h"
 #include "Units/Aircraft/Player/PlayerAircraft.h"

@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Free Flight Widget!"));
 #include "UI/MainMenuUI/FreeFlightWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"

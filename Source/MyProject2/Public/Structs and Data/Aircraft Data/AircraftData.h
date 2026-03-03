@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "Structs and Data/PylonLoadout.h"
-#include "Specials/BaseSpecial.h"
+#include "Structs and Data/LoadoutInfo/PylonLoadout.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "AircraftData.generated.h"
+
+class UBaseSpecial;
 
 UCLASS()
 class MYPROJECT2_API UAircraftData : public UPrimaryDataAsset

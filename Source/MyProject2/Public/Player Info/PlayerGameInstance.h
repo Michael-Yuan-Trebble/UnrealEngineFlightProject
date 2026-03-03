@@ -5,8 +5,8 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
-#include "Structs and Data/AircraftLoadoutData.h"
-#include "Structs and Data/MissionData.h"
+#include "Structs and Data/LoadoutInfo/AircraftLoadoutData.h"
+#include "Structs and Data/MissionInfo/MissionData.h"
 #include "PlayerGameInstance.generated.h"
 
 class UMainMenuManager;

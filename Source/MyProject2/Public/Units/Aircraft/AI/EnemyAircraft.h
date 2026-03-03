@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Units/Aircraft/BaseAircraft.h"
-#include "Structs and Data/FDetectedAircraftInfo.h"
+#include "Structs and Data/InGame/FDetectedAircraftInfo.h"
 #include "Structs and Data/Aircraft Data/AIAircraftData.h"
 #include "EnemyAircraft.generated.h"
 

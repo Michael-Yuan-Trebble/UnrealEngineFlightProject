@@ -6,9 +6,6 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"
 #include "Units/Aircraft/AI/EnemyAircraft.h"
-#include "Units/Aircraft/FlightComponent.h"
-#include "BehaviorTree/BlackboardComponent.h"
-#include "Units/Aircraft/FlightComponent.h"
 
 UBTTaskFlightTaskNode::UBTTaskFlightTaskNode() 
 {

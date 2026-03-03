@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
-#include "Structs and Data/KillEvent.h"
+#include "Structs and Data/MissionInfo/KillEvent.h"
 #include "PlayerGameState.generated.h"
 
 UCLASS()

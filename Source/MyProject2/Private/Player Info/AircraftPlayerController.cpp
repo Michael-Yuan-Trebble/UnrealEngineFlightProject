@@ -2,8 +2,8 @@
 
 #include "Player Info/AircraftPlayerController.h"
 #include "InputMappingContext.h"
-#include "Units/Aircraft/MenuManagerComponent.h"
-#include "Units/Aircraft/WeaponSystemComponent.h"
+#include "Units/Components/Player/MenuManagerComponent.h"
+#include "Units/Components/Aircraft/WeaponSystemComponent.h"
 #include "Subsystem/AircraftRegistry.h"
 #include "EnhancedInputSubsystems.h"
 #include "UI/PlayerHUD.h"

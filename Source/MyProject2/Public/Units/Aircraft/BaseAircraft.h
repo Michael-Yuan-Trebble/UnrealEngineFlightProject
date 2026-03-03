@@ -7,7 +7,7 @@
 #include "Structs and Data/Weapon Data/BulletStats.h"
 #include "Interfaces/ApproachingMissileInterface.h"
 #include "Enums/FlightMode.h"
-#include "Structs and Data/AircraftAnimationValues.h"
+#include "Structs and Data/Animation/AircraftAnimationValues.h"
 #include "Units/BaseUnit.h"
 #include "Weapons/Missiles/BaseMissile.h"
 #include "Enums/ThrottleStage.h"

@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "Structs and Data/LevelListData.h"
-#include "Structs and Data/MissionData.h"
+#include "Structs and Data/MissionInfo/LevelListData.h"
+#include "Structs and Data/MissionInfo/MissionData.h"
 #include "MainMenuManager.generated.h"
 
 class UMainMenuWidget;

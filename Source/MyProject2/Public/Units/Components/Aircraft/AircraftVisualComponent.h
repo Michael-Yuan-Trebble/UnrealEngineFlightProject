@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Structs and Data/AircraftAnimationInformation.h"
-#include "Structs and Data/AircraftAnimationValues.h"
+#include "Structs and Data/Animation/AircraftAnimationInformation.h"
+#include "Structs and Data/Animation/AircraftAnimationValues.h"
 #include "AircraftVisualComponent.generated.h"
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )

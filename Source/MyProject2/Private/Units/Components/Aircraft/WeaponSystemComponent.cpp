@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Units/Aircraft/WeaponSystemComponent.h"
+#include "Units/Components/Aircraft/WeaponSystemComponent.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Weapons/AircraftBullet.h"
-#include "Units/Aircraft/RadarComponent.h"
+#include "Units/Components/Aircraft/RadarComponent.h"
 #include "Components/BoxComponent.h"
 #include "Units/BaseUnit.h"
 #include "Kismet/GameplayStatics.h"

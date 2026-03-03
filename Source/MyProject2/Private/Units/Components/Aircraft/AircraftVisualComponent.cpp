@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Units/Aircraft/AircraftVisualComponent.h"
+#include "Units/Components/Aircraft/AircraftVisualComponent.h"
 #include "Specials/CountermeasureActor.h"
 
 UAircraftVisualComponent::UAircraftVisualComponent() { PrimaryComponentTick.bCanEverTick = true; }

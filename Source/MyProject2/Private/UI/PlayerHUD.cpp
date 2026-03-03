@@ -6,10 +6,10 @@
 #include "Units/Aircraft/BaseAircraft.h"
 #include "UI/LockBoxWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
-#include "Units/Aircraft/FlightComponent.h"
-#include "Units/Aircraft/RadarComponent.h"
+#include "Units/Components/Aircraft/FlightComponent.h"
+#include "Units/Components/Aircraft/RadarComponent.h"
 #include "Components/CanvasPanelSlot.h"
-#include "Units/Aircraft/WeaponSystemComponent.h"
+#include "Units/Components/Aircraft/WeaponSystemComponent.h"
 #include "Units/Aircraft/Player/PlayerAircraft.h"
 
 APlayerHUD::APlayerHUD() 

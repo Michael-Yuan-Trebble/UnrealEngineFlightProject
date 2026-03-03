@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Units/Aircraft/MenuManagerComponent.h"
+#include "Units/Components/Player/MenuManagerComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player Info/PlayerGameInstance.h"
 #include "UI/SelectionUI/AircraftSelectionComponent.h"

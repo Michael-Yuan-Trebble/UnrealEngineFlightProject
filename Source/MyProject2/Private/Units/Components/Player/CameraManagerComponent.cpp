@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Camera Manager!"));
-#include "Units/Aircraft/Player/CameraManagerComponent.h"
+#include "Units/Components/Player/CameraManagerComponent.h"
 #include "Units/Aircraft/Player/PlayerAircraft.h"
-#include "Units/Aircraft/AircraftAudioComponent.h"
+#include "Units/Components/Aircraft/AircraftAudioComponent.h"
 #include "UI/PlayerHUD.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/SpringArmComponent.h"

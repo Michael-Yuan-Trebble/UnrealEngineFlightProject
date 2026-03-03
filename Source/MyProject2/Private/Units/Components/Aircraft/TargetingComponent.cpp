@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Units/Aircraft/TargetingComponent.h"
+#include "Units/Components/Aircraft/TargetingComponent.h"
 
 UTargetingComponent::UTargetingComponent()
 {
