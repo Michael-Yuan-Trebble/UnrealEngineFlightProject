@@ -37,7 +37,7 @@ public:
 
 	const TArray<FDetectedAircraftInfo>& GetEnemies() const { return Enemies; };
 
-	ABaseUnit* GetSelected() const { return Selected; };
+	ABaseUnit* GetSelected() const { return Selected.Get(); };
 
 private:
 	virtual void BeginPlay() override;
@@ -50,7 +50,7 @@ private:
 	TObjectPtr<ABaseUnit> Controlled = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<ABaseUnit> Selected = nullptr;
+	TWeakObjectPtr<ABaseUnit> Selected = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<APlayerHUD> HUD = nullptr;
@@ -58,7 +58,7 @@ private:
 	FTimerHandle RadarScanTimer;
 
 	UPROPERTY()
-	TObjectPtr<ABaseUnit> LastSelected = nullptr;
+	TWeakObjectPtr<ABaseUnit> LastSelected = nullptr;
 
 		
 };

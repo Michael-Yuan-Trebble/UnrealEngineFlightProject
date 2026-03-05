@@ -4,10 +4,6 @@
 #include "Engine/World.h"
 #include "Units/Aircraft/AI/EnemyAircraft.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
-#include "Units/Aircraft/BaseAircraft.h"
-#include "Units/Components/Aircraft/WeaponSystemComponent.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Weapons/BaseWeapon.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 
@@ -38,9 +34,6 @@ void AEnemyAircraftAI::OnPossess(APawn* PawnPossess)
 	}
 
 	Controlled = Cast<AEnemyAircraft>(GetPawn());
-	if (!Controlled) return;
-
-	WeaponComp = Controlled->GetWeaponComp();
 }
 
 void AEnemyAircraftAI::Tick(float DeltaTime) 

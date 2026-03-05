@@ -31,7 +31,7 @@ void UAircraftDatabase::LoadAllAircraftFromFolder(const FString& Path)
                 
                 UObject* CDO = BlueprintAsset->GeneratedClass->GetDefaultObject();
                 UAircraftData* AircraftData = Cast<UAircraftData>(CDO);
-                if (!AircraftData) continue;
+                if (!IsValid(AircraftData)) continue;
                 AllAircraft.Add(AircraftData);
             }
         }

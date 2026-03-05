@@ -43,8 +43,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Vapors")
 	void SetWingVapors(const TArray<UStaticMeshComponent*>& Vapors) { AllMainWingVapors = Vapors; }
 
-	virtual void PossessedBy(AController* Controller) override;
-
 	virtual void HandleLOD(FVector CameraLoc) override;
 
 	virtual void FireBullets() {};
@@ -73,6 +71,8 @@ public:
 	void SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In);
 
 	void SetSpecial(TSubclassOf<UBaseSpecial> In);
+
+	void SwitchWeapon(const TSubclassOf<ABaseWeapon> InWeapon);
 
 	void SetFlightMode(EFlightMode FlightMode);
 

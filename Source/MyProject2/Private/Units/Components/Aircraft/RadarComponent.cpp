@@ -37,34 +37,31 @@ void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 void URadarComponent::ScanTargets()
 {
-	if (!Controlled || !GetWorld()) return;
+	if (!IsValid(Controlled) || !GetWorld()) return;
 
 	UAircraftRegistry* Registry = UAircraftRegistry::Get(GetWorld());
-	if (!Registry) return;
+	if (!IsValid(Registry)) return;
 
-	if (!IsValid(Selected) || Selected->IsPendingKillPending())
+	if (!Selected.IsValid() || Selected->IsPendingKillPending())
 	{
 		HandleSelectedDestroyed();
 	}
 
 	Enemies.Empty();
 
-	ABaseUnit* Previous = Selected;
-
+	ABaseUnit* Previous = Selected.Get();
 	ABaseUnit* FirstSelected = nullptr;
-	for (TWeakObjectPtr<ABaseUnit> RegisteredPawn : Registry->RegisteredUnits)
-	{
-		if (!RegisteredPawn.IsValid()) continue;
-		if (RegisteredPawn == Controlled) continue;
-		if (RegisteredPawn->GetFaction() == Controlled->GetFaction()) continue;
-		if (!RegisteredPawn->IsLockable()) continue;
 
-		ABaseUnit* Unit = RegisteredPawn.Get();
+	for (const TWeakObjectPtr<ABaseUnit>& RegisteredPawn : Registry->RegisteredUnits)
+	{
+		ABaseUnit* T = RegisteredPawn.Get();
+		if (!IsValid(T) || T == Controlled) continue;
+		if (T->GetFaction() == Controlled->GetFaction() || !T->IsLockable()) continue;
 
 		FDetectedAircraftInfo Info;
-		Info.CurrentPawn = Unit;
-		Info.Location = RegisteredPawn->GetActorLocation();
-		Info.Rotation = RegisteredPawn->GetActorRotation();
+		Info.CurrentPawn = T;
+		Info.Location = T->GetActorLocation();
+		Info.Rotation = T->GetActorRotation();
 		Info.threatLevel = Info.CalculateThreat();
 
 		if (Info.threatLevel <= 0) continue;
@@ -72,11 +69,11 @@ void URadarComponent::ScanTargets()
 
 		if (!IsValid(FirstSelected))
 		{
-			FirstSelected = Unit;
+			FirstSelected = T;
 		}
 	}
 
-	if ((!IsValid(Selected) || !Selected->IsValidLowLevel()) && IsValid(FirstSelected) && FirstSelected != Previous)
+	if ((Selected.IsValid() || !Selected->IsValidLowLevel()) && IsValid(FirstSelected) && FirstSelected != Previous)
 	{
 		SetTarget(FirstSelected);
 	}
@@ -91,8 +88,8 @@ void URadarComponent::HandleSelectedDestroyed()
 {
 	Selected = nullptr;
 
-	if (Controlled) Controlled->SetTracking(nullptr);
-	if (HUD) HUD->SetTarget(nullptr);
+	if (IsValid(Controlled)) Controlled->SetTracking(nullptr);
+	if (IsValid(HUD)) HUD->SetTarget(nullptr);
 
 	CycleToNextTarget();
 }
@@ -103,28 +100,30 @@ void URadarComponent::HandleSelectedDestroyed()
 
 void URadarComponent::CycleTarget() 
 {
-	if (Enemies.Num() == 0) return;
+	if (Enemies.Num() == 0 || !IsValid(GetWorld())) return;
 
-	FVector CameraLoc;
-	FRotator CameraRot;
+	FVector CameraLoc = FVector::ZeroVector;
+	FRotator CameraRot = FRotator::ZeroRotator;
+
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(CameraLoc, CameraRot);
 	const FVector Forward = CameraRot.Vector();
 
 	float BestDot = -1.0f;
 	AActor* ClosestTarget = nullptr;
 
-	for (const FDetectedAircraftInfo Target : Enemies)
+	for (const FDetectedAircraftInfo& Target : Enemies)
 	{
-		if (!IsValid(Target.CurrentPawn)) continue;
+		AActor* GetTarget = Target.CurrentPawn.Get();
+		if (!IsValid(GetTarget)) return;
 
 		// Find the distance between target and where the player's camera is pointing
-		FVector ToTarget = (Target.CurrentPawn->GetActorLocation() - CameraLoc).GetSafeNormal();
+		FVector ToTarget = (GetTarget->GetActorLocation() - CameraLoc).GetSafeNormal();
 		float Dot = FVector::DotProduct(Forward, ToTarget);
 
 		if (Dot > BestDot)
 		{
 			BestDot = Dot;
-			ClosestTarget = Target.CurrentPawn;
+			ClosestTarget = GetTarget;
 		}
 	}
 
@@ -140,29 +139,29 @@ void URadarComponent::CycleTarget()
 
 void URadarComponent::CycleToNextTarget() 
 {
-	if (Enemies.Num() <= 1) return;
+	if (Enemies.Num() <= 1 || !IsValid(GetWorld())) return;
 
-	FVector CameraLoc;
-	FRotator CameraRot;
+	FVector CameraLoc = FVector::ZeroVector;
+	FRotator CameraRot = FRotator::ZeroRotator;
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(CameraLoc, CameraRot);
-	FVector Forward = CameraRot.Vector();
+	const FVector Forward = CameraRot.Vector();
 
 	float BestAngleDiff = FLT_MAX;
 	AActor* BestTarget = nullptr;
 
-	for (const FDetectedAircraftInfo Target : Enemies)
+	for (const FDetectedAircraftInfo& Target : Enemies)
 	{
-		if (!IsValid(Target.CurrentPawn) || Target.CurrentPawn == Selected) continue;
-		AActor* temp = Cast<AActor>(Target.CurrentPawn);
+		AActor* TargetGet = Target.CurrentPawn.Get();
+		if (!IsValid(TargetGet) || TargetGet == Selected.Get()) return;
 
-		FVector ToTarget = (temp->GetActorLocation() - CameraLoc).GetSafeNormal();
+		FVector ToTarget = (TargetGet->GetActorLocation() - CameraLoc).GetSafeNormal();
 		float Dot = FMath::Clamp(FVector::DotProduct(Forward, ToTarget), -1.0f, 1.0f);
 		float AngleDiff = FMath::Acos(Dot);
 
 		if (AngleDiff < BestAngleDiff)
 		{
 			BestAngleDiff = AngleDiff;
-			BestTarget = temp;
+			BestTarget = TargetGet;
 		}
 	}
 
@@ -175,13 +174,12 @@ void URadarComponent::CycleToNextTarget()
 void URadarComponent::SetTarget(AActor* NewTarget) 
 {
 	ABaseUnit* Unit = Cast<ABaseUnit>(NewTarget);
-	if (!IsValid(Unit) || Selected == Unit) return;
+	ABaseUnit* Target = Selected.Get();
+	if (!IsValid(Unit) || Target == Unit) return;
 
-	if (IsValid(LastSelected) && Unit->GetActorGuid() == LastSelected->GetActorGuid()) return;
-
-	if (IsValid(Selected))
+	if (IsValid(Target))
 	{
-		Selected->OnUnitDeath.RemoveDynamic(this, &URadarComponent::HandleSelectedDestroyed);
+		Target->OnUnitDeath.RemoveDynamic(this, &URadarComponent::HandleSelectedDestroyed);
 	}
 
 	Selected = Unit;

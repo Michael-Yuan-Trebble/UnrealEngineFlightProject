@@ -31,6 +31,4 @@ public:
 	virtual void StartBullets() override;
 	virtual void EndBullets() override;
 
-	void SwitchWeapon(const TSubclassOf<ABaseWeapon> InWeapon);
-
 };

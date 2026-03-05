@@ -20,7 +20,7 @@ public:
 	FRotator Rotation = FRotator::ZeroRotator;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<APawn> CurrentPawn = nullptr;
+	TWeakObjectPtr<APawn> CurrentPawn = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float threatLevel = 0.f;
@@ -28,8 +28,6 @@ public:
 	bool operator==(const FDetectedAircraftInfo& Other) const {
 		return CurrentPawn == Other.CurrentPawn;
 	}
-
-	FDetectedAircraftInfo();
 
 	/*
 		Threat 1.f is Max

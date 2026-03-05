@@ -32,8 +32,3 @@ void AEnemyAircraft::EndBullets()
 {
 	GetWorld()->GetTimerManager().ClearTimer(RepeatTimerHandle);
 }
-
-void AEnemyAircraft::SwitchWeapon(const TSubclassOf<ABaseWeapon> InWeapon)
-{
-	if (WeaponComponent) WeaponComponent->SearchAndEquipWeapon(InWeapon);
-}

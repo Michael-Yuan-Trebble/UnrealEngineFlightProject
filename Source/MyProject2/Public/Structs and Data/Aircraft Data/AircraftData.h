@@ -37,5 +37,5 @@ public:
 	TArray<TSubclassOf<UBaseSpecial>> Specials{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UAircraftStats> AircraftStat = nullptr;
+	TSoftObjectPtr<UAircraftStats> AircraftStat = nullptr;
 };

@@ -7,8 +7,6 @@
 #include "Structs and Data/InGame/FDetectedAircraftInfo.h"
 #include "ChooseTarget.generated.h"
 
-class AEnemyAircraft;
-
 UCLASS(Blueprintable, BlueprintType, meta = (DisplayName = "Tracking Service"))
 class MYPROJECT2_API UBTServiceChooseTarget : public UBTService
 {
@@ -18,6 +16,8 @@ public:
 	UBTServiceChooseTarget();
 
 private:
+	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
 	void PickTarget();
@@ -25,12 +25,15 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector TargetActorKey;
 
-	TArray<FDetectedAircraftInfo> AllAircraft;
+	TArray<FDetectedAircraftInfo> AllAircraft{};
 
-	FDetectedAircraftInfo Selected;
+	FDetectedAircraftInfo Selected{};
 
 	UPROPERTY()
-	TObjectPtr<AEnemyAircraft> Controlled = nullptr;
+	UBlackboardComponent* BlackboardComponent = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<class ABaseAircraft> Controlled = nullptr;
 
 	float timeSinceLastPick = 0.f;
 

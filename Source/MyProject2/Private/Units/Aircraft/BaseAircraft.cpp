@@ -142,11 +142,6 @@ void ABaseAircraft::BeginPlay()
 	}
 }
 
-void ABaseAircraft::PossessedBy(AController* NewController) 
-{
-	Super::PossessedBy(NewController);
-}
-
 void ABaseAircraft::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -292,4 +287,9 @@ float ABaseAircraft::GetMaxWeaponCount() {
 float ABaseAircraft::GetCurrentWeaponCount() {
 	if (IsValid(WeaponComponent)) return WeaponComponent->GetCurrentWeaponCount();
 	return 0.f;
+}
+
+void ABaseAircraft::SwitchWeapon(const TSubclassOf<ABaseWeapon> InWeapon)
+{
+	if (WeaponComponent) WeaponComponent->SearchAndEquipWeapon(InWeapon);
 }

@@ -30,13 +30,10 @@ protected:
 	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<class AEnemyAircraftAI> Controller = nullptr;
+	TObjectPtr<class AAircraftAIController> Controller = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<class UFlightComponent> FlightComp = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<AActor> Selected = nullptr;
+	TWeakObjectPtr<AActor> Selected = nullptr;
 
 private:
 	void EquipAppropriateWeapon();

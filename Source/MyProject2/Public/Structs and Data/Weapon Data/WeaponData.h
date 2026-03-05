@@ -23,6 +23,6 @@ public:
 	FText Description = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UBaseWeaponStats> WeaponStat = nullptr;
+	TSoftObjectPtr<UBaseWeaponStats> WeaponStat = nullptr;
 
 };

@@ -23,5 +23,5 @@ public:
 	FText Class = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UAircraftStats> Stats = nullptr;
+	TSoftObjectPtr<UAircraftStats> Stats = nullptr;
 };

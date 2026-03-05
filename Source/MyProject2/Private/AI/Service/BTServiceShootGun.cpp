@@ -2,54 +2,50 @@
 
 #include "AI/Service/BTServiceShootGun.h"
 #include "DrawDebugHelpers.h"
-#include "Units/Aircraft/AI/EnemyAircraft.h"
+#include "AI/AircraftAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Units/Aircraft/AI/EnemyAircraftAI.h"
 
 UBTServiceShootGun::UBTServiceShootGun() {
 	NodeName = "Update Gun Shot";
 	Interval = 2.f;
 	bNotifyBecomeRelevant = true;
+	bNotifyTick = true;
 }
 
 void UBTServiceShootGun::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) 
 {
 	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
 	BlackboardComp = OwnerComp.GetBlackboardComponent();
-	Controller = Cast<AEnemyAircraftAI>(OwnerComp.GetAIOwner());
+	if (!IsValid(BlackboardComp)) return;
+	AAircraftAIController* Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
+	Controlled = Controller->GetPawn();
 	Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
 }
 
 void UBTServiceShootGun::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
-	if (!IsValid(Selected)) return;
-	if (IsInsideCone())
-	{
-		BlackboardComp->SetValueAsBool(bFireGun.SelectedKeyName, true);
-	}
-	else
-	{
-		BlackboardComp->SetValueAsBool(bFireGun.SelectedKeyName, false);
-	}
+	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+	bool bFire = IsInsideCone();
+	if (IsValid(BlackboardComp)) BlackboardComp->SetValueAsBool(bFireGun.SelectedKeyName, bFire);
 }
 
 bool UBTServiceShootGun::IsInsideCone()
 {
-	if (!IsValid(Selected) || !IsValid(Controller)) return false;
-	FVector ToPlayer = (Selected->GetActorLocation() - Controller->GetPawn()->GetActorLocation()).GetSafeNormal();
-	FVector Forward = Controller->GetPawn()->GetActorForwardVector();
+	AActor* Target = Selected.Get();
+	if (!IsValid(Target) || !IsValid(Controlled)) return false;
+
+	FVector ToPlayer = (Target->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
+	FVector Forward = Controlled->GetActorForwardVector();
 
 	float CosAngle = FVector::DotProduct(Forward, ToPlayer);
 	float Threshold = FMath::Cos(FMath::DegreesToRadians(ConeAngle));
 
-	if (APawn* Pawn = Controller->GetPawn())
-	{
-		float HalfAngleRad = FMath::DegreesToRadians(ConeAngle);
+	float HalfAngleRad = FMath::DegreesToRadians(ConeAngle);
 
 		/*
 		DrawDebugCone(
 			GetWorld(),
-			Pawn->GetActorLocation(),
+			Controlled->GetActorLocation(),
 			Forward,
 			SHOOTDISTANCE,
 			HalfAngleRad,
@@ -61,9 +57,8 @@ bool UBTServiceShootGun::IsInsideCone()
 			0,
 			1.0f
 		);*/
-	}
 
-	float Distance = FVector::Dist(Controller->GetPawn()->GetActorLocation(), Selected->GetActorLocation());
+	float Distance = FVector::Dist(Controlled->GetActorLocation(), Target->GetActorLocation());
 
 	return (CosAngle >= Threshold) && (Distance < ShootDistance);
 }

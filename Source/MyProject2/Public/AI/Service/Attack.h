@@ -6,8 +6,7 @@
 #include "BehaviorTree/BTService.h"
 #include "Attack.generated.h"
 
-class AEnemyAircraftAI;
-class AEnemyAircraft;
+class AAircraftAIController;
 class ABaseAircraft;
 
 UENUM(BlueprintType)
@@ -37,16 +36,16 @@ private:
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 	UPROPERTY()
-	TObjectPtr<AActor> Selected = nullptr;
+	TWeakObjectPtr<AActor> Selected = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<AEnemyAircraft> Controlled = nullptr;
+	TObjectPtr<ABaseAircraft> Controlled = nullptr;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<AEnemyAircraftAI> Controller = nullptr;
+	TObjectPtr<AAircraftAIController> Controller = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector YawKey;

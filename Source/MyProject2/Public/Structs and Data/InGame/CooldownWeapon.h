@@ -14,7 +14,7 @@ struct FCooldownWeapon
 	FCooldownWeapon();
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf <ABaseWeapon> WeaponClass = nullptr;
+	TSubclassOf<ABaseWeapon> WeaponClass = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<ABaseWeapon> WeaponInstance = nullptr;

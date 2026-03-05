@@ -9,7 +9,6 @@
 
 class AEnemyAircraft;
 class ABaseWeapon;
-class UWeaponSystemComponent;
 class UBehaviorTree;
 class UBlackboardComponent;
 
@@ -57,9 +56,6 @@ private:
 	void Special();
 
 	void SpecialCooldown();
-
-	UPROPERTY()
-	TObjectPtr<UWeaponSystemComponent> WeaponComp = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "AI")
 	TObjectPtr<UBehaviorTree> BehaviorTreeAsset = nullptr;

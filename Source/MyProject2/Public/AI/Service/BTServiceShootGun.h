@@ -6,8 +6,7 @@
 #include "BehaviorTree/BTService.h"
 #include "BTServiceShootGun.generated.h"
 
-class AEnemyAircraft;
-class AEnemyAircraftAI;
+class ABaseAircraft;
 
 UCLASS(Blueprintable, BlueprintType, meta = (DisplayName = "Shoot Gun Service"))
 class MYPROJECT2_API UBTServiceShootGun : public UBTService
@@ -29,13 +28,10 @@ private:
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 	UPROPERTY()
-	TObjectPtr<AActor> Selected = nullptr;
+	TWeakObjectPtr<AActor> Selected = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<AEnemyAircraft> Controlled = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<AEnemyAircraftAI> Controller = nullptr;
+	TObjectPtr<AActor> Controlled = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;

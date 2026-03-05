@@ -13,7 +13,7 @@ class MYPROJECT2_API UBTTaskFlightTaskNode : public UBTTaskNode
 public:
 	UBTTaskFlightTaskNode();
 
-protected:
+private:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds);
 
@@ -36,5 +36,5 @@ protected:
 	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<class AEnemyAircraftAI> Controller = nullptr;
+	TObjectPtr<class AAircraftAIController> Controller = nullptr;
 };

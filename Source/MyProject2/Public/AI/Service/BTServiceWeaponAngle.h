@@ -6,7 +6,6 @@
 #include "BehaviorTree/BTService.h"
 #include "BTServiceWeaponAngle.generated.h"
 
-class AEnemyAircraft;
 class ABaseAircraft;
 
 UCLASS(Blueprintable, BlueprintType, meta = (DisplayName = "Weapon Angle Service"))
@@ -33,10 +32,10 @@ private:
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 	UPROPERTY()
-	TObjectPtr<AActor> Selected = nullptr;
+	TWeakObjectPtr<AActor> Selected = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<AEnemyAircraft> Controlled = nullptr;
+	TObjectPtr<ABaseAircraft> Controlled = nullptr;
 	
 	UPROPERTY()
 	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;

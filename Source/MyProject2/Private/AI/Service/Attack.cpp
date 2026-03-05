@@ -1,18 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/Service/Attack.h"
-#include "Units/Aircraft/AI/EnemyAircraft.h"
-#include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Structs and Data/MathLib/FlightMathLibrary.h"
 #include "Units/Aircraft/BaseAircraft.h"
-#include "Units/Aircraft/AI/EnemyAircraftAI.h"
+#include "AI/AircraftAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "DrawDebugHelpers.h"
 
 EAIThrottleMode UBTServiceAttack::GetThrottleMode(float distance) 
 {
 	// Makes the distance into meters
-	distance = distance * 0.034;
+	distance = distance * 0.01;
 	if (distance >= 7000) return EAIThrottleMode::FarAway;
 	else if (distance >= 3000 && distance < 7000) return EAIThrottleMode::MidRange;
 	else return EAIThrottleMode::Close;
@@ -29,21 +26,22 @@ void UBTServiceAttack::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8
 {
 	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
 	BlackboardComp = OwnerComp.GetBlackboardComponent();
-	Controller = Cast<AEnemyAircraftAI>(OwnerComp.GetAIOwner());
-	if (Controller) Controlled = Cast<AEnemyAircraft>(Controller->Controlled);
-	Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
+	Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
+	if (IsValid(Controller)) Controlled = Cast<ABaseAircraft>(Controller->GetControlled());
+	if (IsValid(BlackboardComp)) Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
 }
 
 void UBTServiceAttack::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
-	if (!Controlled || !Controlled->GetFlightComp() ||!BlackboardComp || !Selected) return;
 	CalculateAngle(DeltaSeconds);
 	CalculateThrust(DeltaSeconds);
 }
 
 void UBTServiceAttack::CalculateAngle(const float DeltaSeconds)
 {
-	FVector ToTargetWorld = (Selected->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
+	AActor* Target = Selected.Get();
+	if (!IsValid(Target) || !IsValid(Controlled)) return;
+	FVector ToTargetWorld = (Target->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
 	if (ToTargetWorld.IsNearlyZero()) return;
 
 	FTransform AirframeTransform = Controlled->GetAirframe()->GetComponentTransform();
@@ -59,7 +57,7 @@ void UBTServiceAttack::CalculateAngle(const float DeltaSeconds)
 	}
 	float DesiredYawInput = CalculateYawDegrees(LocalDir);
 
-	// GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan,FString::Printf(TEXT("Pitch: %.2f Roll: %.2f"), DesiredPitchInput, DesiredRollInput));
+	if (!IsValid(BlackboardComp)) return;
 
 	BlackboardComp->SetValueAsFloat(RollKey.SelectedKeyName, -DesiredRollInput);
 	BlackboardComp->SetValueAsFloat(PitchKey.SelectedKeyName, DesiredPitchInput);
@@ -108,40 +106,54 @@ float UBTServiceAttack::CalculateYawDegrees(const FVector& LocalDir)
 
 void UBTServiceAttack::CalculateThrust(const float DeltaSeconds) 
 {
-	ABaseAircraft* Target = Cast<ABaseAircraft>(Selected);
+	AActor* Target = Selected.Get();
+
+	if (!IsValid(Target) || !IsValid(Controlled)) return;
+
+	float Distance = FVector::Dist(Controlled->GetActorLocation(), Selected.Get()->GetActorLocation());
+
+	float throttle = 0.f;
+	EAIThrottleMode throttleMode = GetThrottleMode(Distance);
 	if (Target) 
 	{
 		// Make Speed dependent on how many aircraft are in a radius, keep speed high when there are more enemies
 		// For now its single target
-		float Distance = FVector::Dist(Controlled->GetActorLocation(), Selected->GetActorLocation());
-		//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan, FString::Printf(TEXT("Distance: %.2f"), Distance));
-
-		// Maybe make this a throttle range in the future instead of just these hard values
-		float throttle = 0.f;
-		EAIThrottleMode throttleMode = GetThrottleMode(Distance);
 		switch (throttleMode) 
 		{
-			case EAIThrottleMode::FarAway: throttle = 1;
-			case EAIThrottleMode::MidRange: throttle = 0.5;
-			case EAIThrottleMode::Close: throttle = PursuitThrottle(Target);
+			case EAIThrottleMode::FarAway: 
+				throttle = 1.f; 
+				break;
+			case EAIThrottleMode::MidRange: 
+				throttle = 0.5f;
+				break;
+			case EAIThrottleMode::Close: 
+				throttle = PursuitThrottle(Cast<ABaseAircraft>(Target));
+				break;
+			default:
+				throttle = 0.f;
+				break;
 		}
-
-		BlackboardComp->SetValueAsFloat(ThrottleKey.SelectedKeyName, throttle);
 	}
 	else
 	{
 		// For anything that isn't an aircraft, maintain some relative speed, it shouldn't really change its speed that much
-		float Distance = FVector::Dist(Controlled->GetActorLocation(), Selected->GetActorLocation());
-		float throttle = 0.f;
-		EAIThrottleMode throttleMode = GetThrottleMode(Distance);
 		switch (throttleMode) 
 		{
-			case EAIThrottleMode::FarAway: throttle = 0.8;
-			case EAIThrottleMode::MidRange: throttle = 0.5;
-			case EAIThrottleMode::Close: throttle = 0.5;
+			case EAIThrottleMode::FarAway: 
+				throttle = 0.8f;
+				break;
+			case EAIThrottleMode::MidRange: 
+				throttle = 0.5f;
+				break;
+			case EAIThrottleMode::Close: 
+				throttle = 0.5f;
+				break;
+			default:
+				throttle = 0.f;
+				break;
 		}
-		BlackboardComp->SetValueAsFloat(ThrottleKey.SelectedKeyName, throttle);
 	}
+	if (BlackboardComp) BlackboardComp->SetValueAsFloat(ThrottleKey.SelectedKeyName, throttle);
 }
 
 float UBTServiceAttack::PursuitThrottle(ABaseAircraft* Target)

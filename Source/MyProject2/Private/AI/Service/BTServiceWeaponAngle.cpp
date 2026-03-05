@@ -20,10 +20,16 @@ UBTServiceWeaponAngle::UBTServiceWeaponAngle()
 void UBTServiceWeaponAngle::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) 
 {
 	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
+
+	// TODO: Controlled is always null remember to set it
+
 	BlackboardComp = OwnerComp.GetBlackboardComponent();
+	if (!IsValid(BlackboardComp)) return;
 	Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
 
-	for (const TPair<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon* >>& GroupPair : Controlled->GetWeaponComp()->GetWeaponGroups())
+	if (!IsValid(Controlled) || !IsValid(Controlled->GetWeaponComp())) return;
+
+	for (const TPair<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon*>>& GroupPair : Controlled->GetWeaponComp()->GetWeaponGroups())
 	{
 		TSubclassOf<ABaseWeapon> WeaponClass = GroupPair.Key;
 		const TArray<FCooldownWeapon*>& WeaponArray = GroupPair.Value;
@@ -38,19 +44,22 @@ void UBTServiceWeaponAngle::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, 
 
 void UBTServiceWeaponAngle::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
-	if (!Controlled || !Controlled->GetWeaponComp() || !BlackboardComp || !Selected) return;
+	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 	WeaponDistance();
 }
 
 void UBTServiceWeaponAngle::WeaponDistance() 
 {
-	float Distance = FVector::Dist(Controlled->GetActorLocation(), Selected->GetActorLocation());
+	AActor* Target = Selected.Get();
+	if (!IsValid(Target) || !IsValid(Controlled)) return;
+
+	float Distance = FVector::Dist(Controlled->GetActorLocation(), Target->GetActorLocation());
 	if (Distance > greatestRange) return;
 
-	if (!Controlled->GetWeaponComp()->GetLocked()) return;
+	if (!IsValid(Controlled->GetWeaponComp()) || !Controlled->GetWeaponComp()->GetLocked()) return;
 
 	ABaseWeapon* CurrentWeapon = Controlled->GetWeaponComp()->GetWeapon();
-	if (!CurrentWeapon) return;
+	if (!IsValid(CurrentWeapon)) return;
 
 	TSubclassOf<ABaseWeapon> FiringWeapon = nullptr;
 	float smallestRange = Distance;
@@ -71,8 +80,9 @@ void UBTServiceWeaponAngle::WeaponDistance()
 			}
 		}
 	}
-	if (!FiringWeapon) return;
+	if (!IsValid(FiringWeapon)) return;
 
+	if (!IsValid(BlackboardComp)) return;
 	BlackboardComp->SetValueAsBool(bFireMissile.SelectedKeyName, true);
 	BlackboardComp->SetValueAsClass(MissileClass.SelectedKeyName, FiringWeapon);
 }

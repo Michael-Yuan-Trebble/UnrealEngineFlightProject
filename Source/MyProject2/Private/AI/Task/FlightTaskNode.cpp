@@ -1,10 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Movement!"));
-
 #include "AI/Task/FlightTaskNode.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Units/Aircraft/AI/EnemyAircraftAI.h"
+#include "AI/AircraftAIController.h"
 #include "Units/Aircraft/AI/EnemyAircraft.h"
 
 UBTTaskFlightTaskNode::UBTTaskFlightTaskNode() 
@@ -14,11 +12,12 @@ UBTTaskFlightTaskNode::UBTTaskFlightTaskNode()
 
 EBTNodeResult::Type UBTTaskFlightTaskNode::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) 
 {
+	Super::ExecuteTask(OwnerComp, NodeMemory);
 	BlackboardComp = OwnerComp.GetBlackboardComponent();
-	if (!BlackboardComp) return EBTNodeResult::Aborted;
+	if (!IsValid(BlackboardComp)) return EBTNodeResult::Aborted;
 
-	Controller = Cast<AEnemyAircraftAI>(OwnerComp.GetAIOwner());
-	if (!Controller) return EBTNodeResult::Aborted;
+	Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
+	if (!IsValid(Controller)) return EBTNodeResult::Aborted;
 
 	Controller->SetFlying(true);
 	return EBTNodeResult::InProgress;
@@ -26,7 +25,8 @@ EBTNodeResult::Type UBTTaskFlightTaskNode::ExecuteTask(UBehaviorTreeComponent& O
 
 void UBTTaskFlightTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
-	if (!Controller) return;
+	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
+	if (!IsValid(Controller) || !IsValid(BlackboardComp)) return;
 
 	float YawOffset = BlackboardComp->GetValueAsFloat(YawKey.SelectedKeyName);
 	YawOffset = FMath::IsNearlyZero(YawOffset) ? 0.f : YawOffset;

@@ -8,13 +8,17 @@ void UAircraftButtonWidget::Setup(UAircraftData* AircraftData, TArray<FName> Tem
 {
 	ContainedData = AircraftData;
 	Owned = TempOwned;
-	if (!IsValid(ContainedData) || !IsValid(ContainedData->AircraftStat)) return;
-	AircraftNameText->SetText(FText::FromName(ContainedData->AircraftStat->AircraftName));
+	if (!IsValid(ContainedData) || ContainedData->AircraftStat.IsValid()) return;
+
+	UAircraftStats* Loaded = ContainedData->AircraftStat.LoadSynchronous();
+	if (!IsValid(Loaded)) return;
+
+	AircraftNameText->SetText(FText::FromName(Loaded->AircraftName));
 
 	if (!IsValid(AircraftSelectButton)) return;
 
 	AircraftSelectButton->OnHovered.AddDynamic(this, &UAircraftButtonWidget::HandleButtonHover);
-	if (Owned.Contains(AircraftData->AircraftStat->AircraftName))
+	if (Owned.Contains(Loaded->AircraftName))
 	{
 		AircraftSelectButton->OnClicked.AddDynamic(this, &UAircraftButtonWidget::HandleButtonClick);
 	}
