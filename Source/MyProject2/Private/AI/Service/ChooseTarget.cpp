@@ -6,6 +6,7 @@
 #include "Units/Components/Aircraft/RadarComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Debug/DebugHelper.h"
 
 UBTServiceChooseTarget::UBTServiceChooseTarget() {
 	NodeName = "Update Target Actor";
@@ -17,18 +18,23 @@ UBTServiceChooseTarget::UBTServiceChooseTarget() {
 
 void UBTServiceChooseTarget::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) {
 	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
-	AAircraftAIController* Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
-	if (!Controller) return;
+	OwnerComp.GetWorld()->GetTimerManager().SetTimerForNextTick(
+		FTimerDelegate::CreateUObject(this, &UBTServiceChooseTarget::InitAfterTick, &OwnerComp)
+	);
+}
 
+void UBTServiceChooseTarget::InitAfterTick(UBehaviorTreeComponent* OwnerComp) {
+	if (!IsValid(OwnerComp)) return;
+	AAircraftAIController* Controller = Cast<AAircraftAIController>(OwnerComp->GetAIOwner());
+	if (!IsValid(Controller)) return;
 	Controlled = Controller->GetControlled();
-	BlackboardComponent = OwnerComp.GetBlackboardComponent();
+	BlackboardComponent = OwnerComp->GetBlackboardComponent();
 }
 
 void UBTServiceChooseTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
 	if (!IsValid(Controlled) || !IsValid(BlackboardComponent)) return;
-
 	timeSinceLastPick += DeltaSeconds;
 
 	// TODO: Add a system where its not just the highest threat is picked, some sort of internal timer for changing targets
@@ -52,10 +58,6 @@ void UBTServiceChooseTarget::PickTarget()
 	for (FDetectedAircraftInfo& Info : AllAircraft)
 	{
 		if (Info.CurrentPawn.Get() == Controlled) return;
-		if (Info.CurrentPawn.IsValid())
-		{
-			FString PawnName = Info.CurrentPawn.Get()->GetName();
-		}
 		Info.threatLevel = Info.CalculateThreat();
 		if (!Selected.CurrentPawn.IsValid()) 
 		{

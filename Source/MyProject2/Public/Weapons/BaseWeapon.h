@@ -50,6 +50,10 @@ protected:
 
 	float range = 0.f;
 
+	float damage = 0.f;
+
+	float lifeTime = 0.f;
+
 	float cooldownTime = 0.f;
 
 	UPROPERTY(EditAnywhere)

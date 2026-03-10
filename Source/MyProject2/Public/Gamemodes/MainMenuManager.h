@@ -43,7 +43,7 @@ public:
 	void Init(AAircraftPlayerController* InAPC);
 
 	UFUNCTION()
-	void OnLevelPicked(FMissionData LevelName);
+	void OnLevelPicked(const FMissionData& LevelName);
 
 	void SetMainMenuClass(const TSubclassOf<UMainMenuWidget> InMenu) { MainMenuClass = InMenu; };
 
@@ -76,7 +76,7 @@ private:
 	TObjectPtr<UUserWidget> TransitionScreenWidget = nullptr;
 
 	UPROPERTY()
-	TArray<UUserWidget*> MenuStack{};
+	TArray<TObjectPtr<UUserWidget>> MenuStack{};
 
 	UPROPERTY()
 	TObjectPtr<UUserWidget> CurrentMenu = nullptr;

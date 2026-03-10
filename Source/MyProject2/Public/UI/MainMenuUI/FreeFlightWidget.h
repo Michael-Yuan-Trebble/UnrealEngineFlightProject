@@ -10,7 +10,7 @@
 #include "Structs and Data/MissionInfo/MissionData.h"
 #include "FreeFlightWidget.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelSelected, FMissionData, LevelName);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelSelected, const FMissionData&, LevelName);
 
 UCLASS()
 class MYPROJECT2_API UFreeFlightWidget : public UUserWidget
@@ -33,7 +33,7 @@ protected:
 	TObjectPtr<UScrollBox> LevelScrollBox = nullptr;
 
 	UFUNCTION()
-	void HandleLevelButtonClicked(FMissionData InLevel);
+	void HandleLevelButtonClicked(const FMissionData& InLevel);
 
 private:
 	UPROPERTY(EditAnywhere)

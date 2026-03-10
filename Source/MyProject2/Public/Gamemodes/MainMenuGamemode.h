@@ -19,7 +19,7 @@ class MYPROJECT2_API AMainMenuGamemode : public AGameModeBase
 public:
 	AMainMenuGamemode();
 
-	void LevelSelected(FMissionData Level);
+	void LevelSelected(const FMissionData& Level);
 
 protected:
 	virtual void BeginPlay() override;

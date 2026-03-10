@@ -24,7 +24,7 @@ void ALandingGamemode::Tick(float D)
 void ALandingGamemode::CheckLanding(const float D) 
 {
 	if (!IsValid(PlayerSpawnedIn)) return;
-	if (PlayerSpawnedIn->IsLanded() && PlayerSpawnedIn->GetSpeed() <= 20)
+	if (PlayerSpawnedIn->IsLanded() && PlayerSpawnedIn->GetKMHSpeed() <= 20)
 	{
 		LandingTimeCounter -= D;
 		if (LandingTimeCounter <= 0) 

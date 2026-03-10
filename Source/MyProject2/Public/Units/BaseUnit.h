@@ -57,6 +57,8 @@ public:
 
 	EFaction GetFaction() const { return Faction; };
 
+	const FName& GetUnitName() const { return UnitName; };
+
 protected:
 
 	UPROPERTY(EditAnywhere)
@@ -76,6 +78,8 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UHealthComponent> HealthComp = nullptr;
+
+	FName UnitName = NAME_None;
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;

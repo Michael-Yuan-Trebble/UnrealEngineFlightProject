@@ -3,14 +3,15 @@
 #include "UI/PlayerHUD.h"
 #include "Player Info/AircraftPlayerController.h"
 #include "DrawDebugHelpers.h"
-#include "Units/Aircraft/BaseAircraft.h"
 #include "UI/LockBoxWidget.h"
+#include "UI/HitNotificationWidget.h"
+#include "UI/MinimapWidget.h"
+#include "UI/PitchLadder.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
-#include "Units/Components/Aircraft/FlightComponent.h"
 #include "Units/Components/Aircraft/RadarComponent.h"
 #include "Components/CanvasPanelSlot.h"
-#include "Units/Components/Aircraft/WeaponSystemComponent.h"
 #include "Units/Aircraft/Player/PlayerAircraft.h"
+#include "Debug/DebugHelper.h"
 
 APlayerHUD::APlayerHUD() 
 {
@@ -25,7 +26,6 @@ void APlayerHUD::BeginPlay()
 void APlayerHUD::Init(AAircraftPlayerController* InPC) 
 {
     PC = InPC;
-    //UpdateTargetWidgets();
     MiniMap = CreateWidget<UMinimapWidget>(GetWorld(), MiniMapClass);
     if (!IsValid(MiniMap)) return;
     MiniMap->AddToViewport();
@@ -93,32 +93,34 @@ void APlayerHUD::Tick(float DeltaSeconds)
     }
 
     if (!Controlled.IsValid() || !IsValid(AimReticleWidget) || !IsValid(AOAReticleWidget)) return;
-    FVector CamLoc;
-    FRotator CamRot;
+    FVector CamLoc = FVector::ZeroVector;
+    FRotator CamRot = FRotator::ZeroRotator;
+    FVector2D ScreenPos = FVector2D::ZeroVector;
+    FVector2D Middle = FVector2D(0.5, 0.5);
+
     PC->GetPlayerViewPoint(CamLoc, CamRot);
 
     FVector NoseDir = Controlled->GetAirframe()->GetForwardVector();
     FVector ForwardDir = Controlled->GetActorForwardVector();
 
-    FVector AimWorldPos = CamLoc + NoseDir * 10000.f;
+    FVector AimWorldPos = CamLoc + NoseDir * AimWorldPosDistance;
+    FVector AOAWorldPos = CamLoc + ForwardDir * AOAWorldPosDistance;
 
-    FVector AOAWorldPos = CamLoc + ForwardDir * 10000.f;
-
-    FVector2D ScreenPos;
     if (PC->ProjectWorldLocationToScreen(AimWorldPos, ScreenPos, true))
     {
-        AimReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+        AimReticleWidget->SetAlignmentInViewport(Middle);
         AimReticleWidget->SetPositionInViewport(ScreenPos, true);
     }
     if (PC->ProjectWorldLocationToScreen(AOAWorldPos, ScreenPos, true))
     {
-        AOAReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+        AOAReticleWidget->SetAlignmentInViewport(Middle);
         AOAReticleWidget->SetPositionInViewport(ScreenPos, true);
     }
+
     if (!IsValid(PitchLadderWidget)) return;
 
-    FVector LadderWorldPos = CamLoc + NoseDir * 10000.f;
-    FVector2D LadderScreenPos;
+    FVector2D LadderScreenPos = FVector2D::ZeroVector;
+    FVector LadderWorldPos = CamLoc + NoseDir * LadderWorldPosDistance;
 
     if (PC->ProjectWorldLocationToScreen(LadderWorldPos, LadderScreenPos, true))
     {
@@ -145,12 +147,10 @@ void APlayerHUD::PitchLadderUpdate()
 
 void APlayerHUD::UpdateLocked(const float LockPercent)
 {
-    if (!Target.IsValid()) return;
     TObjectPtr<ULockBoxWidget>* FoundWidget = ActiveWidgets.Find(Target);
     if (FoundWidget && IsValid(*FoundWidget))
     {
-        ULockBoxWidget* Widget = *FoundWidget;
-        if (IsValid(Widget))
+        if (ULockBoxWidget* Widget = *FoundWidget)
         {
             Widget->UpdateLockProgress(LockPercent);
         }
@@ -193,14 +193,14 @@ void APlayerHUD::UpdateTargetWidgets()
     {
         TWeakObjectPtr<ABaseUnit> Actor = Pair.Key;
         ULockBoxWidget* Reticle = Pair.Value;
-        if (!Actor.IsValid() || !Reticle) continue;
+        if (!Actor.IsValid() || !IsValid(Reticle)) continue;
 
         FVector WorldLocation = Actor->GetActorLocation();
         FVector2D ScreenPos;
         bool bProjected = PC->ProjectWorldLocationToScreen(WorldLocation, ScreenPos);
 
-        FVector CameraLoc;
-        FRotator CameraRot;
+        FVector CameraLoc = FVector::ZeroVector;
+        FRotator CameraRot = FRotator::ZeroRotator;
         PC->GetPlayerViewPoint(CameraLoc, CameraRot);
 
         bool bInFront = FVector::DotProduct((WorldLocation - CameraLoc), CameraRot.Vector()) > 0;
@@ -221,7 +221,7 @@ void APlayerHUD::UpdateTargetWidgets()
 
 void APlayerHUD::HandleRadarScan(const TArray<FDetectedAircraftInfo>& InEnemies)
 {
-    TArray<TWeakObjectPtr<ABaseUnit>> Array;
+    TArray<TWeakObjectPtr<ABaseUnit>> Array{};
     if (!Controlled.IsValid()) return;
     for (const FDetectedAircraftInfo& T : InEnemies) 
     {
@@ -245,23 +245,26 @@ void APlayerHUD::OnUnitDestroyed(ABaseUnit* Death)
 
 void APlayerHUD::UpdateSelected()
 {
-    if (!Target.IsValid())
+    ABaseUnit* TargetLoaded = Target.Get();
+    if (!IsValid(TargetLoaded))
     {
+        if (IsValid(SelectedAircraftWidget)) SelectedAircraftWidget->SelectStop();
         SelectedAircraftWidget = nullptr;
         LastActor = nullptr;
         return;
     }
 
-    if (!LastActor.IsValid() || LastActor == Target) return;
+    ABaseUnit* LastActorLoaded = LastActor.Get();
+
+    if (IsValid(LastActorLoaded) && LastActorLoaded == TargetLoaded) return;
 
     LastActor = Target;
 
-    TObjectPtr<ULockBoxWidget>* FoundWidget = ActiveWidgets.Find(Target);
-
+    TObjectPtr<ULockBoxWidget>* FoundWidget = ActiveWidgets.Find(TargetLoaded);
     if (FoundWidget && IsValid(*FoundWidget))
     {
         SelectedAircraftWidget = *FoundWidget;
-        SelectedAircraftWidget->SelectedAnimation();
+        SelectedAircraftWidget->SelectedAnimation(TargetLoaded->GetUnitName());
     }
     else
     {
@@ -271,13 +274,13 @@ void APlayerHUD::UpdateSelected()
 
 void APlayerHUD::SetTarget(TWeakObjectPtr<ABaseUnit> InTarget)
 {
-    if (!InTarget.IsValid()) return;
-    APlayerAircraft* IfControl = Cast<APlayerAircraft>(InTarget.Get());
-    if (IsValid(IfControl)) return;
+    APawn* Pawn = Cast<APawn>(InTarget.Get());
+    if (IsValid(Pawn) && Pawn->IsPlayerControlled()) return;
 
-    if (Target.IsValid()) 
+    ABaseUnit* LoadedTarget = Target.Get();
+    if (IsValid(LoadedTarget))
     {
-        TObjectPtr<ULockBoxWidget>* FoundWidget = ActiveWidgets.Find(Target);
+        TObjectPtr<ULockBoxWidget>* FoundWidget = ActiveWidgets.Find(LoadedTarget);
         if (FoundWidget && IsValid(*FoundWidget))
         {
             ULockBoxWidget* Temp = *FoundWidget;
@@ -285,8 +288,8 @@ void APlayerHUD::SetTarget(TWeakObjectPtr<ABaseUnit> InTarget)
         }
     }
 
-    Target = InTarget.Get(); 
-    if (!Targets.Contains(Target)) Targets.Add(Target); 
+    Target = InTarget; 
+    if (!Targets.Contains(Target.Get())) Targets.Add(Target); 
     UpdateTargetWidgets();
 }
 

@@ -31,5 +31,8 @@ public:
 	float AirBrake = 0.f;
 
 	UPROPERTY(BlueprintReadOnly)
-	float Elevator = 0.f;
+	float LElevator = 0.f;
+
+	UPROPERTY(BlueprintReadOnly)
+	float RElevator = 0.f;
 };

@@ -60,5 +60,7 @@ private:
 	UPROPERTY()
 	TWeakObjectPtr<ABaseUnit> LastSelected = nullptr;
 
+	static constexpr int scanTime = 1;
+
 		
 };

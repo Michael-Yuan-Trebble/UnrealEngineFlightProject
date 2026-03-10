@@ -11,8 +11,3 @@ void ASu25Pawn::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 }
-
-void ASu25Pawn::BeginPlay()
-{
-	Super::BeginPlay();
-}

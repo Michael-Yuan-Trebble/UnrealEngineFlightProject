@@ -4,13 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Button.h"
-#include "Components/TextBlock.h"
 #include "Structs and Data/MissionInfo/MissionData.h"
 #include "LevelButton.generated.h"
 
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelPicked, FMissionData, SelectedLevel);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelPicked, const FMissionData&, SelectedLevel);
 
 UCLASS()
 class MYPROJECT2_API ULevelButton : public UUserWidget
@@ -35,8 +32,8 @@ private:
 	void HandleButtonClick();
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> LevelSelectbtn = nullptr;
+	TObjectPtr<class UButton> LevelSelectbtn = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock> LevelText = nullptr;
+	TObjectPtr<class UTextBlock> LevelText = nullptr;
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Weapons/BaseWeapon.h"
+#include "Structs and Data/InGame/InGameMissileStats.h"
 #include "BaseMissile.generated.h"
 
 class ABaseAircraft;
@@ -38,25 +39,15 @@ public:
 	UPROPERTY()
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovement = nullptr;
 
-	FVector CurrentDirection = FVector::ZeroVector;
-
 	UPROPERTY()
 	TWeakObjectPtr<AActor> Tracking = nullptr;
 
 	UPROPERTY()
 	TWeakObjectPtr<ABaseAircraft> AircraftOwner = nullptr;
 
-	float missileAcceleration = 0.f;
+	FInGameMissileStats InGameStats{};
 
-	float missileMaxSpeed = 0.f;
-
-	float missileVelocity = 0.f;
-
-	float damage = 0.f;
-
-	float turnRate = 0.f;
-
-	float lifeTime = 0.f;
+	FVector CurrentDirection = FVector::ZeroVector;
 
 	bool bAir = false;
 
@@ -79,6 +70,11 @@ public:
 	bool bMissed = false;
 
 protected:
+
+	float LockOnRange = 0.f;
+
+	float missileVelocity = 0.f;
+	
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;

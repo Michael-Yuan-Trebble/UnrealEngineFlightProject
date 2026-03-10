@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "Units/Components/Standard/BaseAudioComponent.h"
 #include "Enums/CameraPerspective.h"
+#include "Structs and Data/Aircraft Data/AircraftAudioData.h"
+#include "Structs and Data/AircraftAudios.h"
+#include "Structs and Data/GunAudios.h"
 #include "AircraftAudioComponent.generated.h"
 
 class ABaseAircraft;
@@ -17,6 +20,16 @@ class MYPROJECT2_API UAircraftAudioComponent : public UBaseAudioComponent
 public:
 
 	UAircraftAudioComponent();
+	
+	void PlayPerspectiveSound(const ECameraPerspective Perspective);
+
+	void HandleGunSound(bool bFiring);
+
+	void SetControlled(ABaseAircraft* InControl) { Controlled = InControl; };
+
+	void SetAudio(UAircraftAudioData* InAudio);
+
+private:
 
 	UPROPERTY()
 	TObjectPtr<UAudioComponent> PersonalAircraftAudio = nullptr;
@@ -24,21 +37,19 @@ public:
 	UPROPERTY()
 	TObjectPtr<UAudioComponent> GunAudio = nullptr;
 
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USoundWave> CockpitSound = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USoundWave> ThirdPersonSound = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USoundWave> GunSound = nullptr;
+	UPROPERTY()
+	TObjectPtr<UAircraftAudioData> AudioData = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<ABaseAircraft> Controlled = nullptr;
-	
-	void PlayPerspectiveSound(const ECameraPerspective Perspective);
 
-	void HandleGunSound(bool bFiring);
+	UPROPERTY()
+	TObjectPtr<USoundWave> CachedCockpit = nullptr;
 
-	void SetControlled(ABaseAircraft* InControl) { Controlled = InControl; };
+	UPROPERTY()
+	TObjectPtr<USoundWave> CachedThirdPerson = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<USoundWave> CachedGun = nullptr;
+
 };

@@ -12,8 +12,3 @@ void AT38Pawn::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 }
-
-void AT38Pawn::Tick(float DeltaSeconds) 
-{
-	Super::Tick(DeltaSeconds);
-}

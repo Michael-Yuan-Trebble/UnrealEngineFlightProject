@@ -8,8 +8,8 @@
 #include "Units/Aircraft/Player/PlayerAircraft.h"
 #include "Player Info/PlayerGameInstance.h"
 #include "EngineUtils.h"
+#include "Specials/BaseSpecial.h"
 #include "Subsystem/AircraftRegistry.h"
-#include "Structs and Data/LoadoutInfo/AircraftLoadoutData.h"
 #include "Weapons/BaseWeapon.h"
 
 AFlightGamemode::AFlightGamemode() 
@@ -39,7 +39,6 @@ void AFlightGamemode::SpawnInController()
 	Database = NewObject<UAircraftDatabase>(PC->GetGameInstance());
 	if (!IsValid(Database)) return;
 
-	const FString Path = "/Game/Aircraft/AircraftData";
 	Database->LoadAllAircraftFromFolder(Path);
 
 	HandlePlayerState();
@@ -166,11 +165,14 @@ void AFlightGamemode::FallBackAircraft()
 
 TMap<FName, TSubclassOf<ABaseWeapon>> AFlightGamemode::TemporaryLoadout()
 {
-	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
+	UAircraftStats* Loaded = AircraftSelected->AircraftStat.LoadSynchronous();
+	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout{};
 
-	if (!IsValid(AircraftSelected) || !IsValid(AircraftSelected->AircraftStat)) return Loadout;
+	if (!IsValid(Loaded)) return Loadout;
 
-	if (AircraftSelected->AircraftStat->WeaponInfo.NumOfPylons < 2) return Loadout;
+	if (!IsValid(AircraftSelected) || !IsValid(Loaded)) return Loadout;
+
+	if (Loaded->WeaponInfo.NumOfPylons < 2) return Loadout;
 
 	for (int i = 0; i < 2; i++) 
 	{
@@ -179,7 +181,7 @@ TMap<FName, TSubclassOf<ABaseWeapon>> AFlightGamemode::TemporaryLoadout()
 		Loadout.Add(Pylon, Bomb);
 	}
 
-	for (int i = 2; i < AircraftSelected->AircraftStat->WeaponInfo.NumOfPylons; i++)
+	for (int i = 2; i < Loaded->WeaponInfo.NumOfPylons; i++)
 	{
 		FString PylonName = FString::Printf(TEXT("Pylon_%d"), i);
 		FName Pylon(*PylonName);

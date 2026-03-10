@@ -5,7 +5,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Units/Aircraft/BaseAircraft.h"
-
+#include "Debug/DebugHelper.h"
 
 AAircraftAIController::AAircraftAIController() {
 	PrimaryActorTick.bCanEverTick = true;

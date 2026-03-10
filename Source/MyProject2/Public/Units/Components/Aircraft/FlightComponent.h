@@ -60,7 +60,9 @@ public:
 
 	void SetStallSpeed(const float Speed) { StallSpeed = Speed; };
 
-	float GetSpeed() const { return currentSpeed; };
+	float GetUnitSpeed() const { return currentSpeed; };
+
+	float GetKMHSpeed() const { return currentKMHSpeed; };
 
 	float GetThrottle() const { return CurrentThrust; };
 
@@ -110,6 +112,8 @@ private:
 
 	float currentSpeed = 0.f;
 
+	float currentKMHSpeed = 0.f;
+
 	float FlightDrag = 0.f;
 	
 	FQuat PrevQuat = FQuat::Identity;
@@ -146,6 +150,7 @@ private:
 
 	EThrottleStage currentStage = EThrottleStage::Normal;
 
+	UPROPERTY(EditAnywhere)
 	EFlightMode FlightMode = EFlightMode::Flight;
 
 	bool switchingPhase = false;

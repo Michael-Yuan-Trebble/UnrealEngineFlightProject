@@ -12,16 +12,16 @@ void UFreeFlightWidget::InitLevels()
 		if (Level.LevelData.Level.IsNull()) continue;
 
 		ULevelButton* Button = CreateWidget<ULevelButton>(GetWorld(), LevelButtonClass);
-		if (!Button) continue;
+		if (!IsValid(Button)) continue;
 
 		Button->SetupLevel(Level.LevelData);
 		Button->OnLevelPicked.AddDynamic(this, &UFreeFlightWidget::HandleLevelButtonClicked);
-		if (!LevelScrollBox) continue;
+		if (!IsValid(LevelScrollBox)) continue;
 		LevelScrollBox->AddChild(Button);
 	}
 }
 
-void UFreeFlightWidget::HandleLevelButtonClicked(FMissionData InLevel)
+void UFreeFlightWidget::HandleLevelButtonClicked(const FMissionData& InLevel)
 {
 	if (InLevel.Level.IsNull()) return;
 	OnLevelSelected.Broadcast(InLevel);

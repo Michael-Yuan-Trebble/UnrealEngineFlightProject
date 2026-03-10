@@ -23,7 +23,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetSmallerReticleImage(UTexture2D* NewTexture);
 
-	void SelectedAnimation();
+	void SelectedAnimation(const FName& TargetName);
 
 	void SelectStop();
 
@@ -43,6 +43,9 @@ private:
 	TObjectPtr<UImage> SmallReticleImage = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> UnitNameTextBox = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class USizeBox> SizeBox_Reticle = nullptr;
 
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
@@ -50,9 +53,6 @@ private:
 
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
 	TObjectPtr<UWidgetAnimation> LockConfirm = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<AActor> TrackedTarget = nullptr;
 
 	bool isLockedOn = false;
 

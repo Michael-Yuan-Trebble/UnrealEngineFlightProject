@@ -23,18 +23,6 @@ public:
 
 	virtual void PossessedBy(AController* Controller) override;
 
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USpringArmComponent> FirstPersonSpringArm = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USpringArmComponent> ThirdPersonSpringArm = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UCameraComponent> ThirdPersonCamera = nullptr;
-	
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UCameraComponent> FirstPersonCamera = nullptr;
-
 	void GunSoundEffect(bool bShoot);
 
 	void WeaponComponentOnUnitDeath();
@@ -91,7 +79,7 @@ public:
 
 	float GetThrottle();
 
-protected:
+private:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaSeconds) override;
@@ -108,22 +96,24 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float Interp = 1.f;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USpringArmComponent> FirstPersonSpringArm = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USpringArmComponent> ThirdPersonSpringArm = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UCameraComponent> ThirdPersonCamera = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UCameraComponent> FirstPersonCamera = nullptr;
+
 	UPROPERTY()
 	TObjectPtr<AAircraftPlayerController> Controlled = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<UCameraManagerComponent> ManagerComp = nullptr;
 
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UAircraftAudioComponent> AudioComp = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<UAudioComponent> PersonalAircraftAudio = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<UAudioComponent> GunAudio = nullptr;
-
-private:
 	UFUNCTION()
 	void HandleHit();
 

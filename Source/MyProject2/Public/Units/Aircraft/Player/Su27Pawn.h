@@ -35,8 +35,5 @@ public:
 
 	virtual void PossessedBy(AController* NewController);
 
-protected:
-	virtual void Tick(float DeltaTime) override;
-
 private:
 };

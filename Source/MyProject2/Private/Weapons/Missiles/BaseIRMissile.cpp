@@ -22,14 +22,13 @@ void ABaseIRMissile::BeginPlay()
 
 	if (!IsValid(LoadedStats)) return;
 	WeaponName = LoadedStats->InGameName;
-	//missileAcceleration = LoadedStats->Acceleration;
-	//missileMaxSpeed = LoadedStats->MaxSpeed;
-	//cooldownTime = LoadedStats->Cooldown;
-	//range = LoadedStats->LockOnRange;
-	//turnRate = LoadedStats->TurnRate;
+	InGameStats = LoadedStats->InGameMissileStats;
+	cooldownTime = LoadedStats->Cooldown;
+	LockOnRange = InGameStats.LockOnRange;
+	range = InGameStats.LockOnRange;
 	damage = LoadedStats->Damage;
 	lifeTime = LoadedStats->LifeTime;
-	//ProjectileMovement->MaxSpeed = LoadedStats->MaxSpeed;
+	ProjectileMovement->MaxSpeed = InGameStats.MaxSpeed;
 	SupportedTargetTypes = LoadedStats->SupportedTargetTypes;
 }
 
@@ -40,7 +39,7 @@ void ABaseIRMissile::Tick(float DeltaTime)
 
 	if (!SmokeTrail.IsValid() || !MissileRocket.IsValid()) activateSmoke();
 
-	ProjectileMovement->Velocity += GetActorForwardVector() * missileAcceleration * DeltaTime;
+	ProjectileMovement->Velocity += GetActorForwardVector() * InGameStats.Acceleration * DeltaTime;
 	ProjectileMovement->Velocity = ProjectileMovement->Velocity.GetClampedToMaxSize(ProjectileMovement->MaxSpeed);
 
 	// TODO: Attach, don't set
@@ -96,7 +95,7 @@ void ABaseIRMissile::FireTracking(float launchSpeed, AActor* Target)
 	{
 		ProjectileMovement->bIsHomingProjectile = true;
 		ProjectileMovement->HomingTargetComponent = Target->GetRootComponent();
-		ProjectileMovement->HomingAccelerationMagnitude = turnRate;
+		ProjectileMovement->HomingAccelerationMagnitude = InGameStats.TurnRate;
 		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Target))
 		{
 			Aircraft->OnMissileLaunchedAtSelf.Broadcast(this);

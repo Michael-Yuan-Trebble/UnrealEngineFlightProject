@@ -2,6 +2,7 @@
 
 #include "Units/Components/Aircraft/AircraftVisualComponent.h"
 #include "Specials/CountermeasureActor.h"
+#include "Debug/DebugHelper.h"
 
 UAircraftVisualComponent::UAircraftVisualComponent() { PrimaryComponentTick.bCanEverTick = true; }
 
@@ -15,7 +16,8 @@ void UAircraftVisualComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	AirBrakeCalculation(DeltaTime);
 
 	// In order to account for both pitch and roll playing a roll
-	AircraftValues.Elevator = ElevatorPitch + ElevatorRoll;
+	AircraftValues.LElevator = ElevatorPitch + LElevatorRoll;
+	AircraftValues.RElevator = ElevatorPitch + RElevatorRoll;
 	AircraftValues.RFlap = FlapPitch + RFlapRoll;
 	AircraftValues.LFlap = FlapPitch + LFlapRoll;
 }
@@ -44,7 +46,7 @@ void UAircraftVisualComponent::PitchCalculation(const float D)
 			0, 
 			AircraftInfo.MaxSlats), 
 			D, 
-			InterpSpeed);
+			ReturnInterpSpeed);
 	}
 
 	// Elevators pitch slightly
@@ -52,7 +54,7 @@ void UAircraftVisualComponent::PitchCalculation(const float D)
 
 	if (bElevators) 
 	{
-		if (InputPitch == 0) ElevatorPitch = FMath::FInterpTo(ElevatorPitch, 0, D, InterpSpeed);
+		if (InputPitch == 0) ElevatorPitch = FMath::FInterpTo(ElevatorPitch, 0, D, ReturnInterpSpeed);
 		else ElevatorPitch = FMath::FInterpTo(
 			ElevatorPitch, 
 			FMath::Clamp(ElevatorPitch + InputPitch, 
@@ -62,7 +64,7 @@ void UAircraftVisualComponent::PitchCalculation(const float D)
 			InterpSpeed);
 	}
 
-	if (InputPitch <= 0) FlapPitch = FMath::FInterpTo(FlapPitch, 0, D, InterpSpeed);
+	if (InputPitch <= 0) FlapPitch = FMath::FInterpTo(FlapPitch, 0, D, ReturnInterpSpeed);
 	else FlapPitch = FMath::FInterpTo(
 		FlapPitch, 
 		FMath::Clamp(FlapPitch - InputPitch, -AircraftInfo.MaxPitchFlaps, -AircraftInfo.MinPitchFlaps), 
@@ -78,7 +80,7 @@ void UAircraftVisualComponent::PitchCalculation(const float D)
 void UAircraftVisualComponent::YawCalculation(const float D) 
 {
 	// Rudder
-	if (InputYaw == 0) AircraftValues.Rudder = FMath::FInterpTo(AircraftValues.Rudder, 0, D, InterpSpeed);
+	if (InputYaw == 0) AircraftValues.Rudder = FMath::FInterpTo(AircraftValues.Rudder, 0, D, ReturnInterpSpeed);
 	else AircraftValues.Rudder = FMath::FInterpTo(
 		AircraftValues.Rudder,
 		FMath::Clamp(AircraftValues.Rudder + InputYaw, -AircraftInfo.MaxRudder, AircraftInfo.MaxRudder),
@@ -91,8 +93,8 @@ void UAircraftVisualComponent::RollCalculation(const float D)
 	// Flaps roll equally
 	if (InputRoll == 0) 
 	{
-		LFlapRoll = FMath::FInterpTo(LFlapRoll, 0, D, InterpSpeed);
-		RFlapRoll = FMath::FInterpTo(RFlapRoll, 0, D, InterpSpeed);
+		LFlapRoll = FMath::FInterpTo(LFlapRoll, 0, D, ReturnInterpSpeed);
+		RFlapRoll = FMath::FInterpTo(RFlapRoll, 0, D, ReturnInterpSpeed);
 	}
 	else 
 	{
@@ -109,12 +111,18 @@ void UAircraftVisualComponent::RollCalculation(const float D)
 
 	if (bElevators)
 	{
-		if (InputRoll == 0) ElevatorRoll = FMath::FInterpTo(ElevatorRoll, 0, D, InterpSpeed);
-		else ElevatorRoll = FMath::FInterpTo(
-			ElevatorRoll, 
-			FMath::Clamp(ElevatorRoll + InputRoll, -AircraftInfo.MaxRollElevator, AircraftInfo.MaxRollElevator), 
-			D, 
-			InterpSpeed);
+		if (InputRoll == 0) {
+			LElevatorRoll = FMath::FInterpTo(LElevatorRoll, 0, D, ReturnInterpSpeed);
+			RElevatorRoll = FMath::FInterpTo(RElevatorRoll, 0, D, ReturnInterpSpeed);
+		}
+		else {
+			RElevatorRoll = FMath::FInterpTo(
+				RElevatorRoll,
+				FMath::Clamp(RElevatorRoll + InputRoll, -AircraftInfo.MaxRollElevator, AircraftInfo.MaxRollElevator),
+				D,
+				InterpSpeed);
+			LElevatorRoll = -RElevatorRoll;
+		}
 	}
 }
 
@@ -149,7 +157,7 @@ void UAircraftVisualComponent::AirBrakeCalculation(const float D)
 {
 	// Might move this also into thrust, depends if it doesn't make too much sense when expanded
 
-	if (InputThrust > 0.4) AircraftValues.AirBrake = FMath::FInterpTo(AircraftValues.AirBrake, 0, D, InterpSpeed);
+	if (InputThrust > 0.4) AircraftValues.AirBrake = FMath::FInterpTo(AircraftValues.AirBrake, 0, D, ReturnInterpSpeed);
 	else AircraftValues.AirBrake = FMath::FInterpTo(
 		AircraftValues.AirBrake,
 		AircraftInfo.MaxAirbrake, 

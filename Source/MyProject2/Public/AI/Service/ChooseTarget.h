@@ -20,6 +20,9 @@ private:
 
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
+	UFUNCTION()
+	void InitAfterTick(UBehaviorTreeComponent* OwnerComp);
+
 	void PickTarget();
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")

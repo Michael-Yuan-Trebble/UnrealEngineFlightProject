@@ -76,9 +76,6 @@ void ABaseMissile::activateSmoke()
 	UNiagaraSystem* LoadedSmoke = SmokeTrailSystem.LoadSynchronous();
 	if (!IsValid(LoadedSmoke)) return;
 
-	UNiagaraSystem* LoadedRocket = MissileRocketSystem.LoadSynchronous();
-	if (!IsValid(LoadedRocket)) return;
-
 	SmokeTrail = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		GetWorld(),
 		LoadedSmoke,
@@ -88,6 +85,9 @@ void ABaseMissile::activateSmoke()
 		true,
 		true
 	);
+
+	UNiagaraSystem* LoadedRocket = MissileRocketSystem.LoadSynchronous();
+	if (!IsValid(LoadedRocket)) return;
 
 	MissileRocket = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		GetWorld(),
@@ -105,10 +105,7 @@ void ABaseMissile::activateSmoke()
 bool ABaseMissile::CalculateIfOvershoot(FVector ToTarget) {
 	ToTarget.Normalize();
 	float Dot = FVector::DotProduct(GetActorForwardVector(), ToTarget);
-	if (Dot < 0.f) {
-		return true;
-	}
-	return false;
+	return Dot < 0.f;
 }
 
 void ABaseMissile::ApplyVFXLOD(const FVector& CameraLoc)
@@ -144,7 +141,7 @@ void ABaseMissile::NotifyCountermeasure()
 			}
 			ProjectileMovement->bIsHomingProjectile = false;
 			ProjectileMovement->HomingTargetComponent = nullptr;
-			ProjectileMovement->Velocity = GetActorForwardVector() * missileAcceleration;
+			ProjectileMovement->Velocity = GetActorForwardVector() * InGameStats.Acceleration;
 			Tracking = nullptr;
 		}
 	}

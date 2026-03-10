@@ -9,7 +9,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/PlayerHUD.h"
 #include "Interfaces/LockableTarget.h"
+#include "Structs and Data/MathLib/FlightMathLibrary.h"
 #include "DrawDebugHelpers.h"
+#include "Debug/DebugHelper.h"
 
 UWeaponSystemComponent::UWeaponSystemComponent()
 {
@@ -172,12 +174,13 @@ void UWeaponSystemComponent::FireWeaponSelected(const TSubclassOf<ABaseWeapon> W
 	if (!WeaponGroups.Contains(WeaponClass)) return;
 	for (FCooldownWeapon* Weapon : WeaponGroups[WeaponClass])
 	{
+		if (!Weapon) return;
 		if (!Weapon->WeaponInstance || !Weapon->CanFire()) continue;
 
 		Weapon->WeaponInstance->OnWeaponResult.AddDynamic(this, &UWeaponSystemComponent::OnWeaponResult);
 
-		if (Target && bLocked)
-			Weapon->WeaponInstance->FireTracking(Speed, Target);
+		if (Target && bLocked && IsValid(Controlled))
+			Weapon->WeaponInstance->FireTracking(Controlled->GetUnitSpeed(), Target);
 		else 
 			Weapon->WeaponInstance->FireStatic(Speed);
 
@@ -194,7 +197,7 @@ void UWeaponSystemComponent::OnWeaponResult(bool bHit)
 
 void UWeaponSystemComponent::SelectWeapon(const int WeaponIndex)
 {
-	TArray<TSubclassOf<ABaseWeapon>> Keys;
+	TArray<TSubclassOf<ABaseWeapon>> Keys{};
 	WeaponGroups.GetKeys(Keys);
 
 	if (!Keys.IsValidIndex(WeaponIndex)) return;
@@ -259,14 +262,8 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 		if (bLocked || LockTime > 0.f) 
 			ResetLockedOn();
 		else 
+			// TODO: Change this to not broadcast every tick
 			OnHUDLockedOn.Broadcast(false);
-
-		return;
-	}
-
-	if (!Target->Implements<ULockableTarget>()) 
-	{
-		ResetLockedOn();
 		return;
 	}
 
@@ -291,12 +288,13 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 		return;
 	}
 
-	if (!IsValid(Target) || !IsValid(Controlled)) return;
+	if (!IsValid(Controlled)) return;
 
 	FVector ToTarget = Target->GetActorLocation() - Controlled->GetActorLocation();
 	float Distance = ToTarget.Size();
 	ToTarget.Normalize();
-	if (Distance > CurrentWeapon->GetRange()) 
+
+	if (UFlightMathLibrary::SpeedToKMH(Distance) > UFlightMathLibrary::SpeedToKMH(CurrentWeapon->GetRange()))
 	{
 		ResetLockedOn();
 		return;
@@ -304,6 +302,7 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 
 	float Dot = FVector::DotProduct(Controlled->GetAirframe()->GetForwardVector(), ToTarget);
 	bool bInCone = Dot > FMath::Cos(FMath::DegreesToRadians(ConeAngle));
+	bool bWasLocked = bLocked;
 	if (bInCone)
 	{
 		LockTime += DeltaSeconds;
@@ -316,9 +315,9 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 		bLocked = false;
 		LockTime = 0.f;
 	}
-	if (bLocked) if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Target)) Aircraft->OnLockedOnByEnemy.Broadcast();
+	if (bLocked && !bWasLocked) if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Target)) Aircraft->OnLockedOnByEnemy.Broadcast();
 
-	float LockPercent;
+	float LockPercent = 0.f;
 	if (MaxLockTime == 0) 
 		LockPercent = 1.f;
 	else 
@@ -328,7 +327,8 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 
 void UWeaponSystemComponent::ResetLockedOn() 
 {
+	float lastLock = 0.f;
 	LockTime = 0.f;
 	bLocked = false;
-	OnHUDLockedOn.Broadcast(0.f);
+	if (lastLock != LockTime) OnHUDLockedOn.Broadcast(0.f);
 }

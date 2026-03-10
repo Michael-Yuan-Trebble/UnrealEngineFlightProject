@@ -7,8 +7,8 @@
 
 EThrottleStage UFlightComponent::getThrottleStage(const float throttle)
 {
-	if (throttle >= 0 && throttle <= 0.4) return EThrottleStage::Slow;
-	else if (throttle <= 0.8) return EThrottleStage::Normal;
+	if (throttle >= 0.f && throttle <= 0.4f) return EThrottleStage::Slow;
+	else if (throttle <= 0.8f) return EThrottleStage::Normal;
 	else return EThrottleStage::Afterburner;
 }
 
@@ -35,7 +35,7 @@ void UFlightComponent::SetFlightMode(const EFlightMode InFlight)
 		isFlying = true;
 		break;
 	case EFlightMode::Gears:
-		FlightDrag = AirStats.Acceleration * 0.5;
+		FlightDrag = AirStats.Acceleration * 0.5f;
 		break;
 	case EFlightMode::Naval:
 		bLanded = true;
@@ -63,7 +63,7 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	RollAOA(DeltaTime);
 	ApplyRot(DeltaTime);
 
-	if (UFlightMathLibrary::SpeedToKMH(currentSpeed) <= DropSpeed) 
+	if (currentKMHSpeed <= DropSpeed)
 	{
 		if (!bDropping) bDropping = true;
 		AddDropSpeed(DeltaTime);
@@ -72,7 +72,7 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 			Landed(DeltaTime);
 			bCanTakeOff = false;
 		}
-		else if (UFlightMathLibrary::SpeedToKMH(currentSpeed) <= StallSpeed)
+		else if (currentKMHSpeed <= StallSpeed)
 		{
 			// TODO: Stall should enter a state where it goes down, but also skips that drop speed process because it feels clunky
 			Stall(DeltaTime);
@@ -80,7 +80,7 @@ void UFlightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	}
 	else if (bDropping) bDropping = false;
 
-	if (!bCanTakeOff && UFlightMathLibrary::SpeedToKMH(currentSpeed) > DropSpeed)
+	if (!bCanTakeOff && currentKMHSpeed > DropSpeed)
 	{
 		bCanTakeOff = true;
 		bLanded = false;
@@ -111,22 +111,21 @@ void UFlightComponent::ApplySpeed(const float ThrottlePercentage, const float De
 	if (FlightMode == EFlightMode::Naval && bRestrained) return;
 
 	float speedDrag = CalculateSpeedDrag();
-	float AOADrag = 0;
-	if (!bDropping) AOADrag = FMath::IsFinite(DragAOA()) ? DragAOA() : 0;
-	float pitchDrag = FMath::IsFinite(PitchDrag()) ? PitchDrag() : 0;
+	float AOADrag = 0.f;
+	if (!bDropping) AOADrag = FMath::IsFinite(DragAOA()) ? DragAOA() : 0.f;
+	float pitchDrag = FMath::IsFinite(PitchDrag()) ? PitchDrag() : 0.f;
 
 	float totalDrag = speedDrag + AOADrag + pitchDrag;
 
 	float trueAcceleration = Acceleration - totalDrag - FlightDrag;
-	trueAcceleration = FMath::Abs(trueAcceleration) < 0.001 ? 0 : trueAcceleration;
-
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
+	trueAcceleration = FMath::Abs(trueAcceleration) < 0.001f ? 0.f : trueAcceleration;
 
 	// Convert to meters
-	currentSpeed += (trueAcceleration / 0.01) * DeltaSeconds;
+	currentSpeed += (trueAcceleration / 0.01f) * DeltaSeconds;
 
-	if (!FMath::IsFinite(currentSpeed)) currentSpeed = 0;
-	currentSpeed = FMath::Clamp(currentSpeed, 0, 1000000);
+	if (!FMath::IsFinite(currentSpeed)) currentSpeed = 0.f;
+	currentSpeed = FMath::Clamp(currentSpeed, 0.f, 1000000.f);
+	currentKMHSpeed = UFlightMathLibrary::SpeedToKMH(currentSpeed);
 
 	PreviousVelocity = Velocity;
 	if (bLanded && IsValid(Airframe)) Velocity = Airframe->GetForwardVector() * currentSpeed;
@@ -134,9 +133,8 @@ void UFlightComponent::ApplySpeed(const float ThrottlePercentage, const float De
 
 	if (Velocity.ContainsNaN() || Velocity.Size() > 1e6f) Velocity = FVector::ZeroVector;
 
-	if (bLanded && !bCanTakeOff) { 
-		Velocity.Z = 0; 
-	}
+	if (bLanded && !bCanTakeOff) 
+		Velocity.Z = 0.f;
 
 	if (IsValid(Controlled)) Controlled->AddActorWorldOffset(Velocity * DeltaSeconds, true);
 	CalculateGForce(DeltaSeconds);
@@ -149,7 +147,7 @@ void UFlightComponent::SetInitialSpeed(const float Speed)
 }
 
 void UFlightComponent::AddSpeed(const float Speed, const float D) {
-	currentSpeed += UFlightMathLibrary::ConvertKMHToSpeed(Speed) + ((Acceleration / 0.01) * D);
+	currentSpeed += UFlightMathLibrary::ConvertKMHToSpeed(Speed) + ((Acceleration / 0.01f) * D);
 }
 
 void UFlightComponent::CheckLanding(const float D)
@@ -158,7 +156,7 @@ void UFlightComponent::CheckLanding(const float D)
 	if (bLanded && !bCanTakeOff) return;
 	FHitResult Hit;
 	FVector Start = Controlled->GetLandingGearCollision()->GetComponentLocation();
-	FVector End = Start - Controlled->GetActorUpVector() * 110;
+	FVector End = Start - Controlled->GetActorUpVector() * 110.f;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(Controlled);
 	FCollisionObjectQueryParams ObjParams;
@@ -169,12 +167,11 @@ void UFlightComponent::CheckLanding(const float D)
 void UFlightComponent::AddDropSpeed(const float D) {
 
 	// It doesn't have to go to 90! it can go to something like 30 or 40, once stalling then push it to 90 for the user to gain speed then exit stall
-	if (UFlightMathLibrary::SpeedToKMH(currentSpeed) <= StallSpeed) return;
+	if (currentKMHSpeed <= StallSpeed) return;
 
 	float MaxDropAngle = 30.f;
 
-	float Speed = UFlightMathLibrary::SpeedToKMH(currentSpeed);
-	float Percent = FMath::Clamp(Speed / DropSpeed, 0.f, 1.f);
+	float Percent = FMath::Clamp(currentKMHSpeed / DropSpeed, 0.f, 1.f);
 	
 	float CurrentMaxAngleDrop = MaxDropAngle * (1 - Percent);
 
@@ -209,20 +206,20 @@ void UFlightComponent::Landed(const float D)
 
 float UFlightComponent::CalculateSpeedDrag() 
 {
-	float drag = 0;
-	float totalFlightPercent = (targetSpeed != 0) ? (currentSpeed / targetSpeed) : 0.f;
+	float drag = 0.f;
+	float totalFlightPercent = (targetSpeed != 0.f) ? (currentSpeed / targetSpeed) : 0.f;
 
-	if (totalFlightPercent >= 0.8 && totalFlightPercent <= 1.05)
+	if (totalFlightPercent >= 0.8f && totalFlightPercent <= 1.05f)
 	{
 		drag = Acceleration / (1.05f + FMath::Pow(2.f, -0.01f * (currentSpeed - targetSpeed)));
 	}
-	else if (totalFlightPercent > 1.05 && switchingPhase)
+	else if (totalFlightPercent > 1.05f && switchingPhase)
 	{
-		drag = Acceleration * 4 / (1.f + FMath::Pow(2.f, -0.01f * (currentSpeed - targetSpeed)));
+		drag = Acceleration * 4.f / (1.f + FMath::Pow(2.f, -0.01f * (currentSpeed - targetSpeed)));
 	}
 	else if (switchingPhase) switchingPhase = false;
 
-	return FMath::Clamp(drag, 0, Acceleration * 10.f);
+	return FMath::Clamp(drag, 0.f, Acceleration * 10.f);
 }
 
 void UFlightComponent::CalculateGForce(const float DeltaSeconds)
@@ -237,7 +234,7 @@ void UFlightComponent::CalculateGForce(const float DeltaSeconds)
 	FVector Gs = LocalAccel / 9.81f;
 
 	// Starts at 0 G, so just adding one because of gravity
-	float VerticalG = Gs.Z + 1;
+	float VerticalG = Gs.Z + 1.f;
 	previousGForce = displayG;
 
 	// Vortex
@@ -258,10 +255,10 @@ void UFlightComponent::CalculateVortex()
 
 void UFlightComponent::SlowSpeed(const float ThrottlePercentage)
 {
-	float negation = 1 - ThrottlePercentage;
-	targetSpeed = 0;
+	float negation = 1.f - ThrottlePercentage;
+	targetSpeed = 0.f;
 
-	float scale = (ThrottlePercentage <= 0.1) ? 3.f : 1.25f;
+	float scale = (ThrottlePercentage <= 0.1f) ? 3.f : 1.25f;
 	Acceleration = -(AirStats.Acceleration * negation * scale);
 }
 
@@ -374,10 +371,7 @@ float UFlightComponent::GetAOA()
 float UFlightComponent::DragAOA()
 {
 	float dragCo = AirStats.DragCoefficient;
-	float drag = FMath::Abs(GetAOA()) * dragCo * (UFlightMathLibrary::SpeedToKMH(currentSpeed) / 4);
-
-	//GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Pitch: %.2f"), drag));
-
+	float drag = FMath::Abs(GetAOA()) * dragCo * (currentKMHSpeed / 4.f);
 	return drag;
 }
 
@@ -399,9 +393,7 @@ void UFlightComponent::RollAOA(const float DeltaSeconds)
 	);
 
 	float UpDot = FVector::DotProduct(Up, FVector::UpVector);
-
 	float DownPitchStrength = FMath::Clamp(1.f - UpDot, 0.f, 2.f) * 2.f;
-
 	float DownPitch = -DownPitchStrength * DeltaSeconds;
 
 	FVector WorldPitchAxis = FVector::CrossProduct(Forward, FVector::UpVector).GetSafeNormal();
@@ -425,11 +417,10 @@ float UFlightComponent::PitchDrag()
 	);
 
 	float RadAngle = FMath::DegreesToRadians(PitchAngle);
-
 	float UpDot = FVector::DotProduct(Up, FVector::UpVector);
 
 	// TODO: Make this more robust
-	return PitchAngle / 50;
+	return PitchAngle / 50.f;
 }
 
 // ====================================
@@ -440,19 +431,18 @@ void UFlightComponent::ApplyPitch(const float DeltaSeconds)
 {
 	if (bLanded && !bCanTakeOff) return;
 	if (!IsValid(AirStats.DragCurve) || !IsValid(Airframe)) return;
-	float CurveTurn = AirStats.DragCurve->GetFloatValue(UFlightMathLibrary::SpeedToKMH(currentSpeed));
-	float CompressionTurn = AirStats.CompressionCurve->GetFloatValue(UFlightMathLibrary::SpeedToKMH(currentSpeed));
-	//GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Yellow, FString::Printf(TEXT("Curve: %.2f"), CurveTurn));
-	if (UserRotation.Pitch == 0)
+	float CurveTurn = AirStats.DragCurve->GetFloatValue(currentKMHSpeed);
+	float CompressionTurn = AirStats.CompressionCurve->GetFloatValue(currentKMHSpeed);
+	if (UserRotation.Pitch == 0.f)
 	{
-		NextRotation.Pitch = FMath::FInterpTo(NextRotation.Pitch, 0, DeltaSeconds, 3.f);
+		NextRotation.Pitch = FMath::FInterpTo(NextRotation.Pitch, 0.f, DeltaSeconds, 3.f);
 		FRotator DeltaRot(NextRotation.Pitch * DeltaSeconds, 0.f, 0.f);
 		Airframe->AddLocalRotation(DeltaRot);
 		return;
 	}
 		
 	float InterpSpeed = AirStats.TurnRate * CurveTurn * CompressionTurn;
-	InterpSpeed = UserRotation.Pitch < 0 ? InterpSpeed * 0.5 : InterpSpeed;
+	InterpSpeed = UserRotation.Pitch < 0.f ? InterpSpeed * 0.5f : InterpSpeed;
 
 	float TargetPitchRate = UserRotation.Pitch * InterpSpeed;
 	NextRotation.Pitch = FMath::FInterpTo(NextRotation.Pitch, TargetPitchRate, DeltaSeconds, 5.f);
@@ -464,25 +454,24 @@ void UFlightComponent::ApplyPitch(const float DeltaSeconds)
 void UFlightComponent::ApplyYaw(const float DeltaSeconds)
 {
 	if (!IsValid(Airframe)) return;
-	if (UserRotation.Yaw == 0) {
-		NextRotation.Yaw = FMath::FInterpTo(NextRotation.Yaw, 0, DeltaSeconds, 3.f);
-		FRotator DeltaRot(0.f, NextRotation.Yaw * DeltaSeconds,0.f);
+	if (UserRotation.Yaw == 0.f) {
+		NextRotation.Yaw = FMath::FInterpTo(NextRotation.Yaw, 0.f, DeltaSeconds, 3.f);
+		FRotator DeltaRot(0.f, NextRotation.Yaw * DeltaSeconds, 0.f);
 		Airframe->AddLocalRotation(DeltaRot);
 		return;
 	}
 	float TargetYawRate = UserRotation.Yaw * AirStats.RudderRate;
 	NextRotation.Yaw = FMath::FInterpTo(NextRotation.Yaw, TargetYawRate, DeltaSeconds, 2.f);
-
-	FRotator DeltaRot(0.f, NextRotation.Yaw * DeltaSeconds,0.f);
+	FRotator DeltaRot(0.f, NextRotation.Yaw * DeltaSeconds, 0.f);
 	Airframe->AddLocalRotation(DeltaRot);
 }
 
 void UFlightComponent::ApplyRoll(const float DeltaSeconds)
 {
 	if (!IsValid(Airframe)) return;
-	if (UserRotation.Roll == 0)
+	if (UserRotation.Roll == 0.f)
 	{
-		NextRotation.Roll = FMath::FInterpTo(NextRotation.Roll, 0, DeltaSeconds, 3.f);
+		NextRotation.Roll = FMath::FInterpTo(NextRotation.Roll, 0.f, DeltaSeconds, 3.f);
 		FRotator DeltaRot(0.f, 0.f, NextRotation.Roll * DeltaSeconds);
 		Airframe->AddLocalRotation(DeltaRot);
 		return;

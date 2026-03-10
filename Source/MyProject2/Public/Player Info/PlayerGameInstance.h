@@ -30,8 +30,6 @@ public:
 
 	void SetLevel(const FMissionData& InLevel);
 
-	const FMissionData& GetLevel() const { return Level; };
-
 	void SetLoadout(const FAircraftLoadoutData& InLoadout) { FullLoadout = InLoadout; };
 
 	const FAircraftLoadoutData& GetLoadout() { return FullLoadout; };
@@ -84,15 +82,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<UTransitionWidget> TransitionWidget = nullptr;
 
-	void SetAircraftSelectMap();
-
-	void SetNavalCarrierMap();
-
-	void SetGroundTakeoffMap();
-
-	void SetDefaultMap();
-
-	FMissionData Level{};
+	void SetMaps();
 
 	void Init() override;
 

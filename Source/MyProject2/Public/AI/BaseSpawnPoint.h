@@ -18,4 +18,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void ActivateSpawn();
+
+
 };

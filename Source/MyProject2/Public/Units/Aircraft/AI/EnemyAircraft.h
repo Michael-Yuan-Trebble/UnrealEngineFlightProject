@@ -11,6 +11,7 @@
 class AEnemyAircraftAI;
 class ABaseWeapon;
 class UAIFlightComponent;
+class AAircraftAIController;
 
 UCLASS()
 class MYPROJECT2_API AEnemyAircraft : public ABaseAircraft
@@ -21,8 +22,6 @@ public:
 
 	AEnemyAircraft();
 
-	TObjectPtr<AEnemyAircraftAI> Controller = nullptr;
-
 	virtual void PossessedBy(AController* Controller) override;
 
 	FTimerHandle RepeatTimerHandle;
@@ -31,4 +30,6 @@ public:
 	virtual void StartBullets() override;
 	virtual void EndBullets() override;
 
+private:
+	TObjectPtr<AAircraftAIController> Controller = nullptr;
 };

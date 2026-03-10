@@ -9,7 +9,6 @@
 #include "Subsystem/LevelTransitionSubsystem.h"
 #include "Subsystem/MissionManagerSubsystem.h"
 #include "Kismet/GameplayStatics.h"
-#include "Enums/ThrottleStage.h"
 
 ANavalTakeoffGamemode::ANavalTakeoffGamemode() {
 	FlightMode = EFlightMode::Naval;
@@ -28,7 +27,7 @@ void ANavalTakeoffGamemode::Tick(float D) {
 // Spawn in Carrier and get the point
 void ANavalTakeoffGamemode::HandlePlayerSpawnPoint() 
 {
-	if (CarrierClass && IsValid(GetWorld()))
+	if (IsValid(CarrierClass) && IsValid(GetWorld()))
 	{
 		FTransform SpawnTransform;
 		SpawnTransform.SetTranslation(SpawnVector);
@@ -86,7 +85,7 @@ void ANavalTakeoffGamemode::CheckTakeoff(const float D)
 }
 
 void ANavalTakeoffGamemode::TransitionLevel() {
-	if (!PC || bFinished) return;
+	if (!IsValid(PC) || bFinished) return;
 	bFinished = true;
 	PC->ClientMessage(TEXT("COMPLETE"));
 	PC->DeactivateMovement();

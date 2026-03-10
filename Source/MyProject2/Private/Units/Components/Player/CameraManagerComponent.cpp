@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Camera Manager!"));
 #include "Units/Components/Player/CameraManagerComponent.h"
 #include "Units/Aircraft/Player/PlayerAircraft.h"
 #include "Units/Components/Aircraft/AircraftAudioComponent.h"
@@ -174,22 +173,18 @@ void UCameraManagerComponent::SetThirdPerson()
 
 void UCameraManagerComponent::HandleHorizontal()
 {
-	if (!IsValid(Controlled) || !IsValid(MainSpringArm)) return;
+	if (!IsValid(MainSpringArm)) return;
 
 	FRotator Rotation = MainSpringArm->GetRelativeRotation();
-
 	Rotation.Yaw = FMath::Clamp(Rotation.Yaw + LookX, -LookXLock, LookXLock);
-
 	MainSpringArm->SetRelativeRotation(Rotation);
 }
 
 void UCameraManagerComponent::HandleVertical() 
 {
-	if (!IsValid(Controlled) || !IsValid(MainSpringArm)) return;
+	if (!IsValid(MainSpringArm)) return;
 
 	FRotator Rotation = MainSpringArm->GetRelativeRotation();
-
 	Rotation.Pitch = FMath::Clamp(Rotation.Pitch + LookY, -LookYLock, LookYLock);
-
 	MainSpringArm->SetRelativeRotation(Rotation);
 }

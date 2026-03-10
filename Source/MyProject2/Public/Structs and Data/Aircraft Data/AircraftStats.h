@@ -6,6 +6,8 @@
 #include "Engine/DataAsset.h"
 #include "Structs and Data/InGame/InGameAirStats.h"
 #include "Structs and Data/LoadoutInfo/AircraftWeaponInfo.h"
+#include "Structs and Data/Weapon Data/BulletStats.h"
+#include "Structs and Data/Aircraft Data/AircraftAudioData.h"
 #include "AircraftStats.generated.h"
 
 UCLASS()
@@ -26,4 +28,10 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FAircraftWeaponInfo WeaponInfo{};
+
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UBulletStats> BulletStats = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UAircraftAudioData> AudioData = nullptr;
 };

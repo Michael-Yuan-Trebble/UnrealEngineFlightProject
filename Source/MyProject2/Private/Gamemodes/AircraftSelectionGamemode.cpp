@@ -4,10 +4,8 @@
 #include "GameFramework/SpectatorPawn.h"
 #include "UI/SelectionUI/AircraftSelectionWidget.h"
 #include "Player Info/AircraftPlayerController.h"
-#include "Units/Aircraft/Player/PlayerAircraft.h"
 #include "Units/Components/Player/MenuManagerComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Enums/MenuState.h"
 #include "Player Info/PlayerGameInstance.h"
 #include "Subsystem/LevelTransitionSubsystem.h"
 #include "Subsystem/MissionManagerSubsystem.h"
@@ -22,17 +20,18 @@ AAircraftSelectionGamemode::AAircraftSelectionGamemode()
 void AAircraftSelectionGamemode::BeginPlay() 
 {
 	Super::BeginPlay();
+	
+	if (!IsValid(GetWorld())) return;
 
-	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-	if (!PC)  return;
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0)) {
+		APC = Cast<AAircraftPlayerController>(PC);
+	}
 
-	APC = Cast<AAircraftPlayerController>(PC);
-	if (!APC)
+	if (!IsValid(APC)) return;
 
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	ASpectatorPawn* Spectator = GetWorld()->SpawnActor<ASpectatorPawn>(ASpectatorPawn::StaticClass(), FVector::ZeroVector,FRotator::ZeroRotator,SpawnParams);
-
-	if (!Spectator)  return;
+	if (!IsValid(Spectator)) return;
 
 	APC->Possess(Spectator);
 	APC->SetControlMode(EControlMode::Menu);
@@ -50,17 +49,15 @@ void AAircraftSelectionGamemode::BeginPlay()
 
 void AAircraftSelectionGamemode::SpawnInAircraft(const TSubclassOf<APawn> SpawnIn) 
 {
-	if (AircraftDisplayed && AircraftDisplayed->GetClass() == SpawnIn) return;
+	if (!IsValid(AircraftDisplayed) || !IsValid(GetWorld())) return;
+	if (AircraftDisplayed->GetClass() == SpawnIn) return;
 
-	if (AircraftDisplayed) 
-	{
-		AircraftDisplayed->Destroy();
-		AircraftDisplayed = nullptr;
-	}
+	AircraftDisplayed->Destroy();
+	AircraftDisplayed = nullptr;
 
 	FVector PreviewLocation = FVector::ZeroVector;
 
-	FHitResult HitResult;
+	FHitResult HitResult{};
 
 	FCollisionQueryParams Params;
 	Params.bTraceComplex = true;
@@ -79,8 +76,9 @@ void AAircraftSelectionGamemode::SpawnInAircraft(const TSubclassOf<APawn> SpawnI
 
 	FRotator PreviewRotation = FRotator::ZeroRotator;
 	AircraftDisplayed = GetWorld()->SpawnActor<APawn>(SpawnIn, SpawnLocation, PreviewRotation, SpawnParams);
-	ABaseAircraft* Preview = Cast<ABaseAircraft>(AircraftDisplayed);
-	Preview->SetLandingGearVisiblility(true);
+	if (ABaseAircraft* Preview = Cast<ABaseAircraft>(AircraftDisplayed)) {
+		Preview->SetLandingGearVisiblility(true);
+	}
 	
 }
 
@@ -96,7 +94,7 @@ void AAircraftSelectionGamemode::SpawnInWeapon(const TSubclassOf<ABaseWeapon> We
 
 	AActor* WeaponDisplayed;
 	FTransform SocketTransform = Mesh->GetSocketTransform(Pylon);
-	if (AActor** WeaponPtr = EquippedWeapons.Find(Pylon)) 
+	if (TObjectPtr<AActor>* WeaponPtr = EquippedWeapons.Find(Pylon))
 	{
 		WeaponDisplayed = *WeaponPtr;
 		if (IsValid(WeaponDisplayed))
@@ -115,7 +113,7 @@ void AAircraftSelectionGamemode::ClearWeapons(const FName& Pylon)
 {
 	if (!IsValid(AircraftDisplayed)) return;
 
-	AActor** WeaponPtr = EquippedWeapons.Find(Pylon);
+	TObjectPtr<AActor>* WeaponPtr = EquippedWeapons.Find(Pylon);
 	if (!WeaponPtr) return;
 
 	AActor* WeaponDisplayed = *WeaponPtr;
@@ -137,28 +135,17 @@ void AAircraftSelectionGamemode::EndSelection(AAircraftPlayerController* Control
 }
 
 // TODO: Try to make it so it advances to a "Buffer" screen
-void AAircraftSelectionGamemode::TryAdvanceToNextStage() 
+void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 {
 	// TODO: Make Co-Op be able to work if implemented
 	//if (ReadyPlayers.Num() < PlayersRequired) return;
 
 	UWorld* World = GetWorld();
-	if (!World) return;
+	if (!IsValid(World)) return;
 
-	UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
-	if (!GI) return;
-
-	TSoftObjectPtr<UWorld> LoadWorld = GI->GetLevel().Level;
-
-	// Default to TestHeightmap, might change this later?
-	if (LoadWorld.IsNull())
-	{
-		// TODO: Do some fallback, for now return
-		return;
-	}
-
+	UPlayerGameInstance* GI = World->GetGameInstance<UPlayerGameInstance>();
 	APlayerController* PC = World->GetFirstPlayerController();
-	if (!PC) return;
+	if (!IsValid(GI) || !IsValid(PC)) return;
 
 	AAircraftPlayerController* LocalAPC = IsValid(APC) ? APC.Get() : Cast<AAircraftPlayerController>(PC);
 
@@ -167,29 +154,23 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 		LocalAPC->DisableInput(Cast<APlayerController>(PC));
 		if (IsValid(LocalAPC->GetMenuManager())) LocalAPC->GetMenuManager()->CloseAll();
 	}
-
-	ABaseAircraft* BaseAir = Cast<ABaseAircraft>(AircraftDisplayed);
 	
 	// TODO: See what would work better, returning if there is no aircraft displayed or letting it ride and just using the fallback
 
-	if (BaseAir) 
+	if (ABaseAircraft* BaseAir = Cast<ABaseAircraft>(AircraftDisplayed))
 	{
 		FullLoadout.AircraftClass = BaseAir->GetClass();
 	}
 
 	// TODO: Change funtions so that they suit this
 
-	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout;
+	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout{};
 
 	for (auto& Pair : EquippedWeapons)
 	{
 		AActor* Actor = Pair.Value;
-		if (!IsValid(Actor)) continue;
 
-		ABaseWeapon* Weapon = Cast<ABaseWeapon>(Actor);
-		if (!Weapon) continue;
-
-		Loadout.Add(Pair.Key, Weapon->GetClass());
+		Loadout.Add(Pair.Key, Actor->GetClass());
 	}
 
 	FullLoadout.EquippedWeapons = Loadout;

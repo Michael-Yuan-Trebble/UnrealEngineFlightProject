@@ -5,6 +5,7 @@
 #include "Units/Aircraft/BaseAircraft.h"
 #include "AI/AircraftAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Debug/DebugHelper.h"
 
 EAIThrottleMode UBTServiceAttack::GetThrottleMode(float distance) 
 {
@@ -158,9 +159,9 @@ void UBTServiceAttack::CalculateThrust(const float DeltaSeconds)
 
 float UBTServiceAttack::PursuitThrottle(ABaseAircraft* Target)
 {
-	if (!IsValid(Target) || !IsValid(Controlled)) return 0.f;
-	float targetSpeed = UFlightMathLibrary::SpeedToKMH(Target->GetSpeed());
-	float currentSpeed = UFlightMathLibrary::SpeedToKMH(Controlled->GetSpeed());
+	if (!IsValid(Target) || !IsValid(Controlled)) return 0.5f;
+	float targetSpeed = Target->GetKMHSpeed();
+	float currentSpeed = Controlled->GetKMHSpeed();
 	float speedDif = targetSpeed - currentSpeed;
 	float absSpeedDif = FMath::Abs(speedDif);
 

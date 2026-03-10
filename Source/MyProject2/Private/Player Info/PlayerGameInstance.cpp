@@ -18,10 +18,7 @@ void UPlayerGameInstance::Init()
 	);
 	SaveManager = NewObject<USaveGameManager>(this, USaveGameManager::StaticClass());
 	SaveManager->LoadGame();
-	SetAircraftSelectMap();
-	SetNavalCarrierMap();
-	SetGroundTakeoffMap();
-	SetDefaultMap();
+	SetMaps();
 }
 
 void UPlayerGameInstance::FadeIn() 
@@ -99,13 +96,13 @@ void UPlayerGameInstance::GoToLevel() {
 	ULevelTransitionSubsystem* LevelSubsystem = GetSubsystem<ULevelTransitionSubsystem>();
 	UMissionManagerSubsystem* MissionSubsystem = GetSubsystem<UMissionManagerSubsystem>();
 
-	if (!LevelSubsystem || !MissionSubsystem) return;
+	if (!IsValid(LevelSubsystem) || !IsValid(MissionSubsystem)) return;
 	LevelSubsystem->LoadIntermission(MissionSubsystem->GetCurrentMission().TakeoffType);
 }
 
 void UPlayerGameInstance::SetLevel(const FMissionData& InLevel) {
 	if (UMissionManagerSubsystem* MissionSubsystem = GetSubsystem<UMissionManagerSubsystem>()) {
-		MissionSubsystem->SetCurrentMission(Level);
+		MissionSubsystem->SetCurrentMission(InLevel);
 	}
 }
 
@@ -117,26 +114,11 @@ bool UPlayerGameInstance::DoesFadeExist() const {
 	return IsValid(FadeWidget);
 }
 
-void UPlayerGameInstance::SetAircraftSelectMap() {
+void UPlayerGameInstance::SetMaps() {
 	if (UMissionManagerSubsystem* MissionSubsystem = GetSubsystem<UMissionManagerSubsystem>()) {
 		MissionSubsystem->SetAircraftSelectMap(AircraftSelectMap);
-	}
-}
-
-void UPlayerGameInstance::SetNavalCarrierMap() {
-	if (UMissionManagerSubsystem* MissionSubsystem = GetSubsystem<UMissionManagerSubsystem>()) {
 		MissionSubsystem->SetNavalCarrierMap(NavalCarrierMap);
-	}
-}
-
-void UPlayerGameInstance::SetGroundTakeoffMap() {
-	if (UMissionManagerSubsystem* MissionSubsystem = GetSubsystem<UMissionManagerSubsystem>()) {
 		MissionSubsystem->SetGroundTakeoffMap(GroundTakeoffMap);
-	}
-}
-
-void UPlayerGameInstance::SetDefaultMap() {
-	if (UMissionManagerSubsystem* MissionSubsystem = GetSubsystem<UMissionManagerSubsystem>()) {
 		MissionSubsystem->SetDefaultMap(DefaultMap);
 	}
 }

@@ -6,9 +6,6 @@
 #include "BehaviorTree/BTService.h"
 #include "Attack.generated.h"
 
-class AAircraftAIController;
-class ABaseAircraft;
-
 UENUM(BlueprintType)
 enum class EAIThrottleMode : uint8 
 {
@@ -39,13 +36,13 @@ private:
 	TWeakObjectPtr<AActor> Selected = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<ABaseAircraft> Controlled = nullptr;
+	TObjectPtr<class ABaseAircraft> Controlled = nullptr;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<AAircraftAIController> Controller = nullptr;
+	TObjectPtr<class AAircraftAIController> Controller = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector YawKey;

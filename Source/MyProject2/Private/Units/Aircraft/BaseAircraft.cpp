@@ -5,15 +5,17 @@
 #include "Units/Components/Aircraft/FlightComponent.h"
 #include "Units/Components/Aircraft/WeaponSystemComponent.h"
 #include "Units/Components/Aircraft/AircraftVisualComponent.h"
-#include "Weapons/Missiles/BaseMissile.h"
 #include "Units/Components/Aircraft/RadarComponent.h"
 #include "Units/Components/Aircraft/SpecialSystemComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/BoxComponent.h"
+#include "Structs and Data/Aircraft Data/AircraftAudioData.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Units/Components/Aircraft/AircraftAudioComponent.h"
 #include "NiagaraSystem.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
+#include "Debug/DebugHelper.h"
 
 ABaseAircraft::ABaseAircraft()
 {
@@ -62,6 +64,8 @@ void ABaseAircraft::BeginPlay()
 {
 	Super::BeginPlay();
 
+	GetBulletStats();
+
 	if (IsValid(VisualCompClass)) 
 	{
 		VisualComp = NewObject<UAircraftVisualComponent>(this, VisualCompClass);
@@ -72,10 +76,12 @@ void ABaseAircraft::BeginPlay()
 		}
 	}
 
-	if (!IsValid(Airframe) || !IsValid(RadarComponent) || !IsValid(FlightComponent)) return;
+	if (!IsValid(Airframe) || !IsValid(RadarComponent) || !IsValid(FlightComponent) || !IsValid(UnitRoot)) return;
 
 	UAircraftStats* LoadedStats = AirStats.LoadSynchronous();
 	if (!IsValid(LoadedStats)) return;
+
+	UnitName = LoadedStats->AircraftName;
 
 	OriginalCollOffset = UnitRoot->GetRelativeLocation();
 	OriginalExtent = UnitRoot->GetUnscaledBoxExtent();
@@ -86,6 +92,9 @@ void ABaseAircraft::BeginPlay()
 	FlightComponent->SetDropSpeed(DropSpeed);
 	FlightComponent->SetStallSpeed(StallSpeed);
 	WeaponComponent->Setup(this, LoadedStats);
+
+	if (UAircraftAudioData* LoadedAudio = LoadedStats->AudioData.LoadSynchronous()) 
+		AudioComp->SetAudio(LoadedAudio);
 
 	if (IsValid(AfterburnerSystem))
 	{
@@ -253,7 +262,9 @@ void ABaseAircraft::SetSpeed(const float speed) { if (IsValid(FlightComponent)) 
 
 bool ABaseAircraft::IsLanded() { if (IsValid(FlightComponent)) return FlightComponent->IsLanded(); else return false; }
 
-float ABaseAircraft::GetSpeed() { if (IsValid(FlightComponent)) return FlightComponent->GetSpeed(); else return 0.f; }
+float ABaseAircraft::GetUnitSpeed() { if (IsValid(FlightComponent)) return FlightComponent->GetUnitSpeed(); else return 0.f; }
+
+float ABaseAircraft::GetKMHSpeed() { if (IsValid(FlightComponent)) return FlightComponent->GetKMHSpeed(); else return 0.f; }
 
 void ABaseAircraft::SetWeapons(const TMap<FName, TSubclassOf<ABaseWeapon>> In) { if (IsValid(WeaponComponent)) WeaponComponent->SetWeapons(In); }
 
@@ -268,6 +279,18 @@ void ABaseAircraft::SetFlightMode(const EFlightMode FlightMode)
 const FAircraftAnimationValues& ABaseAircraft::GetAircraftAnimationValues() {
 	if (IsValid(VisualComp)) return VisualComp->GetAircraftAnimationValues();
 	return DefaultAnimVal;
+}
+
+UBulletStats* ABaseAircraft::GetBulletStats() {
+	if (!IsValid(CachedBulletStats))
+	{
+		if (UAircraftStats* Stats = AirStats.LoadSynchronous())
+		{
+			CachedBulletStats = Stats->BulletStats.LoadSynchronous();
+		}
+	}
+
+	return CachedBulletStats;
 }
 
 EThrottleStage ABaseAircraft::GetThrottleStage() const { if (IsValid(FlightComponent)) return FlightComponent->ReturnThrottleStage(); else return EThrottleStage::Slow; }

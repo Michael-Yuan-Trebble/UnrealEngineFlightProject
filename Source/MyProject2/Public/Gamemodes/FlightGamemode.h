@@ -6,7 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
-#include "Specials/BaseSpecial.h"
+#include "Structs and Data/LoadoutInfo/AircraftLoadoutData.h"
 #include "Enums/FlightMode.h"
 #include "FlightGamemode.generated.h"
 
@@ -14,6 +14,7 @@ class APlayerAircraft;
 class AAircraftPlayerController;
 class AAircraftRegistry;
 class ABaseWeapon;
+class UBaseSpecial;
 
 UCLASS()
 class MYPROJECT2_API AFlightGamemode : public AGameModeBase
@@ -67,6 +68,8 @@ protected:
 	bool bFinished = false;
 
 	FTransform PlayerSpawnLoc = FTransform::Identity;
+
+	const FString Path = "/Game/Aircraft/AircraftData";
 
 protected:
 	void FallBackAircraft();

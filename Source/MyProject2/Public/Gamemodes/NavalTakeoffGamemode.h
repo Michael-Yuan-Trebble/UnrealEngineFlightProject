@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Gamemodes/FlightGamemode.h"
+#include "Enums/ThrottleStage.h"
 #include "NavalTakeoffGamemode.generated.h"
 
 class ACarrier;

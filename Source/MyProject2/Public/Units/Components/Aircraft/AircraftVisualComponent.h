@@ -53,7 +53,7 @@ private:
 	TSubclassOf<class ACountermeasureActor> FlareClass = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	bool bUsingCountermeasures;
+	bool bUsingCountermeasures = false;
 
 	UPROPERTY(EditAnywhere)
 	bool bCanards = false;
@@ -77,8 +77,10 @@ private:
 
 	float FlapPitch = 0.f;
 
-	float ElevatorRoll = 0.f;
+	float LElevatorRoll = 0.f;
+	float RElevatorRoll = 0.f;
 	float ElevatorPitch = 0.f;
 
 	static constexpr int InterpSpeed = 30;
+	static constexpr int ReturnInterpSpeed = 5;
 };

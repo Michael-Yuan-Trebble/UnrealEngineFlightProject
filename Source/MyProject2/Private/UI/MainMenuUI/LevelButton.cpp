@@ -2,21 +2,21 @@
 
 
 #include "UI/MainMenuUI/LevelButton.h"
+#include "Components/Button.h"
+#include "Components/TextBlock.h"
 
 void ULevelButton::SetupLevel(const FMissionData& InLevel) 
 {
 	if (InLevel.Level.IsNull()) return;
 	MissionData = InLevel;
-
 	LevelText->SetText(FText::FromString(MissionData.Level.GetAssetName()));
 }
 
 void ULevelButton::NativeConstruct() 
 {
 	Super::NativeConstruct();
-	if (!LevelSelectbtn) return;
-
-	LevelSelectbtn->OnClicked.AddDynamic(this, &ULevelButton::HandleButtonClick);
+	if (IsValid(LevelSelectbtn))
+		LevelSelectbtn->OnClicked.AddDynamic(this, &ULevelButton::HandleButtonClick);
 }
 
 void ULevelButton::HandleButtonClick() 

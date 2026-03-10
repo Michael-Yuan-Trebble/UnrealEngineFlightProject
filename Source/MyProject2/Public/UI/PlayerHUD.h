@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
-#include "LockBoxWidget.h"
-#include "UI/HitNotificationWidget.h"
-#include "MinimapWidget.h"
 #include "Structs and Data/InGame/FDetectedAircraftInfo.h"
-#include "PitchLadder.h"
 #include "PlayerHUD.generated.h"
 
 class APlayerAircraft;
 class ABaseUnit;
 class ABaseMissile;
 class AAircraftPlayerController;
+class UHitNotificationWidget;
+class UMinimapWidget;
+class ULockBoxWidget;
+class UPitchLadder;
 
 UCLASS()
 class MYPROJECT2_API APlayerHUD : public AHUD
@@ -125,4 +125,7 @@ private:
 
 	void PitchLadderUpdate();
 
+	static constexpr float AimWorldPosDistance = 10000.f;
+	static constexpr float AOAWorldPosDistance = 10000.f;
+	static constexpr float LadderWorldPosDistance = 10000.f;
 };

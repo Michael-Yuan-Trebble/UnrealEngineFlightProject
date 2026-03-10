@@ -12,14 +12,14 @@ do { \
 	{ \
 	GEngine->AddOnScreenDebugMessage( \
 		Key, \
-		0.f, \
+		0.1f, \
 		Color, \
 		FString::Printf(TEXT(Format), ##__VA_ARGS__) \
 	); \
 	} \
 } while(0)
 
-#define DEBUG_LOCATION(Time, Format,...)\
+#define DEBUG_TIME(Time, Format,...)\
 do { \
 	if(GEngine) \
 	{\

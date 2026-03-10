@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Button.h"
 #include "MainMenuWidget.generated.h"
 
 class UMainMenuManager;
+class UButton;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFreeFlightPicked);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSettingsPicked);

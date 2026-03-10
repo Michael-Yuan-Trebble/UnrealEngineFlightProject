@@ -24,21 +24,17 @@ void AMainMenuGamemode::BeginPlay()
 
 	APC = Cast<AAircraftPlayerController>(PC);
 
-	if (!APC) return;
+	if (!IsValid(APC)) return;
 	APC->SetControlMode(EControlMode::Menu);
 
-	UMainMenuManager* MenuManager = GetWorld()->GetGameInstance()->GetSubsystem<UMainMenuManager>();
-	if (!MenuManager) return;
-
-	if (!IsValid(MainMenuClass) || !IsValid(FreeFlightClass)) return;
-
-	MenuManager->SetMainMenuClass(MainMenuClass);
-	MenuManager->SetFreeFlightClass(FreeFlightClass);
-	MenuManager->ShowMainMenu();
-
+	if (UMainMenuManager* MenuManager = GetWorld()->GetGameInstance()->GetSubsystem<UMainMenuManager>()) {
+		MenuManager->SetMainMenuClass(MainMenuClass);
+		MenuManager->SetFreeFlightClass(FreeFlightClass);
+		MenuManager->ShowMainMenu();
+	}
 }
 
-void AMainMenuGamemode::LevelSelected(FMissionData Level) {
+void AMainMenuGamemode::LevelSelected(const FMissionData& Level) {
 
 	UWorld* World = GetWorld();
 	if (!IsValid(World)) return;

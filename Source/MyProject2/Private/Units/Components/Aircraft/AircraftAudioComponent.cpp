@@ -12,6 +12,13 @@ UAircraftAudioComponent::UAircraftAudioComponent()
 
 }
 
+void UAircraftAudioComponent::SetAudio(UAircraftAudioData* InAudio) {
+	if (!IsValid(InAudio)) return;
+	CachedCockpit = InAudio->AircraftAudio.CockpitSound.LoadSynchronous();
+	CachedThirdPerson = InAudio->AircraftAudio.ThirdPersonSound.LoadSynchronous();
+	CachedGun = InAudio->GunAudios.GunSound.LoadSynchronous();
+}
+
 void UAircraftAudioComponent::PlayPerspectiveSound(const ECameraPerspective Perspective) 
 {
 	if (!PersonalAircraftAudio) 
@@ -19,51 +26,51 @@ void UAircraftAudioComponent::PlayPerspectiveSound(const ECameraPerspective Pers
 		if (AActor* Owner = GetOwner()) 
 		{
 			if (APlayerAircraft* Player = Cast<APlayerAircraft>(Owner)) 
-			{
 				PersonalAircraftAudio = Player->GetAircraftAudio();
-			}
 		}
-		if (!PersonalAircraftAudio) return;
 	}
+	if (!PersonalAircraftAudio) return;
+
 	USoundWave* SoundToPlay = nullptr;
 	switch (Perspective) 
 	{
 		case ECameraPerspective::ThirdPerson:
-			SoundToPlay = ThirdPersonSound;
+			SoundToPlay = CachedThirdPerson;
 			break;
 		case ECameraPerspective::FirstPerson:
-			SoundToPlay = CockpitSound;
+			SoundToPlay = CachedCockpit;
 			break;
 		default:
-			SoundToPlay = ThirdPersonSound;
+			SoundToPlay = CachedThirdPerson;
 			break;
 	}
 
-	if (!SoundToPlay) return;
+	if (!IsValid(SoundToPlay)) return;
 	PersonalAircraftAudio->SetSound(SoundToPlay);
 	if (!PersonalAircraftAudio->IsPlaying()) PersonalAircraftAudio->Play();
 }
 
 void UAircraftAudioComponent::HandleGunSound(bool bFiring) 
 {
+	if (!CachedGun) return;
 	if (!GunAudio) 
 	{
 		if (AActor* Owner = GetOwner())
 		{
 			if (APlayerAircraft* Player = Cast<APlayerAircraft>(Owner))
 			{
-				GunAudio = Player->GetGunAudio();
+				if (GunAudio = Player->GetGunAudio()) 
+					GunAudio->SetSound(CachedGun);
 			}
 		}
-		if (!GunAudio || !GunSound) return;
-		GunAudio->SetSound(GunSound);
 	}
-	if (bFiring) 
+	if (!GunAudio) return;
+	if (bFiring && !GunAudio->IsPlaying()) 
 	{
-		if (!GunAudio->IsPlaying()) GunAudio->Play();
+		GunAudio->Play();
 	}
-	else 
+	else if (GunAudio->IsPlaying())
 	{
-		if (GunAudio->IsPlaying()) GunAudio->Stop();
+		GunAudio->Stop();
 	}
 }

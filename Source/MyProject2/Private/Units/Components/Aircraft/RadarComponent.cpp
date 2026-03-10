@@ -1,13 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Units/Components/Aircraft/RadarComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "Units/BaseUnit.h"
 #include "Subsystem/AircraftRegistry.h"
-#include "Engine/World.h"
 #include "UI/PlayerHUD.h"
 #include "DrawDebugHelpers.h"
-#include "GameFramework/SpectatorPawn.h"
 
 URadarComponent::URadarComponent()
 {
@@ -18,16 +15,13 @@ void URadarComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	const float ScanTime = 1.f;
-	GetWorld()->GetTimerManager().SetTimer(RadarScanTimer, this, &URadarComponent::ScanTargets, ScanTime, true);
+	GetWorld()->GetTimerManager().SetTimer(RadarScanTimer, this, &URadarComponent::ScanTargets, scanTime, true);
 }
 
 void URadarComponent::Setup(ABaseUnit* InControl)
 {
 	Controlled = InControl;
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (!PC) return;
-	HUD = Cast<APlayerHUD>(PC->GetHUD());
+	if (APlayerController * PC = GetWorld()->GetFirstPlayerController()) HUD = Cast<APlayerHUD>(PC->GetHUD());
 }
 
 void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -78,10 +72,7 @@ void URadarComponent::ScanTargets()
 		SetTarget(FirstSelected);
 	}
 
-	if (HUD)
-	{
-		RadarScanEvent.Broadcast(Enemies);
-	}
+	RadarScanEvent.Broadcast(Enemies);
 }
 
 void URadarComponent::HandleSelectedDestroyed() 
@@ -188,6 +179,7 @@ void URadarComponent::SetTarget(AActor* NewTarget)
 		Unit->OnUnitDeath.AddDynamic(this, &URadarComponent::HandleSelectedDestroyed);
 	}
 
+	// TODO: Change this to broadcast instead of containing HUD
 	if (HUD) HUD->SetTarget(Unit);
 	LastSelected = Unit;
 	if (Controlled) Controlled->SetTracking(Unit);

@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "AI/BaseSpawnPoint.h"
 #include "Structs and Data/MissionInfo/MissionWave.h"
 #include "BaseMissionController.generated.h"
+
+class ABaseSpawnPoint;
+class AStandardMissionGamemode;
 
 UCLASS()
 class MYPROJECT2_API ABaseMissionController : public AActor
@@ -16,22 +18,33 @@ class MYPROJECT2_API ABaseMissionController : public AActor
 public:	
 	ABaseMissionController();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Mission")
-	TArray<ABaseSpawnPoint*> AllSpawnPoints;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Mission")
-	TArray<FMissionWave> MissionWaves;
-
 	UFUNCTION(BlueprintCallable)
 	void StartMission();
 
 	UFUNCTION(BlueprintCallable)
 	void StartWave(const int32 WaveIndex);
 
-	UFUNCTION(BlueprintCallable)
-	void OnEnemyDestroyed();
+	void Setup(AStandardMissionGamemode* InMission);
+
+	void RegisterSpawnPoint(ABaseSpawnPoint* InSpawn);
+
+protected:
+	virtual void BeginPlay() override;
 
 private:
+
+	UPROPERTY(EditAnywhere, Category = "Mission")
+	TArray<TObjectPtr<ABaseSpawnPoint>> AllSpawnPoints{};
+
+	UPROPERTY(EditAnywhere, Category = "Mission")
+	TArray<FMissionWave> MissionWaves{};
+
+	UPROPERTY()
+	TObjectPtr<AStandardMissionGamemode> CurrentMission = nullptr;
+
+	UFUNCTION()
+	void OnEnemyDestroyed();
+
 	int32 CurrentWave = 0;
 	int32 RemainingEnemies = 0;
 };

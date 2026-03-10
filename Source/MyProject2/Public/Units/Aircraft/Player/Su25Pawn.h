@@ -77,9 +77,6 @@ class MYPROJECT2_API ASu25Pawn : public APlayerAircraft
 
 		virtual void PossessedBy(AController* NewController);
 
-	protected:
-		virtual void BeginPlay() override;
-
 	private:
 
 };

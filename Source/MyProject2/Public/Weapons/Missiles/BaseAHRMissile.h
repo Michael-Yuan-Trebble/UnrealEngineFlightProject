@@ -25,11 +25,11 @@ private:
 
 	bool isDropPhase = false;
 
-	float DropTimer = 0;
+	float DropTimer = 0.f;
 
-	float DropAcceleration = 40;
+	float DropAcceleration = 40.f;
 
-	float dropVelocity = 0;
+	float dropVelocity = 0.f;
 
 	virtual void BeginPlay() override;
 

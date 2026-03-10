@@ -95,7 +95,7 @@ void APlayerAircraft::StartBullets()
 {
 	GunSoundEffect(true);
 	FireBullets();
-	if (IsValid(BulletStats)) GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &APlayerAircraft::FireBullets, BulletStats->FireRate, true);
+	if (IsValid(CachedBulletStats)) GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &APlayerAircraft::FireBullets, CachedBulletStats->FireRate, true);
 }
 
 void APlayerAircraft::EndBullets()

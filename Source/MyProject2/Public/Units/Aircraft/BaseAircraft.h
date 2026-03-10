@@ -7,9 +7,9 @@
 #include "Structs and Data/Weapon Data/BulletStats.h"
 #include "Interfaces/ApproachingMissileInterface.h"
 #include "Enums/FlightMode.h"
+#include "Weapons/Missiles/BaseMissile.h"
 #include "Structs and Data/Animation/AircraftAnimationValues.h"
 #include "Units/BaseUnit.h"
-#include "Weapons/Missiles/BaseMissile.h"
 #include "Enums/ThrottleStage.h"
 #include "BaseAircraft.generated.h"
 
@@ -19,11 +19,11 @@ class UWeaponSystemComponent;
 class UAircraftVisualComponent;
 class USpecialSystemComponent;
 class UBaseSpecial;
-class ABaseMissile;
 class UNiagaraComponent;
 class UNiagaraSystem;
 class USkeletalMeshComponent;
 class UBoxComponent;
+class UAircraftAudioComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissileLaunchedAtSelf, ABaseMissile*, IncomingMissile);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLockedOnByEnemy);
@@ -88,7 +88,8 @@ public:
 
 	USkeletalMeshComponent* GetAirframe() const { return Airframe; };
 
-	UBulletStats* GetBulletStats() const { return BulletStats; };
+	// TODO: Maybe change this to have two, one where it loads and one where it returns
+	UBulletStats* GetBulletStats();
 
 	URadarComponent* GetRadarComp() const { return RadarComponent; };
 
@@ -126,7 +127,10 @@ public:
 	bool IsLanded();
 
 	UFUNCTION(BlueprintCallable)
-	float GetSpeed();
+	float GetUnitSpeed();
+
+	UFUNCTION(BlueprintCallable)
+	float GetKMHSpeed();
 
 protected:
 
@@ -136,10 +140,8 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<UAircraftStats> AirStats = nullptr;
 
-	// TODO: Make this softobjectptr
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UBulletStats> BulletStats = nullptr;
+	UPROPERTY()
+	UBulletStats* CachedBulletStats = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<UFlightComponent> FlightComponent = nullptr;
@@ -175,6 +177,15 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	int32 NumOfMainWingVapors = 0;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UAircraftAudioComponent> AudioComp = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> PersonalAircraftAudio = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> GunAudio = nullptr;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VFX")
 	TArray<TObjectPtr<UStaticMeshComponent>> AllMainWingVapors{};
