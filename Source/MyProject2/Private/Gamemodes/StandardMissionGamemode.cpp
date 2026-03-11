@@ -4,24 +4,34 @@
 #include "Kismet/GameplayStatics.h"
 #include "Gamemodes/BaseMissionController.h"
 #include "AI/BaseSpawnPoint.h"
+#include "Debug/DebugHelper.h"
 
 void AStandardMissionGamemode::BeginPlay() {
 	Super::BeginPlay();
 
 	if (IsValid(MissionControllerClass) && IsValid(GetWorld())) {
 		MissionController = GetWorld()->SpawnActor<ABaseMissionController>(MissionControllerClass);
-		if (MissionController) {
-			// Init Function
+		if (IsValid(MissionController)) {
+			FTimerHandle WaveStartTimer;
+			GetWorldTimerManager().SetTimer(
+				WaveStartTimer,
+				this,
+				&AStandardMissionGamemode::StartFirstWave,
+				3.f,
+				false
+			);
 		}
 	}
 }
 
-void AStandardMissionGamemode::RegisterSpawnPoint(ABaseSpawnPoint* InSpawn) {
-	if (IsValid(MissionController)) {
-		MissionController->RegisterSpawnPoint(InSpawn);
-	}
+void AStandardMissionGamemode::StartFirstWave() {
+	if (IsValid(MissionController)) MissionController->StartWave(0);
 }
 
 void AStandardMissionGamemode::Tick(float D) {
 	Super::Tick(D);
+}
+
+void AStandardMissionGamemode::MissionFinish() {
+
 }

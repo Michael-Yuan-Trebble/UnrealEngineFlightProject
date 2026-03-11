@@ -36,7 +36,10 @@ void AFlightGamemode::SpawnInController()
 	PC = Cast<AAircraftPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	if (!IsValid(PC)) return;
 
-	Database = NewObject<UAircraftDatabase>(PC->GetGameInstance());
+	UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
+	if (!IsValid(GI)) return;
+
+	Database = NewObject<UAircraftDatabase>(GI);
 	if (!IsValid(Database)) return;
 
 	Database->LoadAllAircraftFromFolder(Path);
@@ -165,8 +168,9 @@ void AFlightGamemode::FallBackAircraft()
 
 TMap<FName, TSubclassOf<ABaseWeapon>> AFlightGamemode::TemporaryLoadout()
 {
-	UAircraftStats* Loaded = AircraftSelected->AircraftStat.LoadSynchronous();
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout{};
+	if (!IsValid(AircraftSelected) || AircraftSelected->AircraftStat.IsNull()) return Loadout;
+	UAircraftStats* Loaded = AircraftSelected->AircraftStat.LoadSynchronous();
 
 	if (!IsValid(Loaded)) return Loadout;
 
@@ -193,7 +197,7 @@ TMap<FName, TSubclassOf<ABaseWeapon>> AFlightGamemode::TemporaryLoadout()
 
 void AFlightGamemode::FinishMission() 
 {
-	if (!PC || bFinished) return;
+	if (!IsValid(PC) || bFinished) return;
 	bFinished = true;
 	PC->ClientMessage(TEXT("COMPLETE"));
 	if (!IsValid(PlayerSpawnedIn)) return;

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Structs and Data/MissionInfo/MissionWave.h"
+#include "AI/MissionWaveActor.h"
 #include "BaseMissionController.generated.h"
 
 class ABaseSpawnPoint;
@@ -26,25 +27,28 @@ public:
 
 	void Setup(AStandardMissionGamemode* InMission);
 
-	void RegisterSpawnPoint(ABaseSpawnPoint* InSpawn);
+	void RegisterWave(AMissionWaveActor* InSpawn);
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
 
-	UPROPERTY(EditAnywhere, Category = "Mission")
-	TArray<TObjectPtr<ABaseSpawnPoint>> AllSpawnPoints{};
-
-	UPROPERTY(EditAnywhere, Category = "Mission")
-	TArray<FMissionWave> MissionWaves{};
+	TMap<int32, TArray<AMissionWaveActor*>> MissionWaves{};
 
 	UPROPERTY()
 	TObjectPtr<AStandardMissionGamemode> CurrentMission = nullptr;
 
+	TMap<int32, int32> CompletedWaves{};
+
 	UFUNCTION()
-	void OnEnemyDestroyed();
+	void OnEnemyDestroyed(const AMissionWaveActor* InMission);
+
+	void HandleWaveCompleted(int32 WaveIndex);
+
+	void MissionComplete();
 
 	int32 CurrentWave = 0;
-	int32 RemainingEnemies = 0;
+	int32 TotalWaves = 0;
+
 };

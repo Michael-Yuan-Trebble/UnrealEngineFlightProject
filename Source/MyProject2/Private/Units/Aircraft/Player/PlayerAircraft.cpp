@@ -56,11 +56,15 @@ APlayerAircraft::APlayerAircraft()
 void APlayerAircraft::BeginPlay()
 {
 	Super::BeginPlay();
-	AudioComp->SetControlled(this);
-	ManagerComp->SetControlled(this);
-	ManagerComp->SetAudioComp(AudioComp);
-	OriginalFirstPersonSpringArmLength = FirstPersonSpringArm->TargetArmLength;
-	OriginalThirdPersonSpringArmLength = ThirdPersonSpringArm->TargetArmLength;
+	if (IsValid(AudioComp))AudioComp->SetControlled(this);
+	if (IsValid(ManagerComp)) {
+		ManagerComp->SetControlled(this);
+		ManagerComp->SetAudioComp(AudioComp);
+	}
+	if (IsValid(FirstPersonSpringArm) && IsValid(ThirdPersonSpringArm)) {
+		OriginalFirstPersonSpringArmLength = FirstPersonSpringArm->TargetArmLength;
+		OriginalThirdPersonSpringArmLength = ThirdPersonSpringArm->TargetArmLength;
+	}
 	SetSensitivity(0.f);
 	SetInterp();
 }
@@ -89,7 +93,7 @@ void APlayerAircraft::WeaponComponentOnUnitDeath()
 	if (IsValid(WeaponComponent)) WeaponComponent->ResetLockedOn();
 }
 
-void APlayerAircraft::FireBullets() { if (WeaponComponent) WeaponComponent->FireBullets(); }
+void APlayerAircraft::FireBullets() { if (IsValid(WeaponComponent)) WeaponComponent->FireBullets(); }
 
 void APlayerAircraft::StartBullets() 
 {
@@ -104,7 +108,7 @@ void APlayerAircraft::EndBullets()
 	GetWorld()->GetTimerManager().ClearTimer(RepeatTimerHandle);
 }
 
-void APlayerAircraft::SelectWeapon(float index) { if (WeaponComponent) WeaponComponent->SelectWeapon(index); }
+void APlayerAircraft::SelectWeapon(float index) { if (IsValid(WeaponComponent)) WeaponComponent->SelectWeapon(index); }
 
 int32 APlayerAircraft::AdvanceWeapon(int32 index, bool bForward) 
 {
@@ -126,7 +130,7 @@ void APlayerAircraft::GunSoundEffect(bool bShooting)
 	if (IsValid(AudioComp)) AudioComp->HandleGunSound(bShooting);
 }
 
-void APlayerAircraft::CycleTarget() { if (RadarComponent) RadarComponent->CycleTarget(); };
+void APlayerAircraft::CycleTarget() { if (IsValid(RadarComponent)) RadarComponent->CycleTarget(); };
 
 void APlayerAircraft::SetHUD(APlayerHUD* InHUD) 
 {
@@ -135,7 +139,7 @@ void APlayerAircraft::SetHUD(APlayerHUD* InHUD)
 	ManagerComp->SetThirdPerson();
 }
 
-const FRotator& APlayerAircraft::GetNextRotation() { if (FlightComponent) return FlightComponent->GetNextRotation(); return FRotator::ZeroRotator; }
+const FRotator& APlayerAircraft::GetNextRotation() { if (IsValid(FlightComponent)) return FlightComponent->GetNextRotation(); return FRotator::ZeroRotator; }
 
 void APlayerAircraft::SwitchCameras() { if (IsValid(ManagerComp)) ManagerComp->SwitchCamera(); }
 
@@ -147,29 +151,13 @@ void APlayerAircraft::SetFirstPersonCamera(bool bActive) { if (IsValid(FirstPers
 
 void APlayerAircraft::SetThirdPersonCamera(bool bActive) { if (IsValid(ThirdPersonCamera)) ThirdPersonCamera->SetActive(bActive); };
 
-void APlayerAircraft::SetSensitivity(float Sens) {
-	if (IsValid(ManagerComp)) {
-		ManagerComp->Sensitivity = CameraSens;
-	}
-}
+void APlayerAircraft::SetSensitivity(float Sens) { if (IsValid(ManagerComp)) ManagerComp->Sensitivity = CameraSens; }
 
-void APlayerAircraft::SetRollStrength(float S) {
-	if (IsValid(ManagerComp)) {
-		ManagerComp->RollLagStrength = RollLagStrength;
-	}
-}
+void APlayerAircraft::SetRollStrength(float S) { if (IsValid(ManagerComp)) ManagerComp->RollLagStrength = RollLagStrength; }
 
-void APlayerAircraft::SetRollSpeed(float S) {
-	if (IsValid(ManagerComp)) {
-		ManagerComp->RollLagSpeed = RollLagSpeed;
-	}
-}
+void APlayerAircraft::SetRollSpeed(float S) { if (IsValid(ManagerComp)) ManagerComp->RollLagSpeed = RollLagSpeed; }
 
-void APlayerAircraft::SetInterp() {
-	if (IsValid(ManagerComp)) {
-		ManagerComp->SetInterp(Interp);
-	}
-}
+void APlayerAircraft::SetInterp() { if (IsValid(ManagerComp)) ManagerComp->SetInterp(Interp); }
 
 float APlayerAircraft::GetThrottle() {
 	if (IsValid(FlightComponent)) return FlightComponent->GetThrottle();

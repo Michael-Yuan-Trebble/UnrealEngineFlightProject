@@ -67,7 +67,10 @@ void URadarComponent::ScanTargets()
 		}
 	}
 
-	if ((Selected.IsValid() || !Selected->IsValidLowLevel()) && IsValid(FirstSelected) && FirstSelected != Previous)
+	// Was causing Warning: NULL object before, watch out in the future
+	if ((Selected.IsValid() && !Selected->IsValidLowLevel()) 
+		&& IsValid(FirstSelected)
+		&& FirstSelected != Previous)
 	{
 		SetTarget(FirstSelected);
 	}

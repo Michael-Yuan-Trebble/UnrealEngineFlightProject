@@ -3,17 +3,22 @@
 #include "AI/AircraftSpawnPoint.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"
+#include "AI/AircraftAIController.h"
+
+#include "Debug/DebugHelper.h"
 
 void AAircraftSpawnPoint::BeginPlay() 
 {
 	Super::BeginPlay();
-	if (bStressTest) StressTest();
-	else ActivateSpawn();
+	//if (bStressTest) StressTest();
+	//else ActivateSpawn();
 }
 
 void AAircraftSpawnPoint::ActivateSpawn() 
 {
-	if (bSpawned || !AircraftClass) return;
+	Super::ActivateSpawn();
+
+	if (bSpawned || !IsValid(UnitClass)) return;
 
 	UWorld* World = GetWorld();
 
@@ -33,31 +38,33 @@ void AAircraftSpawnPoint::ActivateSpawn()
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 		APawn* SpawnedAircraft = World->SpawnActor<APawn>(
-			AircraftClass,
+			UnitClass,
 			SpawnLocation,
 			BaseRotation,
 			Params
 		);
 
-		if (IsValid(SpawnedAircraft)) bSpawned = true;
-		else continue;
+		if (!IsValid(SpawnedAircraft)) continue;
+		AliveUnits.Add(SpawnedAircraft);
+		SpawnedAircraft->OnDestroyed.AddDynamic(this, &ABaseSpawnPoint::OnUnitDestroyed);
 
 		if (SpawnedAircraft->AutoPossessAI == EAutoPossessAI::Disabled) 
 		{
 			FActorSpawnParameters AIParams;
 			AIParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-			AEnemyAircraftAI* AIC = World->SpawnActor<AEnemyAircraftAI>(AEnemyAircraftAI::StaticClass(), FTransform(), AIParams);
+			AAircraftAIController* AIC = World->SpawnActor<AAircraftAIController>(AAircraftAIController::StaticClass(), FTransform(), AIParams);
 			if (!IsValid(AIC)) continue;
 			AIC->Possess(SpawnedAircraft);
 			SetInitialSpeed(SpawnedAircraft);
 		}
 	}
+	bSpawned = true;
 }
 
 void AAircraftSpawnPoint::StressTest() 
 {
-	if (!IsValid(AircraftClass)) return;
+	if (!IsValid(UnitClass)) return;
 	for (int32 i = 0; i < Count; i++)
 	{
 		FVector Location = GetActorLocation() + FVector(i * 200.f, 0, 0);
@@ -66,7 +73,7 @@ void AAircraftSpawnPoint::StressTest()
 		FActorSpawnParameters Params;
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-		ABaseAircraft* Aircraft = GetWorld()->SpawnActor<ABaseAircraft>(AircraftClass, Location, Rotation, Params);
+		ABaseAircraft* Aircraft = GetWorld()->SpawnActor<ABaseAircraft>(UnitClass, Location, Rotation, Params);
 		if (IsValid(Aircraft))
 		{
 			// Schedule destruction after a short delay

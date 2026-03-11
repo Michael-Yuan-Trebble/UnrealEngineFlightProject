@@ -3,10 +3,14 @@
 
 #include "AI/BaseSpawnPoint.h"
 #include "Gamemodes/StandardMissionGamemode.h"
+#include "Gamemodes/BaseMissionController.h"
 
 void ABaseSpawnPoint::ActivateSpawn() {
-	AStandardMissionGamemode* GM = Cast<AStandardMissionGamemode>(GetWorld()->GetAuthGameMode());
-	if (IsValid(GM)) {
-		
+}
+
+void ABaseSpawnPoint::OnUnitDestroyed(AActor* DestroyedActor) {
+	AliveUnits.Remove(DestroyedActor);
+	if (AliveUnits.Num() == 0) {
+		OnWaveDestroyed.Broadcast(this);
 	}
 }

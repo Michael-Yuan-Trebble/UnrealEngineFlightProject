@@ -129,7 +129,7 @@ void UFlightComponent::ApplySpeed(const float ThrottlePercentage, const float De
 
 	PreviousVelocity = Velocity;
 	if (bLanded && IsValid(Airframe)) Velocity = Airframe->GetForwardVector() * currentSpeed;
-	else Velocity = Controlled->GetActorForwardVector() * currentSpeed;
+	else if (IsValid(Controlled)) Velocity = Controlled->GetActorForwardVector() * currentSpeed;
 
 	if (Velocity.ContainsNaN() || Velocity.Size() > 1e6f) Velocity = FVector::ZeroVector;
 

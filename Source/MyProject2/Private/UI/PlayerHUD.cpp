@@ -92,7 +92,7 @@ void APlayerHUD::Tick(float DeltaSeconds)
         UpdateTargetWidgets();
     }
 
-    if (!Controlled.IsValid() || !IsValid(AimReticleWidget) || !IsValid(AOAReticleWidget)) return;
+    if (!Controlled.IsValid()) return;
     FVector CamLoc = FVector::ZeroVector;
     FRotator CamRot = FRotator::ZeroRotator;
     FVector2D ScreenPos = FVector2D::ZeroVector;
@@ -106,12 +106,12 @@ void APlayerHUD::Tick(float DeltaSeconds)
     FVector AimWorldPos = CamLoc + NoseDir * AimWorldPosDistance;
     FVector AOAWorldPos = CamLoc + ForwardDir * AOAWorldPosDistance;
 
-    if (PC->ProjectWorldLocationToScreen(AimWorldPos, ScreenPos, true))
+    if (PC->ProjectWorldLocationToScreen(AimWorldPos, ScreenPos, true) && IsValid(AOAReticleWidget))
     {
         AimReticleWidget->SetAlignmentInViewport(Middle);
         AimReticleWidget->SetPositionInViewport(ScreenPos, true);
     }
-    if (PC->ProjectWorldLocationToScreen(AOAWorldPos, ScreenPos, true))
+    if (PC->ProjectWorldLocationToScreen(AOAWorldPos, ScreenPos, true) && IsValid(AimReticleWidget))
     {
         AOAReticleWidget->SetAlignmentInViewport(Middle);
         AOAReticleWidget->SetPositionInViewport(ScreenPos, true);
@@ -132,7 +132,7 @@ void APlayerHUD::Tick(float DeltaSeconds)
 }
 
 void APlayerHUD::TogglePitchLadder(bool Toggle) {
-    if (!IsValid(PitchLadderWidget) || !IsValid(PitchLadderWidget)) return;
+    if (!IsValid(PitchLadderWidget)) return;
 
     PitchLadderWidget->SetVisibility(Toggle ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
     isPitchLadderVisible = !Toggle;
@@ -168,7 +168,7 @@ void APlayerHUD::UpdateTargetWidgets()
 
         if (!Actor.IsValid() || !Targets.Contains(Actor))
         {
-            if (Widget) Widget->RemoveFromParent();
+            if (IsValid(Widget)) Widget->RemoveFromParent();
             It.RemoveCurrent();
         }
     }
@@ -178,7 +178,7 @@ void APlayerHUD::UpdateTargetWidgets()
         if (!TargetActor.IsValid()) continue;
 
         ULockBoxWidget* Reticle = ActiveWidgets.FindRef(TargetActor);
-        if (!Reticle)
+        if (!IsValid(Reticle))
         {
             Reticle = CreateWidget<ULockBoxWidget>(PC, LockBoxWidgetClass);
             if (IsValid(Reticle))
@@ -197,6 +197,7 @@ void APlayerHUD::UpdateTargetWidgets()
 
         FVector WorldLocation = Actor->GetActorLocation();
         FVector2D ScreenPos;
+        if (!IsValid(PC)) return;
         bool bProjected = PC->ProjectWorldLocationToScreen(WorldLocation, ScreenPos);
 
         FVector CameraLoc = FVector::ZeroVector;

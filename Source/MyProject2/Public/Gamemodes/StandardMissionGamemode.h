@@ -18,9 +18,12 @@ public:
 
 	ABaseMissionController* GetMissionController() const { return MissionController; };
 
-	void RegisterSpawnPoint(ABaseSpawnPoint* InSpawn);
+	void MissionFinish();
 
 protected:
+
+	void StartFirstWave();
+
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaSeconds) override;

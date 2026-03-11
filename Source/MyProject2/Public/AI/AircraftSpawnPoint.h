@@ -18,25 +18,13 @@ private:
 
 	virtual void ActivateSpawn() override;
 
-	void StressTest();
+	virtual void StressTest() override;
 
 	void SetInitialSpeed(APawn* Spawn);
 
 	// TODO: Do formations later, for now they just spawn in a line
 	UPROPERTY(EditAnywhere)
 	float FormationSpacing = 600.f;
-
-	UPROPERTY()
-	bool bSpawned = false;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<APawn> AircraftClass = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	bool bStressTest = false;
-
-	UPROPERTY(EditAnywhere)
-	int32 Count = 1;
 
 	UPROPERTY(EditAnywhere)
 	float DestroyDelay = 10.f;
