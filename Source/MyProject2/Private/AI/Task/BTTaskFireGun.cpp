@@ -3,6 +3,7 @@
 #include "AI/Task/BTTaskFireGun.h"
 #include "Units/Aircraft/AI/EnemyAircraftAI.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "AI/AircraftAIController.h"
 #include "Debug/DebugHelper.h"
 
 UBTTaskFireGun::UBTTaskFireGun() 
@@ -12,22 +13,20 @@ UBTTaskFireGun::UBTTaskFireGun()
 
 EBTNodeResult::Type UBTTaskFireGun::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) 
 {
-	BlackboardComp = OwnerComp.GetBlackboardComponent();
-	if (!BlackboardComp) return EBTNodeResult::Aborted;
-
-	Controller = Cast<AEnemyAircraftAI>(OwnerComp.GetAIOwner());
-	if (!Controller) return EBTNodeResult::Aborted;
-
-	Controller->SetFlying(true);
-	Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
 	return EBTNodeResult::InProgress;
 }
 
 void UBTTaskFireGun::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
-	if (!IsValid(Selected)) return;
-	if (IsInsideCone(Selected, 8.0f) && CanShotHit(Selected)) 
+	AAircraftAIController* Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
+	if (!Controller) return;
+
+	AActor* Controlled = Controller->GetPawn();
+	UBlackboardComponent* Comp = OwnerComp.GetBlackboardComponent();
+	AActor* Selected = Cast<AActor>(Comp->GetValueAsObject(TargetActorKey.SelectedKeyName));
+
+	if (IsInsideCone(Controlled, Selected) && CanShotHit(Controlled, Selected) && IsValid(Controller)) 
 	{
 		Controller->ShootGun(true);
 		AIR_DEBUG_KEY(1, FColor::Red, "FIRING");
@@ -40,30 +39,32 @@ void UBTTaskFireGun::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemo
 }
 
 
-bool UBTTaskFireGun::IsInsideCone(AActor* Player, float ConeDegrees) 
+bool UBTTaskFireGun::IsInsideCone(AActor* Self, AActor* Target) 
 {
-	FVector ToPlayer = (Player->GetActorLocation() - Controller->GetPawn()->GetActorLocation()).GetSafeNormal();
-	FVector Forward = Controller->GetPawn()->GetActorForwardVector();
+	if (!IsValid(Self) || !IsValid(Target)) return false;
+	FVector ToPlayer = (Target->GetActorLocation() - Self->GetActorLocation()).GetSafeNormal();
+	FVector Forward = Self->GetActorForwardVector();
 
 	float CosAngle = FVector::DotProduct(Forward, ToPlayer);
 	float Threshold = FMath::Cos(FMath::DegreesToRadians(ConeDegrees));
 
 	return CosAngle >= Threshold;
 }
-bool UBTTaskFireGun::CanShotHit(AActor* Player) 
+bool UBTTaskFireGun::CanShotHit(AActor* Target, AActor* Self) 
 {
+	if (!IsValid(Self) || !IsValid(Target)) return false;
 	float BulletSpeed = 1500.0f;
 	float Gravity = 980.0f;
 
-	FVector Muzzle = Controller->GetPawn()->GetActorLocation();
-	FVector Target = Player->GetActorLocation();
+	FVector Muzzle = Self->GetActorLocation();
+	FVector TargetVector = Target->GetActorLocation();
 
-	float Distance = FVector::Distance(Muzzle, Target);
+	float Distance = FVector::Distance(Muzzle, TargetVector);
 	float Time = Distance / BulletSpeed;
 
 	float Drop = 0.5f * Gravity * Time * Time;
 
-	float TargetHeightDifference = Muzzle.Z - Target.Z;
+	float TargetHeightDifference = Muzzle.Z - TargetVector.Z;
 
 	return FMath::Abs(TargetHeightDifference - Drop) < 300;
 }

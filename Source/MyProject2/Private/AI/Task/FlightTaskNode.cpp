@@ -13,19 +13,16 @@ UBTTaskFlightTaskNode::UBTTaskFlightTaskNode()
 EBTNodeResult::Type UBTTaskFlightTaskNode::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) 
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
-	BlackboardComp = OwnerComp.GetBlackboardComponent();
-	if (!IsValid(BlackboardComp)) return EBTNodeResult::Aborted;
-
-	Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
-	if (!IsValid(Controller)) return EBTNodeResult::Aborted;
-
-	Controller->SetFlying(true);
 	return EBTNodeResult::InProgress;
 }
 
 void UBTTaskFlightTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
+
+	AAircraftAIController* Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
+	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+
 	if (!IsValid(Controller) || !IsValid(BlackboardComp)) return;
 
 	float YawOffset = BlackboardComp->GetValueAsFloat(YawKey.SelectedKeyName);

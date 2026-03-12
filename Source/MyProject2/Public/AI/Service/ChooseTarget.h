@@ -7,6 +7,8 @@
 #include "Structs and Data/InGame/FDetectedAircraftInfo.h"
 #include "ChooseTarget.generated.h"
 
+class ABaseAircraft;
+
 UCLASS(Blueprintable, BlueprintType, meta = (DisplayName = "Tracking Service"))
 class MYPROJECT2_API UBTServiceChooseTarget : public UBTService
 {
@@ -23,20 +25,10 @@ private:
 	UFUNCTION()
 	void InitAfterTick(UBehaviorTreeComponent* OwnerComp);
 
-	void PickTarget();
+	FDetectedAircraftInfo PickTarget(TArray<FDetectedAircraftInfo> AllAir, ABaseAircraft* Controlled);
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector TargetActorKey;
-
-	TArray<FDetectedAircraftInfo> AllAircraft{};
-
-	FDetectedAircraftInfo Selected{};
-
-	UPROPERTY()
-	UBlackboardComponent* BlackboardComponent = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<class ABaseAircraft> Controlled = nullptr;
 
 	float timeSinceLastPick = 0.f;
 

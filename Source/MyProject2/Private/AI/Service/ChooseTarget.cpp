@@ -25,23 +25,24 @@ void UBTServiceChooseTarget::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp,
 
 void UBTServiceChooseTarget::InitAfterTick(UBehaviorTreeComponent* OwnerComp) {
 	if (!IsValid(OwnerComp)) return;
-	AAircraftAIController* Controller = Cast<AAircraftAIController>(OwnerComp->GetAIOwner());
-	if (!IsValid(Controller)) return;
-	Controlled = Controller->GetControlled();
-	BlackboardComponent = OwnerComp->GetBlackboardComponent();
 }
 
 void UBTServiceChooseTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-
-	if (!IsValid(Controlled) || !IsValid(BlackboardComponent)) return;
+	
+	AAIController* AI = OwnerComp.GetAIOwner();
+	ABaseAircraft* Controlled = Cast<ABaseAircraft>(AI->GetPawn());
+	if (!IsValid(Controlled)) return;
 	timeSinceLastPick += DeltaSeconds;
 
+	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
+	if (!IsValid(BlackboardComponent)) return;
+
 	// TODO: Add a system where its not just the highest threat is picked, some sort of internal timer for changing targets
-	AllAircraft = Controlled->GetRadarComp()->GetEnemies();
-	if (!Selected.CurrentPawn.IsValid() || timeSinceLastPick >= PickInterval) 
+	TArray<FDetectedAircraftInfo> AllAir = Controlled->GetRadarComp()->GetEnemies();
+	if (timeSinceLastPick >= PickInterval) 
 	{
-		PickTarget();
+		FDetectedAircraftInfo Selected = PickTarget(AllAir, Controlled);
 		timeSinceLastPick = 0.f;
 		if(Selected.CurrentPawn.IsValid()) 
 		{
@@ -53,11 +54,12 @@ void UBTServiceChooseTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 	}
 }
 
-void UBTServiceChooseTarget::PickTarget() 
+FDetectedAircraftInfo UBTServiceChooseTarget::PickTarget(TArray<FDetectedAircraftInfo> AllAir, ABaseAircraft* Controlled)
 {
-	for (FDetectedAircraftInfo& Info : AllAircraft)
+	FDetectedAircraftInfo Selected{};
+	for (FDetectedAircraftInfo& Info : AllAir)
 	{
-		if (Info.CurrentPawn.Get() == Controlled) return;
+		if (Info.CurrentPawn.Get() == Controlled) continue;
 		Info.threatLevel = Info.CalculateThreat();
 		if (!Selected.CurrentPawn.IsValid()) 
 		{
@@ -69,4 +71,5 @@ void UBTServiceChooseTarget::PickTarget()
 			Selected = Info;
 		}
 	}
+	return Selected;
 }

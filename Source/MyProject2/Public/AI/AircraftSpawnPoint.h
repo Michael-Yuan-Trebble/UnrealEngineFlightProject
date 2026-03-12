@@ -13,9 +13,6 @@ class MYPROJECT2_API AAircraftSpawnPoint : public ABaseSpawnPoint
 	
 private:
 
-	// TEMPORARY, just to test things easier spawn points should be triggered by gamemode not just automatically on its own
-	virtual void BeginPlay() override;
-
 	virtual void ActivateSpawn() override;
 
 	virtual void StressTest() override;

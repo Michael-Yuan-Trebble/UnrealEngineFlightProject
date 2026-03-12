@@ -15,7 +15,6 @@ AMissionWaveActor::AMissionWaveActor()
 void AMissionWaveActor::BeginPlay() {
 	Super::BeginPlay();
 	FTimerHandle MissionTimer;
-
 	GetWorldTimerManager().SetTimer(
 		MissionTimer,
 		this,
@@ -23,14 +22,12 @@ void AMissionWaveActor::BeginPlay() {
 		2.f,
 		false
 	);
-
 }
 
 void AMissionWaveActor::RegisterWave() {
 	AStandardMissionGamemode* GM = GetWorld()->GetAuthGameMode<AStandardMissionGamemode>();
-	if (IsValid(GM) && GM->GetMissionController()) {
+	if (IsValid(GM) && GM->GetMissionController())
 		GM->GetMissionController()->RegisterWave(this);
-	}
 }
 
 void AMissionWaveActor::ActivateSpawnPoints() {

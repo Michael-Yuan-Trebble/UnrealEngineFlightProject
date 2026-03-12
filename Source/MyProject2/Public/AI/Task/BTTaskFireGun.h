@@ -23,15 +23,8 @@ private:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds);
 
-	bool IsInsideCone(AActor* Player, float ConeDegrees);
-	bool CanShotHit(AActor* Player);
+	bool IsInsideCone(AActor* Self, AActor* Target);
+	bool CanShotHit(AActor* Target, AActor* Self);
 
-	UPROPERTY()
-	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<AEnemyAircraftAI> Controller = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<AActor> Selected = nullptr;
+	static constexpr float ConeDegrees = 8.f;
 };

@@ -31,10 +31,4 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector bFireGun;
-
-	UPROPERTY()
-	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<class AAircraftAIController> Controller = nullptr;
 };

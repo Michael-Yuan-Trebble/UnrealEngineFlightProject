@@ -14,6 +14,8 @@ enum class EAIThrottleMode : uint8
 	Close UMETA(DisplayName = "Close")
 };
 
+class ABaseAircraft;
+
 UCLASS(Blueprintable, BlueprintType, meta = (DisplayName="Attack Service"))
 class MYPROJECT2_API UBTServiceAttack : public UBTService
 {
@@ -31,18 +33,6 @@ private:
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-
-	UPROPERTY()
-	TWeakObjectPtr<AActor> Selected = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<class ABaseAircraft> Controlled = nullptr;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<class AAircraftAIController> Controller = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector YawKey;
@@ -66,7 +56,7 @@ private:
 
 	EAIThrottleMode GetThrottleMode(float distance);
 
-	void CalculateAngle(const float DeltaSeconds);
+	void CalculateAngle(const float DeltaSeconds, ABaseAircraft* Controlled, AActor* Selected, UBlackboardComponent* BlackboardComp);
 
 	float CalculateRollDegrees(const FVector& LocalDir);
 
@@ -74,7 +64,7 @@ private:
 
 	float CalculateYawDegrees(const FVector& LocalDir);
 
-	void CalculateThrust(const float DeltaSeconds);
+	void CalculateThrust(const float DeltaSeconds, AActor* Selected, ABaseAircraft* Controlled, UBlackboardComponent* BlackboardComp);
 
-	float PursuitThrottle(ABaseAircraft* Target);
+	float PursuitThrottle(ABaseAircraft* Target, ABaseAircraft* Controlled);
 };

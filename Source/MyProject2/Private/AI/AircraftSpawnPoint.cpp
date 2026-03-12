@@ -2,17 +2,9 @@
 
 #include "AI/AircraftSpawnPoint.h"
 #include "Units/Aircraft/BaseAircraft.h"
-#include "Units/Aircraft/AI/EnemyAircraftAI.h"
 #include "AI/AircraftAIController.h"
-
 #include "Debug/DebugHelper.h"
-
-void AAircraftSpawnPoint::BeginPlay() 
-{
-	Super::BeginPlay();
-	//if (bStressTest) StressTest();
-	//else ActivateSpawn();
-}
+#include "Structs and Data/MathLib/FlightMathLibrary.h"
 
 void AAircraftSpawnPoint::ActivateSpawn() 
 {
@@ -67,7 +59,7 @@ void AAircraftSpawnPoint::StressTest()
 	if (!IsValid(UnitClass)) return;
 	for (int32 i = 0; i < Count; i++)
 	{
-		FVector Location = GetActorLocation() + FVector(i * 200.f, 0, 0);
+		FVector Location = GetActorLocation() + FVector(i * 200.f, i * 200.f, 0);
 		FRotator Rotation = GetActorRotation();
 
 		FActorSpawnParameters Params;
@@ -81,7 +73,8 @@ void AAircraftSpawnPoint::StressTest()
 			GetWorldTimerManager().SetTimer(TimerHandle, [Aircraft]()
 				{
 					if (IsValid(Aircraft)) Aircraft->Destroy();
-				}, DestroyDelay, false);
+				}, 
+				DestroyDelay, false);
 		}
 	}
 }
@@ -89,6 +82,6 @@ void AAircraftSpawnPoint::StressTest()
 void AAircraftSpawnPoint::SetInitialSpeed(APawn* Spawn) {
 	if (!IsValid(Spawn)) return;
 	if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Spawn)) {
-		Aircraft->SetSpeed(InitialSpeed / 0.036);
+		Aircraft->SetSpeed(UFlightMathLibrary::ConvertKMHToSpeed(InitialSpeed));
 	}
 }

@@ -26,23 +26,24 @@ UBTServiceAttack::UBTServiceAttack()
 void UBTServiceAttack::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) 
 {
 	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
-	BlackboardComp = OwnerComp.GetBlackboardComponent();
-	Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
-	if (IsValid(Controller)) Controlled = Cast<ABaseAircraft>(Controller->GetControlled());
-	if (IsValid(BlackboardComp)) Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
 }
 
 void UBTServiceAttack::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
-	CalculateAngle(DeltaSeconds);
-	CalculateThrust(DeltaSeconds);
+	AAircraftAIController* Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
+	if (!Controller) return;
+
+	ABaseAircraft* Controlled = Cast<ABaseAircraft>(Controller->GetPawn());
+	UBlackboardComponent* Comp = OwnerComp.GetBlackboardComponent();
+	AActor* Selected = Cast<AActor>(Comp->GetValueAsObject(TargetActorKey.SelectedKeyName));
+	CalculateAngle(DeltaSeconds, Controlled, Selected, Comp);
+	CalculateThrust(DeltaSeconds, Selected, Controlled, Comp);
 }
 
-void UBTServiceAttack::CalculateAngle(const float DeltaSeconds)
+void UBTServiceAttack::CalculateAngle(const float DeltaSeconds, ABaseAircraft* Controlled, AActor* Selected, UBlackboardComponent* BlackboardComp)
 {
-	AActor* Target = Selected.Get();
-	if (!IsValid(Target) || !IsValid(Controlled)) return;
-	FVector ToTargetWorld = (Target->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
+	if (!IsValid(Selected) || !IsValid(Controlled)) return;
+	FVector ToTargetWorld = (Selected->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
 	if (ToTargetWorld.IsNearlyZero()) return;
 
 	FTransform AirframeTransform = Controlled->GetAirframe()->GetComponentTransform();
@@ -105,17 +106,15 @@ float UBTServiceAttack::CalculateYawDegrees(const FVector& LocalDir)
 	return DesiredYawInput;
 }
 
-void UBTServiceAttack::CalculateThrust(const float DeltaSeconds) 
+void UBTServiceAttack::CalculateThrust(const float DeltaSeconds, AActor* Selected, ABaseAircraft* Controlled, UBlackboardComponent* BlackboardComp)
 {
-	AActor* Target = Selected.Get();
+	if (!IsValid(Selected) || !IsValid(Controlled)) return;
 
-	if (!IsValid(Target) || !IsValid(Controlled)) return;
-
-	float Distance = FVector::Dist(Controlled->GetActorLocation(), Selected.Get()->GetActorLocation());
+	float Distance = FVector::Dist(Controlled->GetActorLocation(), Selected->GetActorLocation());
 
 	float throttle = 0.f;
 	EAIThrottleMode throttleMode = GetThrottleMode(Distance);
-	if (Target) 
+	if (Selected) 
 	{
 		// Make Speed dependent on how many aircraft are in a radius, keep speed high when there are more enemies
 		// For now its single target
@@ -128,7 +127,7 @@ void UBTServiceAttack::CalculateThrust(const float DeltaSeconds)
 				throttle = 0.5f;
 				break;
 			case EAIThrottleMode::Close: 
-				throttle = PursuitThrottle(Cast<ABaseAircraft>(Target));
+				throttle = PursuitThrottle(Cast<ABaseAircraft>(Selected), Controlled);
 				break;
 			default:
 				throttle = 0.f;
@@ -157,7 +156,7 @@ void UBTServiceAttack::CalculateThrust(const float DeltaSeconds)
 	if (BlackboardComp) BlackboardComp->SetValueAsFloat(ThrottleKey.SelectedKeyName, throttle);
 }
 
-float UBTServiceAttack::PursuitThrottle(ABaseAircraft* Target)
+float UBTServiceAttack::PursuitThrottle(ABaseAircraft* Target, ABaseAircraft* Controlled)
 {
 	if (!IsValid(Target) || !IsValid(Controlled)) return 0.5f;
 	float targetSpeed = Target->GetKMHSpeed();

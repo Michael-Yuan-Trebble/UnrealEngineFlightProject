@@ -8,6 +8,10 @@
 void ABaseSpawnPoint::ActivateSpawn() {
 }
 
+void ABaseSpawnPoint::StressTest() {
+
+}
+
 void ABaseSpawnPoint::OnUnitDestroyed(AActor* DestroyedActor) {
 	AliveUnits.Remove(DestroyedActor);
 	if (AliveUnits.Num() == 0) {
