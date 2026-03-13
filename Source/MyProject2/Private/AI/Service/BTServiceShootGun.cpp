@@ -15,26 +15,28 @@ UBTServiceShootGun::UBTServiceShootGun() {
 void UBTServiceShootGun::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) 
 {
 	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
-	BlackboardComp = OwnerComp.GetBlackboardComponent();
-	if (!IsValid(BlackboardComp)) return;
-	AAircraftAIController* Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
-	Controlled = Controller->GetPawn();
-	Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
 }
 
 void UBTServiceShootGun::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-	bool bFire = IsInsideCone();
-	if (IsValid(BlackboardComp)) BlackboardComp->SetValueAsBool(bFireGun.SelectedKeyName, bFire);
+
+	AAircraftAIController* Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
+	if (!Controller) return;
+
+	AActor* Controlled = Controller->GetPawn();
+	UBlackboardComponent* Comp = OwnerComp.GetBlackboardComponent();
+	AActor* Selected = Cast<AActor>(Comp->GetValueAsObject(TargetActorKey.SelectedKeyName));
+
+	bool bFire = IsInsideCone(Controlled, Selected);
+	if (IsValid(Comp)) Comp->SetValueAsBool(bFireGun.SelectedKeyName, bFire);
 }
 
-bool UBTServiceShootGun::IsInsideCone()
+bool UBTServiceShootGun::IsInsideCone(AActor* Controlled, AActor* Selected)
 {
-	AActor* Target = Selected.Get();
-	if (!IsValid(Target) || !IsValid(Controlled)) return false;
+	if (!IsValid(Selected) || !IsValid(Controlled)) return false;
 
-	FVector ToPlayer = (Target->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
+	FVector ToPlayer = (Selected->GetActorLocation() - Controlled->GetActorLocation()).GetSafeNormal();
 	FVector Forward = Controlled->GetActorForwardVector();
 
 	float CosAngle = FVector::DotProduct(Forward, ToPlayer);
@@ -58,7 +60,7 @@ bool UBTServiceShootGun::IsInsideCone()
 			1.0f
 		);*/
 
-	float Distance = FVector::Dist(Controlled->GetActorLocation(), Target->GetActorLocation());
+	float Distance = FVector::Dist(Controlled->GetActorLocation(), Selected->GetActorLocation());
 
 	return (CosAngle >= Threshold) && (Distance < ShootDistance);
 }

@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UI/SelectionUI/WeaponButtonWidget.h"
+#include "UI/SelectionUI/WeaponSelect/WeaponButtonWidget.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "Weapons/BaseWeapon.h"
 #include "Kismet/GameplayStatics.h"

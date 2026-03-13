@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/SelectionUI/BuyButton.h"
+#include "UI/SelectionUI/Buy/BuyButton.h"
 #include "Components/Button.h"
 
 void UBuyButton::NativeConstruct() 

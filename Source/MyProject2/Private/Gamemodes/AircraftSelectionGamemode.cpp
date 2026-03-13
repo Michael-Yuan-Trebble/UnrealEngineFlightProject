@@ -2,7 +2,7 @@
 
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "GameFramework/SpectatorPawn.h"
-#include "UI/SelectionUI/AircraftSelectionWidget.h"
+#include "UI/SelectionUI/AircraftSelect/AircraftSelectionWidget.h"
 #include "Player Info/AircraftPlayerController.h"
 #include "Units/Components/Player/MenuManagerComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -10,6 +10,7 @@
 #include "Subsystem/LevelTransitionSubsystem.h"
 #include "Subsystem/MissionManagerSubsystem.h"
 #include "Units/Aircraft/BaseAircraft.h"
+#include "Debug/DebugHelper.h"
 
 FActorSpawnParameters SpawnParams;
 
@@ -42,18 +43,21 @@ void AAircraftSelectionGamemode::BeginPlay()
 		if (!WeakAPC.IsValid()) return;
 		AAircraftPlayerController* PC = WeakAPC.Get();
 		if (!IsValid(PC) || !IsValid(PC->GetMenuManager())) return;
-		PC->GetMenuManager()->SetupClasses(AircraftSelectClass, WeaponSelectClass, BuySelectionClass, SpecialSelectionClass);
+		PC->GetMenuManager()->SetupClasses(AircraftSelectClass, WeaponSelectClass, BuySelectionClass, SpecialSelectionClass, GreyOutClass);
 		PC->GetMenuManager()->ChooseAircraftUI();
 	});
 }
 
 void AAircraftSelectionGamemode::SpawnInAircraft(const TSubclassOf<APawn> SpawnIn) 
 {
-	if (!IsValid(AircraftDisplayed) || !IsValid(GetWorld())) return;
-	if (AircraftDisplayed->GetClass() == SpawnIn) return;
+	if (!IsValid(GetWorld())) return;
 
-	AircraftDisplayed->Destroy();
-	AircraftDisplayed = nullptr;
+	if (IsValid(AircraftDisplayed)) {
+		if (AircraftDisplayed->GetClass() == SpawnIn->GetClass()) return;
+
+		AircraftDisplayed->Destroy();
+		AircraftDisplayed = nullptr;
+	}
 
 	FVector PreviewLocation = FVector::ZeroVector;
 
@@ -64,18 +68,18 @@ void AAircraftSelectionGamemode::SpawnInAircraft(const TSubclassOf<APawn> SpawnI
 
 	bool bHit = GetWorld()->LineTraceSingleByChannel(
 		HitResult,
-		PreviewLocation + FVector(0, 0, 10000),
+		PreviewLocation,
 		PreviewLocation - FVector(0, 0, 10000),
 		ECC_WorldStatic,
 		Params
 	);
 
-	float SpawnOffset = 150.f;
+	float SpawnOffset = 250.f;
 
 	FVector SpawnLocation = bHit ? HitResult.Location + FVector(0, 0, SpawnOffset) : PreviewLocation;
-
 	FRotator PreviewRotation = FRotator::ZeroRotator;
 	AircraftDisplayed = GetWorld()->SpawnActor<APawn>(SpawnIn, SpawnLocation, PreviewRotation, SpawnParams);
+	if (!IsValid(AircraftDisplayed)) return;
 	if (ABaseAircraft* Preview = Cast<ABaseAircraft>(AircraftDisplayed)) {
 		Preview->SetLandingGearVisiblility(true);
 	}
@@ -192,7 +196,7 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 		AircraftDisplayed->Destroy();
 		AircraftDisplayed = nullptr;
 	}
-
+	DEBUG_TIME(100.f, "Debug");
 	World->GetTimerManager().ClearAllTimersForObject(this);
 	World->GetTimerManager().ClearAllTimersForObject(APC);
 	if (IsValid(APC->GetMenuManager())) World->GetTimerManager().ClearAllTimersForObject(APC->GetMenuManager());
@@ -201,7 +205,7 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 	ULevelTransitionSubsystem* LevelTransition = GI->GetSubsystem<ULevelTransitionSubsystem>();
 
 	if (!IsValid(MissionManager) || !IsValid(LevelTransition)) return;
-
+	DEBUG_TIME(100.f, "Debug");
 	const FMissionData& Mission = MissionManager->GetCurrentMission();
 	LevelTransition->LoadIntermission(Mission.TakeoffType);
 }

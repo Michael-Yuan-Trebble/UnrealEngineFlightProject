@@ -15,6 +15,8 @@ void USaveGameManager::CreateNewSave()
 	if (SaveGameData)
 	{
 		SaveGameData->Money = 0;
+		// TODO: Just adding it here so I can just default select it
+		SaveGameData->AircraftOwned.Add(FName::FName("F18E"));
 		UE_LOG(LogTemp, Warning, TEXT("Created new save data"));
 	}
 	else

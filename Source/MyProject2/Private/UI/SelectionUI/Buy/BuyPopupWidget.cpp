@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/SelectionUI/BuyPopupWidget.h"
-#include "UI/SelectionUI/BuyButton.h"
+#include "UI/SelectionUI/Buy/BuyPopupWidget.h"
+#include "UI/SelectionUI/Buy/BuyButton.h"
 #include "Components/SizeBox.h"
-#include "UI/SelectionUI/BuySelectionComponent.h"
+#include "UI/SelectionUI/Buy/BuySelectionComponent.h"
 
 UBuyPopupWidget::UBuyPopupWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) 
 {

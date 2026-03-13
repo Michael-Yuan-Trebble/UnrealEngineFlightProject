@@ -6,8 +6,8 @@
 #include "Units/Components/Standard/BaseAudioComponent.h"
 #include "Enums/CameraPerspective.h"
 #include "Structs and Data/Aircraft Data/AircraftAudioData.h"
-#include "Structs and Data/AircraftAudios.h"
-#include "Structs and Data/GunAudios.h"
+#include "Structs and Data/Audios/AircraftAudios.h"
+#include "Structs and Data/Audios/GunAudios.h"
 #include "AircraftAudioComponent.generated.h"
 
 class ABaseAircraft;

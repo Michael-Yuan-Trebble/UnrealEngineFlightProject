@@ -14,7 +14,6 @@ public:
 	UBTTaskFireMissiles();
 
 protected:
-	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds);
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
@@ -25,15 +24,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector MissileClass;
-
-	UPROPERTY()
-	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<class AAircraftAIController> Controller = nullptr;
-
-	UPROPERTY()
-	TWeakObjectPtr<AActor> Selected = nullptr;
 
 private:
 	void EquipAppropriateWeapon();

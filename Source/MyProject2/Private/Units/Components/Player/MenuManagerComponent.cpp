@@ -3,16 +3,17 @@
 #include "Units/Components/Player/MenuManagerComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player Info/PlayerGameInstance.h"
-#include "UI/SelectionUI/AircraftSelectionComponent.h"
+#include "UI/SelectionUI/AircraftSelect/AircraftSelectionComponent.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
-#include "UI/SelectionUI/AircraftSelectionWidget.h"
-#include "UI/SelectionUI/WeaponSelectionWidget.h"
-#include "UI/SelectionUI/WeaponSelectionComponent.h"
-#include "UI/SelectionUI/SpecialSelectionComponent.h"
-#include "UI/SelectionUI/SpecialSelectionWidget.h"
+#include "UI/SelectionUI/AircraftSelect/AircraftSelectionWidget.h"
+#include "UI/SelectionUI/WeaponSelect/WeaponSelectionWidget.h"
+#include "UI/SelectionUI/WeaponSelect/WeaponSelectionComponent.h"
+#include "UI/SelectionUI/SpecialSelect/SpecialSelectionComponent.h"
+#include "UI/SelectionUI/SpecialSelect/SpecialSelectionWidget.h"
 #include "Player Info/AircraftPlayerController.h"
-#include "UI/SelectionUI/BuySelectionComponent.h"
-#include "UI/SelectionUI/BuyPopupWidget.h"
+#include "UI/SelectionUI/Buy/BuySelectionComponent.h"
+#include "UI/SelectionUI/Buy/BuyPopupWidget.h"
+#include "Debug/DebugHelper.h"
 
 FInputModeGameAndUI InputMode;
 
@@ -45,7 +46,8 @@ void UMenuManagerComponent::InitializePC(AAircraftPlayerController* InPC)
 void UMenuManagerComponent::SetupClasses(TSubclassOf<UUserWidget> InAircraftClass,
 	TSubclassOf<UUserWidget> InWeaponClass,
 	TSubclassOf<UUserWidget> InBuyClass,
-	TSubclassOf<UUserWidget> InSpecialClass) 
+	TSubclassOf<UUserWidget> InSpecialClass,
+	TSubclassOf<UUserWidget> InGreyClass)
 {
 	AircraftSelectClass = InAircraftClass;
 	WeaponSelectClass = InWeaponClass;
@@ -55,6 +57,7 @@ void UMenuManagerComponent::SetupClasses(TSubclassOf<UUserWidget> InAircraftClas
 	AircraftSelectionUI->SetWidget(InAircraftClass);
 	WeaponSelectionUI->SetWeaponWidgetClass(InWeaponClass);
 	BuySelectionUI->SetWidget(InBuyClass);
+	BuySelectionUI->SetGrey(InGreyClass);
 	SpecialSelectionUI->SetWidget(InSpecialClass);
 }
 
@@ -111,6 +114,9 @@ void UMenuManagerComponent::GetWidgetClassForState(const EMenuState State)
 		break;
 	default:
 		break;
+	}
+	if (IsValid(CurrentWidget) && !CurrentWidget->IsInViewport()) {
+		CurrentWidget->AddToViewport();
 	}
 }
 

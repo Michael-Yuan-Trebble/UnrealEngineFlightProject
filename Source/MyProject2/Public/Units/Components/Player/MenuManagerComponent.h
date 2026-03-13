@@ -48,17 +48,20 @@ public:
 	UPROPERTY()
 	TSubclassOf<UBaseSpecial> SelectedSpecial = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> AircraftSelectClass = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> WeaponSelectClass = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> BuySelectionClass = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> SpecialSelectionClass = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> GreyOutClass = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<UUserWidget> CurrentWidget = nullptr;
@@ -86,7 +89,8 @@ public:
 	void SetupClasses(TSubclassOf<UUserWidget> InAircraftClass,
 		TSubclassOf<UUserWidget> InWeaponClass,
 		TSubclassOf<UUserWidget> InBuyClass,
-		TSubclassOf<UUserWidget> InSpecialClass);
+		TSubclassOf<UUserWidget> InSpecialClass,
+		TSubclassOf<UUserWidget> InGreyClass);
 
 	UFUNCTION()
 	void SpawnBuy(UAircraftData* AircraftData, const int Cost);

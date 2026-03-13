@@ -1,14 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UI/SelectionUI/AircraftButtonWidget.h"
+#include "UI/SelectionUI/AircraftSelect/AircraftButtonWidget.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "Kismet/GameplayStatics.h"
+#include "Debug/DebugHelper.h"
 
 void UAircraftButtonWidget::Setup(UAircraftData* AircraftData, TArray<FName> TempOwned)
 {
 	ContainedData = AircraftData;
 	Owned = TempOwned;
-	if (!IsValid(ContainedData) || ContainedData->AircraftStat.IsValid()) return;
+	if (!IsValid(ContainedData) || !ContainedData->AircraftStat.IsValid() || !IsValid(AircraftNameText)) return;
 
 	UAircraftStats* Loaded = ContainedData->AircraftStat.LoadSynchronous();
 	if (!IsValid(Loaded)) return;
@@ -16,7 +17,6 @@ void UAircraftButtonWidget::Setup(UAircraftData* AircraftData, TArray<FName> Tem
 	AircraftNameText->SetText(FText::FromName(Loaded->AircraftName));
 
 	if (!IsValid(AircraftSelectButton)) return;
-
 	AircraftSelectButton->OnHovered.AddDynamic(this, &UAircraftButtonWidget::HandleButtonHover);
 	if (Owned.Contains(Loaded->AircraftName))
 	{
@@ -37,7 +37,6 @@ void UAircraftButtonWidget::AdjustButtons()
 void UAircraftButtonWidget::HandleButtonHover() 
 {
 	if (!IsValid(ContainedData->AircraftClass)) return;
-	
 	OnAircraftSelected.Broadcast(ContainedData);
 }
 

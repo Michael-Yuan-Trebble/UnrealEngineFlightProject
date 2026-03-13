@@ -55,6 +55,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> SpecialSelectionClass = nullptr;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> GreyOutClass = nullptr;
+
 	UPROPERTY()
 	TObjectPtr<UAircraftData> ChosenAircraft = nullptr;
 

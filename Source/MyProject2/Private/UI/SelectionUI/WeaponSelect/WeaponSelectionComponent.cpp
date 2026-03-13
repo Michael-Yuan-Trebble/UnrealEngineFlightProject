@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/SelectionUI/WeaponSelectionComponent.h"
-#include "UI/SelectionUI/WeaponSelectionWidget.h"
+#include "UI/SelectionUI/WeaponSelect/WeaponSelectionComponent.h"
+#include "UI/SelectionUI/WeaponSelect/WeaponSelectionWidget.h"
 #include "Player Info/SaveGameManager.h"
 #include "Units/Components/Player/MenuManagerComponent.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"

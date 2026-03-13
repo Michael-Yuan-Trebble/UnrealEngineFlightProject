@@ -30,11 +30,7 @@ void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, const UAircraftStats* 
 
 void UWeaponSystemComponent::FireBullets()
 {
-	//Spawns a bullet actor whilst firing at socket
-	if (!IsValid(Controlled)
-		|| !IsValid(BulletStats)
-		|| !IsValid(BulletStats->BulletClass)
-		|| !IsValid(Airframe)) return;
+	if (!IsValid(Controlled) || !IsValid(BulletStats) || !IsValid(BulletStats->BulletClass) || !IsValid(Airframe)) return;
 	
 	int8 GunI = 0;
 	while (true) 
@@ -331,4 +327,19 @@ void UWeaponSystemComponent::ResetLockedOn()
 	LockTime = 0.f;
 	bLocked = false;
 	if (lastLock != LockTime) OnHUDLockedOn.Broadcast(0.f);
+}
+
+FCooldownWeapon* UWeaponSystemComponent::GetBestWeaponRange(float Distance) {
+	FCooldownWeapon* BestWeapon = nullptr;
+	float BestRange = 0.f;
+	for (FCooldownWeapon& Weapon : AvailableWeapons) {
+		if (!Weapon.WeaponInstance) continue;
+		float WeaponRange = Weapon.WeaponInstance->GetRange();
+		if (WeaponRange >= Distance && WeaponRange < BestRange) {
+			BestRange = WeaponRange;
+			BestWeapon = &Weapon;
+		}
+	}
+
+	return BestWeapon;
 }

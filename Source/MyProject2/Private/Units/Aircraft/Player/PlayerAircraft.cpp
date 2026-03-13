@@ -65,7 +65,7 @@ void APlayerAircraft::BeginPlay()
 		OriginalFirstPersonSpringArmLength = FirstPersonSpringArm->TargetArmLength;
 		OriginalThirdPersonSpringArmLength = ThirdPersonSpringArm->TargetArmLength;
 	}
-	SetSensitivity(0.f);
+	SetSensitivity(CameraSens);
 	SetInterp();
 }
 

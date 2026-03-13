@@ -1,12 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UI/SelectionUI/AircraftSelectionComponent.h"
-#include "UI/SelectionUI/AircraftSelectionWidget.h"
+#include "UI/SelectionUI/AircraftSelect/AircraftSelectionComponent.h"
+#include "UI/SelectionUI/AircraftSelect/AircraftSelectionWidget.h"
 #include "Player Info/SaveGameManager.h"
 #include "Player Info/PlayerGameInstance.h"
 #include "Units/Components/Player/MenuManagerComponent.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "Player Info/AircraftPlayerController.h"
+#include "Debug/DebugHelper.h"
 
 UAircraftSelectionComponent::UAircraftSelectionComponent()
 { 
@@ -35,6 +36,7 @@ void UAircraftSelectionComponent::AircraftSelectionMenu()
 {
 	if (!IsValid(PC) || !IsValid(SelectionWidget)) return;
 
+	if (IsValid(AircraftSelectUI)) return;
 	AircraftSelectUI = CreateWidget<UAircraftSelectionWidget>(PC, SelectionWidget);
 
 	if (!IsValid(AircraftSelectUI) || !IsValid(AircraftDatabase)) return;

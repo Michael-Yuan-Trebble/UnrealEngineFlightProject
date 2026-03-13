@@ -19,7 +19,7 @@ void AMissionWaveActor::BeginPlay() {
 		MissionTimer,
 		this,
 		&AMissionWaveActor::RegisterWave,
-		2.f,
+		0.05f,
 		false
 	);
 }

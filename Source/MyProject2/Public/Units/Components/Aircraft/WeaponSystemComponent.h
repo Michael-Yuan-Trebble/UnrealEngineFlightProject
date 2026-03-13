@@ -73,6 +73,8 @@ public:
 
 	void ResetLockedOn();
 
+	FCooldownWeapon* GetBestWeaponRange(float Distance);
+
 private:
 
 	void AddPylons();

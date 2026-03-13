@@ -1,19 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/SelectionUI/BuySelectionComponent.h"
-#include "UI/SelectionUI/BuyPopupWidget.h"
+#include "UI/SelectionUI/Buy/BuySelectionComponent.h"
+#include "UI/SelectionUI/Buy/BuyPopupWidget.h"
 #include "Player Info/AircraftPlayerController.h"
 #include "Player Info/PlayerGameInstance.h"
 #include "Player Info/SaveGameManager.h"
-#include "UI/SelectionUI/AircraftSelectionWidget.h"
-#include "UI/SelectionUI/AircraftSelectionComponent.h"
+#include "UI/SelectionUI/AircraftSelect/AircraftSelectionWidget.h"
+#include "UI/SelectionUI/AircraftSelect/AircraftSelectionComponent.h"
+#include "Debug/DebugHelper.h"
 
 UBuySelectionComponent::UBuySelectionComponent()
 {
 }
 
-void UBuySelectionComponent::Setup(AAircraftPlayerController* InPlayer, UPlayerGameInstance* InGI) 
+void UBuySelectionComponent::Setup(AAircraftPlayerController* InPlayer, UPlayerGameInstance* InGI)
 {
 	PC = InPlayer;
 	GI = InGI;

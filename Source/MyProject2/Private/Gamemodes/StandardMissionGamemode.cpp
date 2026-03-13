@@ -17,7 +17,7 @@ void AStandardMissionGamemode::BeginPlay() {
 				WaveStartTimer,
 				this,
 				&AStandardMissionGamemode::StartFirstWave,
-				3.f,
+				0.1f,
 				false
 			);
 		}

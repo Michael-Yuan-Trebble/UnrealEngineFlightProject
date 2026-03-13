@@ -1,15 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UI/SelectionUI/AircraftSelectionWidget.h"
+#include "UI/SelectionUI/AircraftSelect/AircraftSelectionWidget.h"
 #include "Components/ScrollBox.h"
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
 #include "Player Info/AircraftPlayerController.h"
 #include "Units/Components/Player/MenuManagerComponent.h"
-#include "UI/SelectionUI/AircraftSelectionComponent.h"
+#include "UI/SelectionUI/AircraftSelect/AircraftSelectionComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
-#include "UI/SelectionUI/AircraftButtonWidget.h"
-
+#include "UI/SelectionUI/AircraftSelect/AircraftButtonWidget.h"
+#include "Debug/DebugHelper.h"
 
 UAircraftSelectionWidget::UAircraftSelectionWidget(const FObjectInitializer & ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -30,7 +30,6 @@ void UAircraftSelectionWidget::Setup(
 void UAircraftSelectionWidget::GetAllAircraft() 
 {
     if (!IsValid(AircraftButtonClass) || !IsValid(AircraftScrollBox) || !IsValid(AircraftDatabase) || AircraftDatabase->AllAircraft.Num() <= 0) return;
-
     AircraftScrollBox->ClearChildren();
 
     AAircraftSelectionGamemode* Gamemode = Cast<AAircraftSelectionGamemode>(UGameplayStatics::GetGameMode(this));
@@ -56,10 +55,11 @@ void UAircraftSelectionWidget::GetAllAircraft()
         {
             Card->OnBuyCreate.AddDynamic(MenuManager, &UMenuManagerComponent::SpawnBuy);
         }
-
+        DEBUG_TIME(100.f, "Added");
         AircraftScrollBox->AddChild(Card);
         ButtonArray.Add(Data->AircraftStat->AircraftName, Card);
     }
+
     if (AircraftDatabase->AllAircraft.Num() > 0 && IsValid(AircraftDatabase->AllAircraft[0])) 
     {
         Gamemode->SpawnInAircraft(AircraftDatabase->AllAircraft[0]->AircraftClass);

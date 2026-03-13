@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UI/SelectionUI/WeaponSelectionWidget.h"
+#include "UI/SelectionUI/WeaponSelect/WeaponSelectionWidget.h"
 #include "Components/ScrollBox.h"
 #include "Kismet/GameplayStatics.h"
-#include "UI/SelectionUI/WeaponSelectionComponent.h"
-#include "UI/SelectionUI/WeaponButtonWidget.h"
+#include "UI/SelectionUI/WeaponSelect/WeaponSelectionComponent.h"
+#include "UI/SelectionUI/WeaponSelect/WeaponButtonWidget.h"
 
 UWeaponSelectionWidget::UWeaponSelectionWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {

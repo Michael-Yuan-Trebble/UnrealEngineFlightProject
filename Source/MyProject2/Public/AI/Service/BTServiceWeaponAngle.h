@@ -29,18 +29,5 @@ private:
 
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
-	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-
-	UPROPERTY()
-	TWeakObjectPtr<AActor> Selected = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<ABaseAircraft> Controlled = nullptr;
-	
-	UPROPERTY()
-	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
-
-	void WeaponDistance();
-
-	float greatestRange = 0.f;
+	void WeaponDistance(ABaseAircraft* Controlled, AActor* Selected, UBlackboardComponent* BlackboardComp);
 };

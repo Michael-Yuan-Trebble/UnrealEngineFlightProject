@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/SelectionUI/AircraftPriceDisplayWidget.h"
+#include "UI/SelectionUI/AircraftSelect/AircraftPriceDisplayWidget.h"
 
 void UAircraftPriceDisplayWidget::DisplayAircraftPriceInfo(UAircraftData* Aircraft)
 {

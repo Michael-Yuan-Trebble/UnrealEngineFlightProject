@@ -1,14 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/Service/BTServiceWeaponAngle.h"
-#include "Units/Components/Aircraft/FlightComponent.h"
 #include "Units/Components/Aircraft/WeaponSystemComponent.h"
 #include "Structs and Data/InGame/CooldownWeapon.h"
-#include "Units/Aircraft/AI/EnemyAircraft.h"
-#include "Units/Aircraft/AI/EnemyAircraftAI.h"
 #include "Units/Aircraft/BaseAircraft.h"
+#include "AI/AircraftAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Weapons/BaseWeapon.h"
 
 UBTServiceWeaponAngle::UBTServiceWeaponAngle() 
 {
@@ -17,72 +14,36 @@ UBTServiceWeaponAngle::UBTServiceWeaponAngle()
 	bNotifyBecomeRelevant = true;
 }
 
-void UBTServiceWeaponAngle::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) 
-{
-	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
-
-	// TODO: Controlled is always null remember to set it
-
-	BlackboardComp = OwnerComp.GetBlackboardComponent();
-	if (!IsValid(BlackboardComp)) return;
-	Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
-
-	if (!IsValid(Controlled) || !IsValid(Controlled->GetWeaponComp())) return;
-
-	for (const TPair<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon*>>& GroupPair : Controlled->GetWeaponComp()->GetWeaponGroups())
-	{
-		TSubclassOf<ABaseWeapon> WeaponClass = GroupPair.Key;
-		const TArray<FCooldownWeapon*>& WeaponArray = GroupPair.Value;
-		float WeaponRange = WeaponArray[0]->WeaponInstance->GetRange();
-
-		if (WeaponRange > greatestRange)
-		{
-			greatestRange = WeaponRange;
-		}
-	}
-}
-
 void UBTServiceWeaponAngle::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) 
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-	WeaponDistance();
+
+	AAircraftAIController* Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
+	if (!Controller) return;
+
+	ABaseAircraft* Controlled = Cast<ABaseAircraft>(Controller->GetPawn());
+	UBlackboardComponent* Comp = OwnerComp.GetBlackboardComponent();
+	AActor* Selected = Cast<AActor>(Comp->GetValueAsObject(TargetActorKey.SelectedKeyName));
+
+	WeaponDistance(Controlled, Selected, Comp);
 }
 
-void UBTServiceWeaponAngle::WeaponDistance() 
+void UBTServiceWeaponAngle::WeaponDistance(ABaseAircraft* Controlled, AActor* Selected, UBlackboardComponent* BlackboardComp)
 {
-	AActor* Target = Selected.Get();
-	if (!IsValid(Target) || !IsValid(Controlled)) return;
+	if (!IsValid(Selected) || !IsValid(Controlled)) return;
+	UWeaponSystemComponent* WeaponComp = Controlled->GetWeaponComp();
+	if (!IsValid(WeaponComp) || !WeaponComp->GetLocked()) return;
 
-	float Distance = FVector::Dist(Controlled->GetActorLocation(), Target->GetActorLocation());
-	if (Distance > greatestRange) return;
-
-	if (!IsValid(Controlled->GetWeaponComp()) || !Controlled->GetWeaponComp()->GetLocked()) return;
-
-	ABaseWeapon* CurrentWeapon = Controlled->GetWeaponComp()->GetWeapon();
-	if (!IsValid(CurrentWeapon)) return;
-
-	TSubclassOf<ABaseWeapon> FiringWeapon = nullptr;
-	float smallestRange = Distance;
-
-	for (const TPair<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon* >> &GroupPair : Controlled->GetWeaponComp()->GetWeaponGroups())
-	{
-		TSubclassOf<ABaseWeapon> WeaponClass = GroupPair.Key;
-		const TArray<FCooldownWeapon*>& WeaponArray = GroupPair.Value;
-
-		float WeaponRange = WeaponArray[0]->WeaponInstance->GetRange();
-
-		if (WeaponRange <= Distance)
-		{
-			if (WeaponRange < smallestRange)
-			{
-				FiringWeapon = WeaponClass;
-				smallestRange = WeaponRange;
-			}
-		}
-	}
-	if (!IsValid(FiringWeapon)) return;
-
+	float Distance = FVector::Dist(Controlled->GetActorLocation(), Selected->GetActorLocation());
+	FCooldownWeapon* Found = WeaponComp->GetBestWeaponRange(Distance);
+	
 	if (!IsValid(BlackboardComp)) return;
+
+	if (!Found && !Found->WeaponClass->IsChildOf(ABaseMissile::StaticClass())) {
+		BlackboardComp->SetValueAsBool(bFireMissile.SelectedKeyName, false);
+		return;
+	}
+
 	BlackboardComp->SetValueAsBool(bFireMissile.SelectedKeyName, true);
-	BlackboardComp->SetValueAsClass(MissileClass.SelectedKeyName, FiringWeapon);
+	BlackboardComp->SetValueAsClass(MissileClass.SelectedKeyName, Found->WeaponClass);
 }

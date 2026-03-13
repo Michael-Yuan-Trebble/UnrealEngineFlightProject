@@ -58,7 +58,7 @@ private:
 	TSubclassOf<UUserWidget> AircraftButtonClass = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
-	class UScrollBox* AircraftScrollBox = nullptr;
+	TObjectPtr<class UScrollBox> AircraftScrollBox = nullptr;
 
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		MenuManager = nullptr;

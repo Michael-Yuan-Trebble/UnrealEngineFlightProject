@@ -35,6 +35,8 @@ public:
 
 	void SetWidget(const TSubclassOf<UUserWidget>& InWidget) { BuyPopupClass = InWidget; };
 
+	void SetGrey(const TSubclassOf<UUserWidget>& InWidget) { GreyOutClass = InWidget; };
+
 private:
 
 	UPROPERTY()
@@ -49,13 +51,13 @@ private:
 	UPROPERTY()
 	TObjectPtr<UAircraftSelectionComponent> AircraftUI = nullptr;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	TSubclassOf<UUserWidget> BuyPopupClass = nullptr;
 
 	UPROPERTY()
 	class UBuyPopupWidget* BuyWidget = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY()
 	TSubclassOf<UUserWidget> GreyOutClass = nullptr;
 
 	UPROPERTY()

@@ -10,26 +10,19 @@ UBTTaskFireMissiles::UBTTaskFireMissiles()
 	bNotifyTick = true;
 }
 
-EBTNodeResult::Type UBTTaskFireMissiles::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
-{
-	Super::ExecuteTask(OwnerComp, NodeMemory);
-	BlackboardComp = OwnerComp.GetBlackboardComponent();
-	if (!IsValid(BlackboardComp)) return EBTNodeResult::Aborted;
-
-	Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
-	if (!IsValid(Controller)) return EBTNodeResult::Aborted;
-
-	Selected = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
-
-	return EBTNodeResult::InProgress;
-}
-
 void UBTTaskFireMissiles::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
-	if (!IsValid(BlackboardComp)) return;
-	if (!BlackboardComp->GetValueAsBool(bFireMissile.SelectedKeyName)) return;
-	TSubclassOf<ABaseWeapon> Class = BlackboardComp->GetValueAsClass(MissileClass.SelectedKeyName);
+	AAircraftAIController* Controller = Cast<AAircraftAIController>(OwnerComp.GetAIOwner());
+	if (!Controller) return;
+
+	AActor* Controlled = Controller->GetPawn();
+	UBlackboardComponent* Comp = OwnerComp.GetBlackboardComponent();
+	AActor* Selected = Cast<AActor>(Comp->GetValueAsObject(TargetActorKey.SelectedKeyName));
+
+	if (!IsValid(Comp)) return;
+	if (!Comp->GetValueAsBool(bFireMissile.SelectedKeyName)) return;
+	TSubclassOf<ABaseWeapon> Class = Comp->GetValueAsClass(MissileClass.SelectedKeyName);
 
 	// TODO: Make it first select the class if not selected then fire, ithout using FlightComp
 	if (!IsValid(Class)) return;

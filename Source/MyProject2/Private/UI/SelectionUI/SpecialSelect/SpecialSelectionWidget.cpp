@@ -1,15 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UI/SelectionUI/SpecialSelectionWidget.h"
+#include "UI/SelectionUI/SpecialSelect/SpecialSelectionWidget.h"
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
 #include "Player Info/AircraftPlayerController.h"
 #include "Units/Components/Player/MenuManagerComponent.h"
-#include "UI/SelectionUI/SpecialSelectionComponent.h"
+#include "UI/SelectionUI/SpecialSelect/SpecialSelectionComponent.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/ScrollBox.h"
 #include "Kismet/GameplayStatics.h"
-#include "UI/SelectionUI/SpecialButtonWidget.h"
+#include "UI/SelectionUI/SpecialSelect/SpecialButtonWidget.h"
+#include "Debug/DebugHelper.h"
 
 USpecialSelectionWidget::USpecialSelectionWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -45,6 +46,7 @@ void USpecialSelectionWidget::GetAllSpecials()
 
 void USpecialSelectionWidget::OnAdvancePicked() 
 {
+	DEBUG_TIME(100.f, "Debug");
 	OnAdvance.Broadcast();
 }
 

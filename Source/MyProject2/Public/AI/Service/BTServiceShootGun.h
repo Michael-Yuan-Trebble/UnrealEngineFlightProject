@@ -27,16 +27,7 @@ private:
 
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
-	UPROPERTY()
-	TWeakObjectPtr<AActor> Selected = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<AActor> Controlled = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<UBlackboardComponent> BlackboardComp = nullptr;
-
-	bool IsInsideCone();
+	bool IsInsideCone(AActor* Controlled, AActor* Selected);
 
 	static constexpr int ShootDistance = 75000;
 

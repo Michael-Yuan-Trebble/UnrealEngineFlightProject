@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "Structs and Data/AircraftAudios.h"
-#include "Structs and Data/GunAudios.h"
+#include "Structs and Data/Audios/AircraftAudios.h"
+#include "Structs and Data/Audios/GunAudios.h"
 #include "AircraftAudioData.generated.h"
 
 UCLASS()
