@@ -7,8 +7,6 @@
 #include "Structs and Data/Aircraft Data/AircraftData.h"
 #include "BuySelectionComponent.generated.h"
 
-class AAircraftPlayerController;
-class UPlayerGameInstance;
 class UAircraftSelectionComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -21,13 +19,8 @@ public:
 	
 	void BuyPopupMenu();
 
-	void Setup(AAircraftPlayerController* InPlayer, UPlayerGameInstance* InGI);
-
 	UFUNCTION()
-	void BuyAircraft(FName Name, int Cost);
-
-	UFUNCTION()
-	void CancelBuy();
+	void BuyAircraft(bool bBought);
 
 	void AddAircraft(UAircraftData* Data, UAircraftSelectionComponent* InUI);
 
@@ -38,12 +31,6 @@ public:
 	void SetGrey(const TSubclassOf<UUserWidget>& InWidget) { GreyOutClass = InWidget; };
 
 private:
-
-	UPROPERTY()
-	TObjectPtr<AAircraftPlayerController> PC = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<UPlayerGameInstance> GI = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<UAircraftData> Aircraft = nullptr;

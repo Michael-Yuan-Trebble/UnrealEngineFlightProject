@@ -7,7 +7,6 @@
 #include "Structs and Data/Aircraft Data/AircraftData.h"
 #include "BuyPopupWidget.generated.h"
 
-class UMenuManagerComponent;
 class UBuySelectionComponent;
 
 UCLASS()
@@ -27,9 +26,6 @@ public:
 private:
 
 	int CurrentCurrency = 0;
-
-	UPROPERTY()
-	TObjectPtr<UAircraftData> Aircraft = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<UBuySelectionComponent> BuyUI = nullptr;

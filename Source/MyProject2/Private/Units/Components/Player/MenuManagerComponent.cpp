@@ -5,14 +5,11 @@
 #include "Player Info/PlayerGameInstance.h"
 #include "UI/SelectionUI/AircraftSelect/AircraftSelectionComponent.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
-#include "UI/SelectionUI/AircraftSelect/AircraftSelectionWidget.h"
-#include "UI/SelectionUI/WeaponSelect/WeaponSelectionWidget.h"
 #include "UI/SelectionUI/WeaponSelect/WeaponSelectionComponent.h"
 #include "UI/SelectionUI/SpecialSelect/SpecialSelectionComponent.h"
-#include "UI/SelectionUI/SpecialSelect/SpecialSelectionWidget.h"
 #include "Player Info/AircraftPlayerController.h"
 #include "UI/SelectionUI/Buy/BuySelectionComponent.h"
-#include "UI/SelectionUI/Buy/BuyPopupWidget.h"
+#include "Blueprint/UserWidget.h"
 #include "Debug/DebugHelper.h"
 
 FInputModeGameAndUI InputMode;
@@ -31,16 +28,15 @@ void UMenuManagerComponent::InitializePC(AAircraftPlayerController* InPC)
 	InputMode.SetHideCursorDuringCapture(true);
 
 	AircraftSelectionUI = NewObject<UAircraftSelectionComponent>(this);
-	AircraftSelectionUI->Setup(PC, GM, this, AircraftSelectClass);
+	AircraftSelectionUI->Setup(this);
 
 	WeaponSelectionUI = NewObject<UWeaponSelectionComponent>(this);
-	WeaponSelectionUI->Setup(PC, GM, this);
+	WeaponSelectionUI->Setup(this);
 
 	BuySelectionUI = NewObject<UBuySelectionComponent>(this);
-	BuySelectionUI->Setup(PC, GameInstance);
 
 	SpecialSelectionUI = NewObject<USpecialSelectionComponent>(this);
-	SpecialSelectionUI->Setup(PC, this);
+	SpecialSelectionUI->Setup(this);
 }
 
 void UMenuManagerComponent::SetupClasses(TSubclassOf<UUserWidget> InAircraftClass,
@@ -138,7 +134,7 @@ void UMenuManagerComponent::ChooseSpecialUI()
 void UMenuManagerComponent::SpawnBuy(UAircraftData* AircraftData, const int Cost)
 {
 	TempAircraft = AircraftData;
-	PC->GetMenuHistory().Push(EMenuState::BuyPopup);
+	if (IsValid(PC)) PC->GetMenuHistory().Push(EMenuState::BuyPopup);
 	GetWidgetClassForState(EMenuState::BuyPopup);
 }
 
@@ -149,15 +145,14 @@ void UMenuManagerComponent::EndSelection()
 
 void UMenuManagerComponent::AdvanceToLevel() 
 {
+	CloseAll();
 	if (IsValid(GM)) GM->TryAdvanceToNextStage();
 }
 
 void UMenuManagerComponent::CloseAll() 
 {
 	if (UWorld* World = GetWorld())
-	{
 		World->GetTimerManager().ClearAllTimersForObject(this);
-	}
 
 	if (IsValid(AircraftSelectionUI)) AircraftSelectionUI->CloseAll();
 	if (IsValid(WeaponSelectionUI)) WeaponSelectionUI->CloseAll();
@@ -169,9 +164,6 @@ void UMenuManagerComponent::CloseAll()
 	BuySelectionUI = nullptr;
 	SpecialSelectionUI = nullptr;
 
-	if (APlayerController* TempPC = Cast<APlayerController>(GetOwner()))
-	{
-		TempPC->SetInputMode(FInputModeGameOnly());
-		TempPC->bShowMouseCursor = false;
-	}
+	PC->SetInputMode(FInputModeGameOnly());
+	PC->bShowMouseCursor = false;
 }

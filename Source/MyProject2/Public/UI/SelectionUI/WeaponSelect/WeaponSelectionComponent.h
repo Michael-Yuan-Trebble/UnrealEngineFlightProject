@@ -7,8 +7,6 @@
 #include "Structs and Data/Aircraft Data/AircraftData.h"
 #include "WeaponSelectionComponent.generated.h"
 
-class AAircraftPlayerController;
-class AAircraftSelectionGamemode;
 class UMenuManagerComponent;
 class UWeaponSelectionWidget;
 class ABaseWeapon;
@@ -21,7 +19,7 @@ class MYPROJECT2_API UWeaponSelectionComponent : public UActorComponent
 public:	
 	UWeaponSelectionComponent();
 		
-	void Setup(AAircraftPlayerController* InPlayer, AAircraftSelectionGamemode* InGM, UMenuManagerComponent* InMenu);
+	void Setup(UMenuManagerComponent* InMenu);
 	
 	void AddAircraft(UAircraftData* Data);
 
@@ -37,7 +35,7 @@ public:
 
 	void CloseAll();
 
-	UWeaponSelectionWidget* GetWeaponUI() const { return WeaponSelectUI; };
+	UUserWidget* GetWeaponUI() const;
 
 	void SetWeaponWidgetClass(TSubclassOf<UUserWidget> InUI) { SelectionWidget = InUI; };
 
@@ -46,13 +44,7 @@ private:
 	int32 CurrentPylonIndex = 0;
 
 	UPROPERTY()
-	TMap<FName, TSubclassOf<ABaseWeapon>> WeaponSelection;
-
-	UPROPERTY()
-	TObjectPtr<AAircraftPlayerController> PC = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<AAircraftSelectionGamemode> GM = nullptr;
+	TMap<FName, TSubclassOf<ABaseWeapon>> WeaponSelection{};
 
 	UPROPERTY()
 	TObjectPtr<UMenuManagerComponent> MenuManager = nullptr;

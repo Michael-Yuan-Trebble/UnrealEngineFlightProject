@@ -18,5 +18,5 @@ void USpecialButtonWidget::Setup(const TSubclassOf<UBaseSpecial>& SpecialData)
 
 void USpecialButtonWidget::HandleButtonClick() 
 {
-	if (IsValid(ContainedData)) OnSpecialPicked.Broadcast(ContainedData);
+	OnSpecialPicked.Broadcast(ContainedData);
 }

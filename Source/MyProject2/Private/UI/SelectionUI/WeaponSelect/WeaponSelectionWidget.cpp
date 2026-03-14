@@ -2,7 +2,6 @@
 
 #include "UI/SelectionUI/WeaponSelect/WeaponSelectionWidget.h"
 #include "Components/ScrollBox.h"
-#include "Kismet/GameplayStatics.h"
 #include "UI/SelectionUI/WeaponSelect/WeaponSelectionComponent.h"
 #include "UI/SelectionUI/WeaponSelect/WeaponButtonWidget.h"
 
@@ -12,7 +11,7 @@ UWeaponSelectionWidget::UWeaponSelectionWidget(const FObjectInitializer& ObjectI
 
 void UWeaponSelectionWidget::GetAllAircraft() 
 {
-    if (!WeaponButtonClass || !WeaponScrollBox) return;
+    if (!IsValid(WeaponButtonClass) || !IsValid(WeaponScrollBox)) return;
 
     WeaponScrollBox->ClearChildren();
 
@@ -30,13 +29,13 @@ void UWeaponSelectionWidget::GetAllAircraft()
 
 void UWeaponSelectionWidget::CreateButtons(const TArray<TSubclassOf<ABaseWeapon>>&Array) 
 {
-    if (Array.Num() <= 0) return;
+    if (Array.Num() <= 0 || !IsValid(WeaponScrollBox) || !IsValid(WeaponButtonClass)) return;
     for (TSubclassOf<ABaseWeapon> SingleWeapon : Array)
     {
-        if (!SingleWeapon) continue;
+        if (!IsValid(SingleWeapon)) continue;
 
         UWeaponButtonWidget* Card = CreateWidget<UWeaponButtonWidget>(GetWorld(), WeaponButtonClass);
-        if (!Card) return;
+        if (!IsValid(Card)) return;
 
         FString WeaponName = SingleWeapon->GetName();
 

@@ -5,9 +5,10 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
-#include "Components/TextBlock.h"
-#include "Components/Button.h"
 #include "AircraftButtonWidget.generated.h"
+
+class UTextBlock;
+class UButton;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAircraftSelected, UAircraftData*, SelectedAircraft);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAircraftPicked, UAircraftData*, PickedAircraft);
@@ -20,16 +21,13 @@ class MYPROJECT2_API UAircraftButtonWidget : public UUserWidget
 
 public:
 
-	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAircraftSelected OnAircraftSelected;
 
-	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAircraftPicked OnAircraftPicked;
 
-	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAircraftBuyPicked OnBuyCreate;
 
-	void Setup(UAircraftData* AircraftData, TArray<FName> Owned);
+	void Setup(UAircraftData* AircraftData, bool bOwned);
 
 	void AdjustButtons();
 
@@ -52,6 +50,4 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UAircraftData> ContainedData = nullptr;
-
-	TArray<FName> Owned;
 };

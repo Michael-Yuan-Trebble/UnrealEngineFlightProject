@@ -6,8 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "BuyButton.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBuyPicked, FName, PurchasedAircraft, int, cost);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCancelPicked);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBuyPressed, bool, bBought);
 
 UCLASS()
 class MYPROJECT2_API UBuyButton : public UUserWidget
@@ -16,11 +15,8 @@ class MYPROJECT2_API UBuyButton : public UUserWidget
 	
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnBuyPicked OnBuyPicked;
+	FOnBuyPressed OnBuyPressed;
 
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnCancelPicked OnCancelPicked;
-	
 	void Setup(const FName& Name, const int Cost);
 
 	void TurnOffBuy();
@@ -48,8 +44,7 @@ private:
 	virtual void NativeConstruct() override;
 
 	virtual void NativeDestruct() override {
-		OnBuyPicked.Clear();
-		OnCancelPicked.Clear();
+		OnBuyPressed.Clear();
 		Super::NativeDestruct();
 	}
 };

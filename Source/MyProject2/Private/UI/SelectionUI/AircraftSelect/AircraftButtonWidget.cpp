@@ -1,30 +1,28 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/SelectionUI/AircraftSelect/AircraftButtonWidget.h"
-#include "Gamemodes/AircraftSelectionGamemode.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/TextBlock.h"
+#include "Components/Button.h"
 #include "Debug/DebugHelper.h"
 
-void UAircraftButtonWidget::Setup(UAircraftData* AircraftData, TArray<FName> TempOwned)
+void UAircraftButtonWidget::Setup(UAircraftData* AircraftData, bool bOwned)
 {
 	ContainedData = AircraftData;
-	Owned = TempOwned;
-	if (!IsValid(ContainedData) || !ContainedData->AircraftStat.IsValid() || !IsValid(AircraftNameText)) return;
+	if (!IsValid(ContainedData) || !IsValid(AircraftNameText)) return;
 
 	UAircraftStats* Loaded = ContainedData->AircraftStat.LoadSynchronous();
 	if (!IsValid(Loaded)) return;
 
 	AircraftNameText->SetText(FText::FromName(Loaded->AircraftName));
 
-	if (!IsValid(AircraftSelectButton)) return;
-	AircraftSelectButton->OnHovered.AddDynamic(this, &UAircraftButtonWidget::HandleButtonHover);
-	if (Owned.Contains(Loaded->AircraftName))
-	{
-		AircraftSelectButton->OnClicked.AddDynamic(this, &UAircraftButtonWidget::HandleButtonClick);
-	}
-	else 
-	{
-		AircraftSelectButton->OnClicked.AddDynamic(this, &UAircraftButtonWidget::HandleBuyCreate);
+	if (IsValid(AircraftSelectButton)) {
+		AircraftSelectButton->OnHovered.AddDynamic(this, &UAircraftButtonWidget::HandleButtonHover);
+
+		if (bOwned) 
+			AircraftSelectButton->OnClicked.AddDynamic(this, &UAircraftButtonWidget::HandleButtonClick);
+		else 
+			AircraftSelectButton->OnClicked.AddDynamic(this, &UAircraftButtonWidget::HandleBuyCreate);
 	}
 }
 
@@ -36,19 +34,15 @@ void UAircraftButtonWidget::AdjustButtons()
 
 void UAircraftButtonWidget::HandleButtonHover() 
 {
-	if (!IsValid(ContainedData->AircraftClass)) return;
 	OnAircraftSelected.Broadcast(ContainedData);
 }
 
 void UAircraftButtonWidget::HandleButtonClick() 
 {
-	if (!IsValid(ContainedData->AircraftClass)) return;
-	
 	OnAircraftPicked.Broadcast(ContainedData);
 }
 
 void UAircraftButtonWidget::HandleBuyCreate() 
 {
-	if (!IsValid(ContainedData)) return;
 	OnBuyCreate.Broadcast(ContainedData, ContainedData->price);
 }

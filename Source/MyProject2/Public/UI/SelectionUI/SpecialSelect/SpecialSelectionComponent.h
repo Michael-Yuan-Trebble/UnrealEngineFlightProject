@@ -23,7 +23,7 @@ public:
 
 	void SpecialSelectionMenu();
 
-	void Setup(AAircraftPlayerController* InPlayer, UMenuManagerComponent* InMenu);
+	void Setup(UMenuManagerComponent* InMenu);
 
 	UFUNCTION()
 	void SetSpecial(TSubclassOf<UBaseSpecial> InSpecial);
@@ -37,18 +37,12 @@ public:
 
 	void SetWidget(const TSubclassOf<UUserWidget>& InWidget) { SelectionWidget = InWidget; };
 
-	USpecialSelectionWidget* GetWidget() const { return SpecialSelectUI; };
+	UUserWidget* GetWidget() const;
 
 private:
 
 	UPROPERTY()
 	TSubclassOf<UUserWidget> SelectionWidget = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<AAircraftPlayerController> PC = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<class UPlayerGameInstance> GameInstance = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<USpecialSelectionWidget> SpecialSelectUI = nullptr;

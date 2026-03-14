@@ -22,16 +22,12 @@ public:
 
 	UAircraftSelectionWidget(const FObjectInitializer& ObjectInitializer);
 
-	UPROPERTY(BlueprintAssignable,Category = "Events")
 	FAircraftSelectedSignature OnWidgetSelected;
 
 	UFUNCTION(BlueprintCallable)
 	void GetAllAircraft();
 
-	void Setup(UAircraftDatabase* Database, 
-		TArray<FName> InOwn, 
-		UMenuManagerComponent* InMenu, 
-		UAircraftSelectionComponent* InSelect);
+	void Setup(UMenuManagerComponent* InMenu, UAircraftSelectionComponent* InSelect);
 
 	void UpdateAircraft(const FName& AircraftChange);
 
@@ -41,15 +37,10 @@ private:
 	TObjectPtr<UMenuManagerComponent> MenuManager = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<UAircraftDatabase> AircraftDatabase = nullptr;
-
-	UPROPERTY()
 	TObjectPtr<UAircraftSelectionComponent> AircraftUI = nullptr;
 
-	TArray<FName> Owned;
-
 	UPROPERTY()
-	TMap<FName, class UAircraftButtonWidget*> ButtonArray;
+	TMap<FName, class UAircraftButtonWidget*> ButtonArray{};
 
 	UFUNCTION()
 	void HandleAircraftSelected(UAircraftData* Aircraft);

@@ -5,7 +5,7 @@
 
 void UAircraftPriceDisplayWidget::DisplayAircraftPriceInfo(UAircraftData* Aircraft)
 {
-	if (!Aircraft) return;
+	if (!IsValid(Aircraft)) return;
 	AircraftPriceText->SetText(FText::AsNumber(Aircraft->price));
 	AircraftNameText->SetText(FText::FromName(Aircraft->AircraftStat->AircraftName));
 }

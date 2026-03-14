@@ -8,9 +8,6 @@
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
 #include "AircraftSelectionComponent.generated.h"
 
-class AAircraftPlayerController;
-class AAircraftSelectionGamemode;
-class UPlayerGameInstance;
 class UMenuManagerComponent;
 class UAircraftSelectionWidget;
 
@@ -24,10 +21,7 @@ public:
 
 	void AircraftSelectionMenu();
 
-	void Setup(AAircraftPlayerController* InPlayer, 
-		AAircraftSelectionGamemode* InGM, 
-		UMenuManagerComponent* InMenu,
-		TSubclassOf<UUserWidget> InClass);
+	void Setup(UMenuManagerComponent* InMenu);
 
 	UFUNCTION()
 	void HandleAircraftPicked(UAircraftData* Aircraft);
@@ -37,7 +31,7 @@ public:
 	UFUNCTION()
 	void SetAircraft(UAircraftData* Aircraft);
 
-	UAircraftSelectionWidget* GetWidget() const { return AircraftSelectUI; };
+	UUserWidget* GetWidget() const;
 
 	void SetWidget(const TSubclassOf<UUserWidget> InWidget) { SelectionWidget = InWidget; };
 
@@ -47,18 +41,6 @@ private:
 
 	UPROPERTY()
 	TSubclassOf<UUserWidget> SelectionWidget = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<AAircraftPlayerController> PC = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<AAircraftSelectionGamemode> GM = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<UAircraftDatabase> AircraftDatabase = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<UPlayerGameInstance> GameInstance = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<UAircraftSelectionWidget> AircraftSelectUI = nullptr;

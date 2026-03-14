@@ -7,7 +7,7 @@
 void UBuyButton::NativeConstruct() 
 {
 	Super::NativeConstruct();
-	if (!IsValid(AircraftBuyButton)) return;
+	if (!IsValid(AircraftBuyButton) || !IsValid(CancelBuyButton)) return;
 	AircraftBuyButton->OnClicked.AddDynamic(this, &UBuyButton::HandleButtonClick);
 	CancelBuyButton->OnClicked.AddDynamic(this, &UBuyButton::HandleCancelClick);
 }
@@ -20,6 +20,7 @@ void UBuyButton::Setup(const FName& InName, const int InCost)
 
 void UBuyButton::TurnOffBuy() 
 {
+	if (!IsValid(AircraftBuyButton)) return;
 	AircraftBuyButton->SetIsEnabled(false);
 	FLinearColor Tint = FLinearColor::Gray;
 	AircraftBuyButton->SetBackgroundColor(Tint);
@@ -27,10 +28,10 @@ void UBuyButton::TurnOffBuy()
 
 void UBuyButton::HandleButtonClick() 
 {
-	OnBuyPicked.Broadcast(Name, Cost);
+	OnBuyPressed.Broadcast(true);
 }
 
 void UBuyButton::HandleCancelClick() 
 {
-	OnCancelPicked.Broadcast();
+	OnBuyPressed.Broadcast(false);
 }

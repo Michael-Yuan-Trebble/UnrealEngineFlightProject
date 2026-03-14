@@ -2,7 +2,6 @@
 
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "GameFramework/SpectatorPawn.h"
-#include "UI/SelectionUI/AircraftSelect/AircraftSelectionWidget.h"
 #include "Player Info/AircraftPlayerController.h"
 #include "Units/Components/Player/MenuManagerComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -88,10 +87,10 @@ void AAircraftSelectionGamemode::SpawnInAircraft(const TSubclassOf<APawn> SpawnI
 
 void AAircraftSelectionGamemode::SpawnInWeapon(const TSubclassOf<ABaseWeapon> Weapon, const FName& Pylon) 
 {
-	if (!AircraftDisplayed || !Weapon) return;
+	if (!IsValid(AircraftDisplayed) || !IsValid(Weapon)) return;
 
 	ABaseAircraft* BaseAircraft = Cast<ABaseAircraft>(AircraftDisplayed);
-	if (!BaseAircraft) return;
+	if (!IsValid(BaseAircraft)) return;
 
 	USkeletalMeshComponent* Mesh = BaseAircraft->GetAirframe();
 	if (!IsValid(Mesh) || !Mesh->DoesSocketExist(Pylon)) return;

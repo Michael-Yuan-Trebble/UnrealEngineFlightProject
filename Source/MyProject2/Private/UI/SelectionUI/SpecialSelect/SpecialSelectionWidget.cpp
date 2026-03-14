@@ -2,13 +2,10 @@
 
 #include "UI/SelectionUI/SpecialSelect/SpecialSelectionWidget.h"
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
-#include "Player Info/AircraftPlayerController.h"
-#include "Units/Components/Player/MenuManagerComponent.h"
 #include "UI/SelectionUI/SpecialSelect/SpecialSelectionComponent.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/ScrollBox.h"
-#include "Kismet/GameplayStatics.h"
 #include "UI/SelectionUI/SpecialSelect/SpecialButtonWidget.h"
 #include "Debug/DebugHelper.h"
 
@@ -16,24 +13,20 @@ USpecialSelectionWidget::USpecialSelectionWidget(const FObjectInitializer& Objec
 {
 }
 
-void USpecialSelectionWidget::Setup(UAircraftData* InAircraft, UMenuManagerComponent* InMenu, USpecialSelectionComponent* InSelect) 
+void USpecialSelectionWidget::Setup(UAircraftData* InAircraft, USpecialSelectionComponent* InSelect) 
 {
 	AircraftSelected = InAircraft;
-	MenuManager = InMenu;
 	SpecialUI = InSelect;
 }
 
 void USpecialSelectionWidget::GetAllSpecials() 
 {
-	if (!IsValid(SpecialButtonClass) || !IsValid(SpecialScrollBox)) return;
+	if (!IsValid(SpecialButtonClass) || !IsValid(SpecialScrollBox) || !IsValid(SpecialUI) || !IsValid(GetWorld())) return;
 	SpecialScrollBox->ClearChildren();
-
-	if (!IsValid(MenuManager)) return;
 
 	for (TSubclassOf<UBaseSpecial> Data : AircraftSelected->Specials)
 	{
 		if (!IsValid(Data)) continue;
-
 		USpecialButtonWidget* Card = CreateWidget<USpecialButtonWidget>(GetWorld(), SpecialButtonClass);
 		if (!IsValid(Card)) continue;
 		Card->Setup(Data);
@@ -46,12 +39,10 @@ void USpecialSelectionWidget::GetAllSpecials()
 
 void USpecialSelectionWidget::OnAdvancePicked() 
 {
-	DEBUG_TIME(100.f, "Debug");
 	OnAdvance.Broadcast();
 }
 
 void USpecialSelectionWidget::HandleSpecialSelected(TSubclassOf<UBaseSpecial> Special)
 {
-	if (!IsValid(Special)) return;
 	OnWidgetSelected.Broadcast(Special);
 }

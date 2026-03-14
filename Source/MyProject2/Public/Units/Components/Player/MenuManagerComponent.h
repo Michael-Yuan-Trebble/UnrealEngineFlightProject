@@ -30,6 +30,40 @@ public:
 
 	void GetWidgetClassForState(const EMenuState State);
 
+	void ChooseAircraftUI();
+
+	void ChooseWeaponUI();
+
+	void ChooseSpecialUI();
+
+	void EndSelection();
+
+	void SetupClasses(TSubclassOf<UUserWidget> InAircraftClass,
+		TSubclassOf<UUserWidget> InWeaponClass,
+		TSubclassOf<UUserWidget> InBuyClass,
+		TSubclassOf<UUserWidget> InSpecialClass,
+		TSubclassOf<UUserWidget> InGreyClass);
+
+	UFUNCTION()
+	void SpawnBuy(UAircraftData* AircraftData, const int Cost);
+
+	UFUNCTION()
+	void AdvanceToLevel();
+
+	void CloseAll();
+	
+	void SetTempAircraft(UAircraftData* InTemp) { TempAircraft = InTemp; };
+
+	void SetAircraft(UAircraftData* InAir) { SelectedAircraft = InAir; };
+
+	void SetSpecial(TSubclassOf<UBaseSpecial> InSpecial) { SelectedSpecial = InSpecial; };
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override {
+		CloseAll();
+		Super::EndPlay(EndPlayReason);
+	}
+
+private:
 	UPROPERTY()
 	TObjectPtr<AAircraftPlayerController> PC = nullptr;
 
@@ -77,31 +111,4 @@ public:
 
 	UPROPERTY()
 	TObjectPtr<USpecialSelectionComponent> SpecialSelectionUI = nullptr;
-
-	void ChooseAircraftUI();
-
-	void ChooseWeaponUI();
-
-	void ChooseSpecialUI();
-
-	void EndSelection();
-
-	void SetupClasses(TSubclassOf<UUserWidget> InAircraftClass,
-		TSubclassOf<UUserWidget> InWeaponClass,
-		TSubclassOf<UUserWidget> InBuyClass,
-		TSubclassOf<UUserWidget> InSpecialClass,
-		TSubclassOf<UUserWidget> InGreyClass);
-
-	UFUNCTION()
-	void SpawnBuy(UAircraftData* AircraftData, const int Cost);
-
-	UFUNCTION()
-	void AdvanceToLevel();
-
-	void CloseAll();
-
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override {
-		CloseAll();
-		Super::EndPlay(EndPlayReason);
-	}
 };

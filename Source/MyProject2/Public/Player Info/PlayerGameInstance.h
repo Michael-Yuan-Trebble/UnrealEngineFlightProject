@@ -7,6 +7,7 @@
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Structs and Data/LoadoutInfo/AircraftLoadoutData.h"
 #include "Structs and Data/MissionInfo/MissionData.h"
+#include "Structs and Data/Aircraft Data/AircraftDatabase.h"
 #include "PlayerGameInstance.generated.h"
 
 class UMainMenuManager;
@@ -56,7 +57,12 @@ public:
 	UFUNCTION()
 	void HandlePostLoad(UWorld* LoadedWorld);
 
+	UAircraftDatabase* GetDatabase() const { return AircraftDatabase; };
+
 private:
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UAircraftDatabase> AircraftDatabase = nullptr;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UFadeWidget> FadeWidgetClass = nullptr;
@@ -84,7 +90,7 @@ private:
 
 	void SetMaps();
 
-	void Init() override;
+	virtual void Init() override;
 
 	FAircraftLoadoutData FullLoadout{};
 

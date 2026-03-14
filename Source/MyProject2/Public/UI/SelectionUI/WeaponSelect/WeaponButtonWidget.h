@@ -9,8 +9,8 @@
 #include "Components/TextBlock.h"
 #include "WeaponButtonWidget.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponSelected, TSubclassOf<ABaseWeapon>, SelectedAircraft);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponPicked, TSubclassOf<ABaseWeapon>, PickedAircraft);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponSelected, TSubclassOf<ABaseWeapon>, SelectedWeapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponPicked, TSubclassOf<ABaseWeapon>, PickedWeapon);
 
 UCLASS()
 class MYPROJECT2_API UWeaponButtonWidget : public UUserWidget
@@ -37,8 +37,6 @@ protected:
 
 	UFUNCTION()
 	void HandleButtonClick();
-
-	virtual void NativeConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> WeaponSelectButton = nullptr;

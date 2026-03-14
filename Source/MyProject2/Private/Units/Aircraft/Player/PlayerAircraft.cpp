@@ -56,7 +56,7 @@ APlayerAircraft::APlayerAircraft()
 void APlayerAircraft::BeginPlay()
 {
 	Super::BeginPlay();
-	if (IsValid(AudioComp))AudioComp->SetControlled(this);
+	if (IsValid(AudioComp)) AudioComp->SetControlled(this);
 	if (IsValid(ManagerComp)) {
 		ManagerComp->SetControlled(this);
 		ManagerComp->SetAudioComp(AudioComp);
@@ -112,7 +112,7 @@ void APlayerAircraft::SelectWeapon(float index) { if (IsValid(WeaponComponent)) 
 
 int32 APlayerAircraft::AdvanceWeapon(int32 index, bool bForward) 
 {
-	if (!IsValid(WeaponComponent) || WeaponComponent->GetWeaponGroups().Num() == 0) return 0;
+	if (!IsValid(WeaponComponent) || WeaponComponent->GetWeaponGroups().Num() == 0 || !IsValid(WeaponComponent->GetWeapon())) return 0;
 
 	TArray<TSubclassOf<ABaseWeapon>> Keys;
 	WeaponComponent->GetWeaponGroups().GetKeys(Keys);

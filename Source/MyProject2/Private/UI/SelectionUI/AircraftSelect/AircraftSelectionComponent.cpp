@@ -2,46 +2,31 @@
 
 #include "UI/SelectionUI/AircraftSelect/AircraftSelectionComponent.h"
 #include "UI/SelectionUI/AircraftSelect/AircraftSelectionWidget.h"
-#include "Player Info/SaveGameManager.h"
-#include "Player Info/PlayerGameInstance.h"
 #include "Units/Components/Player/MenuManagerComponent.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
-#include "Player Info/AircraftPlayerController.h"
+#include "Kismet/GameplayStatics.h"
 #include "Debug/DebugHelper.h"
 
 UAircraftSelectionComponent::UAircraftSelectionComponent()
 { 
 }
 
-void UAircraftSelectionComponent::Setup(AAircraftPlayerController* InPlayer,
-	AAircraftSelectionGamemode* InGM,
-	UMenuManagerComponent* InMenu,
-	TSubclassOf<UUserWidget> InClass)
+void UAircraftSelectionComponent::Setup(UMenuManagerComponent* InMenu)
 {
-	PC = InPlayer;
-	GM = InGM;
 	MenuManager = InMenu;
-	SelectionWidget = InClass;
-	GameInstance = Cast<UPlayerGameInstance>(GetWorld()->GetGameInstance());
-	
-	if (!IsValid(PC)) return;
-	AircraftDatabase = NewObject<UAircraftDatabase>(GameInstance);
-	if (!IsValid(AircraftDatabase)) return;
-
-	FString Path = "/Game/Aircraft/AircraftData";
-	AircraftDatabase->LoadAllAircraftFromFolder(Path);
 }
 
 void UAircraftSelectionComponent::AircraftSelectionMenu() 
 {
-	if (!IsValid(PC) || !IsValid(SelectionWidget)) return;
+	if (!IsValid(SelectionWidget) || !IsValid(GetWorld()) || IsValid(AircraftSelectUI)) return;
 
-	if (IsValid(AircraftSelectUI)) return;
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (!PC) return;
+
 	AircraftSelectUI = CreateWidget<UAircraftSelectionWidget>(PC, SelectionWidget);
+	if (!IsValid(AircraftSelectUI)) return;
 
-	if (!IsValid(AircraftSelectUI) || !IsValid(AircraftDatabase)) return;
-
-	AircraftSelectUI->Setup(AircraftDatabase, GameInstance->SaveManager->GetAircraftOwned(), MenuManager, this);
+	AircraftSelectUI->Setup(MenuManager, this);
 	AircraftSelectUI->GetAllAircraft();
 
 	FInputModeGameAndUI InputMode;
@@ -50,40 +35,42 @@ void UAircraftSelectionComponent::AircraftSelectionMenu()
 
 	AircraftSelectUI->AddToViewport();
 	InputMode.SetWidgetToFocus(AircraftSelectUI->TakeWidget());
+
 	PC->SetInputMode(InputMode);
 	PC->bShowMouseCursor = true;
-	MenuManager->CurrentWidget = AircraftSelectUI;
 	AircraftSelectUI->OnWidgetSelected.AddDynamic(this, &UAircraftSelectionComponent::HandleAircraftPicked);
 }
 
 void UAircraftSelectionComponent::HandleAircraftPicked(UAircraftData* Aircraft) 
 {
-	if (!IsValid(Aircraft)) return;
-	GM->SpawnInAircraft(Aircraft->AircraftClass);
-	MenuManager->TempAircraft = Aircraft;
+	if (!IsValid(Aircraft) || !IsValid(MenuManager)) return;
+	if (AAircraftSelectionGamemode* GM = Cast<AAircraftSelectionGamemode>(UGameplayStatics::GetGameMode(this))) {
+		GM->SpawnInAircraft(Aircraft->AircraftClass);
+	}
+	MenuManager->SetTempAircraft(Aircraft);
 }
 
 void UAircraftSelectionComponent::SetAircraft(UAircraftData* Aircraft)
 {
-	if (!IsValid(Aircraft)) return;
-	MenuManager->SelectedAircraft = Aircraft;
+	if (!IsValid(MenuManager)) return;
+	MenuManager->SetAircraft(Aircraft);
 	MenuManager->ChooseWeaponUI();
 }
 
 void UAircraftSelectionComponent::UpdateAircraft(const FName& Name) 
 {
-	AircraftSelectUI->UpdateAircraft(Name);
+	if (IsValid(AircraftSelectUI)) AircraftSelectUI->UpdateAircraft(Name);
 }
 
 void UAircraftSelectionComponent::CloseAll()
 {
-	if (IsValid(AircraftSelectUI))
+	if (!IsValid(AircraftSelectUI)) return;
+	AircraftSelectUI->OnWidgetSelected.RemoveAll(this);
+	if (AircraftSelectUI->IsInViewport())
 	{
-		AircraftSelectUI->OnWidgetSelected.RemoveAll(this);
-		if (AircraftSelectUI->IsInViewport())
-		{
-			AircraftSelectUI->RemoveFromParent();
-		}
-		AircraftSelectUI = nullptr;
+		AircraftSelectUI->RemoveFromParent();
 	}
+	AircraftSelectUI = nullptr;
 }
+
+UUserWidget* UAircraftSelectionComponent::GetWidget() const { return AircraftSelectUI; }

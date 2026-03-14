@@ -8,7 +8,6 @@
 #include "Structs and Data/Aircraft Data/AircraftData.h"
 #include "SpecialSelectionWidget.generated.h"
 
-class UMenuManagerComponent;
 class USpecialSelectionComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSpecialSelectedSignature, TSubclassOf<UBaseSpecial>, SelectedSpecial);
@@ -31,15 +30,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GetAllSpecials();
 
-	void Setup(UAircraftData* InAircraft, UMenuManagerComponent* InMenu, USpecialSelectionComponent* InSelect);
+	void Setup(UAircraftData* InAircraft, USpecialSelectionComponent* InSelect);
 
 private:
 
 	UPROPERTY()
 	TObjectPtr<UAircraftData> AircraftSelected = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<UMenuManagerComponent> MenuManager = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<USpecialSelectionComponent> SpecialUI = nullptr;
@@ -61,7 +57,6 @@ private:
 
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		Super::ReleaseSlateResources(bReleaseChildren);
-		MenuManager = nullptr;
 		SpecialUI = nullptr;
 	}
 

@@ -7,22 +7,17 @@
 
 void UWeaponButtonWidget::SetupWeapons(const TSubclassOf<ABaseWeapon>& WeaponData)
 {
+	if (!IsValid(WeaponNameText) || !IsValid(WeaponSelectButton)) return;
 	ButtonWeapon = WeaponData;
-	if (!WeaponData) 
+	if (!IsValid(ButtonWeapon))
 	{
 		WeaponNameText->SetText(FText::FromString("None"));
 		return;
 	}
 
-	const ABaseWeapon* DefaultWeapon = WeaponData->GetDefaultObject<ABaseWeapon>();
+	const ABaseWeapon* DefaultWeapon = ButtonWeapon->GetDefaultObject<ABaseWeapon>();
 	FName WeaponName = DefaultWeapon->GetName();
 	WeaponNameText->SetText(FText::FromName(WeaponName));
-}
-
-void UWeaponButtonWidget::NativeConstruct() 
-{
-	Super::NativeConstruct();
-	if (!WeaponSelectButton) return;
 
 	WeaponSelectButton->OnHovered.AddDynamic(this, &UWeaponButtonWidget::HandleButtonHover);
 	WeaponSelectButton->OnClicked.AddDynamic(this, &UWeaponButtonWidget::HandleButtonClick);

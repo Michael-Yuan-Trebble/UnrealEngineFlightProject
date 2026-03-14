@@ -12,11 +12,9 @@ USpecialSelectionComponent::USpecialSelectionComponent()
 {
 }
 
-void USpecialSelectionComponent::Setup(AAircraftPlayerController* InPlayer, UMenuManagerComponent* InMenu)
+void USpecialSelectionComponent::Setup(UMenuManagerComponent* InMenu)
 {
-	PC = InPlayer;
 	MenuManager = InMenu;
-	GameInstance = Cast<UPlayerGameInstance>(GetWorld()->GetGameInstance());
 }
 
 void USpecialSelectionComponent::SetAir(UAircraftData* InAir)
@@ -26,13 +24,16 @@ void USpecialSelectionComponent::SetAir(UAircraftData* InAir)
 
 void USpecialSelectionComponent::SpecialSelectionMenu() 
 {
+	if (!IsValid(GetWorld())) return;
+
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (!IsValid(PC)) return;
 
 	SpecialSelectUI = CreateWidget<USpecialSelectionWidget>(PC, SelectionWidget);
 
 	if (!IsValid(SpecialSelectUI)) return;
 
-	SpecialSelectUI->Setup(SelectedAircraft, MenuManager, this);
+	SpecialSelectUI->Setup(SelectedAircraft, this);
 	SpecialSelectUI->GetAllSpecials();
 
 	FInputModeGameAndUI InputMode;
@@ -43,14 +44,13 @@ void USpecialSelectionComponent::SpecialSelectionMenu()
 	InputMode.SetWidgetToFocus(SpecialSelectUI->TakeWidget());
 	PC->SetInputMode(InputMode);
 	PC->bShowMouseCursor = true;
-	MenuManager->CurrentWidget = SpecialSelectUI;
 	SpecialSelectUI->OnWidgetSelected.AddDynamic(this, &USpecialSelectionComponent::SetSpecial);
 	SpecialSelectUI->OnAdvance.AddDynamic(this, &USpecialSelectionComponent::AdvanceLevel);
 }
 
 void USpecialSelectionComponent::SetSpecial(TSubclassOf<UBaseSpecial> Special)
 {
-	if (IsValid(Special)) MenuManager->SelectedSpecial = Special;
+	MenuManager->SetSpecial(Special);
 }
 
 void USpecialSelectionComponent::AdvanceLevel() 
@@ -71,3 +71,5 @@ void USpecialSelectionComponent::CloseAll()
 		SpecialSelectUI = nullptr;
 	}
 }
+
+UUserWidget* USpecialSelectionComponent::GetWidget() const { return SpecialSelectUI; };

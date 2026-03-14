@@ -12,6 +12,14 @@
 void UPlayerGameInstance::Init() 
 {
 	Super::Init();
+
+	if (!IsValid(AircraftDatabase)) {
+		AircraftDatabase = NewObject<UAircraftDatabase>(this);
+		if (!IsValid(AircraftDatabase)) return;
+		const FString Path = "/Game/Aircraft/AircraftData";
+		AircraftDatabase->LoadAllAircraftFromFolder(Path);
+	}
+
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(
 		this,
 		&UPlayerGameInstance::HandlePostLoad

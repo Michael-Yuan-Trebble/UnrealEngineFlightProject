@@ -14,12 +14,6 @@ UBuySelectionComponent::UBuySelectionComponent()
 {
 }
 
-void UBuySelectionComponent::Setup(AAircraftPlayerController* InPlayer, UPlayerGameInstance* InGI)
-{
-	PC = InPlayer;
-	GI = InGI;
-}
-
 void UBuySelectionComponent::AddAircraft(UAircraftData* Data, UAircraftSelectionComponent* InUI) 
 {
 	Aircraft = Data;
@@ -28,12 +22,15 @@ void UBuySelectionComponent::AddAircraft(UAircraftData* Data, UAircraftSelection
 
 void UBuySelectionComponent::BuyPopupMenu() 
 {
-	if (!IsValid(PC) || !IsValid(GreyOutClass)) return;
+	if (!IsValid(GreyOutClass) || !IsValid(BuyPopupClass) || !IsValid(GetWorld())) return;
+
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (!IsValid(PC)) return;
+
 	GreyOut = CreateWidget<UUserWidget>(PC, GreyOutClass);
 	if (!IsValid(GreyOut)) return;
 	GreyOut->AddToViewport(0);
 
-	if (!IsValid(PC) || !IsValid(BuyPopupClass)) return;
 	BuyWidget = CreateWidget<UBuyPopupWidget>(PC, BuyPopupClass);
 	if (!IsValid(BuyWidget)) return;
 	BuyWidget->SetComp(this);
@@ -44,37 +41,32 @@ void UBuySelectionComponent::BuyPopupMenu()
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	InputMode.SetHideCursorDuringCapture(true);
 	if (IsValid(BuyWidget)) InputMode.SetWidgetToFocus(BuyWidget->TakeWidget());
-	if (!IsValid(PC)) return;
 	PC->SetInputMode(InputMode);
 	PC->bShowMouseCursor = true;
 }
 
-void UBuySelectionComponent::BuyAircraft(FName Name, int Cost)
+void UBuySelectionComponent::BuyAircraft(bool bBought)
 {
-	if (!IsValid(GI) || !IsValid(GI->SaveManager)) return;
-	GI->SaveManager->AddAircraftOwned(Name);
-	GI->SaveManager->AddMoney(-Cost);
-	if (!IsValid(AircraftUI)) return;
-	AircraftUI->UpdateAircraft(Name);
+	if (!IsValid(GetWorld())) return;
+	AAircraftPlayerController* PC = Cast<AAircraftPlayerController>(GetWorld()->GetFirstPlayerController());
+	UPlayerGameInstance* GI = Cast<UPlayerGameInstance>(GetWorld()->GetGameInstance());
+	if (!IsValid(PC) || !IsValid(GI)) return;
 
-	FInputModeGameAndUI InputMode;
-	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	InputMode.SetHideCursorDuringCapture(true);
-	InputMode.SetWidgetToFocus(AircraftUI->GetWidget()->TakeWidget());
-	if (!IsValid(PC)) return;
-	PC->SetInputMode(InputMode);
-	PC->bShowMouseCursor = true;
-	CloseAll();
-	PC->GetMenuHistory().Pop();
-}
+	if (bBought) {
+		if (!IsValid(GI) || !IsValid(GI->SaveManager) || !IsValid(Aircraft) || Aircraft->AircraftStat.IsNull()) return;
+		UAircraftStats* LoadedData = Aircraft->AircraftStat.LoadSynchronous();
+		const FName& AircraftName = LoadedData->AircraftName;
 
-void UBuySelectionComponent::CancelBuy() 
-{
+		GI->SaveManager->AddAircraftOwned(AircraftName);
+		GI->SaveManager->AddMoney(-Aircraft->price);
+		if (!IsValid(AircraftUI)) return;
+		AircraftUI->UpdateAircraft(AircraftName);
+	}
+
 	FInputModeGameAndUI InputMode;
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	InputMode.SetHideCursorDuringCapture(true);
 	if (IsValid(AircraftUI) && IsValid(AircraftUI->GetWidget())) InputMode.SetWidgetToFocus(AircraftUI->GetWidget()->TakeWidget());
-	if (!IsValid(PC)) return;
 	PC->SetInputMode(InputMode);
 	PC->bShowMouseCursor = true;
 	CloseAll();
@@ -86,18 +78,14 @@ void UBuySelectionComponent::CloseAll()
 	if (IsValid(BuyWidget))
 	{
 		if (BuyWidget->IsInViewport())
-		{
 			BuyWidget->RemoveFromParent();
-		}
 		BuyWidget = nullptr;
 	}
 
 	if (IsValid(GreyOut))
 	{
 		if (GreyOut->IsInViewport())
-		{
 			GreyOut->RemoveFromParent();
-		}
 		GreyOut = nullptr;
 	}
 }
