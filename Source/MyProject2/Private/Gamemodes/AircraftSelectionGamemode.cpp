@@ -155,7 +155,6 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 	if (IsValid(LocalAPC) && IsValid(LocalAPC->GetMenuManager())) 
 	{ 
 		LocalAPC->DisableInput(Cast<APlayerController>(PC));
-		if (IsValid(LocalAPC->GetMenuManager())) LocalAPC->GetMenuManager()->CloseAll();
 	}
 	
 	// TODO: See what would work better, returning if there is no aircraft displayed or letting it ride and just using the fallback
@@ -164,8 +163,6 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 	{
 		FullLoadout.AircraftClass = BaseAir->GetClass();
 	}
-
-	// TODO: Change funtions so that they suit this
 
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout{};
 
@@ -195,7 +192,6 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 		AircraftDisplayed->Destroy();
 		AircraftDisplayed = nullptr;
 	}
-	DEBUG_TIME(100.f, "Debug");
 	World->GetTimerManager().ClearAllTimersForObject(this);
 	World->GetTimerManager().ClearAllTimersForObject(APC);
 	if (IsValid(APC->GetMenuManager())) World->GetTimerManager().ClearAllTimersForObject(APC->GetMenuManager());
@@ -204,7 +200,6 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 	ULevelTransitionSubsystem* LevelTransition = GI->GetSubsystem<ULevelTransitionSubsystem>();
 
 	if (!IsValid(MissionManager) || !IsValid(LevelTransition)) return;
-	DEBUG_TIME(100.f, "Debug");
 	const FMissionData& Mission = MissionManager->GetCurrentMission();
 	LevelTransition->LoadIntermission(Mission.TakeoffType);
 }

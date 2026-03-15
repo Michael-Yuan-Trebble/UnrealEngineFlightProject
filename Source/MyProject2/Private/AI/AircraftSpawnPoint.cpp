@@ -21,9 +21,7 @@ void AAircraftSpawnPoint::ActivateSpawn()
 
 	for (int32 i = 0; i < Count; i++) 
 	{
-		FVector Offset = BaseRotation.RotateVector(
-			FVector(i * FormationSpacing, 0.f, 0.f)
-			);
+		FVector Offset = BaseRotation.RotateVector(FVector(i * FormationSpacing, 0.f, 0.f));
 		FVector SpawnLocation = BaseLocation + Offset;
 
 		FActorSpawnParameters Params;
@@ -57,6 +55,10 @@ void AAircraftSpawnPoint::ActivateSpawn()
 void AAircraftSpawnPoint::StressTest() 
 {
 	if (!IsValid(UnitClass)) return;
+	
+	UWorld* World = GetWorld();
+	if (!IsValid(World)) return;
+
 	for (int32 i = 0; i < Count; i++)
 	{
 		FVector Location = GetActorLocation() + FVector(i * 200.f, i * 200.f, 0);
@@ -65,7 +67,7 @@ void AAircraftSpawnPoint::StressTest()
 		FActorSpawnParameters Params;
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-		ABaseAircraft* Aircraft = GetWorld()->SpawnActor<ABaseAircraft>(UnitClass, Location, Rotation, Params);
+		ABaseAircraft* Aircraft = World->SpawnActor<ABaseAircraft>(UnitClass, Location, Rotation, Params);
 		if (IsValid(Aircraft))
 		{
 			// Schedule destruction after a short delay
@@ -74,13 +76,12 @@ void AAircraftSpawnPoint::StressTest()
 				{
 					if (IsValid(Aircraft)) Aircraft->Destroy();
 				}, 
-				DestroyDelay, false);
+			DestroyDelay, false);
 		}
 	}
 }
 
 void AAircraftSpawnPoint::SetInitialSpeed(APawn* Spawn) {
-	if (!IsValid(Spawn)) return;
 	if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Spawn)) {
 		Aircraft->SetSpeed(UFlightMathLibrary::ConvertKMHToSpeed(InitialSpeed));
 	}

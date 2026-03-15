@@ -164,6 +164,7 @@ void UMenuManagerComponent::CloseAll()
 	BuySelectionUI = nullptr;
 	SpecialSelectionUI = nullptr;
 
+	if (!IsValid(PC)) return;
 	PC->SetInputMode(FInputModeGameOnly());
 	PC->bShowMouseCursor = false;
 }

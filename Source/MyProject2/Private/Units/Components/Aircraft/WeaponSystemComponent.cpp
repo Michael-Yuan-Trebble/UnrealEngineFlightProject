@@ -134,7 +134,7 @@ void UWeaponSystemComponent::EquipWeapons()
 void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace)
 {
 	UStaticMeshComponent* PylonComp = PylonSockets.FindRef(Replace.SocketName);
-	if (!PylonComp) return;
+	if (!IsValid(PylonComp)) return;
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = Controlled;
 	Replace.WeaponInstance = GetWorld()->SpawnActor<ABaseWeapon>(Replace.WeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
@@ -170,8 +170,7 @@ void UWeaponSystemComponent::FireWeaponSelected(const TSubclassOf<ABaseWeapon> W
 	if (!WeaponGroups.Contains(WeaponClass)) return;
 	for (FCooldownWeapon* Weapon : WeaponGroups[WeaponClass])
 	{
-		if (!Weapon) return;
-		if (!Weapon->WeaponInstance || !Weapon->CanFire()) continue;
+		if (!Weapon || !IsValid(Weapon->WeaponInstance) || !Weapon->CanFire()) continue;
 
 		Weapon->WeaponInstance->OnWeaponResult.AddDynamic(this, &UWeaponSystemComponent::OnWeaponResult);
 
@@ -323,10 +322,10 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 
 void UWeaponSystemComponent::ResetLockedOn() 
 {
-	float lastLock = 0.f;
+	float lastLock = LockTime;
 	LockTime = 0.f;
 	bLocked = false;
-	if (lastLock != LockTime) OnHUDLockedOn.Broadcast(0.f);
+	if (lastLock != 0.f) OnHUDLockedOn.Broadcast(0.f);
 }
 
 FCooldownWeapon* UWeaponSystemComponent::GetBestWeaponRange(float Distance) {
