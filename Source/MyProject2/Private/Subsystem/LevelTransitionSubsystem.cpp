@@ -9,6 +9,17 @@ void ULevelTransitionSubsystem::LoadMainMenu() {
 
 }
 
+void ULevelTransitionSubsystem::LoadAircraftSelect() {
+	UWorld* World = GetWorld();
+	if (!IsValid(World)) return;
+
+	if (auto* Sub = GetGameInstance()->GetSubsystem<UMissionManagerSubsystem>()) {
+		const TSoftObjectPtr<UWorld>& Map = Sub->GetAircraftSelectMap();
+		if (Map.IsNull()) return;
+		UGameplayStatics::OpenLevelBySoftObjectPtr(World, Map);
+	}
+}
+
 void ULevelTransitionSubsystem::LoadMission(const TSoftObjectPtr<UWorld> Level) 
 {
 	UWorld* World = GetWorld();
@@ -16,7 +27,7 @@ void ULevelTransitionSubsystem::LoadMission(const TSoftObjectPtr<UWorld> Level)
 	
 	// Default Map Fallback
 	if (Level.IsNull()) {
-		if (UMissionManagerSubsystem* Sub = GetGameInstance()->GetSubsystem<UMissionManagerSubsystem>()) {
+		if (auto* Sub = GetGameInstance()->GetSubsystem<UMissionManagerSubsystem>()) {
 			const TSoftObjectPtr<UWorld>& Map = Sub->GetDefaultMap();
 			if (Map.IsNull()) return;
 			UGameplayStatics::OpenLevelBySoftObjectPtr(World, Map);
@@ -39,7 +50,7 @@ void ULevelTransitionSubsystem::TransitionScreen() {
 
 void ULevelTransitionSubsystem::LoadIntermission(const ETakeoffType& TakeoffType) 
 {
-	UMissionManagerSubsystem* Sub = GetGameInstance()->GetSubsystem<UMissionManagerSubsystem>();
+	auto* Sub = GetGameInstance()->GetSubsystem<UMissionManagerSubsystem>();
 	if (!IsValid(Sub)) return;
 	switch (TakeoffType) {
 		case ETakeoffType::Grounded:

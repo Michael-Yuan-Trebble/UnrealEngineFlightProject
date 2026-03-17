@@ -74,3 +74,36 @@ void UAircraftAudioComponent::HandleGunSound(bool bFiring)
 		GunAudio->Stop();
 	}
 }
+
+void UAircraftAudioComponent::HandleLockSound(bool bLocking, bool bLocked) {
+
+	if (!LockingOnAudio || !LockedOnAudio) {
+		APlayerAircraft* Player = Cast<APlayerAircraft>(GetOwner());
+		if (!IsValid(Player)) return;
+
+		if (!LockingOnAudio) {
+			if (LockingOnAudio = Player->GetLockingOnAudio())
+				LockingOnAudio->SetSound(CachedLockingOn);
+		}
+		if (!LockedOnAudio) {
+			if (LockedOnAudio = Player->GetLockedOnAudio())
+				LockedOnAudio->SetSound(CachedLockedOn);
+		}
+	}
+
+	if (!bLocking && LockingOnAudio->IsPlaying()) {
+		LockingOnAudio->Stop();
+	}
+	else if (!bLocking && LockedOnAudio->IsPlaying()) {
+		LockedOnAudio->Stop();
+	}
+	else if (bLocking && !LockingOnAudio->IsPlaying()) {
+		LockingOnAudio->Play();
+	}
+
+	if (bLocked) {
+		if (LockingOnAudio->IsPlaying()) {
+			LockingOnAudio->Stop();
+		}
+	}
+}

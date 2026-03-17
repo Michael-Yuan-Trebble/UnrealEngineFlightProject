@@ -75,6 +75,12 @@ public:
 
 	FCooldownWeapon* GetBestWeaponRange(float Distance);
 
+	void AddPylon(const FName& PylonName, UStaticMesh* PylonMesh);
+
+	void RemovePylon(const FName& PylonName);
+
+	AActor* AddWeapon(const FName& PylonName, TSubclassOf<ABaseWeapon> Weapon);
+
 private:
 
 	void AddPylons();

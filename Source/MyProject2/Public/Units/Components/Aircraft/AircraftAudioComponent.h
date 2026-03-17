@@ -29,6 +29,8 @@ public:
 
 	void SetAudio(UAircraftAudioData* InAudio);
 
+	void HandleLockSound(bool bLocking, bool bLocked);
+
 private:
 
 	UPROPERTY()
@@ -36,6 +38,12 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UAudioComponent> GunAudio = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> LockingOnAudio = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> LockedOnAudio = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<UAircraftAudioData> AudioData = nullptr;
@@ -51,5 +59,11 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<USoundWave> CachedGun = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<USoundWave> CachedLockingOn = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<USoundWave> CachedLockedOn = nullptr;
 
 };

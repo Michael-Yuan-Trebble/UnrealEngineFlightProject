@@ -16,6 +16,7 @@ class MYPROJECT2_API ULevelTransitionSubsystem : public UGameInstanceSubsystem
 public:
 	void LoadMission(const TSoftObjectPtr<UWorld> Level);
 	void LoadMainMenu();
+	void LoadAircraftSelect();
 	void RestartMission();
 	void TransitionScreen();
 

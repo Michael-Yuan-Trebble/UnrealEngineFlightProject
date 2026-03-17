@@ -36,6 +36,8 @@ public:
 
 	void TryAdvanceToNextStage();
 
+	void Transition();
+
 private:
 	UPROPERTY()
 	TObjectPtr<APawn> AircraftDisplayed = nullptr;
@@ -70,9 +72,13 @@ private:
 	UPROPERTY()
 	TSet<TObjectPtr<AAircraftPlayerController>> ReadyPlayers{};
 
+	bool bFinished = false;
+
 	FAircraftLoadoutData FullLoadout{};
 
 	virtual void BeginPlay() override;
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
 	int PlayersRequired = 1;
 };

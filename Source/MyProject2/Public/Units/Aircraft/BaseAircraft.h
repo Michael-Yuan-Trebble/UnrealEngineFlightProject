@@ -91,6 +91,8 @@ public:
 	// TODO: Maybe change this to have two, one where it loads and one where it returns
 	UBulletStats* GetBulletStats();
 
+	UAircraftStats* GetAirStats();
+
 	URadarComponent* GetRadarComp() const { return RadarComponent; };
 
 	UWeaponSystemComponent* GetWeaponComp() const { return WeaponComponent; };
@@ -142,6 +144,9 @@ protected:
 
 	UPROPERTY()
 	UBulletStats* CachedBulletStats = nullptr;
+
+	UPROPERTY()
+	UAircraftStats* CachedAirStats = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<UFlightComponent> FlightComponent = nullptr;

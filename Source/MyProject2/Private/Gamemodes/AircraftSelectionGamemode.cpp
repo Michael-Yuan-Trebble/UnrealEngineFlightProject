@@ -8,6 +8,7 @@
 #include "Player Info/PlayerGameInstance.h"
 #include "Subsystem/LevelTransitionSubsystem.h"
 #include "Subsystem/MissionManagerSubsystem.h"
+#include "Units/Components/Aircraft/WeaponSystemComponent.h"
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Debug/DebugHelper.h"
 
@@ -53,7 +54,6 @@ void AAircraftSelectionGamemode::SpawnInAircraft(const TSubclassOf<APawn> SpawnI
 
 	if (IsValid(AircraftDisplayed)) {
 		if (AircraftDisplayed->GetClass() == SpawnIn->GetClass()) return;
-
 		AircraftDisplayed->Destroy();
 		AircraftDisplayed = nullptr;
 	}
@@ -85,6 +85,8 @@ void AAircraftSelectionGamemode::SpawnInAircraft(const TSubclassOf<APawn> SpawnI
 	
 }
 
+// TODO: Combine these into one function with a bool to differentiate final logic
+
 void AAircraftSelectionGamemode::SpawnInWeapon(const TSubclassOf<ABaseWeapon> Weapon, const FName& Pylon) 
 {
 	if (!IsValid(AircraftDisplayed) || !IsValid(Weapon)) return;
@@ -92,23 +94,21 @@ void AAircraftSelectionGamemode::SpawnInWeapon(const TSubclassOf<ABaseWeapon> We
 	ABaseAircraft* BaseAircraft = Cast<ABaseAircraft>(AircraftDisplayed);
 	if (!IsValid(BaseAircraft)) return;
 
-	USkeletalMeshComponent* Mesh = BaseAircraft->GetAirframe();
-	if (!IsValid(Mesh) || !Mesh->DoesSocketExist(Pylon)) return;
+	UWeaponSystemComponent* WeaponComp = BaseAircraft->GetWeaponComp();
+	if (!IsValid(WeaponComp)) return;
 
-	AActor* WeaponDisplayed;
-	FTransform SocketTransform = Mesh->GetSocketTransform(Pylon);
+	WeaponComp->RemovePylon(Pylon);
+	WeaponComp->AddPylon(Pylon, BaseAircraft->GetAirStats()->WeaponInfo.Pylon);
+
 	if (TObjectPtr<AActor>* WeaponPtr = EquippedWeapons.Find(Pylon))
 	{
-		WeaponDisplayed = *WeaponPtr;
-		if (IsValid(WeaponDisplayed))
+		if (IsValid(*WeaponPtr))
 		{
-			WeaponDisplayed->Destroy();
+			(*WeaponPtr)->Destroy();
 		}
 	}
 
-	WeaponDisplayed = GetWorld()->SpawnActor<AActor>(Weapon, SocketTransform, SpawnParams);
-	if (!IsValid(WeaponDisplayed)) return;
-	WeaponDisplayed->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, Pylon);
+	AActor* WeaponDisplayed = WeaponComp->AddWeapon(Pylon, Weapon);
 	EquippedWeapons.Add(Pylon, WeaponDisplayed);
 }
 
@@ -116,13 +116,19 @@ void AAircraftSelectionGamemode::ClearWeapons(const FName& Pylon)
 {
 	if (!IsValid(AircraftDisplayed)) return;
 
-	TObjectPtr<AActor>* WeaponPtr = EquippedWeapons.Find(Pylon);
-	if (!WeaponPtr) return;
+	ABaseAircraft* BaseAircraft = Cast<ABaseAircraft>(AircraftDisplayed);
+	if (!IsValid(BaseAircraft)) return;
 
-	AActor* WeaponDisplayed = *WeaponPtr;
-	if (IsValid(WeaponDisplayed)) 
-	{
-		WeaponDisplayed->Destroy();
+	UWeaponSystemComponent* WeaponComp = BaseAircraft->GetWeaponComp();
+	if (!IsValid(WeaponComp)) return;
+
+	WeaponComp->RemovePylon(Pylon);
+
+	if (TObjectPtr<AActor>* WeaponPtr = EquippedWeapons.Find(Pylon)) {
+		if (IsValid(*WeaponPtr))
+		{
+			(*WeaponPtr)->Destroy();
+		}
 	}
 
 	EquippedWeapons.Remove(Pylon);
@@ -168,9 +174,7 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 
 	for (auto& Pair : EquippedWeapons)
 	{
-		AActor* Actor = Pair.Value;
-
-		Loadout.Add(Pair.Key, Actor->GetClass());
+		Loadout.Add(Pair.Key, Pair.Value->GetClass());
 	}
 
 	FullLoadout.EquippedWeapons = Loadout;
@@ -178,28 +182,38 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 
 	// TODO: Set Specials HERE
 
-	for (auto& Pair : EquippedWeapons)
-	{
-		if (Pair.Value && Pair.Value->IsValidLowLevel())
+	Transition();
+}
+
+void AAircraftSelectionGamemode::Transition() {
+	if (!IsValid(APC) || bFinished || !IsValid(GetWorld())) return;
+	bFinished = true;
+	APC->ClientMessage(TEXT("COMPLETE"));
+	if (auto* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>())
+		GI->FadeIn(ELevelType::Transition);
+}
+
+void AAircraftSelectionGamemode::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+
+	if (UWorld* World = GetWorld()) {
+		for (auto& Pair : EquippedWeapons)
 		{
-			Pair.Value->Destroy();
+			if (Pair.Value && Pair.Value->IsValidLowLevel())
+			{
+				Pair.Value->Destroy();
+			}
 		}
+		EquippedWeapons.Empty();
+
+		if (IsValid(AircraftDisplayed))
+		{
+			AircraftDisplayed->Destroy();
+			AircraftDisplayed = nullptr;
+		}
+		World->GetTimerManager().ClearAllTimersForObject(this);
+		World->GetTimerManager().ClearAllTimersForObject(APC);
+		if (IsValid(APC->GetMenuManager())) World->GetTimerManager().ClearAllTimersForObject(APC->GetMenuManager());
 	}
-	EquippedWeapons.Empty();
 
-	if (IsValid(AircraftDisplayed))
-	{
-		AircraftDisplayed->Destroy();
-		AircraftDisplayed = nullptr;
-	}
-	World->GetTimerManager().ClearAllTimersForObject(this);
-	World->GetTimerManager().ClearAllTimersForObject(APC);
-	if (IsValid(APC->GetMenuManager())) World->GetTimerManager().ClearAllTimersForObject(APC->GetMenuManager());
-
-	UMissionManagerSubsystem* MissionManager = GI->GetSubsystem<UMissionManagerSubsystem>();
-	ULevelTransitionSubsystem* LevelTransition = GI->GetSubsystem<ULevelTransitionSubsystem>();
-
-	if (!IsValid(MissionManager) || !IsValid(LevelTransition)) return;
-	const FMissionData& Mission = MissionManager->GetCurrentMission();
-	LevelTransition->LoadIntermission(Mission.TakeoffType);
+	Super::EndPlay(EndPlayReason);
 }

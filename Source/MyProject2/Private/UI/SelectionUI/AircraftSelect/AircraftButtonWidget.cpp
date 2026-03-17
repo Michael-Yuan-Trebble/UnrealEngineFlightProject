@@ -16,6 +16,8 @@ void UAircraftButtonWidget::Setup(UAircraftData* AircraftData, bool bOwned)
 
 	AircraftNameText->SetText(FText::FromName(Loaded->AircraftName));
 
+	FString NameStr = Loaded->AircraftName.ToString();
+
 	if (IsValid(AircraftSelectButton)) {
 		AircraftSelectButton->OnHovered.AddDynamic(this, &UAircraftButtonWidget::HandleButtonHover);
 

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "Structs and Data/LoadoutInfo/PylonLoadout.h"
+#include "Structs and Data/Aircraft Data/AircraftWeaponEquipInfo.h"
 #include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "AircraftData.generated.h"
 
@@ -22,7 +22,7 @@ public:
 	FText Class = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	TArray<FPylonLoadout> PylonLoadouts{};
+	TArray<FAircraftWeaponEquipInfo> PylonLoadouts{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int NumOfPylons = 0;

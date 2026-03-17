@@ -16,6 +16,7 @@ void UPlayerGameInstance::Init()
 	if (!IsValid(AircraftDatabase)) {
 		AircraftDatabase = NewObject<UAircraftDatabase>(this);
 		if (!IsValid(AircraftDatabase)) return;
+		// TODO: Make this load from something other than hard coded path
 		const FString Path = "/Game/Aircraft/AircraftData";
 		AircraftDatabase->LoadAllAircraftFromFolder(Path);
 	}
@@ -29,20 +30,41 @@ void UPlayerGameInstance::Init()
 	SetMaps();
 }
 
-void UPlayerGameInstance::FadeIn() 
+void UPlayerGameInstance::FadeIn(ELevelType InType)
 {
-	if (!DoesFadeExist()) CreateFade();
+	LevelType = InType;
+	if (!IsValid(FadeWidget)) CreateFade();
 	if (!FadeWidget) return;
 
 	FadeWidget->OnFadeFinished.AddUniqueDynamic(this, &UPlayerGameInstance::HandleFadeFinished);
 	FadeWidget->PlayFadeIn();
 }
 
+// TODO: Make this into one function with a bool to distinguish
+
 void UPlayerGameInstance::HandleFadeFinished() {
-	if (UMissionManagerSubsystem* MissionSub = GetSubsystem<UMissionManagerSubsystem>()) {
-		if (ULevelTransitionSubsystem* LevelSub = GetSubsystem<ULevelTransitionSubsystem>()) {
-			LevelSub->LoadMission(MissionSub->GetCurrentMission().Level);
-		}
+	auto* MissionSub = GetSubsystem<UMissionManagerSubsystem>();
+	auto* LevelSub = GetSubsystem<ULevelTransitionSubsystem>();
+	if (!IsValid(MissionSub) || !IsValid(LevelSub)) return;
+
+	const FMissionData& Mission = MissionSub->GetCurrentMission();
+
+	switch (LevelType) {
+		case ELevelType::Main:
+			LevelSub->LoadMainMenu();
+			break;
+		case ELevelType::Select:
+			LevelSub->LoadAircraftSelect();
+			break;
+		case ELevelType::Transition:
+			LevelSub->LoadIntermission(Mission.TakeoffType);
+			break;
+		case ELevelType::Mission:
+			LevelSub->LoadMission(Mission.Level);
+			break;
+		default:
+			LevelSub->LoadMainMenu();
+			break;
 	}
 }
 
@@ -54,7 +76,7 @@ void UPlayerGameInstance::HandlePostLoad(UWorld* LoadedWorld) {
 
 void UPlayerGameInstance::FadeOut()
 {
-	if (!DoesFadeExist()) CreateFade();
+	if (!IsValid(FadeWidget)) CreateFade();
 	if (!FadeWidget) return;
 
 	FadeWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
@@ -72,7 +94,7 @@ void UPlayerGameInstance::CreateFade() {
 }
 
 void UPlayerGameInstance::ShowTransition() {
-	if (!DoesTransitionExist()) CreateTransition();
+	if (!IsValid(TransitionWidget)) CreateTransition();
 	if (!TransitionWidget) return;
 
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
@@ -85,7 +107,7 @@ void UPlayerGameInstance::ShowTransition() {
 }
 
 void UPlayerGameInstance::HideTransition() {
-	if (!DoesTransitionExist()) CreateTransition();
+	if (!IsValid(TransitionWidget)) CreateTransition();
 	if (!TransitionWidget) return;
 
 	TransitionWidget->HideScreen();
@@ -114,13 +136,7 @@ void UPlayerGameInstance::SetLevel(const FMissionData& InLevel) {
 	}
 }
 
-bool UPlayerGameInstance::DoesTransitionExist() const {
-	return IsValid(TransitionWidget);
-}
-
-bool UPlayerGameInstance::DoesFadeExist() const {
-	return IsValid(FadeWidget);
-}
+// TODO: When bigger, make this easier instead of a bunch of setters
 
 void UPlayerGameInstance::SetMaps() {
 	if (UMissionManagerSubsystem* MissionSubsystem = GetSubsystem<UMissionManagerSubsystem>()) {

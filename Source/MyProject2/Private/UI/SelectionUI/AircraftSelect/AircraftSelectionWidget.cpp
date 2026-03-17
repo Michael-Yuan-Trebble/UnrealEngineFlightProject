@@ -8,6 +8,7 @@
 #include "Player Info/SaveGameManager.h"
 #include "Player Info/PlayerGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "Structs and Data/Aircraft Data/AircraftStats.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "UI/SelectionUI/AircraftSelect/AircraftButtonWidget.h"
 #include "Debug/DebugHelper.h"
@@ -35,7 +36,16 @@ void UAircraftSelectionWidget::GetAllAircraft()
 
     for (UAircraftData* Data : GI->GetDatabase()->AllAircraft)
     {
-        if (!IsValid(Data) || !Data->AircraftStat) continue;
+        if (!IsValid(Data)) {
+            DEBUG_TIME(100.f, "Failed to Find Aircraft");
+            continue;
+        }
+
+        UAircraftStats* LoadedStates = Data->AircraftStat.LoadSynchronous();
+        if (!IsValid(LoadedStates)) {
+            DEBUG_TIME(100.f, "Failed to Load Aircraft");
+            continue;
+        }
 
         UAircraftButtonWidget* Card = CreateWidget<UAircraftButtonWidget>(GetWorld(), AircraftButtonClass);
         if (!IsValid(Card)) continue;

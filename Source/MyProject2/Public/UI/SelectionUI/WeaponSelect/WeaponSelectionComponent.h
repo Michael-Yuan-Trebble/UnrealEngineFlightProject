@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Structs and Data/Aircraft Data/AircraftData.h"
+#include "Structs and Data/Aircraft Data/AircraftWeaponEquipInfo.h"
 #include "WeaponSelectionComponent.generated.h"
 
 class UMenuManagerComponent;
@@ -26,12 +27,12 @@ public:
 	void WeaponSelectionMenu();
 
 	UFUNCTION()
-	void HandleWeaponPicked(TSubclassOf<ABaseWeapon> Weapon);
+	void HandleWeaponPicked(TSubclassOf<ABaseWeapon> Weapon, FAircraftWeaponEquipInfo Equipment);
 
 	UFUNCTION()
-	void AddWeapon(TSubclassOf<ABaseWeapon> Weapon);
+	void AddWeapon(TSubclassOf<ABaseWeapon> Weapon, FAircraftWeaponEquipInfo Equipment);
 
-	void CheckWeaponLoop();
+	void CheckWeaponLoop(const TArray<FName>& Pylons);
 
 	void CloseAll();
 

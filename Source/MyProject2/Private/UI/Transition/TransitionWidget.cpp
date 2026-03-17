@@ -3,6 +3,7 @@
 
 #include "UI/Transition/TransitionWidget.h"
 #include "Player Info/PlayerGameInstance.h"
+#include "Enums/LevelType.h"
 
 void UTransitionWidget::NativeConstruct() {
 	Super::NativeConstruct();
@@ -16,7 +17,7 @@ void UTransitionWidget::StartScreen()
 	PC->DisableInput(PC);
 	UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
 	if (!IsValid(GI)) return;
-	GI->FadeIn();
+	GI->FadeIn(ELevelType::Main);
 	GetWorld()->GetTimerManager().SetTimer(
 		TimerHandle,
 		this,

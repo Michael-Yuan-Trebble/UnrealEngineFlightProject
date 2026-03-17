@@ -8,6 +8,7 @@
 #include "Units/Naval/Carrier.h"
 #include "Subsystem/LevelTransitionSubsystem.h"
 #include "Subsystem/MissionManagerSubsystem.h"
+#include "Enums/LevelType.h"
 #include "Kismet/GameplayStatics.h"
 
 ANavalTakeoffGamemode::ANavalTakeoffGamemode() {
@@ -90,7 +91,6 @@ void ANavalTakeoffGamemode::TransitionLevel() {
 	PC->ClientMessage(TEXT("COMPLETE"));
 	PC->DeactivateMovement();
 	PC->DeactivateWeapon();
-	UPlayerGameInstance* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>();
-	if (!IsValid(GI)) return;
-	GI->FadeIn();
+	if (auto* GI = GetWorld()->GetGameInstance<UPlayerGameInstance>()) 
+		GI->FadeIn(ELevelType::Mission);
 }

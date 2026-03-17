@@ -7,6 +7,7 @@
 #include "Units/Components/Player/MenuManagerComponent.h"
 #include "Gamemodes/AircraftSelectionGamemode.h"
 #include "Player Info/AircraftPlayerController.h"
+#include "Debug/DebugHelper.h"
 
 UWeaponSelectionComponent::UWeaponSelectionComponent()
 {
@@ -38,7 +39,7 @@ void UWeaponSelectionComponent::WeaponSelectionMenu()
 
 	// TODO: Make it so the structs contain how many pylons are in a group, like 2, and then just loop twice for the pylons
 	if (!IsValid(Aircraft)) return;
-	if (Aircraft->PylonLoadouts.Num() > 0) {
+	if (Aircraft->PylonLoadouts.IsValidIndex(CurrentPylonIndex)) {
 		WeaponSelectUI->SetLoadout(Aircraft->PylonLoadouts[CurrentPylonIndex]);
 	}
 
@@ -49,49 +50,52 @@ void UWeaponSelectionComponent::WeaponSelectionMenu()
 	PC->SetInputMode(InputMode);
 	PC->bShowMouseCursor = true;
 	WeaponSelectUI->OnWeaponSelected.AddDynamic(this, &UWeaponSelectionComponent::HandleWeaponPicked);
+	WeaponSelectUI->WeaponAdded.AddDynamic(this, &UWeaponSelectionComponent::AddWeapon);
 }
 
-void UWeaponSelectionComponent::HandleWeaponPicked(TSubclassOf<ABaseWeapon> Weapon)
+void UWeaponSelectionComponent::HandleWeaponPicked(TSubclassOf<ABaseWeapon> Weapon, FAircraftWeaponEquipInfo Equipment)
 {
 	AAircraftSelectionGamemode* GM = Cast<AAircraftSelectionGamemode>(UGameplayStatics::GetGameMode(this));
 	if (!IsValid(GM)) return;
 
-	FString PylonString = FString::Printf(TEXT("Pylon_%d"), CurrentPylonIndex);
-	FName PylonName = FName(*PylonString);
+	for (const FName& Number : Equipment.Pylons) {
+		FName PylonName(*FString("Pylon_") + Number.ToString());
 
-	if (!Weapon)
-	{
-		GM->ClearWeapons(PylonName);
-	}
-	else 
-	{
-		GM->SpawnInWeapon(Weapon, PylonName);
+		if (!Weapon)
+		{
+			GM->ClearWeapons(PylonName);
+		}
+		else
+		{
+			GM->SpawnInWeapon(Weapon, PylonName);
+		}
 	}
 }
 
-void UWeaponSelectionComponent::AddWeapon(TSubclassOf<ABaseWeapon> Weapon) 
+void UWeaponSelectionComponent::AddWeapon(TSubclassOf<ABaseWeapon> Weapon, FAircraftWeaponEquipInfo Equipment)
 {
-	FString PylonString = FString::Printf(TEXT("Pylon_%d"), CurrentPylonIndex);
-	FName PylonName = FName(*PylonString);
-	WeaponSelection.Add(PylonName, Weapon);
-	CheckWeaponLoop();
+	for (const FName& Number : Equipment.Pylons) {
+		FName PylonName(*FString("Pylon_") + Number.ToString());
+		WeaponSelection.Add(PylonName, Weapon);
+	}
+	CheckWeaponLoop(Equipment.Pylons);
 }
 
-void UWeaponSelectionComponent::CheckWeaponLoop() 
+void UWeaponSelectionComponent::CheckWeaponLoop(const TArray<FName>& Pylons)
 {
 	if (!IsValid(GetWorld())) return;
 
-	AAircraftPlayerController* PC = Cast<AAircraftPlayerController>(GetWorld()->GetFirstPlayerController());
-	if (!IsValid(PC)) return;
-
 	CurrentPylonIndex++;
+	DEBUG_TIME(100.f, "Pylon Number: %d", CurrentPylonIndex);
 	if (CurrentPylonIndex >= Aircraft->NumOfPylons)
 	{
 		MenuManager->ChooseSpecialUI();
 	}
 	else
 	{
-		PC->ManageMenuSetting(EMenuState::WeaponSelect);
+		if (auto* PC = Cast<AAircraftPlayerController>(GetWorld()->GetFirstPlayerController())) {
+			PC->ManageMenuSetting(EMenuState::WeaponSelect);
+		}
 	}
 }
 

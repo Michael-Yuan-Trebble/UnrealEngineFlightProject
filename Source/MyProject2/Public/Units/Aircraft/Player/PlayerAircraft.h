@@ -78,6 +78,9 @@ public:
 	void SetRollSpeed(float S);
 
 	float GetThrottle();
+	UAudioComponent* GetLockingOnAudio() const { return LockingOnAudio; };
+
+	UAudioComponent* GetLockedOnAudio() const { return LockedOnAudio; };
 
 private:
 	virtual void BeginPlay() override;
@@ -113,6 +116,12 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UCameraManagerComponent> ManagerComp = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> LockingOnAudio = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> LockedOnAudio = nullptr;
 
 	UFUNCTION()
 	void HandleHit();

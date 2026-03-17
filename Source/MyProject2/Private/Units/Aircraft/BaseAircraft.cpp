@@ -293,6 +293,13 @@ UBulletStats* ABaseAircraft::GetBulletStats() {
 	return CachedBulletStats;
 }
 
+UAircraftStats* ABaseAircraft::GetAirStats() {
+	if (!IsValid(CachedAirStats)) {
+		CachedAirStats = AirStats.LoadSynchronous();
+	}
+	return CachedAirStats;
+}
+
 EThrottleStage ABaseAircraft::GetThrottleStage() const { if (IsValid(FlightComponent)) return FlightComponent->ReturnThrottleStage(); else return EThrottleStage::Slow; }
 
 void ABaseAircraft::ApplySpeed(const float Speed, const float D) { if (IsValid(FlightComponent)) FlightComponent->AddSpeed(Speed, D); }

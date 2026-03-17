@@ -151,8 +151,8 @@ void UMenuManagerComponent::AdvanceToLevel()
 
 void UMenuManagerComponent::CloseAll() 
 {
-	if (UWorld* World = GetWorld())
-		World->GetTimerManager().ClearAllTimersForObject(this);
+	if (IsValid(GetWorld()))
+		GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
 
 	if (IsValid(AircraftSelectionUI)) AircraftSelectionUI->CloseAll();
 	if (IsValid(WeaponSelectionUI)) WeaponSelectionUI->CloseAll();

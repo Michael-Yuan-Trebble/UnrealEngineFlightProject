@@ -19,12 +19,14 @@ void UWeaponSelectionWidget::GetAllAircraft()
     UWeaponButtonWidget* NoneButton = CreateWidget<UWeaponButtonWidget>(GetWorld(), WeaponButtonClass);
     NoneButton->SetupWeapons(nullptr);
     NoneButton->OnWeaponSelected.AddDynamic(this, &UWeaponSelectionWidget::HandleWeaponSelected);
-    if (IsValid(WeaponUI)) NoneButton->OnWeaponPicked.AddDynamic(WeaponUI, &UWeaponSelectionComponent::AddWeapon);
+    if (IsValid(WeaponUI)) NoneButton->OnWeaponPicked.AddDynamic(this, &UWeaponSelectionWidget::HandleWeaponAdded);
     WeaponScrollBox->AddChild(NoneButton);
 
-    CreateButtons(CurrentLoadout.AllowedMissiles);
-    CreateButtons(CurrentLoadout.AllowedBombs);
-    CreateButtons(CurrentLoadout.AllowedMisc);
+    FPylonLoadout Loadouts = CurrentLoadout.PylonLoadout;
+
+    CreateButtons(Loadouts.AllowedMissiles);
+    CreateButtons(Loadouts.AllowedBombs);
+    CreateButtons(Loadouts.AllowedMisc);
 }
 
 void UWeaponSelectionWidget::CreateButtons(const TArray<TSubclassOf<ABaseWeapon>>&Array) 
@@ -41,12 +43,16 @@ void UWeaponSelectionWidget::CreateButtons(const TArray<TSubclassOf<ABaseWeapon>
 
         Card->SetupWeapons(SingleWeapon);
         Card->OnWeaponSelected.AddDynamic(this, &UWeaponSelectionWidget::HandleWeaponSelected);
-        Card->OnWeaponPicked.AddDynamic(WeaponUI, &UWeaponSelectionComponent::AddWeapon);
+        Card->OnWeaponPicked.AddDynamic(this, &UWeaponSelectionWidget::HandleWeaponAdded);
         WeaponScrollBox->AddChild(Card);
     } 
 }
 
 void UWeaponSelectionWidget::HandleWeaponSelected(TSubclassOf<ABaseWeapon> Weapon)
 {
-    OnWeaponSelected.Broadcast(Weapon);
+    OnWeaponSelected.Broadcast(Weapon, CurrentLoadout);
+}
+
+void UWeaponSelectionWidget::HandleWeaponAdded(TSubclassOf<ABaseWeapon> Weapon) {
+    WeaponAdded.Broadcast(Weapon, CurrentLoadout);
 }

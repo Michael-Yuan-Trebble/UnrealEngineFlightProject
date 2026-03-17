@@ -12,12 +12,12 @@ void UWeaponButtonWidget::SetupWeapons(const TSubclassOf<ABaseWeapon>& WeaponDat
 	if (!IsValid(ButtonWeapon))
 	{
 		WeaponNameText->SetText(FText::FromString("None"));
-		return;
 	}
-
-	const ABaseWeapon* DefaultWeapon = ButtonWeapon->GetDefaultObject<ABaseWeapon>();
-	FName WeaponName = DefaultWeapon->GetName();
-	WeaponNameText->SetText(FText::FromName(WeaponName));
+	else {
+		const ABaseWeapon* DefaultWeapon = ButtonWeapon->GetDefaultObject<ABaseWeapon>();
+		FName WeaponName = DefaultWeapon->GetName();
+		WeaponNameText->SetText(FText::FromName(WeaponName));
+	}
 
 	WeaponSelectButton->OnHovered.AddDynamic(this, &UWeaponButtonWidget::HandleButtonHover);
 	WeaponSelectButton->OnClicked.AddDynamic(this, &UWeaponButtonWidget::HandleButtonClick);

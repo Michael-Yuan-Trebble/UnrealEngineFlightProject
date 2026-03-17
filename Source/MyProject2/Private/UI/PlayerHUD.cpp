@@ -31,30 +31,32 @@ void APlayerHUD::Init(AAircraftPlayerController* InPC)
     MiniMap->AddToViewport();
 
     MiniMap->InitializeBounds(
-        FVector2D(-20000.f, -20000.f),
-        FVector2D(20000.f, 20000.f)
+        FVector2D(-MiniMapDimensions, -MiniMapDimensions),
+        FVector2D(MiniMapDimensions, MiniMapDimensions)
     );
+
+    FVector2D MiddleAlignment = FVector2D(0.5f, 0.5f);
 
     if (!IsValid(AimReticleClass)) return;
     AimReticleWidget = CreateWidget<UUserWidget>(PC, AimReticleClass);
     AimReticleWidget->AddToViewport();
-    AimReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+    AimReticleWidget->SetAlignmentInViewport(MiddleAlignment);
 
     if (!IsValid(AOAReticleClass)) return;
     AOAReticleWidget = CreateWidget<UUserWidget>(PC, AOAReticleClass);
     AOAReticleWidget->AddToViewport();
-    AOAReticleWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+    AOAReticleWidget->SetAlignmentInViewport(MiddleAlignment);
 
     if (!IsValid(PitchLadderClass)) return;
     PitchLadderWidget = CreateWidget<UPitchLadder>(PC, PitchLadderClass);
     PitchLadderWidget->AddToViewport();
-    PitchLadderWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+    PitchLadderWidget->SetAlignmentInViewport(MiddleAlignment);
 
     if (!IsValid(HitNotiClass)) return;
     HitNotiWidget = CreateWidget<UHitNotificationWidget>(PC, HitNotiClass);
     HitNotiWidget->AddToViewport();
     HitNotiWidget->HideMessage();
-    HitNotiWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+    HitNotiWidget->SetAlignmentInViewport(MiddleAlignment);
 
     Controlled = Cast<APlayerAircraft>(PC->GetPawn());
     if (!Controlled.IsValid()) return;
@@ -151,9 +153,7 @@ void APlayerHUD::UpdateLocked(const float LockPercent)
     if (FoundWidget && IsValid(*FoundWidget))
     {
         if (ULockBoxWidget* Widget = *FoundWidget)
-        {
             Widget->UpdateLockProgress(LockPercent);
-        }
     }
 }
 
@@ -214,7 +214,6 @@ void APlayerHUD::UpdateTargetWidgets()
             FVector2D WidgetSize = Reticle->GetDesiredSize();
             Reticle->SetPositionInViewport(ScreenPos - WidgetSize * 0.5f, true);
         }
-
     }
 
     UpdateSelected();
@@ -257,7 +256,15 @@ void APlayerHUD::UpdateSelected()
 
     ABaseUnit* LastActorLoaded = LastActor.Get();
 
-    if (IsValid(LastActorLoaded) && LastActorLoaded == TargetLoaded) return;
+    if (IsValid(LastActorLoaded)) {
+        if (LastActorLoaded == TargetLoaded) return;
+        else {
+            TObjectPtr<ULockBoxWidget>* FoundWidget = ActiveWidgets.Find(LastActorLoaded);
+            if (FoundWidget && IsValid(*FoundWidget)) {
+                (*FoundWidget)->SelectStop();
+            }
+        }
+    }
 
     LastActor = Target;
 
@@ -275,18 +282,15 @@ void APlayerHUD::UpdateSelected()
 
 void APlayerHUD::SetTarget(TWeakObjectPtr<ABaseUnit> InTarget)
 {
-    APawn* Pawn = Cast<APawn>(InTarget.Get());
-    if (IsValid(Pawn) && Pawn->IsPlayerControlled()) return;
+    ABaseUnit* Loaded = Cast<ABaseUnit>(InTarget.Get());
+    if (Loaded == Target.Get()) return;
+    if (!IsValid(Loaded) || Loaded->IsPlayerControlled()) return;
 
-    ABaseUnit* LoadedTarget = Target.Get();
-    if (IsValid(LoadedTarget))
+    TObjectPtr<ULockBoxWidget>* FoundWidget = ActiveWidgets.Find(Loaded);
+    if (FoundWidget && IsValid(*FoundWidget))
     {
-        TObjectPtr<ULockBoxWidget>* FoundWidget = ActiveWidgets.Find(LoadedTarget);
-        if (FoundWidget && IsValid(*FoundWidget))
-        {
-            ULockBoxWidget* Temp = *FoundWidget;
-            Temp->SelectStop();
-        }
+        ULockBoxWidget* Temp = *FoundWidget;
+        Temp->SelectStop();
     }
 
     Target = InTarget; 

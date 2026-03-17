@@ -8,6 +8,7 @@
 #include "Structs and Data/LoadoutInfo/AircraftLoadoutData.h"
 #include "Structs and Data/MissionInfo/MissionData.h"
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
+#include "Enums/LevelType.h"
 #include "PlayerGameInstance.generated.h"
 
 class UMainMenuManager;
@@ -35,7 +36,7 @@ public:
 
 	const FAircraftLoadoutData& GetLoadout() { return FullLoadout; };
 
-	void FadeIn();
+	void FadeIn(ELevelType InType);
 
 	UFUNCTION()
 	void HandleFadeFinished();
@@ -44,13 +45,9 @@ public:
 
 	void GoToLevel();
 
-	bool DoesFadeExist() const;
-
 	void ShowTransition();
 
 	void HideTransition();
-
-	bool DoesTransitionExist() const;
 
 	void CreateTransition();
 
@@ -93,6 +90,8 @@ private:
 	virtual void Init() override;
 
 	FAircraftLoadoutData FullLoadout{};
+
+	ELevelType LevelType = ELevelType::Main;
 
 	void CreateFade();
 };

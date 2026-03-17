@@ -128,4 +128,5 @@ private:
 	static constexpr float AimWorldPosDistance = 10000.f;
 	static constexpr float AOAWorldPosDistance = 10000.f;
 	static constexpr float LadderWorldPosDistance = 10000.f;
+	static constexpr float MiniMapDimensions = 20000.f;
 };

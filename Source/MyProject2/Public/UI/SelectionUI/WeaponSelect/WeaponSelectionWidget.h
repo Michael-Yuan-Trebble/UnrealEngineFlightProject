@@ -5,11 +5,13 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Structs and Data/Aircraft Data/AircraftDatabase.h"
+#include "Structs and Data/Aircraft Data/AircraftWeaponEquipInfo.h"
 #include "WeaponSelectionWidget.generated.h"
 
 class UWeaponSelectionComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponSelectedSignature, TSubclassOf<ABaseWeapon>, SelectedWeapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWeaponSelectedSignature, TSubclassOf<ABaseWeapon>, SelectedWeapon, FAircraftWeaponEquipInfo, Loadout);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWeaponAddedSignature, TSubclassOf<ABaseWeapon>, SelectedWeapon, FAircraftWeaponEquipInfo, Loadout);
 
 UCLASS()
 class MYPROJECT2_API UWeaponSelectionWidget : public UUserWidget
@@ -22,11 +24,13 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FWeaponSelectedSignature OnWeaponSelected;
 
+	FWeaponAddedSignature WeaponAdded;
+
 	void GetAllAircraft();
 
-	void SetLoadout(const FPylonLoadout& In) { CurrentLoadout = In; };
+	void SetLoadout(const FAircraftWeaponEquipInfo& In) { CurrentLoadout = In; };
 
-	FPylonLoadout GetLoadout() const { return CurrentLoadout; };
+	FAircraftWeaponEquipInfo GetLoadout() const { return CurrentLoadout; };
 
 	UWeaponSelectionComponent* GetWeaponUI() const { return WeaponUI; };
 
@@ -34,13 +38,16 @@ public:
 
 private:
 
-	FPylonLoadout CurrentLoadout;
+	FAircraftWeaponEquipInfo CurrentLoadout;
 
 	UPROPERTY()
 	TObjectPtr<UWeaponSelectionComponent> WeaponUI = nullptr;
 
 	UFUNCTION()
 	void HandleWeaponSelected(TSubclassOf<ABaseWeapon> Weapon);
+
+	UFUNCTION()
+	void HandleWeaponAdded(TSubclassOf<ABaseWeapon> Weapon);
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> WeaponButtonClass = nullptr;

@@ -89,36 +89,54 @@ void UWeaponSystemComponent::AddPylons()
 {
 	for (int i = 0; i < AirWeaponInfo.NumOfPylons; i++)
 	{
-		UStaticMeshComponent* TempPylon = NewObject<UStaticMeshComponent>(this);
 		FName SocketName = FName(*FString::Printf(TEXT("Pylon_%d"), i));
-		if (TempPylon && IsValid(AirWeaponInfo.Pylon))
-		{
-			if (!IsValid(Controlled) || !IsValid(Airframe)) return;
-			FTransform SocketTransform = Airframe->GetSocketTransform(SocketName, RTS_World);
-			SocketTransform.SetScale3D(FVector(1.f));
-			TempPylon->SetStaticMesh(AirWeaponInfo.Pylon);
-			TempPylon->SetWorldTransform(SocketTransform);
-			TempPylon->RegisterComponent();
-			TempPylon->AttachToComponent(Airframe, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
-			TempPylon->AddLocalOffset(FVector(0, -80, -50));
-			PylonSockets.Add(SocketName, TempPylon);
-		}
+		AddPylon(SocketName, AirWeaponInfo.Pylon);
 	}
+}
+
+void UWeaponSystemComponent::AddPylon(const FName& PylonName, UStaticMesh* PylonMesh) {
+	UStaticMeshComponent* TempPylon = NewObject<UStaticMeshComponent>(this);
+	if (TempPylon && IsValid(PylonMesh)) {
+		if (!IsValid(Airframe)) return;
+		FTransform SocketTransform = Airframe->GetSocketTransform(PylonName, RTS_World);
+		SocketTransform.SetScale3D(FVector(1.f));
+		TempPylon->SetStaticMesh(PylonMesh);
+		TempPylon->SetWorldTransform(SocketTransform);
+		TempPylon->RegisterComponent();
+		TempPylon->AttachToComponent(Airframe, FAttachmentTransformRules::SnapToTargetNotIncludingScale, PylonName);
+		TempPylon->AddLocalOffset(FVector(0, -80, -50));
+		PylonSockets.Add(PylonName, TempPylon);
+	}
+}
+
+void UWeaponSystemComponent::RemovePylon(const FName& PylonName) {
+	if (TObjectPtr<UStaticMeshComponent>* Found = PylonSockets.Find(PylonName)) {
+		if (IsValid(*Found)) (*Found)->DestroyComponent();
+		PylonSockets.Remove(PylonName);
+	}
+}
+
+AActor* UWeaponSystemComponent::AddWeapon(const FName& PylonName, TSubclassOf<ABaseWeapon> Weapon) {
+	UStaticMeshComponent* PylonComp = PylonSockets.FindRef(PylonName);
+	if (!IsValid(PylonComp)) return nullptr;
+
+	FTransform SocketTransform = PylonComp->GetSocketTransform(FName("Socket"));
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = Controlled;
+
+	ABaseWeapon* SpawnIn = GetWorld()->SpawnActor<ABaseWeapon>(Weapon, SocketTransform, SpawnParams);
+	if (!IsValid(SpawnIn)) return nullptr;
+	SpawnIn->Collision->SetSimulatePhysics(false);
+	SpawnIn->AttachToComponent(PylonComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Socket"));
+	return SpawnIn;
 }
 
 void UWeaponSystemComponent::EquipWeapons()
 {
 	for (const TPair<FName, TSubclassOf<ABaseWeapon>>&Pair : Loadout)
 	{
-		UStaticMeshComponent* PylonComp = PylonSockets.FindRef(Pair.Key);
-		if (!IsValid(PylonComp))  continue;
-		FTransform SocketTransform = PylonComp->GetSocketTransform(FName("Socket"));
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = Controlled;
-		ABaseWeapon* SpawnIn = GetWorld()->SpawnActor<ABaseWeapon>(Pair.Value, SocketTransform, SpawnParams);
+		ABaseWeapon* SpawnIn = Cast<ABaseWeapon>(AddWeapon(Pair.Key, Pair.Value));
 		if (!IsValid(SpawnIn)) continue;
-		SpawnIn->Collision->SetSimulatePhysics(false);
-		SpawnIn->AttachToComponent(PylonComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Socket"));
 
 		FCooldownWeapon tempCool;
 		tempCool.Init(Pair.Value, SpawnIn, Pair.Key, SpawnIn->GetCooldown());
@@ -152,7 +170,6 @@ void UWeaponSystemComponent::BuildWeaponGroups()
 	for (FCooldownWeapon& CW : AvailableWeapons)
 	{
 		if (!CW.WeaponInstance) continue;
-
 		TSubclassOf<ABaseWeapon> WeaponClass = CW.WeaponClass;
 
 		if (!WeaponGroups.Contains(WeaponClass)) 
@@ -317,6 +334,7 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 		LockPercent = 1.f;
 	else 
 		LockPercent = FMath::Clamp(LockTime / MaxLockTime, 0.f, 1.f);
+	AIR_DEBUG_KEY(0, FColor::Green, "%f", LockPercent);
 	OnHUDLockedOn.Broadcast(LockPercent);
 }
 
@@ -332,13 +350,12 @@ FCooldownWeapon* UWeaponSystemComponent::GetBestWeaponRange(float Distance) {
 	FCooldownWeapon* BestWeapon = nullptr;
 	float BestRange = 0.f;
 	for (FCooldownWeapon& Weapon : AvailableWeapons) {
-		if (!Weapon.WeaponInstance) continue;
+		if (!IsValid(Weapon.WeaponInstance)) continue;
 		float WeaponRange = Weapon.WeaponInstance->GetRange();
 		if (WeaponRange >= Distance && WeaponRange < BestRange) {
 			BestRange = WeaponRange;
 			BestWeapon = &Weapon;
 		}
 	}
-
 	return BestWeapon;
 }
