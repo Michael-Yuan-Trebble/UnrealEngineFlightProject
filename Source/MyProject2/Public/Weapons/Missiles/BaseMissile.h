@@ -85,6 +85,10 @@ protected:
 
 	virtual bool CalculateIfOvershoot(FVector ToTarget);
 
+	void TurnTowardTarget(float Delta);
+
+	float PreviousDistance = 0.f;
+
 private:
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp,

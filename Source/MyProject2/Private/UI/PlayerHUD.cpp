@@ -140,7 +140,7 @@ void APlayerHUD::TogglePitchLadder(bool Toggle) {
     isPitchLadderVisible = !Toggle;
 }
 
-void APlayerHUD::PitchLadderUpdate() 
+void APlayerHUD::PitchLadderUpdate()
 {
     if (!isPitchLadderVisible || !IsValid(PitchLadderWidget)) return;
     float Pitch = FMath::RadiansToDegrees(FMath::Asin(Controlled->GetAirframe()->GetForwardVector().Z));
@@ -221,24 +221,27 @@ void APlayerHUD::UpdateTargetWidgets()
 
 void APlayerHUD::HandleRadarScan(const TArray<FDetectedAircraftInfo>& InEnemies)
 {
-    TArray<TWeakObjectPtr<ABaseUnit>> Array{};
+    TArray<TWeakObjectPtr<ABaseUnit>> TempEnemies{};
+    TArray<TWeakObjectPtr<ABaseUnit>> TempFriendlies{};
     if (!Controlled.IsValid()) return;
-    for (const FDetectedAircraftInfo& T : InEnemies) 
+    for (const FDetectedAircraftInfo& T : InEnemies)
     {
         ABaseUnit* Unit = Cast<ABaseUnit>(T.CurrentPawn);
-        if (!IsValid(Unit) || Unit->GetFaction() == Controlled->GetFaction()) continue;
-        Array.Add(Unit);
+        if (!IsValid(Unit)) continue;
+        if (Unit->GetFaction() == Controlled->GetFaction())
+            TempFriendlies.Add(Unit);
+        else TempEnemies.Add(Unit);
     }
-    Targets = Array;
+    Targets = TempEnemies;
+    Friendlies = TempFriendlies;
 }
 
 void APlayerHUD::OnUnitDestroyed(ABaseUnit* Death)
 {
     Targets.Remove(Death);
     if (ULockBoxWidget* W = ActiveWidgets.FindRef(Death)) 
-    {
         W->RemoveFromParent();
-    }
+
     ActiveWidgets.Remove(Death);
     Controlled->WeaponComponentOnUnitDeath();
 }
@@ -254,15 +257,12 @@ void APlayerHUD::UpdateSelected()
         return;
     }
 
-    ABaseUnit* LastActorLoaded = LastActor.Get();
-
-    if (IsValid(LastActorLoaded)) {
+    if (ABaseUnit* LastActorLoaded = LastActor.Get()) {
         if (LastActorLoaded == TargetLoaded) return;
         else {
             TObjectPtr<ULockBoxWidget>* FoundWidget = ActiveWidgets.Find(LastActorLoaded);
-            if (FoundWidget && IsValid(*FoundWidget)) {
+            if (FoundWidget && IsValid(*FoundWidget))
                 (*FoundWidget)->SelectStop();
-            }
         }
     }
 
@@ -275,9 +275,7 @@ void APlayerHUD::UpdateSelected()
         SelectedAircraftWidget->SelectedAnimation(TargetLoaded->GetUnitName());
     }
     else
-    {
         SelectedAircraftWidget = nullptr;
-    }
 }
 
 void APlayerHUD::SetTarget(TWeakObjectPtr<ABaseUnit> InTarget)
@@ -294,7 +292,7 @@ void APlayerHUD::SetTarget(TWeakObjectPtr<ABaseUnit> InTarget)
     }
 
     Target = InTarget; 
-    if (!Targets.Contains(Target.Get())) Targets.Add(Target); 
+    if (!Targets.Contains(Target.Get())) Targets.Add(Target);
     UpdateTargetWidgets();
 }
 

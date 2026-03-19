@@ -12,30 +12,6 @@ UBaseAudioComponent::UBaseAudioComponent() {}
 void UBaseAudioComponent::BeginPlay() 
 {
 	Super::BeginPlay();
-	if (!PrimaryLoop) 
-	{
-		PrimaryLoop = NewObject<UAudioComponent>(GetOwner(), TEXT("PrimaryLoop"));
-		if (PrimaryLoop) 
-		{
-			USceneComponent* OwnerRoot = GetOwner()->GetRootComponent();
-			PrimaryLoop->AttachToComponent(OwnerRoot, FAttachmentTransformRules::KeepRelativeTransform);
-			PrimaryLoop->bAutoActivate = false;
-			PrimaryLoop->RegisterComponent();
-		}
-	}
-}
-
-void UBaseAudioComponent::PlayLoop(USoundBase* Sound) 
-{
-	if (!PrimaryLoop || !Sound) return;
-	PrimaryLoop->SetSound(Sound);
-	PrimaryLoop->Play();
-}
-
-void UBaseAudioComponent::StopLoop() 
-{
-	if (!PrimaryLoop) return;
-	PrimaryLoop->Stop();
 }
 
 void UBaseAudioComponent::PlayOneShot(USoundBase* Sound)
@@ -55,4 +31,21 @@ void UBaseAudioComponent::PlayOneShotAtLocation(USoundBase* Sound, FVector Locat
 		Sound,
 		Location
 	);
+}
+
+UAudioComponent* UBaseAudioComponent::CreateAndAttachAudioComp(USceneComponent* AttachTo) {
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !IsValid(AttachTo)) return nullptr;
+
+	UWorld* World = Owner->GetWorld();
+	if (!IsValid(World)) return nullptr;
+
+	UAudioComponent* AudioComp = NewObject<UAudioComponent>(Owner);
+	if (!IsValid(AudioComp)) return nullptr;
+
+	AudioComp->RegisterComponentWithWorld(World);
+	AudioComp->AttachToComponent(AttachTo, FAttachmentTransformRules::KeepRelativeTransform);
+
+	AudioComp->bAutoActivate = false;
+	return AudioComp;
 }

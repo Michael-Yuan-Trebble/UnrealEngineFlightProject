@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Weapons/BaseWeapon.h"
+#include "Enums/TargetTypes.h"
 #include "CooldownWeapon.generated.h"
 
 USTRUCT(BlueprintType)
@@ -27,8 +28,12 @@ struct FCooldownWeapon
 
 	float time = 0.f;
 
+	TArray<ETargetType> SupportedTargets{};
+
 	UPROPERTY(EditAnywhere)
 	float cooldownTime = 0.f;
+
+	float Range = 0.f;
 
 	bool CanFire() const { return bCanFire; }
 
@@ -38,11 +43,18 @@ struct FCooldownWeapon
 
 	void UpdateCooldown(const float DeltaTime);
 
-	void Init(TSubclassOf <ABaseWeapon> InWeapon, ABaseWeapon* InInstance, FName InSocket, float InCooldown) {
+	void SetTargetType(TArray<ETargetType> In) {
+		SupportedTargets = In;
+	};
+
+	TArray<ETargetType> GetTargetTypes() const { return SupportedTargets; };
+
+	void Init(TSubclassOf <ABaseWeapon> InWeapon, ABaseWeapon* InInstance, FName InSocket, float InCooldown, float InRange) {
 		WeaponClass = InWeapon;
 		WeaponInstance = InInstance;
 		SocketName = InSocket;
 		cooldownTime = InCooldown;
+		Range = InRange;
 	}
 
 	void ResetFire() {

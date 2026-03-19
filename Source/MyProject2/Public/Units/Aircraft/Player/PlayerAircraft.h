@@ -8,7 +8,7 @@
 
 class AAircraftPlayerController;
 class UCameraManagerComponent;
-class UAircraftAudioComponent;
+class UUIAudioComponent;
 class ABaseWeapon;
 class APlayerHUD;
 class UCameraComponent;
@@ -42,10 +42,6 @@ public:
 	void SetFirstPersonCamera(bool bActive);
 
 	void SetThirdPersonCamera(bool bActive);
-
-	UAudioComponent* GetAircraftAudio() const { return PersonalAircraftAudio; };
-
-	UAudioComponent* GetGunAudio() const { return GunAudio; };
 
 	float GetCameraLocation() const;
 
@@ -123,8 +119,14 @@ private:
 	UPROPERTY()
 	TObjectPtr<UAudioComponent> LockedOnAudio = nullptr;
 
+	UPROPERTY()
+	TObjectPtr<UUIAudioComponent> UIAudioComponent = nullptr;
+
 	UFUNCTION()
 	void HandleHit();
+
+	UFUNCTION()
+	void HandleLockSound(float LockPercent);
 
 	float OriginalFirstPersonSpringArmLength = 0.f;
 	float OriginalThirdPersonSpringArmLength = 0.f;

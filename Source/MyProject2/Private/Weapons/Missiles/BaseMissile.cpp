@@ -8,6 +8,7 @@
 #include "NiagaraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Interfaces/ApproachingMissileInterface.h"
+#include "Debug/DebugHelper.h"
 
 ABaseMissile::ABaseMissile() 
 {
@@ -17,11 +18,6 @@ ABaseMissile::ABaseMissile()
 	RootComponent = Collision;
 
 	Collision->SetCollisionProfileName(TEXT("Projectile"));
-	Collision->SetNotifyRigidBodyCollision(true);
-	Collision->SetGenerateOverlapEvents(false);
-
-	Collision->OnComponentBeginOverlap.AddDynamic(this, &ABaseMissile::OnOverlapBegin);
-	Collision->OnComponentHit.AddDynamic(this, &ABaseMissile::OnHit);
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 0;
@@ -42,6 +38,11 @@ void ABaseMissile::BeginPlay()
 		Collision->IgnoreActorWhenMoving(GetOwner(), true);
 		AircraftOwner = Cast<ABaseAircraft>(GetOwner());
 	}
+
+	Collision->SetGenerateOverlapEvents(true);
+	Collision->OnComponentBeginOverlap.AddDynamic(this, &ABaseMissile::OnOverlapBegin);
+	Collision->OnComponentHit.AddDynamic(this, &ABaseMissile::OnHit);
+
 	if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>()) 
 	{
 		Subsystem->RegisterMissile(this);
@@ -61,6 +62,26 @@ void ABaseMissile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ABaseMissile::TurnTowardTarget(float Delta) {
+	if (AActor* Loaded = Tracking.Get()) {
+		FVector TargetLocation = Loaded->FindComponentByClass<UMeshComponent>()->GetComponentLocation();
+
+		FVector ToTarget = (TargetLocation - GetActorLocation()).GetSafeNormal();
+		FVector CurrentForward = GetActorForwardVector();
+
+		FRotator CurrentRot = CurrentForward.Rotation();
+		FRotator TargetRot = ToTarget.Rotation();
+
+		float MaxDelta = InGameStats.TurnRate;
+
+		FVector NewRot = FMath::VInterpNormalRotationTo(CurrentForward, ToTarget, Delta, InGameStats.TurnRate);
+
+		//DEBUG_TIME(100.f, "X: %f Y: %f Z: %f", CurrentRot.Roll, CurrentRot.Pitch, CurrentRot.Yaw);
+
+		SetActorRotation(NewRot.Rotation());
+	}
 }
 
 void ABaseMissile::LaunchSequence(const float speed)
@@ -103,9 +124,21 @@ void ABaseMissile::activateSmoke()
 }
 
 bool ABaseMissile::CalculateIfOvershoot(FVector ToTarget) {
-	ToTarget.Normalize();
-	float Dot = FVector::DotProduct(GetActorForwardVector(), ToTarget);
-	return Dot < 0.f;
+	bool bOvershot = false;
+	if (AActor* Loaded = Tracking.Get()) {
+		FVector TargetLocation = Loaded->GetActorLocation();
+		float CurrentDistance = FVector::Dist(GetActorLocation(), TargetLocation);
+
+		FVector VelocityDir = ProjectileMovement->Velocity.GetSafeNormal();
+		FVector ToTarget = (TargetLocation - GetActorLocation()).GetSafeNormal();
+
+		float Dot = FVector::DotProduct(VelocityDir, ToTarget);
+
+		bOvershot = (Dot < 0.f) && (CurrentDistance > PreviousDistance);
+
+		PreviousDistance = CurrentDistance;
+	}
+	return bOvershot;
 }
 
 void ABaseMissile::ApplyVFXLOD(const FVector& CameraLoc)

@@ -9,6 +9,7 @@
 #include "Structs and Data/LoadoutInfo/AircraftWeaponInfo.h"
 #include "Structs and Data/Weapon Data/BulletStats.h"
 #include "Structs and Data/InGame/InGameAirStats.h"
+#include "Enums/TargetTypes.h"
 #include "WeaponSystemComponent.generated.h"
 
 class ABaseAircraft;
@@ -17,6 +18,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWeaponCountUpdated,FName, Weap
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHUDLockedOn, float, LockPercent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponSystemWeaponHitResult, bool, bHit);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHUDBulletHit);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLockingSound, float, LockPercent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT2_API UWeaponSystemComponent : public UActorComponent
@@ -34,6 +36,8 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnWeaponCountUpdated OnWeaponCountUpdated;
 
+	FOnLockingSound OnLockingSound;
+
 	UWeaponSystemComponent();
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -42,9 +46,7 @@ public:
 
 	void FireBullets();
 
-	void ReEquip(FCooldownWeapon& Replace);
-
-	void FireWeaponSelected(const TSubclassOf<ABaseWeapon> WeaponClass, AActor* Target, const float Speed);
+	void FireWeaponSelected(AActor* Target, const float Speed);
 
 	void SelectWeapon(const int WeaponIndex);
 
@@ -52,16 +54,14 @@ public:
 
 	void SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In);
 
-	void BuildWeaponGroups();
-
-	void GetCount();
-
 	void SearchAndEquipWeapon(const TSubclassOf<ABaseWeapon> WeaponClass);
 
 	UFUNCTION()
 	void OnWeaponResult(bool bHit);
 
 	ABaseWeapon* GetWeapon() const { return CurrentWeapon; };
+
+	TSubclassOf<ABaseWeapon> GetWeaponClass() const{ return CurrentWeaponClass; };
 
 	TMap<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon*>> GetWeaponGroups() const { return WeaponGroups; };
 
@@ -87,17 +87,35 @@ private:
 
 	void EquipWeapons();
 
+	void GetCount();
+
+	void BuildWeaponGroups();
+
+	void ReEquip(FCooldownWeapon& Replace);
+
 	static constexpr float ConeAngle = 30.f;
 
 	static constexpr float MaxLockTime = 1.f;
 
 	bool bLocked = false;
 
+	bool bPlayingLocking = false;
+
 	float LockTime = 5.f;
 
 	float MaxWeaponCountSelected = 0.f;
 
 	float CurrentWeaponCount = 0.f;
+
+	float PreviousLockPercent = 0.f;
+
+	float CurrentRange = 0.f;
+
+	FName CurrentWeaponName = NAME_None;
+
+	FAircraftWeaponInfo AirWeaponInfo{};
+
+	TArray<ETargetType> CurrentTargetingTypes{};
 
 	UPROPERTY()
 	TObjectPtr<ABaseAircraft> Controlled = nullptr;
@@ -112,21 +130,22 @@ private:
 	TObjectPtr<ABaseWeapon> CurrentWeapon = nullptr;
 
 	UPROPERTY()
-	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout{};
+	TSubclassOf<ABaseWeapon> CurrentWeaponClass = nullptr;
 
-	TMap<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon*>> WeaponGroups{};
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AAircraftBullet> Bullet = nullptr;
+
+	UPROPERTY()
+	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout{};
 
 	UPROPERTY()
 	TMap<FName, TObjectPtr<UStaticMeshComponent>> PylonSockets{};
+
+	TMap<TSubclassOf<ABaseWeapon>, TArray<FCooldownWeapon*>> WeaponGroups{};
 
 	UPROPERTY()
 	TArray<FName> EquippedWeaponNames{};
 
 	UPROPERTY()
 	TArray<FCooldownWeapon> AvailableWeapons{};
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<AAircraftBullet> Bullet = nullptr;
-
-	FAircraftWeaponInfo AirWeaponInfo{};
 };

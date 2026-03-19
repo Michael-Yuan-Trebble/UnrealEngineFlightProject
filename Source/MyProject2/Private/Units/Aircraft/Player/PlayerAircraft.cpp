@@ -11,6 +11,7 @@
 #include "Components/AudioComponent.h"
 #include "Units/Components/Player/CameraManagerComponent.h"
 #include "Components/BoxComponent.h"
+#include "Units/Components/Player/UIAudioComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
@@ -38,16 +39,7 @@ APlayerAircraft::APlayerAircraft()
 
 	ManagerComp = CreateDefaultSubobject<UCameraManagerComponent>(TEXT("CameraManagerComponent"));
 	AudioComp = CreateDefaultSubobject<UAircraftAudioComponent>(TEXT("AudioComponent"));
-
-	PersonalAircraftAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("PersonalAircraftAudio"));
-	PersonalAircraftAudio->SetupAttachment(UnitRoot);
-	PersonalAircraftAudio->bAutoActivate = false;
-	PersonalAircraftAudio->bIsUISound = false;
-
-	GunAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("GunAudio"));
-	GunAudio->SetupAttachment(UnitRoot);
-	GunAudio->bAutoActivate = false;
-	GunAudio->bIsUISound = false;
+	UIAudioComponent = CreateDefaultSubobject<UUIAudioComponent>(TEXT("UIAudioComponent"));
 
 	health = 100;
 	Faction = EFaction::Ally;
@@ -65,8 +57,19 @@ void APlayerAircraft::BeginPlay()
 		OriginalFirstPersonSpringArmLength = FirstPersonSpringArm->TargetArmLength;
 		OriginalThirdPersonSpringArmLength = ThirdPersonSpringArm->TargetArmLength;
 	}
+
+	if (IsValid(WeaponComponent)) {
+		WeaponComponent->OnLockingSound.AddDynamic(this, &APlayerAircraft::HandleLockSound);
+	}
+
 	SetSensitivity(CameraSens);
 	SetInterp();
+
+	UAircraftStats* LoadedStats = AirStats.LoadSynchronous();
+	if (!IsValid(LoadedStats)) return;
+
+	if (UAircraftAudioData* LoadedAudio = LoadedStats->AudioData.LoadSynchronous())
+		if (IsValid(UIAudioComponent)) UIAudioComponent->SetAudio(LoadedAudio);
 }
 
 void APlayerAircraft::Tick(float DeltaSeconds) 
@@ -93,6 +96,17 @@ void APlayerAircraft::WeaponComponentOnUnitDeath()
 	if (IsValid(WeaponComponent)) WeaponComponent->ResetLockedOn();
 }
 
+void APlayerAircraft::HandleLockSound(float LockPercent) {
+	if (IsValid(UIAudioComponent)) {
+		if (LockPercent >= 1) {
+			UIAudioComponent->LockedSound(true);
+			return;
+		}
+		UIAudioComponent->LockingSound(LockPercent > 0);
+		UIAudioComponent->LockedSound(false);
+	}
+}
+
 void APlayerAircraft::FireBullets() { if (IsValid(WeaponComponent)) WeaponComponent->FireBullets(); }
 
 void APlayerAircraft::StartBullets() 
@@ -112,23 +126,22 @@ void APlayerAircraft::SelectWeapon(float index) { if (IsValid(WeaponComponent)) 
 
 int32 APlayerAircraft::AdvanceWeapon(int32 index, bool bForward) 
 {
-	if (!IsValid(WeaponComponent) || WeaponComponent->GetWeaponGroups().Num() == 0 || !IsValid(WeaponComponent->GetWeapon())) return 0;
-
+	if (!IsValid(WeaponComponent)) return 0;
 	TArray<TSubclassOf<ABaseWeapon>> Keys;
 	WeaponComponent->GetWeaponGroups().GetKeys(Keys);
 
-	int32 CurrentIndex = Keys.IndexOfByKey(WeaponComponent->GetWeapon()->GetClass());
-	if (bForward) CurrentIndex = (CurrentIndex + 1) % Keys.Num();
-	else CurrentIndex = (CurrentIndex - 1 + Keys.Num()) % Keys.Num();
+	if (Keys.Num() == 0) return 0;
 
-	WeaponComponent->SelectWeapon(CurrentIndex);
-	return CurrentIndex;
+	if (bForward)
+		index = (index + 1) % Keys.Num();
+	else
+		index = (index - 1 + Keys.Num()) % Keys.Num();
+
+	SelectWeapon(index);
+	return index;
 }
 
-void APlayerAircraft::GunSoundEffect(bool bShooting) 
-{
-	if (IsValid(AudioComp)) AudioComp->HandleGunSound(bShooting);
-}
+void APlayerAircraft::GunSoundEffect(bool bShooting) { if (IsValid(AudioComp)) AudioComp->HandleGunSound(bShooting); }
 
 void APlayerAircraft::CycleTarget() { if (IsValid(RadarComponent)) RadarComponent->CycleTarget(); };
 

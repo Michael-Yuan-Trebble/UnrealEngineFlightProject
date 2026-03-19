@@ -6,6 +6,9 @@
 #include "Styling/SlateBrush.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Blueprint/UserWidget.h"
+#include "Animation/UMGSequencePlayer.h"
+#include "Animation/WidgetAnimation.h"
 #include "Debug/DebugHelper.h"
 
 void ULockBoxWidget::NativeConstruct() 
@@ -18,6 +21,7 @@ void ULockBoxWidget::NativeConstruct()
 		Color.A = 0.f;
 		SmallReticleImage->SetColorAndOpacity(Color);
 	}
+	if (IsValid(UnitNameTextBox)) UnitNameTextBox->SetText(FText::GetEmpty());
 }
 
 void ULockBoxWidget::UpdateLockProgress(const float Percent) 
@@ -33,6 +37,7 @@ void ULockBoxWidget::UpdateLockProgress(const float Percent)
 		if (!isLockedOn) 
 		{
 			isLockedOn = true;
+			bIsLocking = false;
 			PlayFullLockAnimation();
 		}
 		return;
@@ -86,24 +91,39 @@ void ULockBoxWidget::PlayStartLockAnimation()
 
 void ULockBoxWidget::PlayFullLockAnimation()
 {
-	bIsLocking = false;
-	if (LockConfirm) StopAnimation(LockConfirm);
-
-	if (IsValid(SmallReticleImage))
-	{
-		FLinearColor C = SmallReticleImage->GetColorAndOpacity();
-		C.A = 1.f;
-		SmallReticleImage->SetColorAndOpacity(C);
+	if (LockConfirm) {
+		PlayAnimation(
+			LockConfirm,
+			LockConfirm->GetEndTime(), // start time = end
+			1,
+			EUMGSequencePlayMode::Forward,
+			0.f // play rate 0 = don't advance
+		);
 	}
 
-	if (IsValid(ReticleImage))
-	{
+	if (LockApproachAnim) {
+		PlayAnimation(
+			LockApproachAnim,
+			LockApproachAnim->GetEndTime(),
+			1,
+			EUMGSequencePlayMode::Forward,
+			0.f
+		);
+	}
+
+	if (IsValid(SmallReticleImage)) {
+		FLinearColor C = SmallReticleImage->GetColorAndOpacity();
+		C.R = 1.f;
+		C.G = 0.f;
+		C.A = 1.f;
+		//SmallReticleImage->SetColorAndOpacity(C);
+	}
+	if (IsValid(ReticleImage)) {
 		FLinearColor F = ReticleImage->GetColorAndOpacity();
 		F.A = 1.f;
-		F.R = 200.f;
-		F.B = 0.f;
+		F.R = 1.f;
 		F.G = 0.f;
-		ReticleImage->SetColorAndOpacity(F);
+		//ReticleImage->SetColorAndOpacity(F);
 	}
 }
 

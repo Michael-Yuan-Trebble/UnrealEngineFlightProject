@@ -12,6 +12,7 @@
 #include "Subsystem/MissileManagerSubsystem.h"
 #include "Player Info/PlayerGameInstance.h"
 #include "Units/Aircraft/Player/PlayerAircraft.h"
+#include "Debug/DebugHelper.h"
 
 AAircraftPlayerController::AAircraftPlayerController() 
 {

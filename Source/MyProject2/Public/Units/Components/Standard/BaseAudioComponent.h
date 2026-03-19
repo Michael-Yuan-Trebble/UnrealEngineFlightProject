@@ -15,9 +15,6 @@ public:
 
 	UBaseAudioComponent();
 
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UAudioComponent> PrimaryLoop = nullptr;
-
 	void Init();
 
 	void PlayLoop(USoundBase* Sound);
@@ -36,4 +33,7 @@ public:
 
 	bool bIsLooping = false;
 	bool bIsInit = false;
+
+protected:
+	UAudioComponent* CreateAndAttachAudioComp(USceneComponent* AttachTo);
 };

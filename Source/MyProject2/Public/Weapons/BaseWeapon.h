@@ -28,7 +28,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UBoxComponent> Collision = nullptr;
 
-	bool CanLockTarget(ETargetType TargetType) const { return SupportedTargetTypes.Contains(TargetType); }
+	bool CanLockTarget(ETargetType TargetType) const;
+
+	TArray<ETargetType> GetTargetTypes() const { return SupportedTargetTypes; };
 
 	float timeTilDelt = 0.f;
 
@@ -36,13 +38,13 @@ public:
 
 	virtual void FireTracking(const float speed, AActor* Target);
 
-	const FName& GetName() const { return WeaponName; };
+	virtual const FName& GetName() const { return WeaponName; };
 
-	const float& GetRange() const { return range; };
+	virtual const float& GetRange() const { return range; };
 
-	const float& GetCooldown() const { return cooldownTime; };
+	virtual const float& GetCooldown() const { return cooldownTime; };
 
-	const bool& GetCanLock() const { return canLock; };
+	virtual const bool& GetCanLock() const { return canLock; };
 
 protected:
 

@@ -186,12 +186,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UAircraftAudioComponent> AudioComp = nullptr;
 
-	UPROPERTY()
-	TObjectPtr<UAudioComponent> PersonalAircraftAudio = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<UAudioComponent> GunAudio = nullptr;
-
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VFX")
 	TArray<TObjectPtr<UStaticMeshComponent>> AllMainWingVapors{};
 

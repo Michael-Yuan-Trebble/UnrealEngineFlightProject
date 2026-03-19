@@ -32,3 +32,7 @@ void ABaseWeapon::FireTracking(const float speed, AActor* Target)
 {
 
  }
+
+bool ABaseWeapon::CanLockTarget(ETargetType TargetType) const {
+	return SupportedTargetTypes.Contains(TargetType);
+}

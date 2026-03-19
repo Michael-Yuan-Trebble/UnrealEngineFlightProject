@@ -10,7 +10,6 @@
 #include "UI/PlayerHUD.h"
 #include "Interfaces/LockableTarget.h"
 #include "Structs and Data/MathLib/FlightMathLibrary.h"
-#include "DrawDebugHelpers.h"
 #include "Debug/DebugHelper.h"
 
 UWeaponSystemComponent::UWeaponSystemComponent()
@@ -139,8 +138,9 @@ void UWeaponSystemComponent::EquipWeapons()
 		if (!IsValid(SpawnIn)) continue;
 
 		FCooldownWeapon tempCool;
-		tempCool.Init(Pair.Value, SpawnIn, Pair.Key, SpawnIn->GetCooldown());
+		tempCool.Init(Pair.Value, SpawnIn, Pair.Key, SpawnIn->GetCooldown(), SpawnIn->GetRange());
 		tempCool.ResetFire();
+		tempCool.SetTargetType(SpawnIn->GetTargetTypes());
 		AvailableWeapons.Add(tempCool);
 	}
 	// Defer this, would be 0 otherwise, let BeginPlay go through
@@ -167,6 +167,7 @@ void UWeaponSystemComponent::BuildWeaponGroups()
 {
 	WeaponGroups.Empty();
 	EquippedWeaponNames.Empty();
+
 	for (FCooldownWeapon& CW : AvailableWeapons)
 	{
 		if (!CW.WeaponInstance) continue;
@@ -182,17 +183,18 @@ void UWeaponSystemComponent::BuildWeaponGroups()
 	if (WeaponGroups.Num() > 0) SelectWeapon(0);
 }
 
-void UWeaponSystemComponent::FireWeaponSelected(const TSubclassOf<ABaseWeapon> WeaponClass, AActor* Target, const float Speed)
+void UWeaponSystemComponent::FireWeaponSelected(AActor* Target, const float Speed)
 {
-	if (!WeaponGroups.Contains(WeaponClass)) return;
-	for (FCooldownWeapon* Weapon : WeaponGroups[WeaponClass])
+	if (!WeaponGroups.Contains(CurrentWeaponClass)) return;
+	for (FCooldownWeapon* Weapon : WeaponGroups[CurrentWeaponClass])
 	{
 		if (!Weapon || !IsValid(Weapon->WeaponInstance) || !Weapon->CanFire()) continue;
 
 		Weapon->WeaponInstance->OnWeaponResult.AddDynamic(this, &UWeaponSystemComponent::OnWeaponResult);
 
-		if (Target && bLocked && IsValid(Controlled))
+		if (Target && bLocked && IsValid(Controlled)) {
 			Weapon->WeaponInstance->FireTracking(Controlled->GetUnitSpeed(), Target);
+		}
 		else 
 			Weapon->WeaponInstance->FireStatic(Speed);
 
@@ -217,14 +219,19 @@ void UWeaponSystemComponent::SelectWeapon(const int WeaponIndex)
 	TSubclassOf<ABaseWeapon> SelectedClass = Keys[WeaponIndex];
 
 	const TArray<FCooldownWeapon*>* WeaponArray = WeaponGroups.Find(SelectedClass);
-	if (!WeaponArray || WeaponArray->Num() == 0) return;
+	if (!WeaponArray || WeaponArray->Num() <= 0) return;
 
 	const FCooldownWeapon* WeaponData = (*WeaponArray)[0];
-	if (!WeaponData || !IsValid(WeaponData->WeaponInstance)) return;
+	if (!WeaponData) return;
+
+	CurrentTargetingTypes = WeaponData->GetTargetTypes();
+	CurrentRange = WeaponData->Range;
 
 	ResetLockedOn();
 
 	CurrentWeapon = (*WeaponArray)[0]->WeaponInstance;
+	CurrentWeaponClass = (*WeaponArray)[0]->WeaponClass;
+	if (IsValid(CurrentWeapon)) CurrentWeaponName = CurrentWeapon->GetName();
 	GetCount();
 }
 
@@ -241,35 +248,34 @@ void UWeaponSystemComponent::SearchAndEquipWeapon(const TSubclassOf<ABaseWeapon>
 	ResetLockedOn();
 
 	CurrentWeapon = (*WeaponArray)[0]->WeaponInstance;
+	CurrentWeaponClass = (*WeaponArray)[0]->WeaponClass;
 }
 
 void UWeaponSystemComponent::GetCount() 
 {
-	if (!IsValid(CurrentWeapon)) return;
+	if (!IsValid(CurrentWeaponClass)) return;
 
-	MaxWeaponCountSelected = 0;
-	CurrentWeaponCount = 0;
-
-	TSubclassOf<ABaseWeapon> CurrentClass = CurrentWeapon->GetClass();
-
-	const TArray<FCooldownWeapon*>* WeaponArray = WeaponGroups.Find(CurrentClass);
+	const TArray<FCooldownWeapon*>* WeaponArray = WeaponGroups.Find(CurrentWeaponClass);
 	if (!WeaponArray) return;
 
 	MaxWeaponCountSelected = WeaponArray->Num();
+	CurrentWeaponCount = 0;
 
 	for (const FCooldownWeapon* Weapon : *WeaponArray)
 	{
-		if (Weapon && Weapon->WeaponInstance && Weapon->bCanFire)
+		if (Weapon && Weapon->CanFire())
 			CurrentWeaponCount++;
 	}
 
-	OnWeaponCountUpdated.Broadcast(CurrentWeapon->GetName(), CurrentWeaponCount, MaxWeaponCountSelected);
+	OnWeaponCountUpdated.Broadcast(CurrentWeaponName, CurrentWeaponCount, MaxWeaponCountSelected);
 	if (CurrentWeaponCount <= 0) ResetLockedOn();
 }
 
 void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit* Target)
 {
-	if (!IsValid(CurrentWeapon) || !IsValid(Target))
+	if (CurrentWeaponCount <= 0) return;
+
+	if (!CurrentWeaponClass || !IsValid(Target))
 	{
 		if (bLocked || LockTime > 0.f) 
 			ResetLockedOn();
@@ -279,7 +285,10 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 		return;
 	}
 
-	if (!CurrentWeapon->GetCanLock() || CurrentWeaponCount <= 0)
+	ABaseWeapon* TemporaryWeapon = CurrentWeaponClass->GetDefaultObject<ABaseWeapon>();
+	if (!IsValid(TemporaryWeapon)) return;
+
+	if (!TemporaryWeapon->GetCanLock() || CurrentWeaponCount <= 0)
 	{
 		if (bLocked || LockTime > 0.f) 
 			ResetLockedOn();
@@ -293,26 +302,26 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 		return;
 	}
 
-	ETargetType TargetType = LockTarget->GetTargetType();
-	if (!CurrentWeapon->CanLockTarget(TargetType)) 
+	if (!CurrentTargetingTypes.Contains(LockTarget->GetTargetType()))
 	{
 		ResetLockedOn();
 		return;
 	}
 
 	if (!IsValid(Controlled)) return;
-
 	FVector ToTarget = Target->GetActorLocation() - Controlled->GetActorLocation();
 	float Distance = ToTarget.Size();
-	ToTarget.Normalize();
 
-	if (UFlightMathLibrary::SpeedToKMH(Distance) > UFlightMathLibrary::SpeedToKMH(CurrentWeapon->GetRange()))
+	if (UFlightMathLibrary::SpeedToKMH(Distance) > UFlightMathLibrary::SpeedToKMH(CurrentRange))
 	{
 		ResetLockedOn();
 		return;
 	}
 
-	float Dot = FVector::DotProduct(Controlled->GetAirframe()->GetForwardVector(), ToTarget);
+	if (!IsValid(Airframe)) return;
+
+	ToTarget.Normalize();
+	float Dot = FVector::DotProduct(Airframe->GetForwardVector(), ToTarget);
 	bool bInCone = Dot > FMath::Cos(FMath::DegreesToRadians(ConeAngle));
 	bool bWasLocked = bLocked;
 	if (bInCone)
@@ -335,7 +344,12 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 	else 
 		LockPercent = FMath::Clamp(LockTime / MaxLockTime, 0.f, 1.f);
 	AIR_DEBUG_KEY(0, FColor::Green, "%f", LockPercent);
-	OnHUDLockedOn.Broadcast(LockPercent);
+
+	if ((PreviousLockPercent == 0 && LockPercent != 0) || (PreviousLockPercent != LockPercent)) {
+		OnLockingSound.Broadcast(LockPercent);
+		OnHUDLockedOn.Broadcast(LockPercent);
+	}
+	PreviousLockPercent = LockPercent;
 }
 
 void UWeaponSystemComponent::ResetLockedOn() 

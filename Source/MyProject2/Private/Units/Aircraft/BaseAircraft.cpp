@@ -164,7 +164,10 @@ void ABaseAircraft::Tick(float DeltaTime)
 	}
 }
 
-void ABaseAircraft::FireWeaponSelected() { if (IsValid(WeaponComponent)) WeaponComponent->FireWeaponSelected(WeaponComponent->GetWeapon()->GetClass(), Tracked, FlightComponent->GetSpeed()); }
+void ABaseAircraft::FireWeaponSelected() { 
+	if (!IsValid(WeaponComponent) || !IsValid(FlightComponent)) return;
+	WeaponComponent->FireWeaponSelected(Tracked, FlightComponent->GetSpeed());
+}
 
 void ABaseAircraft::HandleAfterburnerFX(bool isActive) 
 {

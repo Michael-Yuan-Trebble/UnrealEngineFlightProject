@@ -10,6 +10,7 @@
 #include "Interfaces/TeamInterface.h"
 #include "Components/BoxComponent.h"
 #include "Interfaces/ApproachingMissileInterface.h"
+#include "Debug/DebugHelper.h"
 
 ABaseAHRMissile::ABaseAHRMissile()
 {
@@ -30,6 +31,7 @@ void ABaseAHRMissile::BeginPlay()
 	LockOnRange = InGameStats.LockOnRange;
 	damage = LoadedStats->Damage;
 	range = InGameStats.LockOnRange;
+	ProjectileMovement->InitialSpeed = 0.f;
 	ProjectileMovement->MaxSpeed = InGameStats.MaxSpeed;
 	SupportedTargetTypes = LoadedStats->SupportedTargetTypes;
 }
@@ -58,8 +60,18 @@ void ABaseAHRMissile::Tick(float DeltaTime)
 
 	if (!SmokeTrail.IsValid() || !MissileRocket.IsValid()) activateSmoke();
 
-	ProjectileMovement->Velocity += GetActorForwardVector() * InGameStats.Acceleration* DeltaTime;
-	ProjectileMovement->Velocity = ProjectileMovement->Velocity.GetClampedToMaxSize(ProjectileMovement->MaxSpeed);
+	// TODO: Also make bMissed be affected by terrain, mountain in way = lose track + shouldn't be able to lock anyways
+
+	if (!bMissed) TurnTowardTarget(DeltaTime);
+
+	// TODO: Make the Interp to some variable in data
+	FVector DesiredVelocity = GetActorForwardVector() * ProjectileMovement->MaxSpeed;
+	ProjectileMovement->Velocity = FMath::VInterpTo(
+		ProjectileMovement->Velocity,
+		DesiredVelocity,
+		DeltaTime,
+		1.f
+	);
 
 	if (SmokeTrail.IsValid())
 	{
@@ -80,16 +92,12 @@ void ABaseAHRMissile::Tick(float DeltaTime)
 		if (CalculateIfOvershoot(LoadedTracking->GetActorLocation() - GetActorLocation()))
 		{
 			OnWeaponResult.Broadcast(false);
-			ProjectileMovement->HomingTargetComponent = nullptr;
-			ProjectileMovement->bIsHomingProjectile = false;
 			bMissed = true;
 
 			if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(LoadedTracking))
 			{
 				if (Aircraft->Implements<UApproachingMissileInterface>())
-				{
 					IApproachingMissileInterface::Execute_UnregisterIncomingMissile(Aircraft,this);
-				}
 			}
 		}
 	}
@@ -111,9 +119,10 @@ void ABaseAHRMissile::FireTracking(float launchSpeed, AActor* Target)
 	Tracking = Target;
 	if (Target)
 	{
-		ProjectileMovement->bIsHomingProjectile = true;
-		ProjectileMovement->HomingTargetComponent = Target->GetRootComponent();
-		ProjectileMovement->HomingAccelerationMagnitude = InGameStats.TurnRate;
+		ProjectileMovement->bIsHomingProjectile = false;
+		ProjectileMovement->bRotationFollowsVelocity = false;
+		ProjectileMovement->Velocity = GetActorForwardVector() * launchSpeed;
+
 		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(Target))
 		{
 			Aircraft->OnMissileLaunchedAtSelf.Broadcast(this);

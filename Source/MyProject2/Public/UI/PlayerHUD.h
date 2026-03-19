@@ -98,7 +98,10 @@ private:
 	TObjectPtr<AAircraftPlayerController> PC = nullptr;
 
 	UPROPERTY()
-	TArray<TWeakObjectPtr<ABaseUnit>> Targets;
+	TArray<TWeakObjectPtr<ABaseUnit>> Targets{};
+
+	UPROPERTY()
+	TArray<TWeakObjectPtr<ABaseUnit>> Friendlies{};
 
 	UPROPERTY()
 	TObjectPtr<ULockBoxWidget> SelectedAircraftWidget = nullptr;
@@ -116,7 +119,7 @@ private:
 	TObjectPtr<UHitNotificationWidget> HitNotiWidget = nullptr;
 
 	UPROPERTY()
-	TMap<TWeakObjectPtr<ABaseUnit>, TObjectPtr<ULockBoxWidget>> ActiveWidgets;
+	TMap<TWeakObjectPtr<ABaseUnit>, TObjectPtr<ULockBoxWidget>> ActiveWidgets{};
 
 	UPROPERTY()
 	TWeakObjectPtr<ABaseUnit> Target = nullptr;

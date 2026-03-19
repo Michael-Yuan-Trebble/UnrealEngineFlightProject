@@ -6,6 +6,7 @@
 #include "Engine/DataAsset.h"
 #include "Structs and Data/Audios/AircraftAudios.h"
 #include "Structs and Data/Audios/GunAudios.h"
+#include "Structs and Data/Audios/UIAudios.h"
 #include "AircraftAudioData.generated.h"
 
 UCLASS()
@@ -20,4 +21,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FGunAudios GunAudios{};
+
+	UPROPERTY(EditAnywhere)
+	FUIAudios UIAudios{};
 };
