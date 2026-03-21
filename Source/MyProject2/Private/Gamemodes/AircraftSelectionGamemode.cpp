@@ -38,13 +38,21 @@ void AAircraftSelectionGamemode::BeginPlay()
 	APC->SetControlMode(EControlMode::Menu);
 	TWeakObjectPtr<AAircraftPlayerController> WeakAPC = APC;
 
-	GetWorld()->GetTimerManager().SetTimerForNextTick([this, WeakAPC]() 
+	GetWorld()->GetTimerManager().SetTimerForNextTick([WeakAPC,
+	AircraftSelectClass = AircraftSelectClass,
+	WeaponSelectClass = WeaponSelectClass,
+	BuySelectionClass = BuySelectionClass,
+	SpecialSelectionClass = SpecialSelectionClass,
+	GreyOutClass = GreyOutClass]() 
 	{
 		if (!WeakAPC.IsValid()) return;
 		AAircraftPlayerController* PC = WeakAPC.Get();
-		if (!IsValid(PC) || !IsValid(PC->GetMenuManager())) return;
-		PC->GetMenuManager()->SetupClasses(AircraftSelectClass, WeaponSelectClass, BuySelectionClass, SpecialSelectionClass, GreyOutClass);
-		PC->GetMenuManager()->ChooseAircraftUI();
+		if (!IsValid(PC)) return;
+		UMenuManagerComponent* MenuManager = PC->GetMenuManager();
+		if (!IsValid(MenuManager)) return;
+
+		MenuManager->SetupClasses(AircraftSelectClass, WeaponSelectClass, BuySelectionClass, SpecialSelectionClass, GreyOutClass);
+		MenuManager->ChooseAircraftUI();
 	});
 }
 

@@ -8,6 +8,7 @@
 #include "NiagaraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Interfaces/ApproachingMissileInterface.h"
+#include "Units/Components/MissileAudioComponent.h"
 #include "Debug/DebugHelper.h"
 
 ABaseMissile::ABaseMissile() 
@@ -15,15 +16,16 @@ ABaseMissile::ABaseMissile()
 	PrimaryActorTick.bCanEverTick = true;
 	canLock = true;
 	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Missile Collision"));
-	RootComponent = Collision;
-
 	Collision->SetCollisionProfileName(TEXT("Projectile"));
+	RootComponent = Collision;
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 0;
-	ProjectileMovement->bRotationFollowsVelocity = true;
+	ProjectileMovement->bRotationFollowsVelocity = false;
 	ProjectileMovement->bShouldBounce = false;
 	ProjectileMovement->ProjectileGravityScale = 0.f;
+
+	MissileAudioComp = CreateDefaultSubobject<UMissileAudioComponent>(TEXT("MissileAudio"));
 
 	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Missile"));
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -33,8 +35,7 @@ ABaseMissile::ABaseMissile()
 void ABaseMissile::BeginPlay() 
 {
 	Super::BeginPlay();
-	if (GetOwner()) 
-	{
+	if (GetOwner()) {
 		Collision->IgnoreActorWhenMoving(GetOwner(), true);
 		AircraftOwner = Cast<ABaseAircraft>(GetOwner());
 	}
@@ -44,17 +45,18 @@ void ABaseMissile::BeginPlay()
 	Collision->OnComponentHit.AddDynamic(this, &ABaseMissile::OnHit);
 
 	if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>()) 
-	{
 		Subsystem->RegisterMissile(this);
-	}
+}
+
+void ABaseMissile::SetAudio() {
+	if (MissileAudioComp)
+		MissileAudioComp->SetAudio(InGameStats.MissileAudio.LoadSynchronous());
 }
 
 void ABaseMissile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>())
-	{
 		Subsystem->UnregisterMissile(this);
-	}
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -66,7 +68,7 @@ void ABaseMissile::Tick(float DeltaTime)
 
 void ABaseMissile::TurnTowardTarget(float Delta) {
 	if (AActor* Loaded = Tracking.Get()) {
-		FVector TargetLocation = Loaded->FindComponentByClass<UMeshComponent>()->GetComponentLocation();
+		FVector TargetLocation = Loaded->FindComponentByClass<USkeletalMeshComponent>()->GetComponentLocation();
 
 		FVector ToTarget = (TargetLocation - GetActorLocation()).GetSafeNormal();
 		FVector CurrentForward = GetActorForwardVector();
@@ -74,11 +76,9 @@ void ABaseMissile::TurnTowardTarget(float Delta) {
 		FRotator CurrentRot = CurrentForward.Rotation();
 		FRotator TargetRot = ToTarget.Rotation();
 
-		float MaxDelta = InGameStats.TurnRate;
-
 		FVector NewRot = FMath::VInterpNormalRotationTo(CurrentForward, ToTarget, Delta, InGameStats.TurnRate);
 
-		//DEBUG_TIME(100.f, "X: %f Y: %f Z: %f", CurrentRot.Roll, CurrentRot.Pitch, CurrentRot.Yaw);
+		// AIR_DEBUG_KEY(1, FColor::Red, "X: %f Y: %f Z: %f", CurrentRot.Roll, CurrentRot.Pitch, CurrentRot.Yaw);
 
 		SetActorRotation(NewRot.Rotation());
 	}
@@ -86,6 +86,10 @@ void ABaseMissile::TurnTowardTarget(float Delta) {
 
 void ABaseMissile::LaunchSequence(const float speed)
 {
+}
+
+void ABaseMissile::LaunchAudio() {
+	if (MissileAudioComp) MissileAudioComp->Launch();
 }
 
 void ABaseMissile::activateSmoke() 
@@ -97,11 +101,13 @@ void ABaseMissile::activateSmoke()
 	UNiagaraSystem* LoadedSmoke = SmokeTrailSystem.LoadSynchronous();
 	if (!IsValid(LoadedSmoke)) return;
 
+	FName ExhaustSocket = "ExhaustSocket";
+
 	SmokeTrail = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		GetWorld(),
 		LoadedSmoke,
-		WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")),
-		WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")),
+		WeaponMesh->GetSocketLocation(ExhaustSocket),
+		WeaponMesh->GetSocketRotation(ExhaustSocket),
 		FVector(1.f),
 		true,
 		true
@@ -113,8 +119,8 @@ void ABaseMissile::activateSmoke()
 	MissileRocket = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		GetWorld(),
 		LoadedRocket,
-		WeaponMesh->GetSocketLocation(TEXT("ExhaustSocket")),
-		WeaponMesh->GetSocketRotation(TEXT("ExhaustSocket")),
+		WeaponMesh->GetSocketLocation(ExhaustSocket),
+		WeaponMesh->GetSocketRotation(ExhaustSocket),
 		FVector(1.f),
 		true,
 		true
@@ -168,12 +174,8 @@ void ABaseMissile::NotifyCountermeasure()
 		{
 			if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(LoadedTracking)) {
 				if (Aircraft->Implements<UApproachingMissileInterface>())
-				{
 					IApproachingMissileInterface::Execute_UnregisterIncomingMissile(Aircraft, this);
-				}
 			}
-			ProjectileMovement->bIsHomingProjectile = false;
-			ProjectileMovement->HomingTargetComponent = nullptr;
 			ProjectileMovement->Velocity = GetActorForwardVector() * InGameStats.Acceleration;
 			Tracking = nullptr;
 		}

@@ -43,7 +43,6 @@ void AMissionWaveActor::ActivateSpawnPoints() {
 void AMissionWaveActor::OnWaveDestroyed(const ABaseSpawnPoint* Wave) {
 	WaveCount--;
 	if (WaveCount <= 0) {
-		DEBUG_TIME(100.f, "WAVE DESTROYED");
 		HandleOnWaveDestroyed.Broadcast(this);
 	}
 }

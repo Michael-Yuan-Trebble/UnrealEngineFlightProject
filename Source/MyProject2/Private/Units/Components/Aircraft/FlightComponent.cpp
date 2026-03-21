@@ -165,7 +165,6 @@ void UFlightComponent::CheckLanding(const float D)
 }
 
 void UFlightComponent::AddDropSpeed(const float D) {
-
 	// It doesn't have to go to 90! it can go to something like 30 or 40, once stalling then push it to 90 for the user to gain speed then exit stall
 	if (currentKMHSpeed <= StallSpeed) return;
 
@@ -210,14 +209,11 @@ float UFlightComponent::CalculateSpeedDrag()
 	float totalFlightPercent = (targetSpeed != 0.f) ? (currentSpeed / targetSpeed) : 0.f;
 
 	if (totalFlightPercent >= 0.8f && totalFlightPercent <= 1.05f)
-	{
 		drag = Acceleration / (1.05f + FMath::Pow(2.f, -0.01f * (currentSpeed - targetSpeed)));
-	}
 	else if (totalFlightPercent > 1.05f && switchingPhase)
-	{
 		drag = Acceleration * 4.f / (1.f + FMath::Pow(2.f, -0.01f * (currentSpeed - targetSpeed)));
-	}
-	else if (switchingPhase) switchingPhase = false;
+	else if (switchingPhase) 
+		switchingPhase = false;
 
 	return FMath::Clamp(drag, 0.f, Acceleration * 10.f);
 }

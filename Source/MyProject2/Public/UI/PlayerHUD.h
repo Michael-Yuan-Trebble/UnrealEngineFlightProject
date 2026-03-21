@@ -62,8 +62,6 @@ public:
 	void HandleRadarScan(const TArray<FDetectedAircraftInfo>& InEnemies);
 
 private:
-
-	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -127,6 +125,8 @@ private:
 	void UpdateTargetWidgets();
 
 	void PitchLadderUpdate();
+
+	UUserWidget* CreateAndAlignWidget(TSubclassOf<UUserWidget> Class, FVector2D Alignment);
 
 	static constexpr float AimWorldPosDistance = 10000.f;
 	static constexpr float AOAWorldPosDistance = 10000.f;

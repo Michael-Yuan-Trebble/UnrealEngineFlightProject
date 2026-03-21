@@ -191,6 +191,7 @@ void UWeaponSystemComponent::FireWeaponSelected(AActor* Target, const float Spee
 		if (!Weapon || !IsValid(Weapon->WeaponInstance) || !Weapon->CanFire()) continue;
 
 		Weapon->WeaponInstance->OnWeaponResult.AddDynamic(this, &UWeaponSystemComponent::OnWeaponResult);
+		Weapon->WeaponInstance->LaunchAudio();
 
 		if (Target && bLocked && IsValid(Controlled)) {
 			Weapon->WeaponInstance->FireTracking(Controlled->GetUnitSpeed(), Target);
@@ -343,7 +344,7 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 		LockPercent = 1.f;
 	else 
 		LockPercent = FMath::Clamp(LockTime / MaxLockTime, 0.f, 1.f);
-	AIR_DEBUG_KEY(0, FColor::Green, "%f", LockPercent);
+	//AIR_DEBUG_KEY(0, FColor::Green, "%f", LockPercent);
 
 	if ((PreviousLockPercent == 0 && LockPercent != 0) || (PreviousLockPercent != LockPercent)) {
 		OnLockingSound.Broadcast(LockPercent);
@@ -357,6 +358,8 @@ void UWeaponSystemComponent::ResetLockedOn()
 	float lastLock = LockTime;
 	LockTime = 0.f;
 	bLocked = false;
+	OnLockingSound.Broadcast(0.f);
+	OnHUDLockedOn.Broadcast(0.f);
 	if (lastLock != 0.f) OnHUDLockedOn.Broadcast(0.f);
 }
 

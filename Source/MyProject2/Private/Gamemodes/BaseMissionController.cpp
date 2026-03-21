@@ -44,14 +44,13 @@ void ABaseMissionController::OnEnemyDestroyed(const AMissionWaveActor* InWave) {
 	int32 WaveIndex = InWave->WaveIndex;
 	CompletedWaves.FindOrAdd(WaveIndex)++;
 	if (auto* Waves = MissionWaves.Find(WaveIndex)) {
-		if (CompletedWaves[WaveIndex] >= Waves->Num()) {
+		if (CompletedWaves[WaveIndex] >= Waves->Num()-1) {
 			HandleWaveCompleted(WaveIndex);
 		}
 	}
 }
 
 void ABaseMissionController::HandleWaveCompleted(int32 WaveIndex) {
-	AIR_DEBUG_KEY(1, FColor::Red, "Wave %d Destroyed", WaveIndex);
 	if (WaveIndex >= TotalWaves) MissionComplete();
 	else StartWave(WaveIndex + 1);
 }

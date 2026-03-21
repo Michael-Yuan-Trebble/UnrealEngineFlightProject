@@ -86,7 +86,7 @@ void UWeaponSelectionComponent::CheckWeaponLoop(const TArray<FName>& Pylons)
 	if (!IsValid(GetWorld())) return;
 
 	CurrentPylonIndex++;
-	DEBUG_TIME(100.f, "Pylon Number: %d", CurrentPylonIndex);
+	//DEBUG_TIME(100.f, "Pylon Number: %d", CurrentPylonIndex);
 	if (CurrentPylonIndex >= Aircraft->NumOfPylons)
 	{
 		MenuManager->ChooseSpecialUI();

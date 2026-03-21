@@ -15,12 +15,7 @@ void ULockBoxWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (SmallReticleImage)
-	{
-		FLinearColor Color = SmallReticleImage->GetColorAndOpacity();
-		Color.A = 0.f;
-		SmallReticleImage->SetColorAndOpacity(Color);
-	}
+	HideSmallReticle();
 	if (IsValid(UnitNameTextBox)) UnitNameTextBox->SetText(FText::GetEmpty());
 }
 
@@ -91,40 +86,11 @@ void ULockBoxWidget::PlayStartLockAnimation()
 
 void ULockBoxWidget::PlayFullLockAnimation()
 {
-	if (LockConfirm) {
-		PlayAnimation(
-			LockConfirm,
-			LockConfirm->GetEndTime(), // start time = end
-			1,
-			EUMGSequencePlayMode::Forward,
-			0.f // play rate 0 = don't advance
-		);
-	}
+	if (LockConfirm)
+		PlayAnimation(LockConfirm, LockConfirm->GetEndTime(), 1, EUMGSequencePlayMode::Forward, 0.f);
 
-	if (LockApproachAnim) {
-		PlayAnimation(
-			LockApproachAnim,
-			LockApproachAnim->GetEndTime(),
-			1,
-			EUMGSequencePlayMode::Forward,
-			0.f
-		);
-	}
-
-	if (IsValid(SmallReticleImage)) {
-		FLinearColor C = SmallReticleImage->GetColorAndOpacity();
-		C.R = 1.f;
-		C.G = 0.f;
-		C.A = 1.f;
-		//SmallReticleImage->SetColorAndOpacity(C);
-	}
-	if (IsValid(ReticleImage)) {
-		FLinearColor F = ReticleImage->GetColorAndOpacity();
-		F.A = 1.f;
-		F.R = 1.f;
-		F.G = 0.f;
-		//ReticleImage->SetColorAndOpacity(F);
-	}
+	if (LockApproachAnim)
+		PlayAnimation(LockApproachAnim, LockApproachAnim->GetEndTime(), 1, EUMGSequencePlayMode::Forward, 0.f);
 }
 
 void ULockBoxWidget::SelectedAnimation(const FName& TargetName)
@@ -135,7 +101,8 @@ void ULockBoxWidget::SelectedAnimation(const FName& TargetName)
 
 void ULockBoxWidget::SelectStop() 
 {
-	if (LockConfirm) StopAnimation(LockConfirm);
+	StopAnimation(LockConfirm);
+	HideSmallReticle();
 	if (IsValid(UnitNameTextBox)) UnitNameTextBox->SetText(FText::GetEmpty());
 }
 
@@ -164,4 +131,11 @@ void ULockBoxWidget::ResetAnimation(UWidgetAnimation* Animation)
 	if (!Animation) return;
 	StopAnimation(Animation);
 	SetAnimationCurrentTime(Animation, 0.f);
+}
+
+void ULockBoxWidget::HideSmallReticle() {
+	if (!SmallReticleImage) return;
+	FLinearColor Color = SmallReticleImage->GetColorAndOpacity();
+	Color.A = 0.f;
+	SmallReticleImage->SetColorAndOpacity(Color);
 }

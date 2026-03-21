@@ -12,6 +12,7 @@ UBTTaskFireGun::UBTTaskFireGun()
 
 EBTNodeResult::Type UBTTaskFireGun::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) 
 {
+	Super::ExecuteTask(OwnerComp, NodeMemory);
 	return EBTNodeResult::InProgress;
 }
 

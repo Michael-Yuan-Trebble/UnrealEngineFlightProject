@@ -31,8 +31,12 @@ void ABaseWeapon::FireStatic(const float speed)
 void ABaseWeapon::FireTracking(const float speed, AActor* Target)
 {
 
- }
+}
 
 bool ABaseWeapon::CanLockTarget(ETargetType TargetType) const {
 	return SupportedTargetTypes.Contains(TargetType);
+}
+
+void ABaseWeapon::LaunchAudio() {
+
 }

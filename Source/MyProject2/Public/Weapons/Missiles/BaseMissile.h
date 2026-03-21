@@ -11,6 +11,7 @@ class ABaseAircraft;
 class UProjectileMovementComponent;
 class UNiagaraSystem;
 class UNiagaraComponent;
+class UMissileAudioComponent;
 
 UCLASS()
 class MYPROJECT2_API ABaseMissile : public ABaseWeapon
@@ -55,6 +56,8 @@ public:
 
 	virtual void LaunchSequence(const float Speed);
 
+	virtual void LaunchAudio() override;
+
 	float ReturnCooldownTime() { return cooldownTime; };
 
 	void activateSmoke();
@@ -65,15 +68,22 @@ public:
 
 	void NotifyCountermeasure();
 
+	void SetAudio();
+
 	bool bMissileVFXOn = true;
 
 	bool bMissed = false;
 
 protected:
 
+	UPROPERTY()
+	UMissileAudioComponent* MissileAudioComp = nullptr;
+
 	float LockOnRange = 0.f;
 
 	float missileVelocity = 0.f;
+
+	float PreviousDistance = 0.f;
 	
 	virtual void BeginPlay() override;
 
@@ -86,8 +96,6 @@ protected:
 	virtual bool CalculateIfOvershoot(FVector ToTarget);
 
 	void TurnTowardTarget(float Delta);
-
-	float PreviousDistance = 0.f;
 
 private:
 	UFUNCTION()

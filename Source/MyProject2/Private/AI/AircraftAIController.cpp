@@ -29,7 +29,7 @@ void AAircraftAIController::OnPossess(APawn* PawnPossess) {
 	}
 
 	Controlled = Cast<ABaseAircraft>(GetPawn());
-	DEBUG_TIME(100.f, "%s possessed %s", *GetName(), *GetNameSafe(PawnPossess));
+	// DEBUG_TIME(100.f, "%s possessed %s", *GetName(), *GetNameSafe(PawnPossess));
 	if (!Controlled) return;
 }
 

@@ -29,7 +29,13 @@ public:
 
 	void SetAudio(UAircraftAudioData* InAudio);
 
+	void HandleAfterburner(bool bAfterburner);
+
 private:
+
+	bool bAfterburnerActive = false;
+
+	ECameraPerspective CurrentPerspective = ECameraPerspective::FirstPerson;
 
 	UPROPERTY()
 	TObjectPtr<UAudioComponent> PersonalAircraftAudio = nullptr;
@@ -48,6 +54,9 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<USoundWave> CachedThirdPerson = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<USoundWave> CachedThirdPersonAfterburner = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<USoundWave> CachedGun = nullptr;

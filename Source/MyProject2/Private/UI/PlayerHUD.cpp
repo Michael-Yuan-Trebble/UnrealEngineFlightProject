@@ -9,7 +9,6 @@
 #include "UI/PitchLadder.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Units/Components/Aircraft/RadarComponent.h"
-#include "Components/CanvasPanelSlot.h"
 #include "Units/Aircraft/Player/PlayerAircraft.h"
 #include "Debug/DebugHelper.h"
 
@@ -18,18 +17,13 @@ APlayerHUD::APlayerHUD()
     PrimaryActorTick.bCanEverTick = true;
 }
 
-void APlayerHUD::BeginPlay()
-{
-    Super::BeginPlay();
-}
-
 void APlayerHUD::Init(AAircraftPlayerController* InPC) 
 {
     PC = InPC;
-    MiniMap = CreateWidget<UMinimapWidget>(GetWorld(), MiniMapClass);
+    if (!PC) return;
+    MiniMap = CreateWidget<UMinimapWidget>(PC, MiniMapClass);
     if (!IsValid(MiniMap)) return;
     MiniMap->AddToViewport();
-
     MiniMap->InitializeBounds(
         FVector2D(-MiniMapDimensions, -MiniMapDimensions),
         FVector2D(MiniMapDimensions, MiniMapDimensions)
@@ -37,32 +31,26 @@ void APlayerHUD::Init(AAircraftPlayerController* InPC)
 
     FVector2D MiddleAlignment = FVector2D(0.5f, 0.5f);
 
-    if (!IsValid(AimReticleClass)) return;
-    AimReticleWidget = CreateWidget<UUserWidget>(PC, AimReticleClass);
-    AimReticleWidget->AddToViewport();
-    AimReticleWidget->SetAlignmentInViewport(MiddleAlignment);
+    AimReticleWidget = CreateAndAlignWidget(AimReticleClass, MiddleAlignment);
+    AOAReticleWidget = CreateAndAlignWidget(AOAReticleClass, MiddleAlignment);
+    PitchLadderWidget = Cast<UPitchLadder>(CreateAndAlignWidget(PitchLadderClass, MiddleAlignment));
+    HitNotiWidget = Cast<UHitNotificationWidget>(CreateAndAlignWidget(HitNotiClass, MiddleAlignment));
+    if (HitNotiWidget) HitNotiWidget->HideMessage();
 
-    if (!IsValid(AOAReticleClass)) return;
-    AOAReticleWidget = CreateWidget<UUserWidget>(PC, AOAReticleClass);
-    AOAReticleWidget->AddToViewport();
-    AOAReticleWidget->SetAlignmentInViewport(MiddleAlignment);
-
-    if (!IsValid(PitchLadderClass)) return;
-    PitchLadderWidget = CreateWidget<UPitchLadder>(PC, PitchLadderClass);
-    PitchLadderWidget->AddToViewport();
-    PitchLadderWidget->SetAlignmentInViewport(MiddleAlignment);
-
-    if (!IsValid(HitNotiClass)) return;
-    HitNotiWidget = CreateWidget<UHitNotificationWidget>(PC, HitNotiClass);
-    HitNotiWidget->AddToViewport();
-    HitNotiWidget->HideMessage();
-    HitNotiWidget->SetAlignmentInViewport(MiddleAlignment);
 
     Controlled = Cast<APlayerAircraft>(PC->GetPawn());
     if (!Controlled.IsValid()) return;
-    if (URadarComponent* Radar = Controlled->GetRadarComp()) {
+    if (URadarComponent* Radar = Controlled->GetRadarComp())
         Radar->RadarScanEvent.AddDynamic(this, &APlayerHUD::HandleRadarScan);
-    }
+}
+
+UUserWidget* APlayerHUD::CreateAndAlignWidget(TSubclassOf<UUserWidget> Class, FVector2D Alignment) {
+    if (!IsValid(Class) || !IsValid(PC)) return nullptr;
+    UUserWidget* Widget = CreateWidget<UUserWidget>(PC, Class);
+    if (!IsValid(Widget)) return nullptr;
+    Widget->AddToViewport();
+    Widget->SetAlignmentInViewport(Alignment);
+    return Widget;
 }
 
 void APlayerHUD::OnWeaponChanged(FName WeaponName, int32 Current, int32 Max) 
@@ -74,8 +62,7 @@ void APlayerHUD::OnWeaponChanged(FName WeaponName, int32 Current, int32 Max)
 
 void APlayerHUD::HandleWeaponMiss()
 {
-    if (!IsValid(HitNotiWidget)) return;
-    HitNotiWidget->ShowMessage(FText::FromString("Missed"));
+    if (IsValid(HitNotiWidget)) HitNotiWidget->ShowMessage(FText::FromString("Missed"));
 }
 
 void APlayerHUD::UpdateTargetHit(bool bDestroyed) 
@@ -89,10 +76,7 @@ void APlayerHUD::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
     if (!IsValid(PC)) return;
-    if (IsValid(LockBoxWidgetClass))
-    {
-        UpdateTargetWidgets();
-    }
+    UpdateTargetWidgets();
 
     if (!Controlled.IsValid()) return;
     FVector CamLoc = FVector::ZeroVector;
@@ -143,8 +127,12 @@ void APlayerHUD::TogglePitchLadder(bool Toggle) {
 void APlayerHUD::PitchLadderUpdate()
 {
     if (!isPitchLadderVisible || !IsValid(PitchLadderWidget)) return;
-    float Pitch = FMath::RadiansToDegrees(FMath::Asin(Controlled->GetAirframe()->GetForwardVector().Z));
-    PitchLadderWidget->Update(Pitch);
+    if (APlayerAircraft* Loaded = Controlled.Get()) {
+        if (Loaded->GetAirframe()) {
+            float Pitch = FMath::RadiansToDegrees(FMath::Asin(Controlled->GetAirframe()->GetForwardVector().Z));
+            PitchLadderWidget->Update(Pitch);
+        }
+    }
 }
 
 void APlayerHUD::UpdateLocked(const float LockPercent)
@@ -196,7 +184,7 @@ void APlayerHUD::UpdateTargetWidgets()
         if (!Actor.IsValid() || !IsValid(Reticle)) continue;
 
         FVector WorldLocation = Actor->GetActorLocation();
-        FVector2D ScreenPos;
+        FVector2D ScreenPos = FVector2D::ZeroVector;
         if (!IsValid(PC)) return;
         bool bProjected = PC->ProjectWorldLocationToScreen(WorldLocation, ScreenPos);
 

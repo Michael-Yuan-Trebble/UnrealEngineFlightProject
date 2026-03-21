@@ -21,7 +21,7 @@ void AAircraftSpawnPoint::ActivateSpawn()
 
 	for (int32 i = 0; i < Count; i++) 
 	{
-		FVector Offset = BaseRotation.RotateVector(FVector(i * FormationSpacing, 0.f, 0.f));
+		FVector Offset = BaseRotation.RotateVector(FVector(i * FormationSpacing, i * FormationSpacing, 0.f));
 		FVector SpawnLocation = BaseLocation + Offset;
 
 		FActorSpawnParameters Params;
@@ -61,7 +61,7 @@ void AAircraftSpawnPoint::StressTest()
 
 	for (int32 i = 0; i < Count; i++)
 	{
-		FVector Location = GetActorLocation() + FVector(i * 200.f, i * 200.f, 0);
+		FVector Location = GetActorLocation() + FVector(i * FormationSpacing, i * FormationSpacing, 0);
 		FRotator Rotation = GetActorRotation();
 
 		FActorSpawnParameters Params;

@@ -59,4 +59,6 @@ private:
 	bool bIsLocking = false;
 
 	void ResetAnimation(UWidgetAnimation* Animation);
+
+	void HideSmallReticle();
 };

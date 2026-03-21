@@ -46,6 +46,8 @@ public:
 
 	virtual const bool& GetCanLock() const { return canLock; };
 
+	virtual void LaunchAudio();
+
 protected:
 
 	bool canLock = false;

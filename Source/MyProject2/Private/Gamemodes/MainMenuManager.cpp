@@ -20,13 +20,12 @@ void UMainMenuManager::Initialize(FSubsystemCollectionBase& Collection)
 
 void UMainMenuManager::Deinitialize() 
 {
-	HideAll(true);
+	ClearAllWidgets();
 	Super::Deinitialize();
 }
 
 void UMainMenuManager::Init(AAircraftPlayerController* InAPC) 
 {
-	APC = InAPC;
 }
 
 void UMainMenuManager::ShowMainMenu() 
@@ -72,20 +71,10 @@ void UMainMenuManager::ShowFreeFlight()
 
 void UMainMenuManager::OnLevelPicked(const FMissionData& LevelName)
 {
-	if (IsValid(TransitionScreenClass))
-	{
-		TransitionScreenWidget = CreateWidget<UUserWidget>(GetWorld(), TransitionScreenClass);
-		if (IsValid(TransitionScreenWidget))
-		{
-			TransitionScreenWidget->AddToViewport(1000);
-		}
-	}
-
-	AMainMenuGamemode* GM = Cast<AMainMenuGamemode>(GetWorld()->GetAuthGameMode());
-	if (!IsValid(GM)) return;
-	GM->LevelSelected(LevelName);
+	ClearAllWidgets();
+	if (AMainMenuGamemode* GM = Cast<AMainMenuGamemode>(GetWorld()->GetAuthGameMode())) 
+		GM->LevelSelected(LevelName);
 }
-
 
 void UMainMenuManager::ShowSettings() 
 {
@@ -109,16 +98,30 @@ void UMainMenuManager::GoBack()
 	else CurrentMenu = nullptr;
 }
 
-void UMainMenuManager::HideAll(bool bClear)
-{
-	for (UUserWidget* Menu : MenuStack) 
-	{
-		if (IsValid(Menu) && Menu->IsInViewport())
+void UMainMenuManager::ClearAllWidgets() {
+	for (UUserWidget* Menu : MenuStack) {
+		if (IsValid(Menu))
 			Menu->RemoveFromParent();
 	}
-	if (bClear) 
-	{
-		MenuStack.Empty();
+
+	if (IsValid(MainMenuWidget)) {
+		MainMenuWidget->RemoveFromParent();
+		MainMenuWidget->OnSettingsPicked.RemoveAll(this);
+		MainMenuWidget->OnFreeFlightPicked.RemoveAll(this);
+		MainMenuWidget = nullptr;
 	}
+
+	if (IsValid(FreeFlightWidget)) {
+		FreeFlightWidget->RemoveFromParent();
+		FreeFlightWidget->OnLevelSelected.RemoveAll(this);
+		FreeFlightWidget = nullptr;
+	}
+
+	if (IsValid(TransitionScreenWidget)) {
+		TransitionScreenWidget->RemoveFromParent();
+		TransitionScreenWidget = nullptr;
+	}
+
+	MenuStack.Empty();
 	CurrentMenu = nullptr;
 }

@@ -10,6 +10,7 @@
 #include "Interfaces/TeamInterface.h"
 #include "Components/BoxComponent.h"
 #include "Interfaces/ApproachingMissileInterface.h"
+#include "Weapons/AircraftBullet.h"
 #include "Debug/DebugHelper.h"
 
 ABaseAHRMissile::ABaseAHRMissile()
@@ -34,6 +35,7 @@ void ABaseAHRMissile::BeginPlay()
 	ProjectileMovement->InitialSpeed = 0.f;
 	ProjectileMovement->MaxSpeed = InGameStats.MaxSpeed;
 	SupportedTargetTypes = LoadedStats->SupportedTargetTypes;
+	SetAudio();
 }
 
 void ABaseAHRMissile::Tick(float DeltaTime)
@@ -93,6 +95,7 @@ void ABaseAHRMissile::Tick(float DeltaTime)
 		{
 			OnWeaponResult.Broadcast(false);
 			bMissed = true;
+			Tracking = nullptr;
 
 			if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(LoadedTracking))
 			{
@@ -127,9 +130,7 @@ void ABaseAHRMissile::FireTracking(float launchSpeed, AActor* Target)
 		{
 			Aircraft->OnMissileLaunchedAtSelf.Broadcast(this);
 			if (Aircraft->Implements<UApproachingMissileInterface>()) 
-			{
 				IApproachingMissileInterface::Execute_RegisterIncomingMissile(Aircraft,this);
-			}
 		}
 	}
 	LaunchSequence(launchSpeed);
@@ -153,26 +154,25 @@ void ABaseAHRMissile::CheckAndDelete(AActor* OtherActor)
 {
 	if (!bAir || !OtherActor || OtherActor == this || !AircraftOwner.IsValid() || OtherActor == AircraftOwner.Get()) return;
 
+	// TODO: Make collision different so this check doesn't have to exist
+	if (OtherActor->IsA(ABaseWeapon::StaticClass())) return;
+	if (OtherActor->IsA(AAircraftBullet::StaticClass())) return;
+
 	if (AActor* LoadedTracking = Tracking.Get()) {
-		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(LoadedTracking))
-		{
+		if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(LoadedTracking)){
 			if (Aircraft->Implements<UApproachingMissileInterface>())
-			{
 				IApproachingMissileInterface::Execute_UnregisterIncomingMissile(Aircraft, this);
-			}
 		}
 	}
 
 	if (ABaseAircraft* LoadedOwner = AircraftOwner.Get()) {
-		if (OtherActor->Implements<UTeamInterface>())
-		{
+		if (OtherActor->Implements<UTeamInterface>()){
 			EFaction OtherFaction = LoadedOwner->GetFaction();
 			OtherFaction = ITeamInterface::Execute_GetFaction(OtherActor);
 			if (OtherFaction == LoadedOwner->GetFaction()) return;
 		}
 
-		if (OtherActor->Implements<UDamageableInterface>())
-		{
+		if (OtherActor->Implements<UDamageableInterface>()){
 			IDamageableInterface::Execute_OnDamage(OtherActor, this, LoadedOwner, OtherActor, damage);
 			OnWeaponResult.Broadcast(true);
 		}

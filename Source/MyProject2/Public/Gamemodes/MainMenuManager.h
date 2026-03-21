@@ -38,8 +38,6 @@ public:
 
 	void GoBack();
 
-	void HideAll(bool bClear);
-
 	void Init(AAircraftPlayerController* InAPC);
 
 	UFUNCTION()
@@ -49,10 +47,9 @@ public:
 
 	void SetFreeFlightClass(const TSubclassOf<UFreeFlightWidget> InFlight) { FreeFlightClass = InFlight; };
 
-private:
+	void ClearAllWidgets();
 
-	UPROPERTY()
-	TObjectPtr<AAircraftPlayerController> APC = nullptr;
+private:
 
 	UPROPERTY()
 	TSubclassOf<UMainMenuWidget> MainMenuClass = nullptr;

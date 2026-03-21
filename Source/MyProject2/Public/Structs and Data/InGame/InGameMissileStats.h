@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Structs and Data/MissileAudioData.h"
 #include "InGameMissileStats.generated.h"
 
 USTRUCT(BlueprintType)
@@ -22,4 +23,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float LockOnRange = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UMissileAudioData> MissileAudio = nullptr;
 };

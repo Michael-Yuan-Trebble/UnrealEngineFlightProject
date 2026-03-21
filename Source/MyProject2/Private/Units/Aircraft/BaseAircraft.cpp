@@ -65,6 +65,7 @@ void ABaseAircraft::BeginPlay()
 	Super::BeginPlay();
 
 	GetBulletStats();
+	GetAirStats();
 
 	if (IsValid(VisualCompClass)) 
 	{
@@ -78,22 +79,20 @@ void ABaseAircraft::BeginPlay()
 
 	if (!IsValid(Airframe) || !IsValid(RadarComponent) || !IsValid(FlightComponent) || !IsValid(UnitRoot)) return;
 
-	UAircraftStats* LoadedStats = AirStats.LoadSynchronous();
-	if (!IsValid(LoadedStats)) return;
-
-	UnitName = LoadedStats->AircraftName;
+	UnitName = CachedAirStats->AircraftName;
 
 	OriginalCollOffset = UnitRoot->GetRelativeLocation();
 	OriginalExtent = UnitRoot->GetUnscaledBoxExtent();
 
 	RadarComponent->Setup(this);
+	WeaponComponent->Setup(this, CachedAirStats);
+	FlightComponent->Setup(this, CachedAirStats);
+
 	FlightComponent->SetLanded(bLanded);
-	FlightComponent->Setup(this,LoadedStats);
 	FlightComponent->SetDropSpeed(DropSpeed);
 	FlightComponent->SetStallSpeed(StallSpeed);
-	WeaponComponent->Setup(this, LoadedStats);
 
-	if (UAircraftAudioData* LoadedAudio = LoadedStats->AudioData.LoadSynchronous()) 
+	if (UAircraftAudioData* LoadedAudio = CachedAirStats->AudioData.LoadSynchronous())
 		AudioComp->SetAudio(LoadedAudio);
 
 	if (IsValid(AfterburnerSystem))
@@ -169,23 +168,26 @@ void ABaseAircraft::FireWeaponSelected() {
 	WeaponComponent->FireWeaponSelected(Tracked, FlightComponent->GetSpeed());
 }
 
-void ABaseAircraft::HandleAfterburnerFX(bool isActive) 
+void ABaseAircraft::HandleAfterburnerFX(bool bActive) 
 {
 	for (UNiagaraComponent* FX : AllAfterburners) 
 	{
 		if (IsValid(FX)) 
 		{
-			if (isActive) FX->Activate();
+			if (bActive) FX->Activate();
 			else FX->Deactivate();
 		}
 	}
+
+	if (IsValid(AudioComp))
+		AudioComp->HandleAfterburner(bActive);
 }
 
-void ABaseAircraft::HandleVortexFX(bool isActive) 
+void ABaseAircraft::HandleVortexFX(bool bActive)
 {
 	for (UNiagaraComponent* FX : AllVortices) {
 		if (IsValid(FX)) {
-			if (isActive) FX->Activate();
+			if (bActive) FX->Activate();
 			else FX->Deactivate();
 		}
 	}
@@ -194,9 +196,7 @@ void ABaseAircraft::HandleVortexFX(bool isActive)
 void ABaseAircraft::DisableAllMainWingVapors() 
 {
 	for (UStaticMeshComponent* Mesh : AllMainWingVapors) 
-	{
 		if (IsValid(Mesh)) Mesh->SetVisibility(false);
-	}
 }
 
 void ABaseAircraft::EnableAllMainWingVapors() {
@@ -208,6 +208,7 @@ void ABaseAircraft::HandleLOD(FVector CameraLoc)
 	// Setting distance to KM
 	if (!IsValid(Airframe)) return;
 	float Distance = FVector::Dist(CameraLoc, GetActorLocation()) * 0.00001;
+
 	if (Distance >= 5 && bIsVisible) 
 	{
 		Airframe->SetVisibility(false, true);
@@ -218,6 +219,8 @@ void ABaseAircraft::HandleLOD(FVector CameraLoc)
 		Airframe->SetVisibility(true, true);
 		bIsVisible = true;
 	}
+
+	// TODO: Handle stuff for the VFX stuff
 }
 
 void ABaseAircraft::ActivateSpecial() {
@@ -228,12 +231,7 @@ void ABaseAircraft::ActivateSpecial() {
 void ABaseAircraft::OnCountermeasureDeployed_Implementation() 
 {
 	for (auto& Missile : IncomingMissiles) 
-	{
-		if (Missile.IsValid()) 
-		{
-			Missile->NotifyCountermeasure();
-		}
-	}
+		if (Missile.IsValid()) Missile->NotifyCountermeasure();
 }
 
 void ABaseAircraft::SetLandingGearVisiblility(bool b)
@@ -288,18 +286,14 @@ UBulletStats* ABaseAircraft::GetBulletStats() {
 	if (!IsValid(CachedBulletStats))
 	{
 		if (UAircraftStats* Stats = AirStats.LoadSynchronous())
-		{
 			CachedBulletStats = Stats->BulletStats.LoadSynchronous();
-		}
 	}
-
 	return CachedBulletStats;
 }
 
 UAircraftStats* ABaseAircraft::GetAirStats() {
-	if (!IsValid(CachedAirStats)) {
+	if (!IsValid(CachedAirStats))
 		CachedAirStats = AirStats.LoadSynchronous();
-	}
 	return CachedAirStats;
 }
 
@@ -324,5 +318,11 @@ float ABaseAircraft::GetCurrentWeaponCount() {
 
 void ABaseAircraft::SwitchWeapon(const TSubclassOf<ABaseWeapon> InWeapon)
 {
-	if (WeaponComponent) WeaponComponent->SearchAndEquipWeapon(InWeapon);
+	if (IsValid(WeaponComponent)) WeaponComponent->SearchAndEquipWeapon(InWeapon);
+}
+
+void ABaseAircraft::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	FlightComponent->OnAfterburnerEngaged.RemoveAll(this);
+	FlightComponent->OnVortexActivate.RemoveAll(this);
+	Super::EndPlay(EndPlayReason);
 }

@@ -114,7 +114,7 @@ void URadarComponent::CycleTarget()
 		FVector ToTarget = (GetTarget->GetActorLocation() - CameraLoc).GetSafeNormal();
 		float Dot = FVector::DotProduct(Forward, ToTarget);
 
-		if (Dot > BestDot)
+		if (Dot > BestDot && GetTarget != Selected.Get())
 		{
 			BestDot = Dot;
 			ClosestTarget = GetTarget;

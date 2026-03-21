@@ -137,6 +137,7 @@ public:
 protected:
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere)
@@ -237,10 +238,10 @@ protected:
 private:
 
 	UFUNCTION()
-	void HandleAfterburnerFX(bool isActive);
+	void HandleAfterburnerFX(bool bActive);
 
 	UFUNCTION()
-	void HandleVortexFX(bool isActive);
+	void HandleVortexFX(bool bActive);
 
 	bool bIsVisible = true;
 

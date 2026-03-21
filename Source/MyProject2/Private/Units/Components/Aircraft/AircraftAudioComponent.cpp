@@ -16,17 +16,18 @@ void UAircraftAudioComponent::SetAudio(UAircraftAudioData* InAudio) {
 	if (!IsValid(InAudio)) return;
 	CachedCockpit = InAudio->AircraftAudio.CockpitSound.LoadSynchronous();
 	CachedThirdPerson = InAudio->AircraftAudio.ThirdPersonSound.LoadSynchronous();
+	CachedThirdPersonAfterburner = InAudio->AircraftAudio.ThirdPersonAfterburner.LoadSynchronous();
 	CachedGun = InAudio->GunAudios.GunSound.LoadSynchronous();
 }
 
 void UAircraftAudioComponent::PlayPerspectiveSound(const ECameraPerspective Perspective) 
 {
+	CurrentPerspective = Perspective;
+
 	if (!PersonalAircraftAudio) 
 	{
 		if (AActor* Owner = GetOwner()) 
-		{
 			PersonalAircraftAudio = CreateAndAttachAudioComp(Owner->GetRootComponent());
-		}
 	}
 	if (!PersonalAircraftAudio) return;
 
@@ -34,13 +35,13 @@ void UAircraftAudioComponent::PlayPerspectiveSound(const ECameraPerspective Pers
 	switch (Perspective) 
 	{
 		case ECameraPerspective::ThirdPerson:
-			SoundToPlay = CachedThirdPerson;
+			SoundToPlay = bAfterburnerActive ? CachedThirdPersonAfterburner : CachedThirdPerson;
 			break;
 		case ECameraPerspective::FirstPerson:
 			SoundToPlay = CachedCockpit;
 			break;
 		default:
-			SoundToPlay = CachedThirdPerson;
+			SoundToPlay = bAfterburnerActive ? CachedThirdPersonAfterburner : CachedThirdPerson;
 			break;
 	}
 
@@ -69,4 +70,10 @@ void UAircraftAudioComponent::HandleGunSound(bool bFiring)
 	{
 		GunAudio->Stop();
 	}
+}
+
+void UAircraftAudioComponent::HandleAfterburner(bool bActive) {
+	if (bAfterburnerActive == bActive) return;
+	bAfterburnerActive = bActive;
+	PlayPerspectiveSound(CurrentPerspective);
 }

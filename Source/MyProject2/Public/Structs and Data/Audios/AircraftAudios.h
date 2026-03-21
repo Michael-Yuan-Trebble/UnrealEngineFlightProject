@@ -16,4 +16,7 @@ struct FAircraftAudios
 
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<USoundWave> ThirdPersonSound = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<USoundWave> ThirdPersonAfterburner = nullptr;
 };
