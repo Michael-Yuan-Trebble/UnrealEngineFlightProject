@@ -37,8 +37,5 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> SpecialNameText = nullptr;
 
-	virtual void NativeDestruct() override {
-		OnSpecialPicked.Clear();
-		Super::NativeDestruct();
-	}
+	virtual void NativeDestruct() override;
 };

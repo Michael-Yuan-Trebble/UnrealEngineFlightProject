@@ -192,4 +192,6 @@ private:
 	void TempRecovery(const float D, const float Deg);
 
 	void CalculateVortex();
+
+	virtual void EndPlay(EEndPlayReason::Type EndPlay) override;
 };

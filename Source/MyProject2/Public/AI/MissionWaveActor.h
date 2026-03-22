@@ -7,7 +7,7 @@
 #include "Structs and Data/MissionInfo/MissionWave.h"
 #include "MissionWaveActor.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWaveDestroyed, const AMissionWaveActor*, Wave);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWaveDestroyed, AMissionWaveActor*, Wave);
 
 class ABaseSpawnPoint;
 
@@ -39,6 +39,10 @@ protected:
 	void RegisterWave();
 
 	UFUNCTION()
-	void OnWaveDestroyed(const ABaseSpawnPoint* Wave);
+	void OnWaveDestroyed(ABaseSpawnPoint* Wave);
+
+	void RemoveAllDynamics();
+
+	virtual void EndPlay(EEndPlayReason::Type EndPlay) override;
 
 };

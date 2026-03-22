@@ -24,7 +24,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void InitLevels();
 
-protected:
+private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ULevelButton> LevelButtonClass = nullptr;
@@ -32,10 +32,14 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UScrollBox> LevelScrollBox = nullptr;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<ULevelListData> LevelList = nullptr;
+
+	UPROPERTY()
+	TArray<ULevelButton*> Buttons{};
+
 	UFUNCTION()
 	void HandleLevelButtonClicked(const FMissionData& InLevel);
 
-private:
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<ULevelListData> LevelList = nullptr;
+	virtual void NativeDestruct() override;
 };

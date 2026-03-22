@@ -7,8 +7,7 @@
 #include "Gamemodes/StandardMissionGamemode.h"
 #include "Debug/DebugHelper.h"
 
-AMissionWaveActor::AMissionWaveActor()
-{
+AMissionWaveActor::AMissionWaveActor() {
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -16,11 +15,9 @@ void AMissionWaveActor::BeginPlay() {
 	Super::BeginPlay();
 	FTimerHandle MissionTimer;
 	GetWorldTimerManager().SetTimer(
-		MissionTimer,
-		this,
+		MissionTimer, this,
 		&AMissionWaveActor::RegisterWave,
-		0.05f,
-		false
+		0.05f, false
 	);
 }
 
@@ -40,9 +37,22 @@ void AMissionWaveActor::ActivateSpawnPoints() {
 	}
 }
 
-void AMissionWaveActor::OnWaveDestroyed(const ABaseSpawnPoint* Wave) {
+void AMissionWaveActor::OnWaveDestroyed(ABaseSpawnPoint* Wave) {
 	WaveCount--;
 	if (WaveCount <= 0) {
+		RemoveAllDynamics();
 		HandleOnWaveDestroyed.Broadcast(this);
 	}
+}
+
+void AMissionWaveActor::RemoveAllDynamics() {
+	for (ABaseSpawnPoint* Spawn : WaveData.SpawnPoints) {
+		if (!IsValid(Spawn)) continue;
+		Spawn->OnWaveDestroyed.RemoveAll(this);
+	}
+}
+
+void AMissionWaveActor::EndPlay(EEndPlayReason::Type EndPlay) {
+	RemoveAllDynamics();
+	Super::EndPlay(EndPlay);
 }

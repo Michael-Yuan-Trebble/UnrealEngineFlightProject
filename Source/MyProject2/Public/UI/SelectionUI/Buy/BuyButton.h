@@ -43,8 +43,5 @@ private:
 
 	virtual void NativeConstruct() override;
 
-	virtual void NativeDestruct() override {
-		OnBuyPressed.Clear();
-		Super::NativeDestruct();
-	}
+	virtual void NativeDestruct() override;
 };

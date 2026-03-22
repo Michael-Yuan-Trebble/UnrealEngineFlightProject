@@ -140,6 +140,35 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaTime) override;
 
+	UNiagaraComponent* CreateEffect(UNiagaraSystem* System, const FName& SocketName);
+
+	UPROPERTY()
+	TWeakObjectPtr<AActor> Tracking = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USkeletalMeshComponent> Airframe = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBoxComponent> BodyCollision = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBoxComponent> LeftWingCollision = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBoxComponent> RightWingCollision = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBoxComponent> RudderCollision = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBoxComponent> LandingGearCollision = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UNiagaraSystem> AfterburnerSystem = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UStaticMeshComponent> LandingGear = nullptr;
+
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<UAircraftStats> AirStats = nullptr;
 
@@ -172,8 +201,6 @@ protected:
 
 	UPROPERTY()
 	TArray<TWeakObjectPtr<ABaseMissile>> IncomingMissiles{};
-
-	bool bLocked = false;
 
 	UPROPERTY(EditAnywhere)
 	int32 NumOfAfterburners = 0;
@@ -208,33 +235,6 @@ protected:
 
 	FVector OriginalExtent = FVector::ZeroVector;
 
-	UPROPERTY()
-	TWeakObjectPtr<AActor> Tracking = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USkeletalMeshComponent> Airframe = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UBoxComponent> BodyCollision = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UBoxComponent> LeftWingCollision = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UBoxComponent> RightWingCollision = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UBoxComponent> RudderCollision = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UBoxComponent> LandingGearCollision = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UNiagaraSystem> AfterburnerSystem = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UStaticMeshComponent> LandingGear = nullptr;
-
 private:
 
 	UFUNCTION()
@@ -252,4 +252,6 @@ private:
 	float StallSpeed = 0.f;
 
 	bool bLanded = false;
+
+	bool bLocked = false;
 };

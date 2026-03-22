@@ -146,3 +146,9 @@ void UPlayerGameInstance::SetMaps() {
 		MissionSubsystem->SetDefaultMap(DefaultMap);
 	}
 }
+
+void UPlayerGameInstance::Shutdown() {
+	if (IsValid(FadeWidget))
+		FadeWidget->OnFadeFinished.RemoveAll(this);
+	Super::Shutdown();
+}

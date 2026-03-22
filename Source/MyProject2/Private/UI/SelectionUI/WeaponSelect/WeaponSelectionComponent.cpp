@@ -104,6 +104,7 @@ void UWeaponSelectionComponent::CloseAll()
 	if (IsValid(WeaponSelectUI))
 	{
 		WeaponSelectUI->OnWeaponSelected.RemoveAll(this);
+		WeaponSelectUI->WeaponAdded.RemoveAll(this);
 		if (WeaponSelectUI->IsInViewport())
 		{
 			WeaponSelectUI->RemoveFromParent();
@@ -114,4 +115,9 @@ void UWeaponSelectionComponent::CloseAll()
 
 UUserWidget* UWeaponSelectionComponent::GetWeaponUI() const { 
 	return WeaponSelectUI; 
+}
+
+void UWeaponSelectionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	CloseAll();
+	Super::EndPlay(EndPlayReason);
 }

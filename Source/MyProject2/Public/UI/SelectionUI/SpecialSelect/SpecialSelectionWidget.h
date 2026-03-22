@@ -46,6 +46,9 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> AdvanceText = nullptr;
 
+	UPROPERTY()
+	TArray<TObjectPtr<class USpecialButtonWidget>> Cards{};
+
 	UFUNCTION()
 	void HandleSpecialSelected(TSubclassOf<UBaseSpecial> SpecialSelected);
 
@@ -60,11 +63,7 @@ private:
 		SpecialUI = nullptr;
 	}
 
-	virtual void NativeDestruct() override {
-		OnWidgetSelected.Clear();
-		OnAdvance.Clear();
-		Super::NativeDestruct();
-	}
+	virtual void NativeDestruct() override;
 
 	UFUNCTION()
 	void OnAdvancePicked();

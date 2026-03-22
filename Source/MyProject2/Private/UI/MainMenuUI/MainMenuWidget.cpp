@@ -24,3 +24,10 @@ void UMainMenuWidget::HandleSettingsbtnClicked()
 {
 	OnSettingsPicked.Broadcast();
 }
+
+void UMainMenuWidget::NativeDestruct() {
+	if (IsValid(Settingsbtn))
+		Settingsbtn->OnClicked.RemoveAll(this);
+	if (IsValid(FreeFlightbtn))
+		FreeFlightbtn->OnClicked.RemoveAll(this);
+}

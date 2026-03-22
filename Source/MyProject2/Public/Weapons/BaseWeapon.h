@@ -10,6 +10,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponResult, bool, bHit);
 
+class UBoxComponent;
+
 UCLASS()
 class MYPROJECT2_API ABaseWeapon : public AActor
 {
@@ -22,17 +24,9 @@ public:
 
 	ABaseWeapon();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<class UStaticMeshComponent> WeaponMesh = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<class UBoxComponent> Collision = nullptr;
-
 	bool CanLockTarget(ETargetType TargetType) const;
 
 	TArray<ETargetType> GetTargetTypes() const { return SupportedTargetTypes; };
-
-	float timeTilDelt = 0.f;
 
 	virtual void FireStatic(const float speed);
 
@@ -45,6 +39,8 @@ public:
 	virtual const float& GetCooldown() const { return cooldownTime; };
 
 	virtual const bool& GetCanLock() const { return canLock; };
+
+	UBoxComponent* GetCollision() const { return Collision; };
 
 	virtual void LaunchAudio();
 
@@ -60,8 +56,16 @@ protected:
 
 	float cooldownTime = 0.f;
 
+	float timeTilDelt = 0.f;
+
 	UPROPERTY(EditAnywhere)
 	FName WeaponName = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<class UStaticMeshComponent> WeaponMesh = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UBoxComponent> Collision = nullptr;
 
 	TArray<ETargetType> SupportedTargetTypes{};
 	

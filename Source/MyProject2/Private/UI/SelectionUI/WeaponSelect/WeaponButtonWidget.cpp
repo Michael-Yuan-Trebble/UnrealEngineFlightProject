@@ -32,3 +32,13 @@ void UWeaponButtonWidget::HandleButtonHover()
 {
 	OnWeaponSelected.Broadcast(ButtonWeapon);
 }
+
+void UWeaponButtonWidget::NativeDestruct() {
+	if (IsValid(WeaponSelectButton)) {
+		WeaponSelectButton->OnHovered.RemoveAll(this);
+		WeaponSelectButton->OnClicked.RemoveAll(this);
+	}
+	OnWeaponSelected.Clear();
+	OnWeaponPicked.Clear();
+	Super::NativeDestruct();
+}

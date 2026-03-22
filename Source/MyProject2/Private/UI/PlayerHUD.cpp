@@ -40,8 +40,9 @@ void APlayerHUD::Init(AAircraftPlayerController* InPC)
 
     Controlled = Cast<APlayerAircraft>(PC->GetPawn());
     if (!Controlled.IsValid()) return;
-    if (URadarComponent* Radar = Controlled->GetRadarComp())
-        Radar->RadarScanEvent.AddDynamic(this, &APlayerHUD::HandleRadarScan);
+    RadarComponent = Controlled->GetRadarComp();
+    if (IsValid(RadarComponent))
+        RadarComponent->RadarScanEvent.AddDynamic(this, &APlayerHUD::HandleRadarScan);
 }
 
 UUserWidget* APlayerHUD::CreateAndAlignWidget(TSubclassOf<UUserWidget> Class, FVector2D Alignment) {
@@ -301,6 +302,8 @@ void APlayerHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
         if (IsValid(Pair.Value)) Pair.Value->RemoveFromParent();
     }
     ActiveWidgets.Empty();
+
+    RadarComponent->RadarScanEvent.RemoveAll(this);
 
     Super::EndPlay(EndPlayReason);
 }

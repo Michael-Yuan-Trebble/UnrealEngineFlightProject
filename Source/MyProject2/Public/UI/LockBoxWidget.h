@@ -17,12 +17,6 @@ class MYPROJECT2_API ULockBoxWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
-	UFUNCTION(BlueprintCallable)
-	void SetReticleImage(UTexture2D* NewTexture);
-
-	UFUNCTION(BlueprintCallable)
-	void SetSmallerReticleImage(UTexture2D* NewTexture);
-
 	void SelectedAnimation(const FName& TargetName);
 
 	void SelectStop();
@@ -61,4 +55,6 @@ private:
 	void ResetAnimation(UWidgetAnimation* Animation);
 
 	void HideSmallReticle();
+
+	void SetName(const FText& Name);
 };

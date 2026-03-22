@@ -74,3 +74,8 @@ void UAircraftSelectionComponent::CloseAll()
 }
 
 UUserWidget* UAircraftSelectionComponent::GetWidget() const { return AircraftSelectUI; }
+
+void UAircraftSelectionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	CloseAll();
+	Super::EndPlay(EndPlayReason);
+}

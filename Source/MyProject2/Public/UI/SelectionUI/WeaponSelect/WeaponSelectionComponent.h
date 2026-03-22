@@ -59,8 +59,5 @@ private:
 	UPROPERTY()
 	TSubclassOf<UUserWidget> SelectionWidget = nullptr;
 
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override {
-		CloseAll();
-		Super::EndPlay(EndPlayReason);
-	}
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 };

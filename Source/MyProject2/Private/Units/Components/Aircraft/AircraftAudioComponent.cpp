@@ -7,8 +7,7 @@
 #include "Units/Aircraft/Player/PlayerAircraft.h"
 #include "Components/AudioComponent.h"
 
-UAircraftAudioComponent::UAircraftAudioComponent() 
-{
+UAircraftAudioComponent::UAircraftAudioComponent() {
 
 }
 
@@ -20,20 +19,17 @@ void UAircraftAudioComponent::SetAudio(UAircraftAudioData* InAudio) {
 	CachedGun = InAudio->GunAudios.GunSound.LoadSynchronous();
 }
 
-void UAircraftAudioComponent::PlayPerspectiveSound(const ECameraPerspective Perspective) 
-{
+void UAircraftAudioComponent::PlayPerspectiveSound(const ECameraPerspective Perspective) {
 	CurrentPerspective = Perspective;
 
-	if (!PersonalAircraftAudio) 
-	{
+	if (!PersonalAircraftAudio) {
 		if (AActor* Owner = GetOwner()) 
 			PersonalAircraftAudio = CreateAndAttachAudioComp(Owner->GetRootComponent());
 	}
 	if (!PersonalAircraftAudio) return;
 
 	USoundWave* SoundToPlay = nullptr;
-	switch (Perspective) 
-	{
+	switch (Perspective) {
 		case ECameraPerspective::ThirdPerson:
 			SoundToPlay = bAfterburnerActive ? CachedThirdPersonAfterburner : CachedThirdPerson;
 			break;
@@ -50,26 +46,19 @@ void UAircraftAudioComponent::PlayPerspectiveSound(const ECameraPerspective Pers
 	if (!PersonalAircraftAudio->IsPlaying()) PersonalAircraftAudio->Play();
 }
 
-void UAircraftAudioComponent::HandleGunSound(bool bFiring) 
-{
+void UAircraftAudioComponent::HandleGunSound(bool bFiring) {
 	if (!CachedGun) return;
-	if (!GunAudio) 
-	{
-		if (AActor* Owner = GetOwner())
-		{
+	if (!GunAudio) {
+		if (AActor* Owner = GetOwner()){
 			GunAudio = CreateAndAttachAudioComp(Owner->GetRootComponent());
 			if (!GunAudio) return;
 			GunAudio->SetSound(CachedGun);
 		}
 	}
 	if (bFiring && !GunAudio->IsPlaying()) 
-	{
 		GunAudio->Play();
-	}
 	else if (GunAudio->IsPlaying())
-	{
 		GunAudio->Stop();
-	}
 }
 
 void UAircraftAudioComponent::HandleAfterburner(bool bActive) {

@@ -122,6 +122,9 @@ private:
 	UPROPERTY()
 	TWeakObjectPtr<ABaseUnit> Target = nullptr;
 
+	UPROPERTY()
+	TObjectPtr<class URadarComponent> RadarComponent = nullptr;
+
 	void UpdateTargetWidgets();
 
 	void PitchLadderUpdate();

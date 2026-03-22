@@ -6,7 +6,6 @@
 
 void UMissileAudioComponent::SetAudio(UMissileAudioData* InAudio) {
 	if (!IsValid(InAudio)) return;
-
 	CachedMissileLaunch = InAudio->MissileLaunchSound.LoadSynchronous();
 }
 

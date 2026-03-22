@@ -20,8 +20,7 @@ void ULevelTransitionSubsystem::LoadAircraftSelect() {
 	}
 }
 
-void ULevelTransitionSubsystem::LoadMission(const TSoftObjectPtr<UWorld> Level) 
-{
+void ULevelTransitionSubsystem::LoadMission(const TSoftObjectPtr<UWorld> Level) {
 	UWorld* World = GetWorld();
 	if (!IsValid(World)) return;
 	
@@ -48,8 +47,7 @@ void ULevelTransitionSubsystem::TransitionScreen() {
 	PC->SetShowMouseCursor(true);
 }
 
-void ULevelTransitionSubsystem::LoadIntermission(const ETakeoffType& TakeoffType) 
-{
+void ULevelTransitionSubsystem::LoadIntermission(const ETakeoffType& TakeoffType) {
 	auto* Sub = GetGameInstance()->GetSubsystem<UMissionManagerSubsystem>();
 	if (!IsValid(Sub)) return;
 	switch (TakeoffType) {

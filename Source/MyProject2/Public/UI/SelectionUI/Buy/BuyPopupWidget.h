@@ -33,6 +33,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> BuyButtonClass = nullptr;
 
+	UPROPERTY()
+	TObjectPtr<class UBuyButton> BuyButton = nullptr;
+
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class USizeBox> SizeBox = nullptr;
 
@@ -40,4 +43,6 @@ private:
 		BuyUI = nullptr;
 		Super::ReleaseSlateResources(bReleaseChildren);
 	}
+
+	virtual void NativeDestruct() override;
 };

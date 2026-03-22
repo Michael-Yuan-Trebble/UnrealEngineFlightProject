@@ -29,6 +29,7 @@ void USpecialSelectionWidget::GetAllSpecials()
 		if (!IsValid(Data)) continue;
 		USpecialButtonWidget* Card = CreateWidget<USpecialButtonWidget>(GetWorld(), SpecialButtonClass);
 		if (!IsValid(Card)) continue;
+		Cards.Add(Card);
 		Card->Setup(Data);
 		Card->OnSpecialPicked.AddDynamic(SpecialUI, &USpecialSelectionComponent::SetSpecial);
 		SpecialScrollBox->AddChild(Card);
@@ -45,4 +46,16 @@ void USpecialSelectionWidget::OnAdvancePicked()
 void USpecialSelectionWidget::HandleSpecialSelected(TSubclassOf<UBaseSpecial> Special)
 {
 	OnWidgetSelected.Broadcast(Special);
+}
+
+void USpecialSelectionWidget::NativeDestruct() {
+	OnWidgetSelected.Clear();
+	OnAdvance.Clear();
+
+	for (USpecialButtonWidget* Card : Cards) {
+		if (IsValid(Card)) Card->OnSpecialPicked.RemoveAll(this);
+	}
+	if (IsValid(Advancebtn)) Advancebtn->OnClicked.RemoveAll(this);
+
+	Super::NativeDestruct();
 }

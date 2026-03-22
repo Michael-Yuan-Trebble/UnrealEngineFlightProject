@@ -51,6 +51,9 @@ private:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UScrollBox> AircraftScrollBox = nullptr;
 
+	UPROPERTY()
+	TArray<TObjectPtr<UAircraftButtonWidget>> Cards{};
+
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		MenuManager = nullptr;
 		AircraftUI = nullptr;
@@ -58,8 +61,5 @@ private:
 		Super::ReleaseSlateResources(bReleaseChildren);
 	}
 
-	virtual void NativeDestruct() override {
-		OnWidgetSelected.Clear();
-		Super::NativeDestruct();
-	}
+	virtual void NativeDestruct() override;
 };

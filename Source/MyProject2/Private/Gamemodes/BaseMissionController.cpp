@@ -40,8 +40,9 @@ void ABaseMissionController::StartWave(const int32 WaveIndex) {
 	}
 }
 
-void ABaseMissionController::OnEnemyDestroyed(const AMissionWaveActor* InWave) {
+void ABaseMissionController::OnEnemyDestroyed(AMissionWaveActor* InWave) {
 	int32 WaveIndex = InWave->WaveIndex;
+	InWave->HandleOnWaveDestroyed.RemoveAll(this);
 	CompletedWaves.FindOrAdd(WaveIndex)++;
 	if (auto* Waves = MissionWaves.Find(WaveIndex)) {
 		if (CompletedWaves[WaveIndex] >= Waves->Num()-1) {
@@ -57,4 +58,13 @@ void ABaseMissionController::HandleWaveCompleted(int32 WaveIndex) {
 
 void ABaseMissionController::MissionComplete() {
 	if (IsValid(CurrentMission)) CurrentMission->MissionFinish();
+}
+
+void ABaseMissionController::EndPlay(EEndPlayReason::Type EndPlay) {
+	for (auto& Waves : MissionWaves) {
+		for (AMissionWaveActor* Wave : Waves.Value) {
+			Wave->HandleOnWaveDestroyed.RemoveAll(this);
+		}
+	}
+	Super::EndPlay(EndPlay);
 }

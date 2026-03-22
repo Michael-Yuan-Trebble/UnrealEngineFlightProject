@@ -66,6 +66,7 @@ private:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void OnPossess(APawn* InPawn) override;
+	virtual void EndPlay(EEndPlayReason::Type EndPlay) override;
 
 	AAircraftPlayerController();
 
@@ -150,6 +151,9 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<APlayerHUD> HUD = nullptr;
+
+	UPROPERTY()
+	class UWeaponSystemComponent* WeaponComp = nullptr;
 
 	static constexpr float MiddleThrust = 0.5f;
 	static constexpr float ScanTime = 0.15f;

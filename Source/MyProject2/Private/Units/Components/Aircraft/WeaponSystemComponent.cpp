@@ -12,28 +12,25 @@
 #include "Structs and Data/MathLib/FlightMathLibrary.h"
 #include "Debug/DebugHelper.h"
 
-UWeaponSystemComponent::UWeaponSystemComponent()
-{
+UWeaponSystemComponent::UWeaponSystemComponent() {
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, const UAircraftStats* InStats)
-{
+void UWeaponSystemComponent::Setup(ABaseAircraft* InBase, const UAircraftStats* InStats) {
 	Controlled = InBase;
 	if (IsValid(Controlled)) {
 		BulletStats = Controlled->GetBulletStats();
 		Airframe = Controlled->GetAirframe();
 		AirWeaponInfo = InStats->WeaponInfo;
+		RadarComp = Controlled->GetRadarComp();
 	}
 }
 
-void UWeaponSystemComponent::FireBullets()
-{
+void UWeaponSystemComponent::FireBullets() {
 	if (!IsValid(Controlled) || !IsValid(BulletStats) || !IsValid(BulletStats->BulletClass) || !IsValid(Airframe)) return;
 	
 	int8 GunI = 0;
-	while (true) 
-	{
+	while (true) {
 		const FName SocketName = FName(*FString::Printf(TEXT("Gun%d"), GunI));
 
 		if (!IsValid(Airframe) || !Airframe->DoesSocketExist(SocketName)) break;
@@ -53,50 +50,37 @@ void UWeaponSystemComponent::FireBullets()
 	}
 }
 
-void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
+void UWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (!IsValid(Controlled)) return;
-
-	// ====================================
-	// Weapon refresh to check respawning conditions
-	// ====================================
-
-	for (FCooldownWeapon& Weapon : AvailableWeapons) 
-	{
-		if (!Weapon.CanFire()) 
-		{
+	for (FCooldownWeapon& Weapon : AvailableWeapons) {
+		if (!Weapon.CanFire()) {
 			Weapon.UpdateCooldown(DeltaTime);
-			if (Weapon.CanFire()) 
-			{
+			if (Weapon.CanFire()) {
 				ReEquip(Weapon);
 			}
 		}
 	}
-	UpdateLockedOn(DeltaTime, Controlled->GetRadarComp()->GetSelected());
+	if (IsValid(RadarComp)) UpdateLockedOn(DeltaTime, RadarComp->GetSelected());
 }
 
-void UWeaponSystemComponent::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) 
-{
+void UWeaponSystemComponent::SetWeapons(TMap<FName, TSubclassOf<ABaseWeapon>> In) {
 	Loadout = In;
 	AddPylons();
 	EquipWeapons();
 }
 
-void UWeaponSystemComponent::AddPylons() 
-{
-	for (int i = 0; i < AirWeaponInfo.NumOfPylons; i++)
-	{
+void UWeaponSystemComponent::AddPylons() {
+	for (int i = 0; i < AirWeaponInfo.NumOfPylons; i++) {
 		FName SocketName = FName(*FString::Printf(TEXT("Pylon_%d"), i));
 		AddPylon(SocketName, AirWeaponInfo.Pylon);
 	}
 }
 
 void UWeaponSystemComponent::AddPylon(const FName& PylonName, UStaticMesh* PylonMesh) {
+	if (!IsValid(Airframe)) return;
 	UStaticMeshComponent* TempPylon = NewObject<UStaticMeshComponent>(this);
 	if (TempPylon && IsValid(PylonMesh)) {
-		if (!IsValid(Airframe)) return;
 		FTransform SocketTransform = Airframe->GetSocketTransform(PylonName, RTS_World);
 		SocketTransform.SetScale3D(FVector(1.f));
 		TempPylon->SetStaticMesh(PylonMesh);
@@ -125,15 +109,13 @@ AActor* UWeaponSystemComponent::AddWeapon(const FName& PylonName, TSubclassOf<AB
 
 	ABaseWeapon* SpawnIn = GetWorld()->SpawnActor<ABaseWeapon>(Weapon, SocketTransform, SpawnParams);
 	if (!IsValid(SpawnIn)) return nullptr;
-	SpawnIn->Collision->SetSimulatePhysics(false);
+	SpawnIn->GetCollision()->SetSimulatePhysics(false);
 	SpawnIn->AttachToComponent(PylonComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Socket"));
 	return SpawnIn;
 }
 
-void UWeaponSystemComponent::EquipWeapons()
-{
-	for (const TPair<FName, TSubclassOf<ABaseWeapon>>&Pair : Loadout)
-	{
+void UWeaponSystemComponent::EquipWeapons() {
+	for (const TPair<FName, TSubclassOf<ABaseWeapon>>&Pair : Loadout) {
 		ABaseWeapon* SpawnIn = Cast<ABaseWeapon>(AddWeapon(Pair.Key, Pair.Value));
 		if (!IsValid(SpawnIn)) continue;
 
@@ -145,12 +127,11 @@ void UWeaponSystemComponent::EquipWeapons()
 	}
 	// Defer this, would be 0 otherwise, let BeginPlay go through
 	FTimerHandle TH;
-	GetWorld()->GetTimerManager().SetTimer(TH, this, &UWeaponSystemComponent::BuildWeaponGroups, 0.01f, false);
+	if (IsValid(GetWorld())) GetWorld()->GetTimerManager().SetTimer(TH, this, &UWeaponSystemComponent::BuildWeaponGroups, 0.01f, false);
 }
 
 //Create and Replace Missile in Array
-void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace)
-{
+void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace) {
 	UStaticMeshComponent* PylonComp = PylonSockets.FindRef(Replace.SocketName);
 	if (!IsValid(PylonComp)) return;
 	FActorSpawnParameters SpawnParams;
@@ -163,18 +144,15 @@ void UWeaponSystemComponent::ReEquip(FCooldownWeapon& Replace)
 	GetCount();
 }
 
-void UWeaponSystemComponent::BuildWeaponGroups() 
-{
+void UWeaponSystemComponent::BuildWeaponGroups() {
 	WeaponGroups.Empty();
 	EquippedWeaponNames.Empty();
 
-	for (FCooldownWeapon& CW : AvailableWeapons)
-	{
+	for (FCooldownWeapon& CW : AvailableWeapons) {
 		if (!CW.WeaponInstance) continue;
 		TSubclassOf<ABaseWeapon> WeaponClass = CW.WeaponClass;
 
-		if (!WeaponGroups.Contains(WeaponClass)) 
-		{
+		if (!WeaponGroups.Contains(WeaponClass)) {
 			WeaponGroups.Add(WeaponClass, TArray<FCooldownWeapon*>());
 			EquippedWeaponNames.Add(CW.WeaponInstance->GetName());
 		}
@@ -183,19 +161,17 @@ void UWeaponSystemComponent::BuildWeaponGroups()
 	if (WeaponGroups.Num() > 0) SelectWeapon(0);
 }
 
-void UWeaponSystemComponent::FireWeaponSelected(AActor* Target, const float Speed)
-{
+void UWeaponSystemComponent::FireWeaponSelected(AActor* Target, const float Speed) {
 	if (!WeaponGroups.Contains(CurrentWeaponClass)) return;
-	for (FCooldownWeapon* Weapon : WeaponGroups[CurrentWeaponClass])
-	{
+	for (FCooldownWeapon* Weapon : WeaponGroups[CurrentWeaponClass]) {
 		if (!Weapon || !IsValid(Weapon->WeaponInstance) || !Weapon->CanFire()) continue;
 
+		// TODO: Include the weapon actor in the dynamic so that it can be removed
 		Weapon->WeaponInstance->OnWeaponResult.AddDynamic(this, &UWeaponSystemComponent::OnWeaponResult);
 		Weapon->WeaponInstance->LaunchAudio();
 
-		if (Target && bLocked && IsValid(Controlled)) {
+		if (Target && bLocked && IsValid(Controlled))
 			Weapon->WeaponInstance->FireTracking(Controlled->GetUnitSpeed(), Target);
-		}
 		else 
 			Weapon->WeaponInstance->FireStatic(Speed);
 
@@ -205,13 +181,7 @@ void UWeaponSystemComponent::FireWeaponSelected(AActor* Target, const float Spee
 	}
 }
 
-void UWeaponSystemComponent::OnWeaponResult(bool bHit) 
-{
-	OnWeaponHit.Broadcast(bHit);
-}
-
-void UWeaponSystemComponent::SelectWeapon(const int WeaponIndex)
-{
+void UWeaponSystemComponent::SelectWeapon(const int WeaponIndex) {
 	TArray<TSubclassOf<ABaseWeapon>> Keys{};
 	WeaponGroups.GetKeys(Keys);
 
@@ -252,8 +222,7 @@ void UWeaponSystemComponent::SearchAndEquipWeapon(const TSubclassOf<ABaseWeapon>
 	CurrentWeaponClass = (*WeaponArray)[0]->WeaponClass;
 }
 
-void UWeaponSystemComponent::GetCount() 
-{
+void UWeaponSystemComponent::GetCount() {
 	if (!IsValid(CurrentWeaponClass)) return;
 
 	const TArray<FCooldownWeapon*>* WeaponArray = WeaponGroups.Find(CurrentWeaponClass);
@@ -262,8 +231,7 @@ void UWeaponSystemComponent::GetCount()
 	MaxWeaponCountSelected = WeaponArray->Num();
 	CurrentWeaponCount = 0;
 
-	for (const FCooldownWeapon* Weapon : *WeaponArray)
-	{
+	for (const FCooldownWeapon* Weapon : *WeaponArray) {
 		if (Weapon && Weapon->CanFire())
 			CurrentWeaponCount++;
 	}
@@ -272,12 +240,10 @@ void UWeaponSystemComponent::GetCount()
 	if (CurrentWeaponCount <= 0) ResetLockedOn();
 }
 
-void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit* Target)
-{
+void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit* Target) {
 	if (CurrentWeaponCount <= 0) return;
 
-	if (!CurrentWeaponClass || !IsValid(Target))
-	{
+	if (!CurrentWeaponClass || !IsValid(Target)) {
 		if (bLocked || LockTime > 0.f) 
 			ResetLockedOn();
 		else 
@@ -289,22 +255,19 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 	ABaseWeapon* TemporaryWeapon = CurrentWeaponClass->GetDefaultObject<ABaseWeapon>();
 	if (!IsValid(TemporaryWeapon)) return;
 
-	if (!TemporaryWeapon->GetCanLock() || CurrentWeaponCount <= 0)
-	{
+	if (!TemporaryWeapon->GetCanLock() || CurrentWeaponCount <= 0) {
 		if (bLocked || LockTime > 0.f) 
 			ResetLockedOn();
 		return;
 	}
 
 	ILockableTarget* LockTarget = Cast<ILockableTarget>(Target);
-	if (!LockTarget) 
-	{
+	if (!LockTarget) {
 		ResetLockedOn();
 		return;
 	}
 
-	if (!CurrentTargetingTypes.Contains(LockTarget->GetTargetType()))
-	{
+	if (!CurrentTargetingTypes.Contains(LockTarget->GetTargetType())) {
 		ResetLockedOn();
 		return;
 	}
@@ -313,8 +276,7 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 	FVector ToTarget = Target->GetActorLocation() - Controlled->GetActorLocation();
 	float Distance = ToTarget.Size();
 
-	if (UFlightMathLibrary::SpeedToKMH(Distance) > UFlightMathLibrary::SpeedToKMH(CurrentRange))
-	{
+	if (UFlightMathLibrary::SpeedToKMH(Distance) > UFlightMathLibrary::SpeedToKMH(CurrentRange)) {
 		ResetLockedOn();
 		return;
 	}
@@ -325,15 +287,13 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 	float Dot = FVector::DotProduct(Airframe->GetForwardVector(), ToTarget);
 	bool bInCone = Dot > FMath::Cos(FMath::DegreesToRadians(ConeAngle));
 	bool bWasLocked = bLocked;
-	if (bInCone)
-	{
+	if (bInCone) {
 		LockTime += DeltaSeconds;
 
 		// TODO: Make it variable
 		bLocked = LockTime >= MaxLockTime;
 	}
-	else
-	{
+	else {
 		bLocked = false;
 		LockTime = 0.f;
 	}
@@ -353,14 +313,11 @@ void UWeaponSystemComponent::UpdateLockedOn(const float DeltaSeconds, ABaseUnit*
 	PreviousLockPercent = LockPercent;
 }
 
-void UWeaponSystemComponent::ResetLockedOn() 
-{
-	float lastLock = LockTime;
+void UWeaponSystemComponent::ResetLockedOn() {
 	LockTime = 0.f;
 	bLocked = false;
 	OnLockingSound.Broadcast(0.f);
 	OnHUDLockedOn.Broadcast(0.f);
-	if (lastLock != 0.f) OnHUDLockedOn.Broadcast(0.f);
 }
 
 FCooldownWeapon* UWeaponSystemComponent::GetBestWeaponRange(float Distance) {
@@ -376,3 +333,5 @@ FCooldownWeapon* UWeaponSystemComponent::GetBestWeaponRange(float Distance) {
 	}
 	return BestWeapon;
 }
+
+void UWeaponSystemComponent::OnWeaponResult(bool bHit) { OnWeaponHit.Broadcast(bHit); }

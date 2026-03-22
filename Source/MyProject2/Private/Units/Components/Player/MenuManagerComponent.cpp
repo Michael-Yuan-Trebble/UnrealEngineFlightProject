@@ -12,8 +12,6 @@
 #include "Blueprint/UserWidget.h"
 #include "Debug/DebugHelper.h"
 
-FInputModeGameAndUI InputMode;
-
 UMenuManagerComponent::UMenuManagerComponent()
 {
 }

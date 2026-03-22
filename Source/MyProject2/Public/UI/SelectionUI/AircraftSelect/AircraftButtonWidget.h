@@ -42,6 +42,8 @@ private:
 	UFUNCTION()
 	void HandleBuyCreate();
 
+	virtual void NativeDestruct() override;
+
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> AircraftSelectButton = nullptr;
 

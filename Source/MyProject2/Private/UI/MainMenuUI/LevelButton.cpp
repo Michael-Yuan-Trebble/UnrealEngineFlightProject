@@ -24,3 +24,9 @@ void ULevelButton::HandleButtonClick()
 	if (MissionData.Level.IsNull()) return;
 	OnLevelPicked.Broadcast(MissionData);
 }
+
+void ULevelButton::NativeDestruct() {
+	if (IsValid(LevelSelectbtn))
+		LevelSelectbtn->OnClicked.RemoveAll(this);
+	Super::NativeDestruct();
+}

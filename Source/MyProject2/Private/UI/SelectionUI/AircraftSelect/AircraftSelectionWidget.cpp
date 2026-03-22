@@ -50,6 +50,8 @@ void UAircraftSelectionWidget::GetAllAircraft()
         UAircraftButtonWidget* Card = CreateWidget<UAircraftButtonWidget>(GetWorld(), AircraftButtonClass);
         if (!IsValid(Card)) continue;
 
+        Cards.Add(Card);
+
         bool bOwned = Owned.Contains(Data->AircraftStat->AircraftName);
 
         Card->Setup(Data, bOwned);
@@ -89,4 +91,17 @@ void UAircraftSelectionWidget::UpdateAircraft(const FName& AircraftChange)
 void UAircraftSelectionWidget::HandleAircraftSelected(UAircraftData* Aircraft)
 {
     OnWidgetSelected.Broadcast(Aircraft);
+}
+
+void UAircraftSelectionWidget::NativeDestruct() {
+    OnWidgetSelected.Clear();
+
+    for (UAircraftButtonWidget* Card : Cards) {
+        if (!IsValid(Card)) continue;
+        Card->OnAircraftPicked.RemoveAll(this);
+        Card->OnAircraftSelected.RemoveAll(this);
+        Card->OnBuyCreate.RemoveAll(this);
+    }
+
+    Super::NativeDestruct();
 }

@@ -21,9 +21,7 @@ ABaseUnit::ABaseUnit()
 
 	PrimaryActorTick.bCanEverTick = true;
 	if (IsValid(HealthComp))
-	{
 		HealthComp->OnDeath.AddDynamic(this, &ABaseUnit::HandleDestroyed);
-	}
 }
 
 void ABaseUnit::BeginPlay()
@@ -32,12 +30,6 @@ void ABaseUnit::BeginPlay()
 	if (UWorld* World = GetWorld()) Registry = UAircraftRegistry::Get(World);
 	if (bStartsTargetable) ActivateTarget();
 	if (IsValid(HealthComp)) HealthComp->Setup(health);
-}
-
-void ABaseUnit::EndPlay(const EEndPlayReason::Type EndPlayReason) 
-{
-	DeactivateTarget();
-	Super::EndPlay(EndPlayReason);
 }
 
 void ABaseUnit::Tick(float DeltaTime)
@@ -53,8 +45,7 @@ void ABaseUnit::PossessedBy(AController* NewController)
 
 void ABaseUnit::OnDamage_Implementation(AActor* Weapon, AActor* Launcher, AActor* Target, float Damage)
 {
-	if (!IsValid(HealthComp)) return;
-	HealthComp->ApplyDamage(Damage, Weapon, Launcher, Target);
+	if (IsValid(HealthComp)) HealthComp->ApplyDamage(Damage, Weapon, Launcher, Target);
 }
 
 void ABaseUnit::HandleDestroyed(AActor* Weapon, AActor* Launcher, AActor* Target)
@@ -95,4 +86,10 @@ void ABaseUnit::DeactivateTarget()
 	if (!IsValid(Registry) || !bIsTargetable) return;
 	bIsTargetable = false;
 	Registry->Unregister(this);
+}
+
+void ABaseUnit::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	HealthComp->OnDeath.RemoveAll(this);
+	DeactivateTarget();
+	Super::EndPlay(EndPlayReason);
 }

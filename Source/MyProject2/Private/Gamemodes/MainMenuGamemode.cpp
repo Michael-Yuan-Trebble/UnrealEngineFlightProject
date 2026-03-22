@@ -10,13 +10,11 @@
 #include "Subsystem/MissionManagerSubsystem.h"
 #include "Player Info/PlayerGameInstance.h"
 
-AMainMenuGamemode::AMainMenuGamemode() 
-{
+AMainMenuGamemode::AMainMenuGamemode() {
 
 }
 
-void AMainMenuGamemode::BeginPlay() 
-{
+void AMainMenuGamemode::BeginPlay() {
 	Super::BeginPlay();
 
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
@@ -35,7 +33,6 @@ void AMainMenuGamemode::BeginPlay()
 }
 
 void AMainMenuGamemode::LevelSelected(const FMissionData& Level) {
-
 	UWorld* World = GetWorld();
 	if (!IsValid(World)) return;
 

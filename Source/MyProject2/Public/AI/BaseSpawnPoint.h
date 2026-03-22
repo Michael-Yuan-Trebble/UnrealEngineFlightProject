@@ -7,7 +7,7 @@
 #include "Enums/TargetTypes.h"
 #include "BaseSpawnPoint.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnDestroyed, const ABaseSpawnPoint*, SpawnPoint);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnDestroyed, ABaseSpawnPoint*, SpawnPoint);
 
 class ABaseUnit;
 
@@ -48,4 +48,8 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	ETargetType TeamType = ETargetType::Unknown;
+
+	void RemoveAllDynamics();
+
+	virtual void EndPlay(EEndPlayReason::Type EndPlay) override;
 };

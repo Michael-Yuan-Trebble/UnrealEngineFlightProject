@@ -12,21 +12,17 @@
 #include "Units/Aircraft/BaseAircraft.h"
 #include "Debug/DebugHelper.h"
 
-FActorSpawnParameters SpawnParams;
+AAircraftSelectionGamemode::AAircraftSelectionGamemode() {
 
-AAircraftSelectionGamemode::AAircraftSelectionGamemode() 
-{
 }
 
-void AAircraftSelectionGamemode::BeginPlay() 
-{
+void AAircraftSelectionGamemode::BeginPlay() {
 	Super::BeginPlay();
 	
 	if (!IsValid(GetWorld())) return;
 
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0)) {
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
 		APC = Cast<AAircraftPlayerController>(PC);
-	}
 
 	if (!IsValid(APC)) return;
 
@@ -39,25 +35,24 @@ void AAircraftSelectionGamemode::BeginPlay()
 	TWeakObjectPtr<AAircraftPlayerController> WeakAPC = APC;
 
 	GetWorld()->GetTimerManager().SetTimerForNextTick([WeakAPC,
-	AircraftSelectClass = AircraftSelectClass,
-	WeaponSelectClass = WeaponSelectClass,
-	BuySelectionClass = BuySelectionClass,
-	SpecialSelectionClass = SpecialSelectionClass,
-	GreyOutClass = GreyOutClass]() 
-	{
-		if (!WeakAPC.IsValid()) return;
-		AAircraftPlayerController* PC = WeakAPC.Get();
-		if (!IsValid(PC)) return;
-		UMenuManagerComponent* MenuManager = PC->GetMenuManager();
-		if (!IsValid(MenuManager)) return;
+		AircraftSelectClass = AircraftSelectClass,
+		WeaponSelectClass = WeaponSelectClass,
+		BuySelectionClass = BuySelectionClass,
+		SpecialSelectionClass = SpecialSelectionClass,
+		GreyOutClass = GreyOutClass]() 
+		{
+			if (!WeakAPC.IsValid()) return;
+			AAircraftPlayerController* PC = WeakAPC.Get();
+			if (!IsValid(PC)) return;
+			UMenuManagerComponent* MenuManager = PC->GetMenuManager();
+			if (!IsValid(MenuManager)) return;
 
-		MenuManager->SetupClasses(AircraftSelectClass, WeaponSelectClass, BuySelectionClass, SpecialSelectionClass, GreyOutClass);
-		MenuManager->ChooseAircraftUI();
-	});
+			MenuManager->SetupClasses(AircraftSelectClass, WeaponSelectClass, BuySelectionClass, SpecialSelectionClass, GreyOutClass);
+			MenuManager->ChooseAircraftUI();
+		});
 }
 
-void AAircraftSelectionGamemode::SpawnInAircraft(const TSubclassOf<APawn> SpawnIn) 
-{
+void AAircraftSelectionGamemode::SpawnInAircraft(const TSubclassOf<APawn> SpawnIn) {
 	if (!IsValid(GetWorld())) return;
 
 	if (IsValid(AircraftDisplayed)) {
@@ -87,16 +82,13 @@ void AAircraftSelectionGamemode::SpawnInAircraft(const TSubclassOf<APawn> SpawnI
 	FRotator PreviewRotation = FRotator::ZeroRotator;
 	AircraftDisplayed = GetWorld()->SpawnActor<APawn>(SpawnIn, SpawnLocation, PreviewRotation, SpawnParams);
 	if (!IsValid(AircraftDisplayed)) return;
-	if (ABaseAircraft* Preview = Cast<ABaseAircraft>(AircraftDisplayed)) {
+	if (ABaseAircraft* Preview = Cast<ABaseAircraft>(AircraftDisplayed))
 		Preview->SetLandingGearVisiblility(true);
-	}
-	
 }
 
 // TODO: Combine these into one function with a bool to differentiate final logic
 
-void AAircraftSelectionGamemode::SpawnInWeapon(const TSubclassOf<ABaseWeapon> Weapon, const FName& Pylon) 
-{
+void AAircraftSelectionGamemode::SpawnInWeapon(const TSubclassOf<ABaseWeapon> Weapon, const FName& Pylon) {
 	if (!IsValid(AircraftDisplayed) || !IsValid(Weapon)) return;
 
 	ABaseAircraft* BaseAircraft = Cast<ABaseAircraft>(AircraftDisplayed);
@@ -108,20 +100,16 @@ void AAircraftSelectionGamemode::SpawnInWeapon(const TSubclassOf<ABaseWeapon> We
 	WeaponComp->RemovePylon(Pylon);
 	WeaponComp->AddPylon(Pylon, BaseAircraft->GetAirStats()->WeaponInfo.Pylon);
 
-	if (TObjectPtr<AActor>* WeaponPtr = EquippedWeapons.Find(Pylon))
-	{
+	if (TObjectPtr<AActor>* WeaponPtr = EquippedWeapons.Find(Pylon)) {
 		if (IsValid(*WeaponPtr))
-		{
 			(*WeaponPtr)->Destroy();
-		}
 	}
 
 	AActor* WeaponDisplayed = WeaponComp->AddWeapon(Pylon, Weapon);
 	EquippedWeapons.Add(Pylon, WeaponDisplayed);
 }
 
-void AAircraftSelectionGamemode::ClearWeapons(const FName& Pylon) 
-{
+void AAircraftSelectionGamemode::ClearWeapons(const FName& Pylon) {
 	if (!IsValid(AircraftDisplayed)) return;
 
 	ABaseAircraft* BaseAircraft = Cast<ABaseAircraft>(AircraftDisplayed);
@@ -134,26 +122,21 @@ void AAircraftSelectionGamemode::ClearWeapons(const FName& Pylon)
 
 	if (TObjectPtr<AActor>* WeaponPtr = EquippedWeapons.Find(Pylon)) {
 		if (IsValid(*WeaponPtr))
-		{
 			(*WeaponPtr)->Destroy();
-		}
 	}
 
 	EquippedWeapons.Remove(Pylon);
 }
 
-void AAircraftSelectionGamemode::EndSelection(AAircraftPlayerController* Controller)
-{
-	if (!ReadyPlayers.Contains(Controller)) 
-	{
+void AAircraftSelectionGamemode::EndSelection(AAircraftPlayerController* Controller) {
+	if (!ReadyPlayers.Contains(Controller)) {
 		ReadyPlayers.Add(Controller);
 		TryAdvanceToNextStage();
 	}
 }
 
 // TODO: Try to make it so it advances to a "Buffer" screen
-void AAircraftSelectionGamemode::TryAdvanceToNextStage()
-{
+void AAircraftSelectionGamemode::TryAdvanceToNextStage() {
 	// TODO: Make Co-Op be able to work if implemented
 	//if (ReadyPlayers.Num() < PlayersRequired) return;
 
@@ -167,23 +150,17 @@ void AAircraftSelectionGamemode::TryAdvanceToNextStage()
 	AAircraftPlayerController* LocalAPC = IsValid(APC) ? APC.Get() : Cast<AAircraftPlayerController>(PC);
 
 	if (IsValid(LocalAPC) && IsValid(LocalAPC->GetMenuManager())) 
-	{ 
 		LocalAPC->DisableInput(Cast<APlayerController>(PC));
-	}
 	
 	// TODO: See what would work better, returning if there is no aircraft displayed or letting it ride and just using the fallback
 
 	if (ABaseAircraft* BaseAir = Cast<ABaseAircraft>(AircraftDisplayed))
-	{
 		FullLoadout.AircraftClass = BaseAir->GetClass();
-	}
 
 	TMap<FName, TSubclassOf<ABaseWeapon>> Loadout{};
 
 	for (auto& Pair : EquippedWeapons)
-	{
 		Loadout.Add(Pair.Key, Pair.Value->GetClass());
-	}
 
 	FullLoadout.EquippedWeapons = Loadout;
 	GI->SetLoadout(FullLoadout);
@@ -202,19 +179,15 @@ void AAircraftSelectionGamemode::Transition() {
 }
 
 void AAircraftSelectionGamemode::EndPlay(const EEndPlayReason::Type EndPlayReason) {
-
 	if (UWorld* World = GetWorld()) {
-		for (auto& Pair : EquippedWeapons)
-		{
-			if (Pair.Value && Pair.Value->IsValidLowLevel())
-			{
+		for (auto& Pair : EquippedWeapons) {
+			if (Pair.Value && Pair.Value->IsValidLowLevel()) {
 				Pair.Value->Destroy();
 			}
 		}
 		EquippedWeapons.Empty();
 
-		if (IsValid(AircraftDisplayed))
-		{
+		if (IsValid(AircraftDisplayed)) {
 			AircraftDisplayed->Destroy();
 			AircraftDisplayed = nullptr;
 		}

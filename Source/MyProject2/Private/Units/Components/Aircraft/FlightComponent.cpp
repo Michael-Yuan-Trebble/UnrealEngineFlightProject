@@ -477,3 +477,8 @@ void UFlightComponent::ApplyRoll(const float DeltaSeconds)
 	FRotator DeltaRot(0.f, 0.f, NextRotation.Roll * DeltaSeconds);
 	Airframe->AddLocalRotation(DeltaRot);
 }
+
+void UFlightComponent::EndPlay(EEndPlayReason::Type EndPlay) {
+
+	Super::EndPlay(EndPlay);
+}

@@ -22,26 +22,14 @@ public:
 
 	UMainMenuManager();
 
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	virtual void Deinitialize() override;
-
 	// All Menus Are Here
 	void ShowMainMenu();
-
-	UFUNCTION()
-	void ShowSettings();
-
-	UFUNCTION()
-	void ShowFreeFlight();
 
 	// Other Menu Functions
 
 	void GoBack();
 
 	void Init(AAircraftPlayerController* InAPC);
-
-	UFUNCTION()
-	void OnLevelPicked(const FMissionData& LevelName);
 
 	void SetMainMenuClass(const TSubclassOf<UMainMenuWidget> InMenu) { MainMenuClass = InMenu; };
 
@@ -50,6 +38,18 @@ public:
 	void ClearAllWidgets();
 
 private:
+
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
+
+	UFUNCTION()
+	void ShowSettings();
+
+	UFUNCTION()
+	void ShowFreeFlight();
+
+	UFUNCTION()
+	void OnLevelPicked(const FMissionData& LevelName);
 
 	UPROPERTY()
 	TSubclassOf<UMainMenuWidget> MainMenuClass = nullptr;

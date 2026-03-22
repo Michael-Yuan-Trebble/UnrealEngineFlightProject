@@ -14,17 +14,22 @@ void UBuyPopupWidget::Setup(UAircraftData* AircraftData)
 {
 	if (!IsValid(BuyButtonClass)) return;
 
-	UBuyButton* Button = CreateWidget<UBuyButton>(GetWorld(), BuyButtonClass);
+	BuyButton = CreateWidget<UBuyButton>(GetWorld(), BuyButtonClass);
 	UAircraftStats* Loaded = AircraftData->AircraftStat.LoadSynchronous();
 
-	if (!IsValid(Button) || !IsValid(AircraftData) || !IsValid(Loaded)) return;
+	if (!IsValid(BuyButton) || !IsValid(AircraftData) || !IsValid(Loaded)) return;
 
-	Button->Setup(Loaded->AircraftName, AircraftData->price);
-	Button->OnBuyPressed.AddDynamic(BuyUI, &UBuySelectionComponent::BuyAircraft);
+	BuyButton->Setup(Loaded->AircraftName, AircraftData->price);
+	BuyButton->OnBuyPressed.AddDynamic(BuyUI, &UBuySelectionComponent::BuyAircraft);
 
 	if (CurrentCurrency < AircraftData->price)
 	{
-		Button->TurnOffBuy();
+		BuyButton->TurnOffBuy();
 	}
-	if (IsValid(SizeBox)) SizeBox->AddChild(Button);
+	if (IsValid(SizeBox)) SizeBox->AddChild(BuyButton);
 } 
+
+void UBuyPopupWidget::NativeDestruct() {
+	if (IsValid(BuyButton)) BuyButton->OnBuyPressed.RemoveAll(this);
+	Super::NativeDestruct();
+}

@@ -15,8 +15,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
-APlayerAircraft::APlayerAircraft() 
-{
+APlayerAircraft::APlayerAircraft() {
 	ThirdPersonSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("ThirdPersonPivot"));
 	ThirdPersonSpringArm->bDoCollisionTest = false;
 	ThirdPersonSpringArm->SetupAttachment(Airframe, USpringArmComponent::SocketName);
@@ -45,8 +44,7 @@ APlayerAircraft::APlayerAircraft()
 	Faction = EFaction::Ally;
 }
 
-void APlayerAircraft::BeginPlay()
-{
+void APlayerAircraft::BeginPlay() {
 	Super::BeginPlay();
 	if (IsValid(AudioComp)) AudioComp->SetControlled(this);
 	if (IsValid(ManagerComp)) {
@@ -58,9 +56,8 @@ void APlayerAircraft::BeginPlay()
 		OriginalThirdPersonSpringArmLength = ThirdPersonSpringArm->TargetArmLength;
 	}
 
-	if (IsValid(WeaponComponent)) {
+	if (IsValid(WeaponComponent))
 		WeaponComponent->OnLockingSound.AddDynamic(this, &APlayerAircraft::HandleLockSound);
-	}
 
 	SetSensitivity(CameraSens);
 	SetInterp();
@@ -72,13 +69,11 @@ void APlayerAircraft::BeginPlay()
 		if (IsValid(UIAudioComponent)) UIAudioComponent->SetAudio(LoadedAudio);
 }
 
-void APlayerAircraft::Tick(float DeltaSeconds) 
-{
+void APlayerAircraft::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 }
 
-void APlayerAircraft::PossessedBy(AController* NewController) 
-{
+void APlayerAircraft::PossessedBy(AController* NewController) {
 	Super::PossessedBy(NewController);
 
 	Controlled = Cast<AAircraftPlayerController>(NewController);
@@ -86,13 +81,11 @@ void APlayerAircraft::PossessedBy(AController* NewController)
 	Controlled->SetComponents(WeaponComponent);
 }
 
-void APlayerAircraft::HandleHit() 
-{
+void APlayerAircraft::HandleHit() {
 
 }
 
-void APlayerAircraft::WeaponComponentOnUnitDeath() 
-{
+void APlayerAircraft::WeaponComponentOnUnitDeath() {
 	if (IsValid(WeaponComponent)) WeaponComponent->ResetLockedOn();
 }
 
@@ -109,23 +102,20 @@ void APlayerAircraft::HandleLockSound(float LockPercent) {
 
 void APlayerAircraft::FireBullets() { if (IsValid(WeaponComponent)) WeaponComponent->FireBullets(); }
 
-void APlayerAircraft::StartBullets() 
-{
+void APlayerAircraft::StartBullets() {
 	GunSoundEffect(true);
 	FireBullets();
-	if (IsValid(CachedBulletStats)) GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &APlayerAircraft::FireBullets, CachedBulletStats->FireRate, true);
+	if (IsValid(CachedBulletStats) && IsValid(GetWorld())) GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &APlayerAircraft::FireBullets, CachedBulletStats->FireRate, true);
 }
 
-void APlayerAircraft::EndBullets()
-{
+void APlayerAircraft::EndBullets() {
 	GunSoundEffect(false);
-	GetWorld()->GetTimerManager().ClearTimer(RepeatTimerHandle);
+	if (IsValid(GetWorld())) GetWorld()->GetTimerManager().ClearTimer(RepeatTimerHandle);
 }
 
 void APlayerAircraft::SelectWeapon(float index) { if (IsValid(WeaponComponent)) WeaponComponent->SelectWeapon(index); }
 
-int32 APlayerAircraft::AdvanceWeapon(int32 index, bool bForward) 
-{
+int32 APlayerAircraft::AdvanceWeapon(int32 index, bool bForward) {
 	if (!IsValid(WeaponComponent)) return 0;
 	TArray<TSubclassOf<ABaseWeapon>> Keys;
 	WeaponComponent->GetWeaponGroups().GetKeys(Keys);
@@ -145,8 +135,7 @@ void APlayerAircraft::GunSoundEffect(bool bShooting) { if (IsValid(AudioComp)) A
 
 void APlayerAircraft::CycleTarget() { if (IsValid(RadarComponent)) RadarComponent->CycleTarget(); };
 
-void APlayerAircraft::SetHUD(APlayerHUD* InHUD) 
-{
+void APlayerAircraft::SetHUD(APlayerHUD* InHUD) {
 	if (!IsValid(ManagerComp)) return;
 	ManagerComp->SetHUD(InHUD);
 	ManagerComp->SetThirdPerson();
@@ -175,4 +164,9 @@ void APlayerAircraft::SetInterp() { if (IsValid(ManagerComp)) ManagerComp->SetIn
 float APlayerAircraft::GetThrottle() {
 	if (IsValid(FlightComponent)) return FlightComponent->GetThrottle();
 	return 0.f;
+}
+
+void APlayerAircraft::EndPlay(EEndPlayReason::Type EndPlay) {
+	WeaponComponent->OnLockingSound.RemoveAll(this);
+	Super::EndPlay(EndPlay);
 }

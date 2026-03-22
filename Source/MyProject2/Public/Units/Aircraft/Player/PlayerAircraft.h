@@ -83,6 +83,8 @@ private:
 
 	virtual void Tick(float DeltaSeconds) override;
 
+	virtual void EndPlay(EEndPlayReason::Type EndPlay) override;
+
 	UPROPERTY(EditAnywhere)
 	float CameraSens = 1.f;
 

@@ -37,9 +37,7 @@ void URadarComponent::ScanTargets()
 	if (!IsValid(Registry)) return;
 
 	if (!Selected.IsValid() || Selected->IsPendingKillPending())
-	{
 		HandleSelectedDestroyed();
-	}
 
 	Enemies.Empty();
 
@@ -62,9 +60,7 @@ void URadarComponent::ScanTargets()
 		Enemies.Add(Info);
 
 		if (!IsValid(FirstSelected))
-		{
 			FirstSelected = T;
-		}
 	}
 
 	// Was causing Warning: NULL object before, watch out in the future
@@ -81,10 +77,8 @@ void URadarComponent::ScanTargets()
 void URadarComponent::HandleSelectedDestroyed() 
 {
 	Selected = nullptr;
-
 	if (IsValid(Controlled)) Controlled->SetTracking(nullptr);
 	if (IsValid(HUD)) HUD->SetTarget(nullptr);
-
 	CycleToNextTarget();
 }
 
@@ -122,13 +116,9 @@ void URadarComponent::CycleTarget()
 	}
 
 	if (ClosestTarget != Selected && ClosestTarget)
-	{
 		SetTarget(ClosestTarget);
-	}
 	else
-	{
 		CycleToNextTarget();
-	}
 }
 
 void URadarComponent::CycleToNextTarget() 
@@ -187,4 +177,11 @@ void URadarComponent::SetTarget(AActor* NewTarget)
 	LastSelected = Unit;
 	if (Controlled) Controlled->SetTracking(Unit);
 	// VFX
+}
+
+void URadarComponent::EndPlay(EEndPlayReason::Type EndPlay) {
+	if (ABaseUnit* Target = Selected.Get()) {
+		Selected->OnUnitDeath.RemoveAll(this);
+	}
+	Super::EndPlay(EndPlay);
 }

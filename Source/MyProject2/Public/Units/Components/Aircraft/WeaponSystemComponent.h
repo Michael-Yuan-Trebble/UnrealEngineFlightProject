@@ -148,4 +148,7 @@ private:
 
 	UPROPERTY()
 	TArray<FCooldownWeapon> AvailableWeapons{};
+
+	UPROPERTY()
+	class URadarComponent* RadarComp = nullptr;
 };

@@ -111,4 +111,6 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<USpecialSelectionComponent> SpecialSelectionUI = nullptr;
+
+	FInputModeGameAndUI InputMode{};
 };

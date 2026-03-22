@@ -11,26 +11,21 @@
 #include "Animation/WidgetAnimation.h"
 #include "Debug/DebugHelper.h"
 
-void ULockBoxWidget::NativeConstruct() 
-{
+void ULockBoxWidget::NativeConstruct() {
 	Super::NativeConstruct();
 
 	HideSmallReticle();
-	if (IsValid(UnitNameTextBox)) UnitNameTextBox->SetText(FText::GetEmpty());
+	SetName(FText::GetEmpty());
 }
 
-void ULockBoxWidget::UpdateLockProgress(const float Percent) 
-{
-	if (Percent <= 0.f)
-	{
+void ULockBoxWidget::UpdateLockProgress(const float Percent) {
+	if (Percent <= 0.f) {
 		ResetLockAnimation();
 		return;
 	}
 
-	if (Percent >= 1.f)
-	{
-		if (!isLockedOn) 
-		{
+	if (Percent >= 1.f) {
+		if (!isLockedOn) {
 			isLockedOn = true;
 			bIsLocking = false;
 			PlayFullLockAnimation();
@@ -38,15 +33,13 @@ void ULockBoxWidget::UpdateLockProgress(const float Percent)
 		return;
 	}
 
-	if (!bIsLocking) 
-	{
+	if (!bIsLocking) {
 		bIsLocking = true;
 		PlayStartLockAnimation();
 	}
 }
 
-void ULockBoxWidget::ResetLockAnimation()
-{
+void ULockBoxWidget::ResetLockAnimation() {
 	bIsLocking = false;
 	isLockedOn = false;
 	if (LockApproachAnim)
@@ -55,16 +48,14 @@ void ULockBoxWidget::ResetLockAnimation()
 	if (LockConfirm) 
 		ResetAnimation(LockConfirm);
 
-	if (IsValid(ReticleImage))
-	{
+	if (IsValid(ReticleImage)) {
 		FLinearColor C = ReticleImage->GetColorAndOpacity();
 		C.A = 1.f;
 		C.G = 1.f;
 		C.R = 0.f;
 		ReticleImage->SetColorAndOpacity(C);
 	}
-	if (IsValid(SmallReticleImage))
-	{
+	if (IsValid(SmallReticleImage)) {
 		FLinearColor C = SmallReticleImage->GetColorAndOpacity();
 		C.A = 0.f;
 		C.G = 1.f;
@@ -73,10 +64,8 @@ void ULockBoxWidget::ResetLockAnimation()
 	}
 }
 
-void ULockBoxWidget::PlayStartLockAnimation() 
-{
-	if (IsValid(SmallReticleImage))
-	{
+void ULockBoxWidget::PlayStartLockAnimation() {
+	if (IsValid(SmallReticleImage)) {
 		FLinearColor C = SmallReticleImage->GetColorAndOpacity();
 		C.A = 1.f;
 		SmallReticleImage->SetColorAndOpacity(C);
@@ -84,8 +73,7 @@ void ULockBoxWidget::PlayStartLockAnimation()
 	if (LockApproachAnim) PlayAnimation(LockApproachAnim, 0.f, 1, EUMGSequencePlayMode::Forward, 1.f);
 }
 
-void ULockBoxWidget::PlayFullLockAnimation()
-{
+void ULockBoxWidget::PlayFullLockAnimation() {
 	if (LockConfirm)
 		PlayAnimation(LockConfirm, LockConfirm->GetEndTime(), 1, EUMGSequencePlayMode::Forward, 0.f);
 
@@ -93,49 +81,31 @@ void ULockBoxWidget::PlayFullLockAnimation()
 		PlayAnimation(LockApproachAnim, LockApproachAnim->GetEndTime(), 1, EUMGSequencePlayMode::Forward, 0.f);
 }
 
-void ULockBoxWidget::SelectedAnimation(const FName& TargetName)
-{
+void ULockBoxWidget::SelectedAnimation(const FName& TargetName) {
 	if (LockConfirm) PlayAnimation(LockConfirm, 0.f, 0.f, EUMGSequencePlayMode::Forward, 1.f);
-	if (IsValid(UnitNameTextBox)) UnitNameTextBox->SetText(FText::FromName(TargetName));
+	SetName(FText::FromName(TargetName));
 }
 
-void ULockBoxWidget::SelectStop() 
-{
+void ULockBoxWidget::SelectStop() {
 	StopAnimation(LockConfirm);
+	ResetLockAnimation();
 	HideSmallReticle();
-	if (IsValid(UnitNameTextBox)) UnitNameTextBox->SetText(FText::GetEmpty());
+	SetName(FText::GetEmpty());
 }
 
-void ULockBoxWidget::SetReticleImage(UTexture2D* NewTexture) 
-{
-	if (!IsValid(ReticleImage) || !IsValid(NewTexture)) return;
-	FSlateBrush Brush;
-	Brush.SetResourceObject(NewTexture);
-	Brush.ImageSize = FVector2D(128, 128);
-	Brush.DrawAs = ESlateBrushDrawType::Image;
-	ReticleImage->SetBrush(Brush);
-}
-
-void ULockBoxWidget::SetSmallerReticleImage(UTexture2D* NewTexture)
-{
-	if (!IsValid(SmallReticleImage) || !IsValid(NewTexture)) return;
-	FSlateBrush Brush;
-	Brush.SetResourceObject(NewTexture);
-	Brush.ImageSize = FVector2D(128, 128);
-	Brush.DrawAs = ESlateBrushDrawType::Image;
-	SmallReticleImage->SetBrush(Brush);
-}
-
-void ULockBoxWidget::ResetAnimation(UWidgetAnimation* Animation) 
-{
+void ULockBoxWidget::ResetAnimation(UWidgetAnimation* Animation) {
 	if (!Animation) return;
 	StopAnimation(Animation);
 	SetAnimationCurrentTime(Animation, 0.f);
 }
 
 void ULockBoxWidget::HideSmallReticle() {
-	if (!SmallReticleImage) return;
+	if (!IsValid(SmallReticleImage)) return;
 	FLinearColor Color = SmallReticleImage->GetColorAndOpacity();
 	Color.A = 0.f;
 	SmallReticleImage->SetColorAndOpacity(Color);
+}
+
+void ULockBoxWidget::SetName(const FText& Name) {
+	if (IsValid(UnitNameTextBox)) UnitNameTextBox->SetText(Name);
 }

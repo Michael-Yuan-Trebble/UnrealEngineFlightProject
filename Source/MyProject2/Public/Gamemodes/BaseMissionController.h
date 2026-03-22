@@ -32,6 +32,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void EndPlay(EEndPlayReason::Type EndPlay) override;
+
 private:
 
 	TMap<int32, TArray<AMissionWaveActor*>> MissionWaves{};
@@ -42,7 +44,7 @@ private:
 	TMap<int32, int32> CompletedWaves{};
 
 	UFUNCTION()
-	void OnEnemyDestroyed(const AMissionWaveActor* InMission);
+	void OnEnemyDestroyed(AMissionWaveActor* InMission);
 
 	void HandleWaveCompleted(int32 WaveIndex);
 

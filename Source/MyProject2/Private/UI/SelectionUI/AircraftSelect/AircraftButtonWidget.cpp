@@ -48,3 +48,11 @@ void UAircraftButtonWidget::HandleBuyCreate()
 {
 	OnBuyCreate.Broadcast(ContainedData, ContainedData->price);
 }
+
+void UAircraftButtonWidget::NativeDestruct() {
+	if (IsValid(AircraftSelectButton)) {
+		AircraftSelectButton->OnClicked.RemoveAll(this);
+		AircraftSelectButton->OnHovered.RemoveAll(this);
+	}
+	Super::NativeDestruct();
+}

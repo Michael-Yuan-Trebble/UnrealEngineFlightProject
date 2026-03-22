@@ -48,8 +48,5 @@ private:
 	UPROPERTY()
 	TObjectPtr<UMenuManagerComponent> MenuManager = nullptr;
 
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override {
-		CloseAll();
-		Super::EndPlay(EndPlayReason);
-	}
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 };

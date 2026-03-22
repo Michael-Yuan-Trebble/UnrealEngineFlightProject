@@ -56,9 +56,10 @@ void AAircraftPlayerController::OnPossess(APawn* InPawn)
 void AAircraftPlayerController::SetComponents(UWeaponSystemComponent* InWeapon) 
 {
 	if (!IsValid(InWeapon)) return;
-	InWeapon->OnWeaponHit.AddDynamic(this, &AAircraftPlayerController::HandleWeaponHit);
-	InWeapon->OnHUDLockedOn.AddDynamic(this, &AAircraftPlayerController::HandleHUDLockedOn);
-	InWeapon->OnWeaponCountUpdated.AddDynamic(this, &AAircraftPlayerController::HandleWeaponCount);
+	WeaponComp = InWeapon;
+	WeaponComp->OnWeaponHit.AddDynamic(this, &AAircraftPlayerController::HandleWeaponHit);
+	WeaponComp->OnHUDLockedOn.AddDynamic(this, &AAircraftPlayerController::HandleHUDLockedOn);
+	WeaponComp->OnWeaponCountUpdated.AddDynamic(this, &AAircraftPlayerController::HandleWeaponCount);
 }
 
 void AAircraftPlayerController::UpdateLODs()
@@ -454,4 +455,17 @@ void AAircraftPlayerController::Tick(float DeltaSeconds)
 	if (CurrentMode == EControlMode::Menu) return;
 	if (!bThrust) thrustPercentage = FMath::FInterpTo(thrustPercentage, MiddleThrust, DeltaSeconds, 2.f);
 	if (IsValid(Controlled)) Controlled->SetThrust(thrustPercentage);
+}
+
+void AAircraftPlayerController::EndPlay(EEndPlayReason::Type EndPlay) {
+	if (IsValid(Controlled)) {
+		Controlled->OnMissileLaunchedAtSelf.RemoveAll(this);
+		Controlled->OnLockedOnByEnemy.RemoveAll(this);
+	}
+	if (IsValid(WeaponComp)) {
+		WeaponComp->OnWeaponHit.RemoveAll(this);
+		WeaponComp->OnHUDLockedOn.RemoveAll(this);
+		WeaponComp->OnWeaponCountUpdated.RemoveAll(this);
+	}
+	Super::EndPlay(EndPlay);
 }

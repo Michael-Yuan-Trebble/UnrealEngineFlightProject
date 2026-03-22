@@ -20,3 +20,9 @@ void USpecialButtonWidget::HandleButtonClick()
 {
 	OnSpecialPicked.Broadcast(ContainedData);
 }
+
+void USpecialButtonWidget::NativeDestruct() {
+	OnSpecialPicked.Clear();
+	if (IsValid(SpecialSelectButton)) SpecialSelectButton->OnClicked.RemoveAll(this);
+	Super::NativeDestruct();
+}

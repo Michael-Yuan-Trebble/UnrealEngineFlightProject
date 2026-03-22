@@ -44,9 +44,5 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> WeaponNameText = nullptr;
 
-	virtual void NativeDestruct() override {
-		OnWeaponSelected.Clear();
-		OnWeaponPicked.Clear();
-		Super::NativeDestruct();
-	}
+	virtual void NativeDestruct() override;
 };

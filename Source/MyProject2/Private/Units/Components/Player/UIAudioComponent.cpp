@@ -16,19 +16,16 @@ void UUIAudioComponent::SetAudio(UAircraftAudioData* InData) {
 void UUIAudioComponent::LockingSound(bool bLocking) {
 	if (!CachedLockingOnSound) return;
 	if (!LockingOn) {
-		if (AActor* Owner = GetOwner())
-		{
+		if (AActor* Owner = GetOwner()) {
 			LockingOn = CreateAndAttachAudioComp(Owner->GetRootComponent());
 			if (!LockingOn) return;
 			LockingOn->SetSound(CachedLockingOnSound);
 		}
 	}
-	if (bLocking && !LockingOn->IsPlaying()) {
+	if (bLocking && !LockingOn->IsPlaying())
 		LockingOn->Play();
-	}
-	else if (!bLocking && LockingOn->IsPlaying()) {
+	else if (!bLocking && LockingOn->IsPlaying())
 		LockingOn->Stop();
-	}
 }
 
 void UUIAudioComponent::LockedSound(bool bLocked) {
@@ -44,7 +41,6 @@ void UUIAudioComponent::LockedSound(bool bLocked) {
 		LockedOn->Play();
 		if (LockingOn && LockingOn->IsPlaying()) LockingOn->Stop();
 	}
-	else if (!bLocked && LockedOn->IsPlaying()) {
+	else if (!bLocked && LockedOn->IsPlaying())
 		LockedOn->Stop();
-	}
 }

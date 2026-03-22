@@ -10,15 +10,13 @@ void AStandardMissionGamemode::BeginPlay() {
 
 	if (IsValid(MissionControllerClass) && IsValid(GetWorld())) {
 		MissionController = GetWorld()->SpawnActor<ABaseMissionController>(MissionControllerClass);
-		MissionController->Setup(this);
 		if (IsValid(MissionController)) {
+			MissionController->Setup(this);
 			FTimerHandle WaveStartTimer;
 			GetWorldTimerManager().SetTimer(
-				WaveStartTimer,
-				this,
+				WaveStartTimer, this,
 				&AStandardMissionGamemode::StartFirstWave,
-				0.1f,
-				false
+				0.1f, false
 			);
 		}
 	}

@@ -17,8 +17,7 @@
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "Debug/DebugHelper.h"
 
-ABaseAircraft::ABaseAircraft()
-{
+ABaseAircraft::ABaseAircraft() {
 	Airframe = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Airframe"));
 	Airframe->SetupAttachment(UnitRoot);
 	Airframe->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -60,18 +59,15 @@ ABaseAircraft::ABaseAircraft()
 	health = 100;
 }
 
-void ABaseAircraft::BeginPlay()
-{
+void ABaseAircraft::BeginPlay() {
 	Super::BeginPlay();
 
 	GetBulletStats();
 	GetAirStats();
 
-	if (IsValid(VisualCompClass)) 
-	{
+	if (IsValid(VisualCompClass)) {
 		VisualComp = NewObject<UAircraftVisualComponent>(this, VisualCompClass);
-		if (IsValid(VisualComp)) 
-		{
+		if (IsValid(VisualComp)) {
 			VisualComp->RegisterComponent();
 			VisualComp->SetMesh(Airframe);
 		}
@@ -95,48 +91,28 @@ void ABaseAircraft::BeginPlay()
 	if (UAircraftAudioData* LoadedAudio = CachedAirStats->AudioData.LoadSynchronous())
 		AudioComp->SetAudio(LoadedAudio);
 
-	if (IsValid(AfterburnerSystem))
-	{
-		for (int i = 0; i < NumOfAfterburners; i++)
-		{
+	if (IsValid(AfterburnerSystem)) {
+		for (int i = 0; i < NumOfAfterburners; i++) {
 			FName SocketName = FName(*FString::Printf(TEXT("AfterburnerSocket%d"), i));
 			if (!Airframe->DoesSocketExist(SocketName)) continue;
 
-			UNiagaraComponent* tempAfterburner = UNiagaraFunctionLibrary::SpawnSystemAttached(
-				AfterburnerSystem,
-				Airframe,
-				SocketName,
-				FVector::ZeroVector,
-				FRotator::ZeroRotator,
-				EAttachLocation::SnapToTarget,
-				false
-			);
-			if (IsValid(tempAfterburner))
-			{
+			UNiagaraComponent* tempAfterburner = CreateEffect(AfterburnerSystem, SocketName);
+
+			if (IsValid(tempAfterburner)) {
 				tempAfterburner->Deactivate();
 				AllAfterburners.Add(tempAfterburner);
 			}
 		}
 	}
 
-	if (IsValid(WingVortexSystem))
-	{
-		for (int i = 0; i < NumOfVortices; i++)
-		{
+	if (IsValid(WingVortexSystem)) {
+		for (int i = 0; i < NumOfVortices; i++) {
 			FName SocketName = FName(*FString::Printf(TEXT("WingVortexSocket%d"), i));
 			if (!Airframe->DoesSocketExist(SocketName)) continue;
 
-			UNiagaraComponent* tempVortex = UNiagaraFunctionLibrary::SpawnSystemAttached(
-				WingVortexSystem,
-				Airframe,
-				SocketName,
-				FVector::ZeroVector,
-				FRotator::ZeroRotator,
-				EAttachLocation::SnapToTarget,
-				false
-			);
-			if (IsValid(tempVortex))
-			{
+			UNiagaraComponent* tempVortex = CreateEffect(WingVortexSystem, SocketName);
+
+			if (IsValid(tempVortex)) {
 				tempVortex->Deactivate();
 				AllVortices.Add(tempVortex);
 			}
@@ -150,11 +126,9 @@ void ABaseAircraft::BeginPlay()
 	}
 }
 
-void ABaseAircraft::Tick(float DeltaTime)
-{
+void ABaseAircraft::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-	if (IsValid(VisualComp) && IsValid(FlightComponent))
-	{
+	if (IsValid(VisualComp) && IsValid(FlightComponent)) {
 		const FRotator& Rotation = FlightComponent->GetUserRotation();
 		VisualComp->SetPitch(Rotation.Pitch);
 		VisualComp->SetYaw(Rotation.Yaw);
@@ -168,12 +142,9 @@ void ABaseAircraft::FireWeaponSelected() {
 	WeaponComponent->FireWeaponSelected(Tracked, FlightComponent->GetSpeed());
 }
 
-void ABaseAircraft::HandleAfterburnerFX(bool bActive) 
-{
-	for (UNiagaraComponent* FX : AllAfterburners) 
-	{
-		if (IsValid(FX)) 
-		{
+void ABaseAircraft::HandleAfterburnerFX(bool bActive) {
+	for (UNiagaraComponent* FX : AllAfterburners) {
+		if (IsValid(FX)) {
 			if (bActive) FX->Activate();
 			else FX->Deactivate();
 		}
@@ -183,8 +154,7 @@ void ABaseAircraft::HandleAfterburnerFX(bool bActive)
 		AudioComp->HandleAfterburner(bActive);
 }
 
-void ABaseAircraft::HandleVortexFX(bool bActive)
-{
+void ABaseAircraft::HandleVortexFX(bool bActive) {
 	for (UNiagaraComponent* FX : AllVortices) {
 		if (IsValid(FX)) {
 			if (bActive) FX->Activate();
@@ -193,8 +163,7 @@ void ABaseAircraft::HandleVortexFX(bool bActive)
 	}
 }
 
-void ABaseAircraft::DisableAllMainWingVapors() 
-{
+void ABaseAircraft::DisableAllMainWingVapors() {
 	for (UStaticMeshComponent* Mesh : AllMainWingVapors) 
 		if (IsValid(Mesh)) Mesh->SetVisibility(false);
 }
@@ -203,19 +172,16 @@ void ABaseAircraft::EnableAllMainWingVapors() {
 
 }
 
-void ABaseAircraft::HandleLOD(FVector CameraLoc) 
-{
+void ABaseAircraft::HandleLOD(FVector CameraLoc) {
 	// Setting distance to KM
 	if (!IsValid(Airframe)) return;
 	float Distance = FVector::Dist(CameraLoc, GetActorLocation()) * 0.00001;
 
-	if (Distance >= 5 && bIsVisible) 
-	{
+	if (Distance >= 5 && bIsVisible) {
 		Airframe->SetVisibility(false, true);
 		bIsVisible = false;
 	}
-	else if (!bIsVisible)
-	{
+	else if (!bIsVisible) {
 		Airframe->SetVisibility(true, true);
 		bIsVisible = true;
 	}
@@ -228,20 +194,31 @@ void ABaseAircraft::ActivateSpecial() {
 	if (IsValid(VisualComp) && VisualComp->IsCountermeasures()) VisualComp->ActivateFlares();
 }
 
-void ABaseAircraft::OnCountermeasureDeployed_Implementation() 
-{
+void ABaseAircraft::OnCountermeasureDeployed_Implementation() {
 	for (auto& Missile : IncomingMissiles) 
 		if (Missile.IsValid()) Missile->NotifyCountermeasure();
 }
 
-void ABaseAircraft::SetLandingGearVisiblility(bool b)
-{
+void ABaseAircraft::SetLandingGearVisiblility(bool b){
 	// TODO: For now its hardcoded for testing, but later change it so that the gamemode dictates if landing gear is present
 	if (LandingGear) LandingGear->SetVisibility(b);
 
 	// TODO: Eventually have this collision box work, however it doesn't instantly kill the player upon reaching designated ground
 	if (LandingGearCollision) LandingGearCollision->SetCollisionEnabled(b ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
 };
+
+UNiagaraComponent* ABaseAircraft::CreateEffect(UNiagaraSystem* System, const FName& SocketName) {
+	if (!IsValid(System) || !IsValid(Airframe)) return nullptr;
+
+	UNiagaraComponent* temp = UNiagaraFunctionLibrary::SpawnSystemAttached(
+		System,
+		Airframe, SocketName,
+		FVector::ZeroVector, FRotator::ZeroRotator,
+		EAttachLocation::SnapToTarget, false
+	);
+
+	return temp;
+}
 
 void ABaseAircraft::Crash() {
 	bAlive = true;
@@ -283,8 +260,7 @@ const FAircraftAnimationValues& ABaseAircraft::GetAircraftAnimationValues() {
 }
 
 UBulletStats* ABaseAircraft::GetBulletStats() {
-	if (!IsValid(CachedBulletStats))
-	{
+	if (!IsValid(CachedBulletStats)) {
 		if (UAircraftStats* Stats = AirStats.LoadSynchronous())
 			CachedBulletStats = Stats->BulletStats.LoadSynchronous();
 	}
@@ -292,8 +268,7 @@ UBulletStats* ABaseAircraft::GetBulletStats() {
 }
 
 UAircraftStats* ABaseAircraft::GetAirStats() {
-	if (!IsValid(CachedAirStats))
-		CachedAirStats = AirStats.LoadSynchronous();
+	if (!IsValid(CachedAirStats)) CachedAirStats = AirStats.LoadSynchronous();
 	return CachedAirStats;
 }
 
@@ -316,10 +291,7 @@ float ABaseAircraft::GetCurrentWeaponCount() {
 	return 0.f;
 }
 
-void ABaseAircraft::SwitchWeapon(const TSubclassOf<ABaseWeapon> InWeapon)
-{
-	if (IsValid(WeaponComponent)) WeaponComponent->SearchAndEquipWeapon(InWeapon);
-}
+void ABaseAircraft::SwitchWeapon(const TSubclassOf<ABaseWeapon> InWeapon){ if (IsValid(WeaponComponent)) WeaponComponent->SearchAndEquipWeapon(InWeapon); }
 
 void ABaseAircraft::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 	FlightComponent->OnAfterburnerEngaged.RemoveAll(this);

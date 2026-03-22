@@ -55,15 +55,19 @@ private:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UScrollBox> WeaponScrollBox = nullptr;
 
+	UPROPERTY()
+	TArray<TObjectPtr<class UWeaponButtonWidget>> Cards{};
+
+	UPROPERTY()
+	TObjectPtr<class UWeaponButtonWidget> NoneButton = nullptr;
+
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override {
 		Super::ReleaseSlateResources(bReleaseChildren);
 		WeaponUI = nullptr;
 		WeaponScrollBox = nullptr;
 	}
 
-	virtual void NativeDestruct() override {
-		OnWeaponSelected.Clear();
-		Super::NativeDestruct();
-	}
+	virtual void NativeDestruct() override;
+
 	void CreateButtons(const TArray<TSubclassOf<ABaseWeapon>>& Array);
 };

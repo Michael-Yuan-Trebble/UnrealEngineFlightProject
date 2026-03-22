@@ -6,21 +6,18 @@
 #include "Debug/DebugHelper.h"
 #include "Structs and Data/MathLib/FlightMathLibrary.h"
 
-void AAircraftSpawnPoint::ActivateSpawn() 
-{
+void AAircraftSpawnPoint::ActivateSpawn() {
 	Super::ActivateSpawn();
 
 	if (bSpawned || !IsValid(UnitClass)) return;
 
 	UWorld* World = GetWorld();
-
 	if (!IsValid(World)) return;
 
 	FVector BaseLocation = GetActorLocation();
 	FRotator BaseRotation = GetActorRotation();
 
-	for (int32 i = 0; i < Count; i++) 
-	{
+	for (int32 i = 0; i < Count; i++) {
 		FVector Offset = BaseRotation.RotateVector(FVector(i * FormationSpacing, i * FormationSpacing, 0.f));
 		FVector SpawnLocation = BaseLocation + Offset;
 
@@ -28,18 +25,15 @@ void AAircraftSpawnPoint::ActivateSpawn()
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 		APawn* SpawnedAircraft = World->SpawnActor<APawn>(
-			UnitClass,
-			SpawnLocation,
-			BaseRotation,
-			Params
+			UnitClass, SpawnLocation,
+			BaseRotation, Params
 		);
 
 		if (!IsValid(SpawnedAircraft)) continue;
 		AliveUnits.Add(SpawnedAircraft);
 		SpawnedAircraft->OnDestroyed.AddDynamic(this, &ABaseSpawnPoint::OnUnitDestroyed);
 
-		if (SpawnedAircraft->AutoPossessAI == EAutoPossessAI::Disabled) 
-		{
+		if (SpawnedAircraft->AutoPossessAI == EAutoPossessAI::Disabled) {
 			FActorSpawnParameters AIParams;
 			AIParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
@@ -52,8 +46,7 @@ void AAircraftSpawnPoint::ActivateSpawn()
 	bSpawned = true;
 }
 
-void AAircraftSpawnPoint::StressTest() 
-{
+void AAircraftSpawnPoint::StressTest() {
 	if (!IsValid(UnitClass)) return;
 	
 	UWorld* World = GetWorld();
@@ -68,12 +61,10 @@ void AAircraftSpawnPoint::StressTest()
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 		ABaseAircraft* Aircraft = World->SpawnActor<ABaseAircraft>(UnitClass, Location, Rotation, Params);
-		if (IsValid(Aircraft))
-		{
+		if (IsValid(Aircraft)){
 			// Schedule destruction after a short delay
 			FTimerHandle TimerHandle;
-			GetWorldTimerManager().SetTimer(TimerHandle, [Aircraft]()
-				{
+			GetWorldTimerManager().SetTimer(TimerHandle, [Aircraft]() {
 					if (IsValid(Aircraft)) Aircraft->Destroy();
 				}, 
 			DestroyDelay, false);

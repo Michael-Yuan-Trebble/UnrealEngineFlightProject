@@ -13,8 +13,20 @@ void ABaseSpawnPoint::StressTest() {
 }
 
 void ABaseSpawnPoint::OnUnitDestroyed(AActor* DestroyedActor) {
+	DestroyedActor->OnDestroyed.RemoveAll(this);
 	AliveUnits.Remove(DestroyedActor);
-	if (AliveUnits.Num() == 0) {
+	if (AliveUnits.Num() == 0)
 		OnWaveDestroyed.Broadcast(this);
+}
+
+void ABaseSpawnPoint::RemoveAllDynamics() {
+	for (TWeakObjectPtr<AActor> Unit : AliveUnits) {
+		if (AActor* Loaded = Unit.Get())
+			Loaded->OnDestroyed.RemoveAll(this);
 	}
+}
+
+void ABaseSpawnPoint::EndPlay(EEndPlayReason::Type EndPlay) {
+	RemoveAllDynamics();
+	Super::EndPlay(EndPlay);
 }

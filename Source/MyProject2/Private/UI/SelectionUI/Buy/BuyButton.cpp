@@ -35,3 +35,10 @@ void UBuyButton::HandleCancelClick()
 {
 	OnBuyPressed.Broadcast(false);
 }
+
+void UBuyButton::NativeDestruct() {
+	OnBuyPressed.Clear();
+	if (IsValid(AircraftBuyButton)) AircraftBuyButton->OnClicked.RemoveAll(this);
+	if (IsValid(CancelBuyButton)) CancelBuyButton->OnClicked.RemoveAll(this);
+	Super::NativeDestruct();
+}

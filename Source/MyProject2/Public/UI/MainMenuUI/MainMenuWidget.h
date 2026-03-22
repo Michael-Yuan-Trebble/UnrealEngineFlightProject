@@ -31,6 +31,8 @@ private:
 		Super::ReleaseSlateResources(bReleaseChildren);
 	}
 
+	virtual void NativeDestruct() override;
+
 	UFUNCTION()
 	void HandleSettingsbtnClicked();
 

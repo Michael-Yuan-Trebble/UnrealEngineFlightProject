@@ -53,17 +53,9 @@ void ABaseMissile::SetAudio() {
 		MissileAudioComp->SetAudio(InGameStats.MissileAudio.LoadSynchronous());
 }
 
-void ABaseMissile::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>())
-		Subsystem->UnregisterMissile(this);
-	Super::EndPlay(EndPlayReason);
-}
-
 void ABaseMissile::Tick(float DeltaTime) 
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ABaseMissile::TurnTowardTarget(float Delta) {
@@ -77,9 +69,6 @@ void ABaseMissile::TurnTowardTarget(float Delta) {
 		FRotator TargetRot = ToTarget.Rotation();
 
 		FVector NewRot = FMath::VInterpNormalRotationTo(CurrentForward, ToTarget, Delta, InGameStats.TurnRate);
-
-		// AIR_DEBUG_KEY(1, FColor::Red, "X: %f Y: %f Z: %f", CurrentRot.Roll, CurrentRot.Pitch, CurrentRot.Yaw);
-
 		SetActorRotation(NewRot.Rotation());
 	}
 }
@@ -96,37 +85,20 @@ void ABaseMissile::activateSmoke()
 {
 	if (!IsValid(WeaponMesh) || !WeaponMesh->DoesSocketExist(TEXT("ExhaustSocket"))) return;
 
-	if (SmokeTrail.IsValid()|| MissileRocket.IsValid()) return;
-
-	UNiagaraSystem* LoadedSmoke = SmokeTrailSystem.LoadSynchronous();
-	if (!IsValid(LoadedSmoke)) return;
+	if (SmokeTrail.IsValid() || MissileRocket.IsValid() || !GetWorld()) return;
 
 	FName ExhaustSocket = "ExhaustSocket";
+	FVector SocketLoc = WeaponMesh->GetSocketLocation(ExhaustSocket);
+	FRotator SocketRot = WeaponMesh->GetSocketRotation(ExhaustSocket);
 
-	SmokeTrail = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-		GetWorld(),
-		LoadedSmoke,
-		WeaponMesh->GetSocketLocation(ExhaustSocket),
-		WeaponMesh->GetSocketRotation(ExhaustSocket),
-		FVector(1.f),
-		true,
-		true
-	);
+	if (UNiagaraSystem* LoadedSmoke = SmokeTrailSystem.LoadSynchronous())
+		SmokeTrail = CreateEffect(SocketLoc, SocketRot, LoadedSmoke);
 
-	UNiagaraSystem* LoadedRocket = MissileRocketSystem.LoadSynchronous();
-	if (!IsValid(LoadedRocket)) return;
+	if (UNiagaraSystem* LoadedRocket = MissileRocketSystem.LoadSynchronous())
+		MissileRocket = CreateEffect(SocketLoc, SocketRot, LoadedRocket);
 
-	MissileRocket = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-		GetWorld(),
-		LoadedRocket,
-		WeaponMesh->GetSocketLocation(ExhaustSocket),
-		WeaponMesh->GetSocketRotation(ExhaustSocket),
-		FVector(1.f),
-		true,
-		true
-	);
-
-	ProjectileMovement->Velocity = GetActorForwardVector() * ProjectileMovement->InitialSpeed;
+	if (ProjectileMovement)
+		ProjectileMovement->Velocity = GetActorForwardVector() * ProjectileMovement->InitialSpeed;
 }
 
 bool ABaseMissile::CalculateIfOvershoot(FVector ToTarget) {
@@ -139,7 +111,6 @@ bool ABaseMissile::CalculateIfOvershoot(FVector ToTarget) {
 		FVector ToTarget = (TargetLocation - GetActorLocation()).GetSafeNormal();
 
 		float Dot = FVector::DotProduct(VelocityDir, ToTarget);
-
 		bOvershot = (Dot < 0.f) && (CurrentDistance > PreviousDistance);
 
 		PreviousDistance = CurrentDistance;
@@ -167,11 +138,9 @@ void ABaseMissile::ApplyVFXLOD(const FVector& CameraLoc)
 	}
 }
 
-void ABaseMissile::NotifyCountermeasure() 
-{
+void ABaseMissile::NotifyCountermeasure() {
 	if (AActor* LoadedTracking = Tracking.Get()) {
-		if (IsValid(ProjectileMovement))
-		{
+		if (IsValid(ProjectileMovement)) {
 			if (ABaseAircraft* Aircraft = Cast<ABaseAircraft>(LoadedTracking)) {
 				if (Aircraft->Implements<UApproachingMissileInterface>())
 					IApproachingMissileInterface::Execute_UnregisterIncomingMissile(Aircraft, this);
@@ -182,51 +151,72 @@ void ABaseMissile::NotifyCountermeasure()
 	}
 }
 
+UNiagaraComponent* ABaseMissile::CreateEffect(const FVector& Location, const FRotator& Rotation, UNiagaraSystem* System) {
+	if (!IsValid(GetWorld()) || !IsValid(System)) return nullptr;
+
+	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		GetWorld(), System, 
+		Location, Rotation, 
+		FVector(1.f),
+		true, true
+	);
+	return NiagaraComp;
+}
+
 void ABaseMissile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex,
-	bool bFromSweep,
-	const FHitResult& SweepResult)
-{
+	AActor* OtherActor,UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,bool bFromSweep,
+	const FHitResult& SweepResult) {
 	CheckAndDelete(OtherActor);
 }
 
 void ABaseMissile::OnHit(UPrimitiveComponent* HitComp,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	FVector NormalImpulse,
-	const FHitResult& Hit)
-{
+	AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	FVector NormalImpulse, const FHitResult& Hit) {
 	CheckAndDelete(OtherActor);
 }
 
-void ABaseMissile::CheckAndDelete(AActor* OtherActor)
-{
+void ABaseMissile::CheckAndDelete(AActor* OtherActor) {
 
 }
 
-void ABaseMissile::DestroyMissile()
-{
+void ABaseMissile::DestroyMissile() {
 	if (bDestroyed) return;
 	bDestroyed = true;
 
-	if (UNiagaraSystem* LoadedExplosion = ExplosionEffect.LoadSynchronous()) {
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(),
-			LoadedExplosion,
-			GetActorLocation(),
-			GetActorRotation()
-		);
+	if (IsValid(GetWorld())) {
+		if (UNiagaraSystem* LoadedExplosion = ExplosionEffect.LoadSynchronous()) {
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(), LoadedExplosion,
+				GetActorLocation(), GetActorRotation()
+			);
+		}
 	}
 
 	if (SmokeTrail.IsValid()) SmokeTrail->Deactivate();
 	if (MissileRocket.IsValid()) MissileRocket->Deactivate();
 
-	if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>())
-	{
-		Subsystem->UnregisterMissile(this);
+	if (IsValid(GetGameInstance())) {
+		if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>())
+			Subsystem->UnregisterMissile(this);
+	}
+
+	if (IsValid(Collision)) {
+		Collision->OnComponentBeginOverlap.RemoveAll(this);
+		Collision->OnComponentHit.RemoveAll(this);
 	}
 
 	Destroy();
+}
+
+void ABaseMissile::EndPlay(EEndPlayReason::Type EndPlay) {
+	if (IsValid(GetGameInstance())) {
+		if (UMissileManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UMissileManagerSubsystem>())
+			Subsystem->UnregisterMissile(this);
+	}
+	if (IsValid(Collision)) {
+		Collision->OnComponentBeginOverlap.RemoveAll(this);
+		Collision->OnComponentHit.RemoveAll(this);
+	}
+	Super::EndPlay(EndPlay);
 }
